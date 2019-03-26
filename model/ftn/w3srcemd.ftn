@@ -1,4 +1,5 @@
 #include "w3macros.h"
+#define NEW_LIMITER
 !/ ------------------------------------------------------------------- /
       MODULE W3SRCEMD
 !/
@@ -45,7 +46,8 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-      REAL, PARAMETER, PRIVATE:: OFFSET = 1.
+      REAL, PARAMETER, PRIVATE :: OFFSET = 1.
+      LOGICAL, PARAMETER       :: LNEWLIMITER = .FALSE. 
 !/
       CONTAINS
 !/ ------------------------------------------------------------------- /
@@ -118,7 +120,10 @@
 !/    07-Jan-2018 : Allows variable ice scaling (F.A.)  ( version 6.04 )
 !/    01-Jan-2018 : Add implicit source term integration ( version 6.04)
 !/    01-Jan-2018 : within PDLIB (A. Roland, M. Dutour    
-!/    18-Aug-2018 : S_{ice} IC5 (Q. Liu)                ( version  6.06)
+!/    16-Sep-2019 : Add new fractional step for wave 
+!/                  wave breaking (A. Roland            ( version 6.06 )
+!/    4-Jan-2019  : Replace hard coded 0.5 by DTMINTOT  ( version 6.06 )
+!/    18-Aug-2018 : S_{ice} IC5 (Q. Liu)                ( version 6.06 )
 !/    26-Aug-2018 : UOST (Mentaschi et al. 2015, 2018)  ( version 6.06 )
 !/
 !/    Copyright 2009-2013 National Weather Service (NWS),
@@ -358,7 +363,7 @@
                           XFC, XFLT, XREL, XFT, FXFM, FXPM, DDEN,     &
                           FTE, FTF, FHMAX, ECOS, ESIN, IICEDISP,      &
                           ICESCALES, IICESMOOTH
-      USE W3GDATMD, ONLY: FSSOURCE, optionCall
+      USE W3GDATMD, ONLY: FSSOURCE
       USE W3GDATMD, ONLY: B_JGS_NLEVEL, B_JGS_SOURCE_NONLINEAR
 !/REF1 USE W3GDATMD, ONLY: IOBP, IOBPD, IOBDP, GTYPE, UNGTYPE, REFPARS
       USE W3WDATMD, ONLY: TIME
@@ -482,7 +487,7 @@
                                  MWXFINISH, MWYFINISH, A1BAND, B1BAND,     &
                                  COSI(2)
       REAL                    :: SPECINIT(NSPEC), SPEC2(NSPEC)
-      REAL                    :: DAM (NSPEC), WN2 (NSPEC),            &
+      REAL                    :: DAM (NSPEC), DAM2(NSPEC), WN2 (NSPEC), &
                                  VSLN(NSPEC),                         &
                                  VSIN(NSPEC), VDIN(NSPEC),            &
                                  VSNL(NSPEC), VDNL(NSPEC),            &
@@ -519,7 +524,8 @@
       LOGICAL, SAVE           :: FIRST = .TRUE.
       LOGICAL                 :: PrintDeltaSmDA
       REAL                    :: eInc1, eInc2
-      REAL                    :: DeltaSRC(NSPEC), MAXDAC(NSPEC)
+      REAL                    :: DeltaSRC(NSPEC)
+      REAL, PARAMETER         :: DTMINTOT = 0.01
 !/PDLIB  REAL                 :: PreVS, eVS, eVD, FAK, DVS, SIDT
 !/PDLIB  INTEGER              :: ISP, IP, ISEA
 
@@ -921,6 +927,18 @@
 !/ST4        NKI    = MAX ( 2 , MIN ( NKH1 ,                           &
 !/ST4                 INT ( FACTI2 + FACTI1*LOG(MAX(1.E-7,FFXFI* FMEAN1)) ) ) )
 
+        IF (LNEWLIMITER) THEN
+          DO IK=1, NK
+            DAM2(1+(IK-1)*NTH) = 5.0E-07*DTMIN*GRAV/(SIG(IK)*TPIINV)**4*USTAR*MAX(FMEANWS,FMEAN)/TPI/SIG(IK)*CG1(IK)
+          END DO
+          DO IK=1, NK
+            IS0    = (IK-1)*NTH
+            DO ITH=2, NTH
+              DAM2(ITH+IS0) = DAM2(1+IS0)
+            END DO
+          END DO
+        ENDIF
+    
         VS = 0
         VD = 0
         DO IS=IS1, NSPECH
@@ -942,24 +960,29 @@
 !/BSX          VD(IS) = VD(IS) + VDBS(IS)
 !/XXX          VD(IS) = VD(IS) + VDXX(IS)
 !/UOST         VD(IS) = VD(IS) + VDUO(IS)
-          DAMAX  = MIN ( DAM(IS) , MAX ( XREL*SPECINIT(IS) , AFILT ) )
+          IF (LNEWLIMITER) THEN
+            DAMAX  = MAX( DAM2(IS), MIN ( DAM(IS) , MAX ( XREL*SPECINIT(IS) , AFILT ) ) )
+          ELSE
+            DAMAX  = MIN ( DAM(IS) , MAX ( XREL*SPECINIT(IS) , AFILT ) ) 
+          ENDIF
           AFAC   = 1. / MAX( 1.E-10 , ABS(VS(IS)/DAMAX) )
           DT     = MIN ( DT , AFAC / ( MAX ( 1.E-10,                  &
                          1. + OFFSET*AFAC*MIN(0.,VD(IS)) ) ) )
-!          IF (IX == DEBUG_NODE) THEN
-!            WRITE(*,'(A20,I10,10F30.10)') 'TIME STEP COMP', IS, DAMAX, DAM(IS), XREL*SPECINIT(IS), AFILT, AFAC, DT
-!          ENDIF
+          !IF (IX == 74) THEN!DEBUG_NODE) THEN
+          !  IF (SPECINIT(IS) .GT. 0.) WRITE(*,'(A20,2I10,10F20.10)') 'TIME STEP COMP', IS, NSPECH, DAMAX, VS(IS), VD(IS), DAM(IS), & 
+         !&                                                                     XREL*SPECINIT(IS), AFILT, AFAC, DT
+          !ENDIF
         END DO  ! end of loop on IS 
 !
 !        WRITE(*,*) 'NODE_NUMBER', IX
 !        IF (IX == DEBUG_NODE) WRITE(*,*) 'TIMINGS 1', DT 
-        DT     = MAX ( 0.5, DT )                   ! Here we have a hardlimit, which is not too usefull, at least not as a fixed constant
+        DT     = MAX ( 0.001, DT ) 
 !
         DTDYN  = DTDYN + DT
 !/T        DTRAW  = DT
         IDT    = 1 + INT ( 0.99*(DTG-DTTOT)/DT ) ! number of iterations 
         DT     = (DTG-DTTOT)/REAL(IDT)           ! actualy time step
-        SHAVE  = DT.LT.DTMIN .AND. DT.LT.DTG-DTTOT   ! limiter check ... 
+        SHAVE  = .false.!DT.LT.DTMIN .AND. DT.LT.DTG-DTTOT   ! limiter check ... 
         SHAVEIO = SHAVE
         DT     = MAX ( DT , MIN (DTMIN,DTG-DTTOT) ) ! override dt with input time step or last time step if it is bigger ... anyway the limiter is on!
         IF (srce_call .eq. srce_imp_post) DT = DTG  ! for implicit part
@@ -1025,15 +1048,9 @@
             WRITE(740+IAPROC,*) 'min/max/sum(DeltaDS)=', minval(DeltaSRC), maxval(DeltaSRC), sum(DeltaSRC)
           END IF
      
-            IF (optionCall .eq. 1) THEN
-              CALL SIGN_VSD_PATANKAR_WW3(SPEC,VS,VD)
-            ELSE IF (optionCall .eq. 2) THEN
-              CALL SIGN_VSD_SEMI_IMPLICIT_WW3(SPEC,VS,VD)
-            ELSE IF (optionCall .eq. 3) THEN
-              CALL SIGN_VSD_SEMI_IMPLICIT_WW3(SPEC,VS,VD)
-            ENDIF
-            VSIO=VS
-            VDIO=VD
+          CALL SIGN_VSD_SEMI_IMPLICIT_WW3(SPEC,VS,VD)
+          VSIO = VS
+          VDIO = VD
 !!/DEBUGSRC          IF (IX == DEBUG_NODE) WRITE(44,'(10EN15.4)') SUM(VS), SUM(VD), SUM(VSIN), SUM(VDIN), SUM(VSDS), SUM(VDDS), SUM(VSNL), SUM(VDNL)
 !/DEBUGSRC          IF (IX == DEBUG_NODE) THEN
 !/DEBUGSRC            WRITE(740+IAPROC,*) '     srce_imp_pre : SHAVE = ', SHAVE
@@ -1071,9 +1088,9 @@
               SPEC(IS) = MAX ( 0. , SPEC(IS)+eInc2 )
             END DO
           ELSE
-!
-            DO IS=IS1, NSPECH
-              eInc1 = VS(IS) * DT / MAX ( 1. , (1.-HDT*VD(IS)))
+            DO IS = IS1, NSPECH
+              eInc1    = VS(IS) * DT / MAX ( 1. , (1. - HDT*VD(IS)))
+              !IF (SPEC(IS) .GT. 0.) write(*,'(2I10,4F20.10)') IS, IX, SPEC(IS), eInc1, VS(IS), VSTR(IS)
               SPEC(IS) = MAX ( 0. , SPEC(IS)+eInc1 )
             END DO
           END IF
