@@ -359,13 +359,13 @@
       SIGM01 = MAX ( 1.E-7 , SIGM01 ) / MAX(EMEAN,0.001)
 
 !---- Temporary parameters (to be replaced by namelists) -----
-      PTRIAD(1) = 0.05
-      PTRIAD(2) = 2.5
+      PTRIAD(1) = 1. 
+      PTRIAD(2) = 20. 
       PTRIAD(3) = 10.
       PTRIAD(4) = 0.2
       PTRIAD(5) = 0.01
 
-      HS = 4.*SQRT( MAX(0.,EMEAN) )
+      HS     = 4.*SQRT( MAX(0.,EMEAN) )
       URSELL = (GRAV*HS)/(2.*SQRT(2.)*SIGM01**2*DEPTH**2)
 !---------------------------------------------
 
@@ -408,7 +408,7 @@
 !
 !     --- compute 3-wave interactions
 !
-      IF ( URSELL.GE.PTRIAD(5) ) THEN
+      IF ( .true. )THEN!URSELL.GE.PTRIAD(5) ) THEN
 !
 !       --- calculate biphase
 !
@@ -417,6 +417,7 @@
 !
         ALLOCATE (EF (1:NK))
         EF = 0.
+
         DO ITH = 1, NTH
 !
 !          --- initialize array with E(f) for the direction considered
@@ -478,7 +479,7 @@
             STRI =       SA(ITH,IK) - 2 * (WISP * SA(ITH,IK+ISP1) + WISP1 * SA(ITH,IK+ISP)) 
             !IF (ABS(STRI) .gt. 0.) WRITE(*,*) IK, ITH, STRI
             IF (A(ITH+(IK-1)*NTH) .gt. tiny(1.)) THEN
-              !write(*,*) IK, ITH, SA(ITH,IK), WISP, A(ITH+(IK-1)*NTH)
+             !write(*,*) IK, ITH, SA(ITH,IK), WISP, A(ITH+(IK-1)*NTH)
              !D(ITH+(IK-1)*NTH) = 0. 
               D(ITH+(IK-1)*NTH) = STRI / (A(ITH+(IK-1)*NTH)*SIGPICG)
               S(ITH+(IK-1)*NTH) = STRI / SIGPICG 
