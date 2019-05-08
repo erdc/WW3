@@ -1011,7 +1011,8 @@
 !
         DO IP = 1, npa
           IP_glob=iplg(IP)
-          U(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*DBLE(IOBPD(ITH,IP_glob))*IOBDP(IP_glob)
+          !U(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*DBLE(IOBPD(ITH,IP_glob))*IOBDP(IP_glob)
+          U(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*IOBDP(IP_glob)
 !/REF1    IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP_glob).EQ.0.AND.IOBPA(IP_glob).EQ.0) U(IP) = AC(IP) ! restores reflected boundary values 
          END DO
 !/DEBUGSOLVER     IF (testWrite) THEN
@@ -4837,7 +4838,7 @@
         IP_glob = iplg(IP)
         ISEA    = MAPFS(1,IP_glob)
 
-        IF (.true.)THEN!IOBDP(IP_glob).eq.1.and.IOBPA(IP_glob).eq.0) THEN
+        IF (IOBDP(IP_glob).eq.1.and.IOBPA(IP_glob).eq.0) THEN
           USTAR = UST(JSEA)
           LLWS = .TRUE.
           U10ABS = U10(ISEA)
