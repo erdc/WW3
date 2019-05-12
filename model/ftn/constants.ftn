@@ -102,8 +102,8 @@
 !AR: Will be removed from here need to see with H and A
       LOGICAL                  :: LPDLIB      = .FALSE. 
       LOGICAL                  :: LSETUP      = .FALSE. 
-      LOGICAL                  :: LNEWLIMITER = .TRUE. 
-      LOGICAL                  :: LNEUMANN    = .TRUE. 
+      LOGICAL                  :: LNEWLIMITER = .FALSE. 
+      LOGICAL                  :: LNEUMANN    = .FALSE. 
 !
 ! Parameters in support of running as ESMF component
 !
