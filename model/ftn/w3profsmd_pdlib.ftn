@@ -118,84 +118,6 @@
 !
 !/ ------------------------------------------------------------------- /
 !
-      SUBROUTINE VA_SETUP_IOBPD
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :         01-Mai-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-Mai-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Setup boundary pointer 
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-!
-      USE W3GDATMD, ONLY: IOBPD, GTYPE, UNGTYPE
-      USE W3GDATMD, ONLY: NSPEC, NTH, NSEAL
-      USE W3WDATMD, ONLY: VA
-      USE YOWNODEPOOL, ONLY: iplg
-!/
-      IMPLICIT NONE
-!/
-!/ ------------------------------------------------------------------- /
-!/ Parameter list
-!/
-!/ ------------------------------------------------------------------- /
-!/ Local PARAMETERs
-!/
-!/S      INTEGER, SAVE           :: IENT = 0
-!/
-!/ ------------------------------------------------------------------- /
-!/
-!
-      INTEGER JSEA, IP, IP_glob, ITH, ISP
-!/S      CALL STRACE (IENT, 'VA_SETUP_IOBPD')
-      IF (GTYPE .eq. UNGTYPE) THEN
-        DO JSEA=1,NSEAL
-          IP      = JSEA
-          IP_glob = iplg(IP)
-          DO ISP=1,NSPEC
-            ITH    = 1 + MOD(ISP-1,NTH)
-            VA(ISP,JSEA) = VA(ISP,JSEA)*IOBPD(ITH,IP_glob)
-          END DO
-        END DO
-      END IF
-      END SUBROUTINE
 !/ ------------------------------------------------------------------- /
       SUBROUTINE PDLIB_STYLE_INIT(IMOD)
 !/
@@ -820,8 +742,8 @@
 !/ ------------------------------------------------------------------- /
 !/S      USE W3SERVMD, ONLY: STRACE
 !
-      USE W3GDATMD, ONLY : NK, NTH, NX, &
-                            IEN, CLATS, MAPSF, IOBPD, IOBP, IOBDP, IOBPA
+      USE CONSTANTS, ONLY : LNEUMANN, LNEWLIMITER
+      USE W3GDATMD, ONLY : NK, NTH, NX,  IEN, CLATS, MAPSF, IOBPD, IOBP, IOBDP, IOBPA
       USE W3WDATMD, ONLY: TIME
       USE W3ADATMD, ONLY: CG, ITER, DW , CFLXYMAX, NSEALM
       USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPIN, ISBPI, BBPI0, BBPIN
@@ -896,13 +818,6 @@
       IK     = 1 + (ISP-1)/NTH
       DTMAX  = DBLE(10.E10)
 
-!      DO IP = 1, npa
-!        IP_glob = iplg(IP)
-!        IF (IOBPD(ITH,IP_glob) .EQ. 0) THEN
-!          if ( AC(IP) .gt. 0.) write(*,*) 'TEST w3profs_pdlib 0', ip, ith, ik, AC(IP)
-!        endif
-!      END DO
-!
 !/REF1       IOBPDR(:)=(1-IOBP(:))*(1-IOBPD(ITH,:))
 
 !/DEBUGSOLVER     WRITE(740+IAPROC,*) 'NX=', NX
@@ -1009,12 +924,19 @@
 ! IOBPD=0  : waves coming from land
 ! IOBPD=1 : waves coming from the coast
 !
-        DO IP = 1, npa
-          IP_glob=iplg(IP)
-          !U(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*DBLE(IOBPD(ITH,IP_glob))*IOBDP(IP_glob)
-          U(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*IOBDP(IP_glob)
+        IF (LNEUMANN) THEN
+          DO IP = 1, npa
+            IP_glob=iplg(IP)
+            U(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*IOBDP(IP_glob)
 !/REF1    IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP_glob).EQ.0.AND.IOBPA(IP_glob).EQ.0) U(IP) = AC(IP) ! restores reflected boundary values 
-         END DO
+           END DO
+        ELSE
+          DO IP = 1, npa
+            IP_glob=iplg(IP)
+            U(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*DBLE(IOBPD(ITH,IP_glob))*IOBDP(IP_glob)
+!/REF1    IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP_glob).EQ.0.AND.IOBPA(IP_glob).EQ.0) U(IP) = AC(IP) ! restores reflected boundary values 
+           END DO
+        ENDIF
 !/DEBUGSOLVER     IF (testWrite) THEN
 !/DEBUGSOLVER       CALL SCAL_INTEGRAL_PRINT_R8(U, "U in loop")
 !/DEBUGSOLVER     END IF
@@ -1126,8 +1048,8 @@
 !/ ------------------------------------------------------------------- /
 !/S      USE W3SERVMD, ONLY: STRACE
 !
-      USE W3GDATMD, ONLY : NK, NTH, NX, &
-                            IEN, CLATS, MAPSF, IOBPD, IOBP, IOBPA, NNZ, IOBDP
+      USE CONSTANTS, ONLY : LNEUMANN, LNEWLIMITER
+      USE W3GDATMD, ONLY : NK, NTH, NX, IEN, CLATS, MAPSF, IOBPD, IOBP, IOBPA, NNZ, IOBDP
       USE W3WDATMD, ONLY: TIME     
       USE W3ADATMD, ONLY: CG, ITER, CFLXYMAX
       USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, ISBPI, BBPI0, BBPIN
@@ -1261,11 +1183,20 @@
           END IF
           ST(NI) = ST(NI) + THETA_L ! the 2nd term are the theta values of each node ...
         END DO
-        DO IP = 1, npa
-          IP_glob=iplg(IP)
-          U(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*DBLE(IOBPD(ITH,IP_glob))*IOBDP(IP_glob)
-!/REF1    IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP_glob).EQ.0.AND.IOBPA(IP_glob).EQ.0) U(IP) = AC(IP) ! restores reflected boundary values
-        END DO
+
+        IF (LNEUMANN) THEN
+          DO IP = 1, npa
+            IP_glob=iplg(IP)
+            U(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*IOBDP(IP_glob)
+!/REF1    IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP_glob).EQ.0.AND.IOBPA(IP_glob).EQ.0) U(IP) = AC(IP) ! restores reflected boundary values 
+           END DO
+        ELSE
+          DO IP = 1, npa
+            IP_glob=iplg(IP)
+            U(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*DBLE(IOBPD(ITH,IP_glob))*IOBDP(IP_glob)
+!/REF1    IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP_glob).EQ.0.AND.IOBPA(IP_glob).EQ.0) U(IP) = AC(IP) ! restores reflected boundary values 
+           END DO
+        ENDIF
         AC = REAL(U)
 !
 ! 5 Update boundaries ... this should be implemented differently ... it is better to omit any if clause in this loop ...
@@ -2838,8 +2769,8 @@
 !/ ------------------------------------------------------------------- /
 !/S      USE W3SERVMD, ONLY: STRACE
 !
-      USE W3GDATMD, ONLY : NK, NTH, NX, &
-                            IEN, CLATS, MAPSF, IOBPD, IOBP, TRIA, IOBDP
+      USE CONSTANTS, ONLY : LNEUMANN, LNEWLIMITER
+      USE W3GDATMD, ONLY : NK, NTH, NX, IEN, CLATS, MAPSF, IOBPD, IOBP, TRIA, IOBDP
       USE W3WDATMD, ONLY: TIME
       USE W3ADATMD, ONLY: CG, ITER, CFLXYMAX
       USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, ISBPI, BBPI0, BBPIN
@@ -2984,11 +2915,20 @@
           THETA_ACE(:,IE) = ((THETA_H(:,IE) - THETA_L(:,IE))) * DT4AI/PDLIB_SI(NI)
           ST(NI)          = ST(NI) + THETA_L(:,IE)*DT4AI/PDLIB_SI(NI)
         END DO
-        DO IP = 1,npa
-          IP_glob=iplg(IP)
-          !UL(IP) = MAX(ZERO,U(IP)-ST(IP))*DBLE(IOBPD(ITH,IP_glob))
-          UL(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*DBLE(IOBPD(ITH,IP_glob))*IOBDP(IP_glob)
-        END DO
+
+        IF (LNEUMANN) THEN
+          DO IP = 1, npa
+            IP_glob=iplg(IP)
+            UL(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*IOBDP(IP_glob)
+!/REF1    IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP_glob).EQ.0.AND.IOBPA(IP_glob).EQ.0) U(IP) = AC(IP) ! restores reflected boundary values 
+           END DO
+        ELSE
+          DO IP = 1, npa
+            IP_glob=iplg(IP)
+            UL(IP) = MAX(ZERO,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP_glob)))*DBLE(IOBPD(ITH,IP_glob))*IOBDP(IP_glob)
+!/REF1    IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP_glob).EQ.0.AND.IOBPA(IP_glob).EQ.0) U(IP) = AC(IP) ! restores reflected boundary values 
+           END DO
+        ENDIF
 
         USTARI(1,:) = MAX(UL,U)
         USTARI(2,:) = MIN(UL,U)
@@ -3643,6 +3583,7 @@
 !/ ------------------------------------------------------------------- /
 !/S      USE W3SERVMD, ONLY: STRACE
 !
+      USE CONSTANTS, ONLY : LNEUMANN, LNEWLIMITER
       USE W3GDATMD, ONLY: NK, NK2, NTH, NSPEC, FACHFA, IOBPD, DMIN
       USE W3GDATMD, ONLY: NSEAL, IOBDP, IOBPA, CLATS
       USE W3GDATMD, ONLY: MAPSTA
@@ -3781,9 +3722,15 @@
 !/REF1            IF (eIOBPDR .eq. 1) THEN
 !/REF1              K1=ZERO
 !/REF1            END IF
-            TRIA03= 1./3. * PDLIB_TRIA(IE)
-            DTK   =  K1 * DTG * IOBDP(IP_glob) * (1-IOBPA(IP_glob)) * IOBPD(ITH,IP_glob)
-            TMP3  =  DTK * NM(ISP,IE)
+            TRIA03        =  1./3. * PDLIB_TRIA(IE)
+            IF (LNEUMANN) THEN
+              DTK           =  K1 * DTG * IOBDP(IP_glob) * (1-IOBPA(IP_glob)) * IOBPD(ITH,IP_glob)
+              B_JAC(ISP,IP) =  B_JAC(ISP,IP) + TRIA03 * VA(ISP,IP) * IOBDP(IP_glob) * (1-IOBPA(IP_glob)) 
+            ELSE
+              DTK           =  K1 * DTG * IOBDP(IP_glob) * (1-IOBPA(IP_glob)) * IOBPD(ITH,IP_glob)
+              B_JAC(ISP,IP) =  B_JAC(ISP,IP) + TRIA03 * VA(ISP,IP) * IOBDP(IP_glob) * (1-IOBPA(IP_glob)) * IOBPD(ITH,IP_glob)
+            ENDIF
+            TMP3          =  DTK * NM(ISP,IE)
             IF (FSGEOADVECT) THEN
               ASPAR_JAC(ISP,I1) = ASPAR_JAC(ISP,I1) + TRIA03 + DTK - TMP3*DELTAL(POS,ISP,IE)
               ASPAR_JAC(ISP,I2) = ASPAR_JAC(ISP,I2)                - TMP3*DELTAL(POS_TRICK(POS,1),ISP,IE) 
@@ -3791,7 +3738,6 @@
             ELSE
               ASPAR_JAC(ISP,I1) = ASPAR_JAC(ISP,I1) + TRIA03
             END IF
-            B_JAC(ISP,IP) = B_JAC(ISP,IP) + TRIA03 * VA(ISP,IP) * IOBDP(IP_glob) * (1-IOBPA(IP_glob)) * IOBPD(ITH,IP_glob)
           END DO
         END DO
       END DO
@@ -4042,6 +3988,7 @@
 !/ ------------------------------------------------------------------- /
 !/S      USE W3SERVMD, ONLY: STRACE
 !
+      USE CONSTANTS, ONLY : LNEUMANN, LNEWLIMITER 
       USE W3GDATMD, ONLY: NK, NK2, NTH, NSPEC, FACHFA, IOBPD, DMIN
       USE W3GDATMD, ONLY: NSEAL, IOBDP, IOBPA, CLATS
       USE W3GDATMD, ONLY: MAPSTA
@@ -4227,7 +4174,8 @@
 !
 !/ ------------------------------------------------------------------- /
 !/S      USE W3SERVMD, ONLY: STRACE
-!
+! 
+      USE CONSTANTS, ONLY : LNEUMANN, LNEWLIMITER
       USE W3GDATMD, ONLY: NK, NK2, NTH, NSPEC, FACHFA, IOBPD, DMIN
       USE W3GDATMD, ONLY: NSEAL, IOBDP, IOBPA, CLATS
       USE W3GDATMD, ONLY: MAPSTA, NK
@@ -4380,7 +4328,13 @@
           KP      = MAX(ZERO,K)
           DELTAL  = CRFS - KP
           NM      = 1.d0/MIN(-THR,SUM(KM))
-          DTK     = KP(POS) * DBLE(DTG) * IOBDP(IP_glob) * (1-IOBPA(IP_glob))! * IOBPD(ITH,IP_glob)
+          IF (LNEUMANN) THEN
+            DTK           =  KP(POS) * DTG * IOBDP(IP_glob) * (1-IOBPA(IP_glob)) * IOBPD(ITH,IP_glob)
+            B_JAC(ISP,IP) =  B_JAC(ISP,IP) + TRIA03 * VA(ISP,IP) * IOBDP(IP_glob) * (1-IOBPA(IP_glob))
+          ELSE
+            DTK           =  KP(POS) * DTG * IOBDP(IP_glob) * (1-IOBPA(IP_glob)) * IOBPD(ITH,IP_glob)
+            B_JAC(ISP,IP) =  B_JAC(ISP,IP) + TRIA03 * VA(ISP,IP) * IOBDP(IP_glob) * (1-IOBPA(IP_glob)) * IOBPD(ITH,IP_glob)
+          ENDIF
           TMP3    = DTK * NM   
           IF (FSGEOADVECT) THEN
             ASPAR_DIAG_LOCAL(ISP)     = ASPAR_DIAG_LOCAL(ISP) + TRIA03 + DTK - TMP3*DELTAL(POS)
