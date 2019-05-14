@@ -524,6 +524,7 @@
       REAL                    :: eInc1, eInc2
       REAL                    :: DeltaSRC(NSPEC)
       REAL, PARAMETER         :: DTMINTOT = 0.01
+      LOGICAL                 :: LNEWLIMITER = .TRUE. 
 !/PDLIB  REAL                 :: PreVS, eVS, eVD, FAK, DVS, SIDT
 !/PDLIB  INTEGER              :: ISP, IP, ISEA
 
@@ -980,7 +981,7 @@
 !/T        DTRAW  = DT
         IDT    = 1 + INT ( 0.99*(DTG-DTTOT)/DT ) ! number of iterations 
         DT     = (DTG-DTTOT)/REAL(IDT)           ! actualy time step
-        SHAVE  = .false.!DT.LT.DTMIN .AND. DT.LT.DTG-DTTOT   ! limiter check ... 
+        SHAVE  = DT.LT.DTMIN .AND. DT.LT.DTG-DTTOT   ! limiter check ... 
         SHAVEIO = SHAVE
         DT     = MAX ( DT , MIN (DTMIN,DTG-DTTOT) ) ! override dt with input time step or last time step if it is bigger ... anyway the limiter is on!
         IF (srce_call .eq. srce_imp_post) DT = DTG  ! for implicit part
