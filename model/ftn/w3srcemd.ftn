@@ -524,7 +524,7 @@
       REAL                    :: eInc1, eInc2
       REAL                    :: DeltaSRC(NSPEC)
       REAL, PARAMETER         :: DTMINTOT = 0.01
-      LOGICAL                 :: LNEWLIMITER = .TRUE. 
+      LOGICAL                 :: LNEWLIMITER = .FALSE. 
 !/PDLIB  REAL                 :: PreVS, eVS, eVD, FAK, DVS, SIDT
 !/PDLIB  INTEGER              :: ISP, IP, ISEA
 
@@ -981,9 +981,9 @@
 !/T        DTRAW  = DT
         IDT    = 1 + INT ( 0.99*(DTG-DTTOT)/DT ) ! number of iterations 
         DT     = (DTG-DTTOT)/REAL(IDT)           ! actualy time step
-        SHAVE  = DT.LT.DTMIN .AND. DT.LT.DTG-DTTOT   ! limiter check ... 
+        SHAVE  = DT.LT.DTMIN .AND. DT.LT.DTG-DTTOT   ! limiter check ... but why always for the last time step ...
         SHAVEIO = SHAVE
-        DT     = MAX ( DT , MIN (DTMIN,DTG-DTTOT) ) ! override dt with input time step or last time step if it is bigger ... anyway the limiter is on!
+        DT     = MAX ( DT , MIN (DTMIN,DTG-DTTOT) ) ! correct last time step ...
         IF (srce_call .eq. srce_imp_post) DT = DTG  ! for implicit part
         HDT    = OFFSET * DT
         DTTOT  = DTTOT + DT
@@ -1081,11 +1081,19 @@
 !            WRITE(*,'(A20,I20,F20.10,L20,4F20.10)') 'BEFORE', IX, DEPTH, SHAVE, SUM(VS), SUM(VD), SUM(SPEC)
 !          ENDIF
           IF ( SHAVE ) THEN
-            DO IS=IS1, NSPECH
-              eInc1 = VS(IS) * DT / MAX ( 1. , (1.-HDT*VD(IS)))
-              eInc2 = SIGN ( MIN (DAM(IS),ABS(eInc1)) , eInc1 )
-              SPEC(IS) = MAX ( 0. , SPEC(IS)+eInc2 )
-            END DO
+            IF (LNEWLIMITER) THEN
+              DO IS=IS1, NSPECH
+                eInc1 = VS(IS) * DT / MAX ( 1. , (1.-HDT*VD(IS)))
+                eInc2 = SIGN ( MIN (DAM2(IS),ABS(eInc1)) , eInc1 )
+                SPEC(IS) = MAX ( 0. , SPEC(IS)+eInc2 )
+              END DO
+            ELSE
+              DO IS=IS1, NSPECH
+                eInc1 = VS(IS) * DT / MAX ( 1. , (1.-HDT*VD(IS)))
+                eInc2 = SIGN ( MIN (DAM(IS),ABS(eInc1)) , eInc1 )
+                SPEC(IS) = MAX ( 0. , SPEC(IS)+eInc2 )
+              END DO
+            ENDIF
           ELSE
             DO IS = IS1, NSPECH
               eInc1    = VS(IS) * DT / MAX ( 1. , (1. - HDT*VD(IS)))

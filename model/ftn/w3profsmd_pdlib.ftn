@@ -4733,7 +4733,7 @@
       IMPLICIT NONE
       REAL, INTENT(in) :: DTG
       REAL, INTENT(inout) :: ASPAR_DIAG_LOCAL(:,:)!NSPEC,NSEAL)
-      REAL, PARAMETER :: COEF4 = 1E-06
+      REAL, PARAMETER :: COEF4 = 1E-03
       INTEGER JSEA, IP, IP_glob, ISEA
       INTEGER IK, ITH, ISP, IS0
       LOGICAL :: LBREAK
@@ -4742,7 +4742,7 @@
       REAL :: PreVS, eDam, DVS, FREQ, EMEAN, FMEAN, WNMEAN, AMAX, SPEC_VA(NSPEC), CG1(NK), WN1(NK)
       REAL :: TAUWX, TAUWY, CD, Z0, CHARN, FMEANWS, U10ABS, U10DIR, USTAR, FMEAN1, COFRM4, USFM
       LOGICAL :: LLWS(NSPEC)
-      LOGICAL :: LNEWLIMITER = .TRUE. 
+      LOGICAL :: LNEWLIMITER = .TRUE.
       REAL TheFactor
 
       DO JSEA = 1, NP
@@ -4751,7 +4751,7 @@
         IP_glob = iplg(IP)
         ISEA    = MAPFS(1,IP_glob)
 
-        IF (IOBDP(IP_glob).eq.1.and.IOBPA(IP_glob).eq.0) THEN
+        IF (IOBP(IP_glob).eq.1.and.IOBDP(IP_glob).eq.1.and.IOBPA(IP_glob).eq.0) THEN
           USTAR = UST(ISEA)
           LLWS = .TRUE.
           U10ABS = U10(ISEA)
@@ -4768,6 +4768,7 @@
           DO IK=1, NK
             DAM(1+(IK-1)*NTH)  = FACP / ( SIG(IK) * WN(IK,ISEA)**3)
             COFRM4 = DTMIN*COEF4*GRAV/(SIG(IK)*TPIINV)**4
+            COFRM4 = COEF4*GRAV/(SIG(IK)*TPIINV)**3
             USFM   = USTAR*FMEAN
             JAC    = 1./TPI/SIG(IK) * CG(IK,ISEA)
             DAM2(1+(IK-1)*NTH) = COFRM4 * USFM * JAC
@@ -4791,7 +4792,7 @@
           DO IK=1,NK
             DO ITH=1,NTH
               ISP=ITH + (IK-1)*NTH
-              !IF (SHAVETOT(JSEA)) THEN ! Limit ONLY the source term part ...
+              !IF (.false.) THEN!SHAVETOT(JSEA)) THEN ! Limit ONLY the source term part ...
                 IF (LNEWLIMITER) THEN
                   MAXDAC    = MAX(DAM(ISP),DAM2(ISP))
                 ELSE
