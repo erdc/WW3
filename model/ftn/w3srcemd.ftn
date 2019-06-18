@@ -47,7 +47,6 @@
 !/ ------------------------------------------------------------------- /
 !/
       REAL, PARAMETER, PRIVATE :: OFFSET = 1.
-      LOGICAL, PARAMETER       :: LNEWLIMITER = .FALSE. 
 !/
       CONTAINS
 !/ ------------------------------------------------------------------- /
@@ -424,7 +423,6 @@
 !/S      USE W3SERVMD, ONLY: STRACE
 !/NNT      USE W3SERVMD, ONLY: EXTCDE
 !/UOST      USE W3UOSTMD, ONLY : UOST_SRCTRMCOMPUTE
-!/PDLIB    USE PDLIB_W3PROFSMD, ONLY : B_JAC, ASPAR_JAC, ASPAR_DIAG_SOURCES
 !/PDLIB    USE yowNodepool,    ONLY: PDLIB_CCON, NPA, PDLIB_I_DIAG, PDLIB_JA, PDLIB_IA_P
 !/PDLIB    USE W3GDATMD, ONLY: CLATS
 !/PDLIB    USE W3WDATMD, ONLY: VA
@@ -526,6 +524,7 @@
       REAL                    :: eInc1, eInc2
       REAL                    :: DeltaSRC(NSPEC)
       REAL, PARAMETER         :: DTMINTOT = 0.01
+      LOGICAL                 :: LNEWLIMITER = .FALSE. 
 !/PDLIB  REAL                 :: PreVS, eVS, eVD, FAK, DVS, SIDT
 !/PDLIB  INTEGER              :: ISP, IP, ISEA
 
@@ -982,9 +981,13 @@
 !/T        DTRAW  = DT
         IDT    = 1 + INT ( 0.99*(DTG-DTTOT)/DT ) ! number of iterations 
         DT     = (DTG-DTTOT)/REAL(IDT)           ! actualy time step
+<<<<<<< HEAD
         SHAVE  = DT.LT.DTMIN .AND. DT.LT.DTG-DTTOT   ! limiter check ... 
+=======
+        SHAVE  = DT.LT.DTMIN .AND. DT.LT.DTG-DTTOT   ! limiter check ... but why always for the last time step ...
+>>>>>>> bb088774d9581be2e805d1524798c13ee04fd8f5
         SHAVEIO = SHAVE
-        DT     = MAX ( DT , MIN (DTMIN,DTG-DTTOT) ) ! override dt with input time step or last time step if it is bigger ... anyway the limiter is on!
+        DT     = MAX ( DT , MIN (DTMIN,DTG-DTTOT) ) ! correct last time step ...
         IF (srce_call .eq. srce_imp_post) DT = DTG  ! for implicit part
         HDT    = OFFSET * DT
         DTTOT  = DTTOT + DT
@@ -1082,11 +1085,19 @@
 !            WRITE(*,'(A20,I20,F20.10,L20,4F20.10)') 'BEFORE', IX, DEPTH, SHAVE, SUM(VS), SUM(VD), SUM(SPEC)
 !          ENDIF
           IF ( SHAVE ) THEN
-            DO IS=IS1, NSPECH
-              eInc1 = VS(IS) * DT / MAX ( 1. , (1.-HDT*VD(IS)))
-              eInc2 = SIGN ( MIN (DAM(IS),ABS(eInc1)) , eInc1 )
-              SPEC(IS) = MAX ( 0. , SPEC(IS)+eInc2 )
-            END DO
+            IF (LNEWLIMITER) THEN
+              DO IS=IS1, NSPECH
+                eInc1 = VS(IS) * DT / MAX ( 1. , (1.-HDT*VD(IS)))
+                eInc2 = SIGN ( MIN (DAM2(IS),ABS(eInc1)) , eInc1 )
+                SPEC(IS) = MAX ( 0. , SPEC(IS)+eInc2 )
+              END DO
+            ELSE
+              DO IS=IS1, NSPECH
+                eInc1 = VS(IS) * DT / MAX ( 1. , (1.-HDT*VD(IS)))
+                eInc2 = SIGN ( MIN (DAM(IS),ABS(eInc1)) , eInc1 )
+                SPEC(IS) = MAX ( 0. , SPEC(IS)+eInc2 )
+              END DO
+            ENDIF
           ELSE
             DO IS = IS1, NSPECH
               eInc1    = VS(IS) * DT / MAX ( 1. , (1. - HDT*VD(IS)))

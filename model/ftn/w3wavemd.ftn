@@ -1399,7 +1399,7 @@
 !/DEBUGRUN          ENDIF
 !/DEBUGRUN        ENDDO
 !
-            IF ( .true. ) then !MAPSTA(IY,IX) .EQ. 1 .AND. FLAGST(ISEA)) THEN
+            IF ( MAPSTA(IY,IX) .EQ. 1 .AND. FLAGST(ISEA)) THEN
               IF (FSSOURCE) THEN
 !/PDLIB!/DEBUGSRC         IF (IX .eq. DEBUG_NODE) THEN
 !/PDLIB!/DEBUGSRC           WRITE(740+IAPROC,*) 'NODE_SRCE_IMP_PRE : IX=', IX, ' JSEA=', JSEA
@@ -1992,7 +1992,7 @@
 
 !/DEBUGRUN          IF (JSEA == DEBUG_NODE) WRITE(*,*) 'W3WAVE TEST', ISEA, JSEA, SUM(VA(:,JSEA))
 
-                IF ( .true. ) THEN!MAPSTA(IY,IX) .EQ. 1 .AND. FLAGST(ISEA)) THEN
+                IF (MAPSTA(IY,IX) .EQ. 1 .AND. FLAGST(ISEA)) THEN
                      TMP1   = WHITECAP(JSEA,1:4)
                      TMP2   = BEDFORMS(JSEA,1:3)
                      TMP3   = TAUBBL(JSEA,1:2)

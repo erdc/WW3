@@ -100,9 +100,8 @@
       INTEGER, PARAMETER       :: DEBUG_ELEMENT = 50
 
 !AR: Will be removed from here need to see with H and A
-      LOGICAL                  :: LPDLIB = .FALSE. 
-      LOGICAL                  :: LSETUP = .FALSE. 
-      LOGICAL                  :: LNEWLIMITER = .FALSE. 
+      LOGICAL                  :: LPDLIB      = .FALSE. 
+      LOGICAL                  :: LSETUP      = .FALSE. 
 !
 ! Parameters in support of running as ESMF component
 !
