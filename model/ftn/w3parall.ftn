@@ -59,7 +59,7 @@
       REAL, ALLOCATABLE    :: AC_tot(:,:)
       INTEGER, ALLOCATABLE :: ListISPnextDir(:), ListISPprevDir(:)
       INTEGER, ALLOCATABLE :: ListISPnextFreq(:), ListISPprevFreq(:)
-      INTEGER, PARAMETER   :: IMEM = 2 
+      INTEGER, PARAMETER   :: IMEM = 1 
 
       REAL,  PARAMETER     :: ONESIXTH  = 1.0d0/6.0d0
       REAL,  PARAMETER     :: ONETHIRD  = 1.0d0/3.0d0

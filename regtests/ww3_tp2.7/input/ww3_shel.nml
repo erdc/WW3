@@ -22,7 +22,7 @@
 !     DOMAIN%STOP   = '19680607 000000'  ! Stop date for the entire model
 ! -------------------------------------------------------------------- !
 &DOMAIN_NML
-  DOMAIN%IOSTYP  = 2
+  DOMAIN%IOSTYP  = 1 
   DOMAIN%START   = '20030101 000000'
   DOMAIN%STOP    = '20030101 120000'
 /
@@ -335,7 +335,7 @@
 &HOMOG_INPUT_NML
   HOMOG_INPUT(1)%NAME        = 'WND'
   HOMOG_INPUT(1)%DATE        = '20020905 000000'
-  HOMOG_INPUT(1)%VALUE1      = 8.
+  HOMOG_INPUT(1)%VALUE1      = 30.
   HOMOG_INPUT(1)%VALUE2      = 270.
   HOMOG_INPUT(1)%VALUE3      = 0.0
 /

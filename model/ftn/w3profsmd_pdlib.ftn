@@ -4792,6 +4792,8 @@
           DO IK=1,NK
             DO ITH=1,NTH
               ISP=ITH + (IK-1)*NTH
+              evs = 0.d0
+              evd = 0.d0
               !IF (.false.) THEN!SHAVETOT(JSEA)) THEN ! Limit ONLY the source term part ...
                 IF (LNEWLIMITER) THEN
                   MAXDAC    = MAX(DAM(ISP),DAM2(ISP))

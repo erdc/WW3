@@ -1,5 +1,4 @@
 #include "w3macros.h"
-#define NEW_LIMITER
 !/ ------------------------------------------------------------------- /
       MODULE W3SRCEMD
 !/
@@ -524,7 +523,7 @@
       REAL                    :: eInc1, eInc2
       REAL                    :: DeltaSRC(NSPEC)
       REAL, PARAMETER         :: DTMINTOT = 0.01
-      LOGICAL                 :: LNEWLIMITER = .FALSE. 
+      LOGICAL                 :: LNEWLIMITER = .TRUE. 
 !/PDLIB  REAL                 :: PreVS, eVS, eVD, FAK, DVS, SIDT
 !/PDLIB  INTEGER              :: ISP, IP, ISEA
 
@@ -639,7 +638,7 @@
       TAUICE = 0.
       PHICE  = 0.
 
-!/DEBUGSRC     IF (IX .eq. DEBUG_NODE) THEN
+!/DEBUGSRC    IF (IX .eq. DEBUG_NODE) THEN
 !/DEBUGSRC       WRITE(740+IAPROC,*) 'W3SRCE start sum(SPEC)=', sum(SPEC)
 !/DEBUGSRC       WRITE(740+IAPROC,*) 'W3SRCE start sum(SPECOLD)=', sum(SPECOLD)
 !/DEBUGSRC       WRITE(740+IAPROC,*) 'W3SRCE start sum(SPECINIT)=', sum(SPECINIT)
@@ -925,7 +924,6 @@
 !
 !/ST4        NKI    = MAX ( 2 , MIN ( NKH1 ,                           &
 !/ST4                 INT ( FACTI2 + FACTI1*LOG(MAX(1.E-7,FFXFI* FMEAN1)) ) ) )
-
         IF (LNEWLIMITER) THEN
           DO IK=1, NK
             DAM2(1+(IK-1)*NTH) = 5.0E-07*DTMIN*GRAV/(SIG(IK)*TPIINV)**4*USTAR*MAX(FMEANWS,FMEAN)/TPI/SIG(IK)*CG1(IK)

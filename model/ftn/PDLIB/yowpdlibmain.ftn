@@ -1330,8 +1330,9 @@ module yowpdlibMain
 !
     J = 0
     PDLIB_NNZ = 0
+    ITMP = 0
     DO IP = 1, npa
-      ITMP(:) = 0
+      ITMP = 0
       DO I = 1, PDLIB_CCON(IP)
         J = J + 1
         IP_J  = PTABLE(J,2)
