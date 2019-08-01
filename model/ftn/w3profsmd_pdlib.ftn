@@ -102,7 +102,7 @@
 !/ Public variables
 !/
       LOGICAL               :: MAPSTA_HACK = .FALSE.
-      REAL, ALLOCATABLE     :: ASPAR_JAC(:,:), ASPAR_DIAG_SOURCES(:,:)
+      REAL, ALLOCATABLE     :: ASPAR_JAC(:,:)
       REAL, ALLOCATABLE     :: B_JAC(:,:), CAD_THE(:,:), CAS_SIG(:,:)
       REAL, ALLOCATABLE     :: CWNB_SIG_M2(:,:)
       REAL, ALLOCATABLE     :: U_JAC(:,:)
@@ -3832,8 +3832,8 @@
 
       J = 0
       DO IP = 1, npa
-        IP_glob=iplg(IP)
-        ISEA=MAPFS(1,IP_glob)
+        IP_glob = iplg(IP)
+        ISEA    = MAPFS(1,IP_glob)
         DO I = 1, PDLIB_CCON(IP)
           J = J + 1
           IE    =  PDLIB_IE_CELL(J)
@@ -4249,9 +4249,11 @@
           CRFS_U(1) = - ONESIXTH*(2.d0 *FL31_U + FL32_U + FL21_U + 2.d0 * FL22_U)
           CRFS_U(2) = - ONESIXTH*(2.d0 *FL32_U + 2.d0 * FL11_U + FL12_U + FL31_U)
           CRFS_U(3) = - ONESIXTH*(2.d0 *FL12_U + 2.d0 * FL21_U + FL22_U + FL11_U)
+
         ENDIF
 
         DO IK = 1, NK
+
           CSX = CG(IK,NI_ISEA) / CLATS(NI_ISEA)
           CSY = CG(IK,NI_ISEA)
           LAMBDA(1) = ONESIXTH * (CSX(1) + CSX(2) + CSX(3))
@@ -4751,7 +4753,7 @@
         IP_glob = iplg(IP)
         ISEA    = MAPFS(1,IP_glob)
 
-        IF (IOBP(IP_glob).eq.1.and.IOBDP(IP_glob).eq.1.and.IOBPA(IP_glob).eq.0) THEN
+        IF ((IOBP(IP_glob).eq.3.or.IOBP(IP_glob).eq.1).and.IOBDP(IP_glob).eq.1.and.IOBPA(IP_glob).eq.0) THEN
           USTAR = UST(ISEA)
           LLWS = .TRUE.
           U10ABS = U10(ISEA)
@@ -6839,8 +6841,6 @@
 !/DEBUGINIT    WRITE(740+IAPROC,*) 'JACOBI_INIT, step 2'
 !/DEBUGINIT    FLUSH(740+IAPROC)
       ALLOCATE(B_JAC(NSPEC,npa), stat=istat)
-      if(istat /= 0) CALL PDLIB_ABORT(10)
-      ALLOCATE(ASPAR_DIAG_SOURCES(NSPEC,npa), stat=istat)
       if(istat /= 0) CALL PDLIB_ABORT(10)
 !/DEBUGINIT    WRITE(740+IAPROC,*) 'JACOBI_INIT, step 3'
 !/DEBUGINIT    FLUSH(740+IAPROC)

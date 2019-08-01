@@ -1208,6 +1208,12 @@ module yowpdlibMain
       PDLIB_IEN(6,IE) =   DXP1
       DBLTMP = (DXP3*DYP1 - DYP3*DXP1)*0.5
       PDLIB_TRIA(IE) = DBLTMP
+      IF (PDLIB_TRIA(IE) .lt. TINY(1.)) THEN
+        WRITE(*,*) PDLIB_IEN(:,IE)
+        WRITE(*,*) 
+        WRITE(*,*) 'AREA SMALLER ZERO IN PDLIB', IE, NE, PDLIB_TRIA(IE)
+        STOP
+      ENDIF
 
       PDLIB_CCON(I1) = PDLIB_CCON(I1) + 1
       PDLIB_CCON(I2) = PDLIB_CCON(I2) + 1

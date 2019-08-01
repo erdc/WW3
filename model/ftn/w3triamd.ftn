@@ -79,27 +79,25 @@
 !--------------------------------------------------------------------- 
 ! 
 !C
-        integer :: node_num
-        integer :: dim_num
-        integer :: triangle_order
-        integer :: triangle_num
-        integer :: bound_edge_num
-        integer :: bound_num
+!        integer :: node_num
+!        integer :: dim_num
+!        integer :: triangle_order
+!        integer :: triangle_num
+!        integer :: bound_edge_num
+!        integer :: bound_num
 !C        
-        logical,save, allocatable :: edge_boundary(:)
-        logical,save, allocatable :: node_boundary(:)
-        integer,save, allocatable :: edge_nums(:)
-        integer,save, allocatable :: boundary_node_index(:)
+!        logical,save, allocatable :: edge_boundary(:)
+!        logical,save, allocatable :: node_boundary(:)
+!        integer,save, allocatable :: edge_nums(:)
+!        integer,save, allocatable :: boundary_node_index(:)
 !C        
-        integer,save, allocatable :: triangle_node(:,:)
-        integer,save, allocatable :: edge(:,:)
-        integer,save, allocatable :: edge_index(:,:)
-        integer,save, allocatable :: iobp_aux(:)
+!        integer,save, allocatable :: triangle_node(:,:)
+!        integer,save, allocatable :: edge(:,:)
+!        integer,save, allocatable :: edge_index(:,:)
+!        integer,save, allocatable :: iobp_aux(:)
 
-        INTEGER, SAVE                      :: N_OUTSIDE_BOUNDARY
-        INTEGER, SAVE, ALLOCATABLE         :: OUTSIDE_BOUNDARY(:)
-        real (kind = 8), save, allocatable :: node_xy(:,:)
-        real (kind = 8), save, allocatable :: edge_angle(:,:)
+        INTEGER, SAVE               :: N_OUTSIDE_BOUNDARY
+        INTEGER, SAVE, ALLOCATABLE  :: OUTSIDE_BOUNDARY(:)
   
 CONTAINS
 !/ -------------------------------------------------------------------/
@@ -349,10 +347,12 @@ CONTAINS
 !
       CLOSE(NDS)
       END SUBROUTINE READMSH
+!/--------------------------------------------------------------------/
       SUBROUTINE READMSH_IOBP(NDS,FNAME) 
 !/ ------------------------------------------------------------------- 
 !/                  +-----------------------------------+
 !/                  | WAVEWATCH III           NOAA/NCEP |
+!/                  |           A. Roland               |
 !/                  |           F. Ardhuin              |
 !/                  |                        FORTRAN 90 |
 !/                  | Last update :          06-Jun-2018|
@@ -435,17 +435,15 @@ CONTAINS
 !/
 !/ local parameters 
 !/      
-      INTEGER                            :: i,j,k, NODES!, NELTS, ID, KID
-      !INTEGER                            :: ID1, ID2, KID1, ITMP(3)
-      !INTEGER                            :: I1, I2, I3
-      !INTEGER(KIND=4)                    :: Ind,eltype,ntag, INode
+      INTEGER                            :: i,j,k, NODES
+      LOGICAL                            :: lfile_exists
       CHARACTER                          :: COMSTR*1, SPACE*1 = ' ', CELS*64
-      !CHARACTER(LEN=50)                  :: CHTMP
       DOUBLE PRECISION, ALLOCATABLE      :: XYBTMP1(:,:)
-      REAL                               :: z
 !/DEBUGINIT     WRITE(740+IAPROC,*) 'Beginning of READMSH routine'
 !/DEBUGINIT     FLUSH(740+IAPROC)
 
+      INQUIRE(FILE=FNAME, EXIST=lfile_exists)
+      IF (.NOT. lfile_exists) RETURN
       OPEN(NDS,FILE = FNAME,STATUS='old')
       READ (NDS,'(A)') COMSTR
       IF (COMSTR.EQ.' ') COMSTR = '$'
@@ -459,8 +457,8 @@ CONTAINS
       ALLOCATE(XYBTMP1(NODES,3))
       DO I= 1, NODES
         READ(NDS,*) j, XYBTMP1(I,1), XYBTMP1(I,2), XYBTMP1(I,3)
-        END DO
-
+        IF (INT(XYBTMP1(I,3)) .EQ. 3) IOBP(I) = 3
+      END DO
 !
       CLOSE(NDS)
       END SUBROUTINE READMSH_IOBP
@@ -2689,6 +2687,7 @@ END SUBROUTINE
       REAL(KIND=8), PARAMETER :: THR    = TINY(1.)
       INTEGER                 :: I1, I2, I3
       INTEGER                 :: ITMP(NX), NEXTVERT(NX), PREVVERT(NX)
+      CHARACTER(60) :: FNAME
 !/S      INTEGER, SAVE           :: IENT = 0
 !/ ------------------------------------------------------------------- /                                     
 !
@@ -2707,6 +2706,9 @@ END SUBROUTINE
 !/DEBUGSETUGIOBP      FLUSH(740+IAPROC)
       ITMP = MAPSTA(1,:)
       CALL SET_IOBP(ITMP, IOBP) 
+!AR: what would be the right unit number? 
+      FNAME = 'meshbnd.msh'
+      CALL READMSH_IOBP(23456,FNAME) 
 !/DEBUGSETUGIOBP      WRITE(740+IAPROC,*) 'Calling SETUGIOBP, step 3'
 !/DEBUGSETUGIOBP      FLUSH(740+IAPROC)
 !

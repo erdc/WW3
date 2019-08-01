@@ -442,8 +442,8 @@
       INTEGER, INTENT(IN)     :: REFLED(6)
       REAL, INTENT(IN)        :: REFLEC(4), DELX, DELY, DELA,         &
                                  TRNX, TRNY, BERG, ICEDMAX
-      REAL, INTENT(INOUT)     :: WN1(NK), CG1(NK), &
-                                 SPEC(NSPEC), ALPHA(NK), USTAR,       &
+      REAL, INTENT(IN)        :: WN1(NK), CG1(NK)
+      REAL, INTENT(OUT)       :: SPEC(NSPEC), ALPHA(NK), USTAR,       &
                                  USTDIR, FPI, TAUOX, TAUOY,           &
                                  TAUWX, TAUWY, PHIAW, PHIOC, PHICE,   &
                                  CHARN, TWS, BEDFORM(3), PHIBBL,      &

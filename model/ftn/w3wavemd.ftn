@@ -1432,6 +1432,10 @@
 !/PDLIB!/DEBUGSRC      WRITE(740+IAPROC,*) '   sum(VDTOT)=', sum(VDTOT(:,JSEA))
 !/PDLIB!/DEBUGSRC      WRITE(740+IAPROC,*) '     SHAVETOT=', SHAVETOT(JSEA)
 !/PDLIB!/DEBUGSRC      FLUSH(740+IAPROC)
+!/PDLIB           IF (IOBP(ISEA) .EQ. 3) THEN 
+!/PDLIB                  VSTOT(:,JSEA) = MIN(0.,VSTOT(:,JSEA))
+!/PDLIB                  VDTOT(:,JSEA) = MAX(0.,VDTOT(:,JSEA))
+!/PDLIB                ENDIF
               ENDIF
             ELSE
               UST   (ISEA) = UNDEF
