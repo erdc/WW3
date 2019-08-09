@@ -1236,7 +1236,7 @@ END SUBROUTINE
          SI(:) = 0.D0
 !
          CCON(:) = 0     ! Number of connected Elements
-         DO IE = 1 , NTRI 
+         DO IE = 1, NTRI 
            I1 = TRIGP(IE,1)
            I2 = TRIGP(IE,2)
            I3 = TRIGP(IE,3)
@@ -1247,14 +1247,14 @@ END SUBROUTINE
            SI(I1) = SI(I1) + TRIA03
            SI(I2) = SI(I2) + TRIA03
            SI(I3) = SI(I3) + TRIA03
-           ENDDO
+         ENDDO
 
          CELLVERTEX(:,:,:) = 0 ! Stores for each node the Elementnumbers of the connected Elements
                                ! and the Position of the position of the Node in the Element Index
 
          WRITE(*,'("+TRACE......",A)') 'COMPUTE CELLVERTEX'
 
-         CHILF             = 0
+         CHILF = 0
 
          DO IE = 1, NTRI 
            DO J=1,3
@@ -1270,7 +1270,6 @@ END SUBROUTINE
 ! Second step in storage, the initial 3D array CELLVERTEX, is transformed in a 1D array
 ! the global index is J . From now, all the computation step based on these arrays must
 ! abide by the conservation of the 2 loop algorithm (points + connected triangles)
-! AR: I will change this now to pointers in order to omit fix loop structure for the LTS stuff ...
 !	   
          INDEX_CELL(1)=1
          J = 0
@@ -1329,7 +1328,7 @@ END SUBROUTINE
              END DO
            END DO
 
-!           WRITE(*,'("+TRACE......",A)') 'SET UP SPARSE MATRIX POINTER ... COUNT NONZERO ENTRY'
+!          WRITE(*,'("+TRACE......",A)') 'SET UP SPARSE MATRIX POINTER ... COUNT NONZERO ENTRY'
 
            J = 0
            K = 0
@@ -1365,7 +1364,7 @@ END SUBROUTINE
            IAA(1) = 1
            JAA    = 0
            DO IP = 1, NX ! Run through all rows 
-             TMP(:)=0
+             TMP = 0
              DO I = 1, CCON(IP)         ! Check how many entries there are ...
                J = J + 1                ! this is the same J index as in IE_CELL
                IP_J  = PTABLE(J,2)
@@ -1469,8 +1468,6 @@ END SUBROUTINE
 !
 ! 10. Source code :
 !
-
-
 !  2. Method :
 !
 !     Using barycentric coordinates. Each coefficient depends on the mass of its related point in the interpolation.
@@ -1914,7 +1911,7 @@ END SUBROUTINE
 !/PDLIB         VAR         = PARAM(MAPFS(1,NI_GL)) * FACT
 !/PDLIB         DVDXIE      = DOT_PRODUCT(VAR,DEDX)
 !/PDLIB         DVDYIE      = DOT_PRODUCT(VAR,DEDY)
-!/PDLIB         DIFFX(1,NI) = DIFFX(1,NI) + DVDXIE * LATMEAN ! AR: This must be correctly computer later ... 
+!/PDLIB         DIFFX(1,NI) = DIFFX(1,NI) + DVDXIE * LATMEAN
 !/PDLIB         DIFFY(1,NI) = DIFFY(1,NI) + DVDYIE
 !/PDLIB       END DO
 !/PDLIB       DIFFX(1,:) = DIFFX(1,:)/WEI_LOCAL
