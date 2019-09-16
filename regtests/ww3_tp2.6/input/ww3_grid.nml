@@ -33,8 +33,12 @@
 !     RUN%FLSOU            = F             ! source terms
 ! -------------------------------------------------------------------- !
 &RUN_NML
-  RUN%FLCX         =  T
-  RUN%FLCY         =  T
+  RUN%FLDRY            = F             ! dry run (I/O only, no calculation)
+  RUN%FLCX             = T             ! x-component of propagation
+  RUN%FLCY             = T             ! y-component of propagation
+  RUN%FLCTH            = T             ! direction shift
+  RUN%FLCK             = F             ! wavenumber shift
+  RUN%FLSOU            = T             ! source terms
 /
 
 ! -------------------------------------------------------------------- !
@@ -69,10 +73,10 @@
 !     TIMESTEPS%DTMIN      = 0.         ! minimum source term time step (s)
 ! -------------------------------------------------------------------- !
 &TIMESTEPS_NML
-  TIMESTEPS%DTMAX        =  1
-  TIMESTEPS%DTXY         =  1
-  TIMESTEPS%DTKTH        =  1
-  TIMESTEPS%DTMIN        =  1
+  TIMESTEPS%DTMAX        =  600
+  TIMESTEPS%DTXY         =  600
+  TIMESTEPS%DTKTH        =  600
+  TIMESTEPS%DTMIN        =  600
 /
 
 ! -------------------------------------------------------------------- !
@@ -240,7 +244,7 @@
 !     INBND_POINT(I)          = 0 0 F    ! included point
 ! -------------------------------------------------------------------- !
 &INBND_COUNT_NML
-  INBND_COUNT%N_POINT    =  2
+  INBND_COUNT%N_POINT    =  33 
 /
 
 &INBND_POINT_NML

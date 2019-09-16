@@ -79,27 +79,25 @@
 !--------------------------------------------------------------------- 
 ! 
 !C
-        integer :: node_num
-        integer :: dim_num
-        integer :: triangle_order
-        integer :: triangle_num
-        integer :: bound_edge_num
-        integer :: bound_num
+!        integer :: node_num
+!        integer :: dim_num
+!        integer :: triangle_order
+!        integer :: triangle_num
+!        integer :: bound_edge_num
+!        integer :: bound_num
 !C        
-        logical,save, allocatable :: edge_boundary(:)
-        logical,save, allocatable :: node_boundary(:)
-        integer,save, allocatable :: edge_nums(:)
-        integer,save, allocatable :: boundary_node_index(:)
+!        logical,save, allocatable :: edge_boundary(:)
+!        logical,save, allocatable :: node_boundary(:)
+!        integer,save, allocatable :: edge_nums(:)
+!        integer,save, allocatable :: boundary_node_index(:)
 !C        
-        integer,save, allocatable :: triangle_node(:,:)
-        integer,save, allocatable :: edge(:,:)
-        integer,save, allocatable :: edge_index(:,:)
-        integer,save, allocatable :: iobp_aux(:)
+!        integer,save, allocatable :: triangle_node(:,:)
+!        integer,save, allocatable :: edge(:,:)
+!        integer,save, allocatable :: edge_index(:,:)
+!        integer,save, allocatable :: iobp_aux(:)
 
-        INTEGER, SAVE                      :: N_OUTSIDE_BOUNDARY
-        INTEGER, SAVE, ALLOCATABLE         :: OUTSIDE_BOUNDARY(:)
-        real (kind = 8), save, allocatable :: node_xy(:,:)
-        real (kind = 8), save, allocatable :: edge_angle(:,:)
+        INTEGER, SAVE               :: N_OUTSIDE_BOUNDARY
+        INTEGER, SAVE, ALLOCATABLE  :: OUTSIDE_BOUNDARY(:)
   
 CONTAINS
 !/ -------------------------------------------------------------------/
@@ -349,6 +347,121 @@ CONTAINS
 !
       CLOSE(NDS)
       END SUBROUTINE READMSH
+!/--------------------------------------------------------------------/
+      SUBROUTINE READMSH_IOBP(NDS,FNAME) 
+!/ ------------------------------------------------------------------- 
+!/                  +-----------------------------------+
+!/                  | WAVEWATCH III           NOAA/NCEP |
+!/                  |           A. Roland               |
+!/                  |           F. Ardhuin              |
+!/                  |                        FORTRAN 90 |
+!/                  | Last update :          06-Jun-2018|
+!/                  +-----------------------------------+
+!/
+!/    15-Feb-2008 : Origination.                        ( version 3.13 )
+!/    25-Aug-2011 : Change of method for IOBPD          ( version 4.04 )
+!/    06-Jun-2018 : Add DEBUGINIT/PDLIB/DEBUGSTP/DEBUGSETIOBP   
+!/                                                      ( version 6.04 )
+!/
+!
+!  1. Purpose :
+!
+!      Reads triangle and unstructured grid information from GMSH files
+!      Calls the subroutines needed to compute grid connectivity
+!
+!  2. Method :
+!
+!     Look for namelist with name NAME in unit NDS and read if found.
+!
+!  3. Parameters :
+!
+!     Parameter list
+!     ----------------------------------------------------------------
+!       NDS     Int.   I   Data set number used for search.
+!       NAME    C*4    I   Name of namelist.
+!       STATUS  C*20   O   Status at end of routine,
+!                            '(default values)  ' if no namelist found.
+!                            '(user def. values)' if namelist read.
+!     ----------------------------------------------------------------
+!
+!  4. Subroutines used :
+!
+!      Name               Type  Module   Description
+!     ------------------------------------------------------------------------------------
+!      NEXTLN             Subr.
+!      COUNT              Subr. Internal Count connection.
+!      SPATIAL_GRID       Subr.   Id.    Calculate surfaces.
+!      NVECTRI            Subr.   Id.    Define cell normals and angles and edge length
+!      COORDMAX           Subr.   Id.    Calculate  useful grid elements
+!      AREA_SI            Subr.   Id.    Define Connections
+!     ----------------------------------------------------------------
+!
+!
+!
+!  5. Called by :
+!      Name      Type  Module   Description
+!     ----------------------------------------------------------------
+!      W3GRID    Prog.          Model configuration program
+!     ----------------------------------------------------------------
+!
+!  6. Error messages :
+!
+!  7. Remarks :
+!     The only point index which is needed is IX and NX stands for the total number of grid point.
+!     IY and NY are not needed anymore, they are set to 1 in the unstructured case
+!     Some noticeable arrays are:
+!                     XYB    : give the 2D coordinates of all grid points
+!                     TRIGP  : give the vertices of each triangle
+!     GMSH file gives too much information that is not necessarily required so data processing is needed (data sort and nesting).
+!  8. Structure :
+!
+!  9. Switches :
+!
+! 10. Source code :
+!
+!/ ------------------------------------------------------------------- /
+      USE W3ODATMD, ONLY: NDSE, NDST, NDSO
+      USE W3GDATMD
+      USE W3SERVMD, ONLY: ITRACE, NEXTLN, EXTCDE
+      USE CONSTANTS, only: LPDLIB
+      USE W3ODATMD, ONLY: IAPROC
+!
+      IMPLICIT NONE
+!/
+!/ Parameter list
+!/
+      INTEGER, INTENT(IN)                :: NDS
+      CHARACTER(60), INTENT(IN)          :: FNAME
+!/
+!/ local parameters 
+!/      
+      INTEGER                            :: i,j,k, NODES
+      LOGICAL                            :: lfile_exists
+      CHARACTER                          :: COMSTR*1, SPACE*1 = ' ', CELS*64
+      DOUBLE PRECISION, ALLOCATABLE      :: XYBTMP1(:,:)
+!/DEBUGINIT     WRITE(740+IAPROC,*) 'Beginning of READMSH routine'
+!/DEBUGINIT     FLUSH(740+IAPROC)
+
+      INQUIRE(FILE=FNAME, EXIST=lfile_exists)
+      IF (.NOT. lfile_exists) RETURN
+      OPEN(NDS,FILE = FNAME,STATUS='old')
+      READ (NDS,'(A)') COMSTR
+      IF (COMSTR.EQ.' ') COMSTR = '$'
+      CALL NEXTLN(COMSTR, NDS, NDSE)
+      READ(NDS,*) i,j,k
+      CALL NEXTLN(COMSTR, NDS, NDSE)
+!
+! read number of nodes and nodes from Gmsh files
+!
+      READ(NDS,*) NODES
+      ALLOCATE(XYBTMP1(NODES,3))
+      DO I= 1, NODES
+        READ(NDS,*) j, XYBTMP1(I,1), XYBTMP1(I,2), XYBTMP1(I,3)
+        IF (INT(XYBTMP1(I,3)) .EQ. 3) IOBP(I) = 3
+      END DO
+!
+      CLOSE(NDS)
+      END SUBROUTINE READMSH_IOBP
 !/--------------------------------------------------------------------/
       SUBROUTINE GET_BOUNDARY_STATUS(STATUS)
 !/
@@ -2577,6 +2690,7 @@ END SUBROUTINE
       REAL(KIND=8), PARAMETER :: THR    = TINY(1.)
       INTEGER                 :: I1, I2, I3
       INTEGER                 :: ITMP(NX), NEXTVERT(NX), PREVVERT(NX)
+      CHARACTER(60) :: FNAME
 !/S      INTEGER, SAVE           :: IENT = 0
 !/ ------------------------------------------------------------------- /                                     
 !
@@ -2595,6 +2709,9 @@ END SUBROUTINE
 !/DEBUGSETUGIOBP      FLUSH(740+IAPROC)
       ITMP = MAPSTA(1,:)
       CALL SET_IOBP(ITMP, IOBP) 
+!AR: what would be the right unit number? 
+      FNAME = 'meshbnd.msh'
+      CALL READMSH_IOBP(23456,FNAME) 
 !/DEBUGSETUGIOBP      WRITE(740+IAPROC,*) 'Calling SETUGIOBP, step 3'
 !/DEBUGSETUGIOBP      FLUSH(740+IAPROC)
 !

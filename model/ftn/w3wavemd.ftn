@@ -1432,6 +1432,10 @@
 !/PDLIB!/DEBUGSRC      WRITE(740+IAPROC,*) '   sum(VDTOT)=', sum(VDTOT(:,JSEA))
 !/PDLIB!/DEBUGSRC      WRITE(740+IAPROC,*) '     SHAVETOT=', SHAVETOT(JSEA)
 !/PDLIB!/DEBUGSRC      FLUSH(740+IAPROC)
+!/PDLIB           IF (IOBP(ISEA) .EQ. 3) THEN 
+!/PDLIB                  VSTOT(:,JSEA) = MIN(0.,VSTOT(:,JSEA))
+!/PDLIB                  VDTOT(:,JSEA) = MAX(0.,VDTOT(:,JSEA))
+!/PDLIB                ENDIF
               ENDIF
             ELSE
               UST   (ISEA) = UNDEF
@@ -1992,7 +1996,7 @@
 
 !/DEBUGRUN          IF (JSEA == DEBUG_NODE) WRITE(*,*) 'W3WAVE TEST', ISEA, JSEA, SUM(VA(:,JSEA))
 
-                IF ( MAPSTA(IY,IX) .EQ. 1 .AND. FLAGST(ISEA)) THEN
+                IF (MAPSTA(IY,IX) .EQ. 1 .AND. FLAGST(ISEA)) THEN
                      TMP1   = WHITECAP(JSEA,1:4)
                      TMP2   = BEDFORMS(JSEA,1:3)
                      TMP3   = TAUBBL(JSEA,1:2)

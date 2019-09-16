@@ -2736,6 +2736,7 @@
 ! -------------------------------------------------------------------- /
 ! 2.  Allocate arrays
 !
+!AR: Different for pdlib and nonpdlib ...
       ALLOCATE ( GRIDS(IMOD)%TRIGP(MTRI,3),                         &
                  GRIDS(IMOD)%XYB(MX,3),                             &
                  GRIDS(IMOD)%SI(MX),                                &
