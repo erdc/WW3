@@ -1,0 +1,210 @@
+#include "w3macros.h"
+!/ ------------------------------------------------------------------- /
+      MODULE W3SVEG1MD
+!/
+!/                  +-----------------------------------+
+!/                  | WAVEWATCH III           NOAA/NCEP |
+!/                  |           A. Roland               |
+!/                  |           A. Abdolali             |
+!/                  |           T. Hesser               |
+!/                  |           J. Smith                |
+!/                  |                        FORTRAN 90 |
+!/                  | Last update :         16-Sep-2019 |
+!/                  +-----------------------------------+
+!/
+!/    16-Sep-2019 : Initial Version                  ( version 6.XX )
+!/
+!/    Copyright 2009 National Weather Service (NWS),
+!/       National Oceanic and Atmospheric Administration.  All rights
+!/       reserved.  WAVEWATCH III is a trademark of the NWS. 
+!/       No unauthorized use without permission.
+!/
+!  1. Purpose :
+!
+!     Vegetation dissipation following Mendez (2004)
+!
+!  2. Variables and types :
+!
+!  3. Subroutines and functions :
+!
+!      Name      Type  Scope    Description
+!     ----------------------------------------------------------------
+!      W3SDB1    Subr. Public   Mendez (2004) bulk veg. dissipation 
+!     ----------------------------------------------------------------
+!
+!  4. Subroutines and functions used :
+!
+!     See subroutine documentation.
+!
+!  5. Remarks :
+!
+!  6. Switches :
+!
+!     See subroutine documentation.
+!
+!  7. Source code :
+!/
+!/ ------------------------------------------------------------------- /
+!/
+      PUBLIC
+!/
+      CONTAINS
+!/ ------------------------------------------------------------------- /
+      SUBROUTINE W3SVEG1 (IX, A, DEPTH, EMEAN, FMEAN, WNMEAN, CG, LBREAK, S, D )
+!/
+!/                  +-----------------------------------+
+!/                  | WAVEWATCH III           NOAA/NCEP |
+!/                  |                        FORTRAN 90 |
+!/                  |           J. H. Alves             |
+!/                  |           H. L. Tolman            |
+!/                  !           A. Roland               | 
+!/                  | Last update :         08-Jun-2018 |
+!/                  +-----------------------------------+
+!/
+!/    19-Sep-2019 : Origination of module.              ( version 3.11 )
+!/
+!  1. Purpose :
+!
+!     Compute bulk vegetation dissipation following Mendez (2004)
+!
+!  2. Method : 
+! 
+!  3. Parameters :
+!
+!     Parameter list
+!     ----------------------------------------------------------------
+!       A       R.A.  I   Action density spectrum (1-D)
+!       EMEAN   Real  I   Mean wave energy.
+!       FMEAN   Real  I   Mean wave frequency.
+!       WNMEAN  Real  I   Mean wave number.
+!       DEPTH   Real  I   Mean water depth.
+!       S       R.A.  O   Source term (1-D version).
+!       D       R.A.  O   Diagonal term of derivative (1-D version).
+!     ----------------------------------------------------------------
+!
+!  4. Subroutines used :
+!
+!       STRACE   Subroutine tracing (!/S switch).
+!
+!  5. Called by :
+!
+!       W3SRCE   Source term integration.
+!       W3EXPO   Point output post-processor.
+!       GXEXPO   GrADS point output post-processor.
+!
+!  6. Error messages :
+!
+!       None.
+!
+!  7. Remarks :
+!
+!  8. Structure :
+!
+!     See source code.
+!
+!  9. Switches :
+!
+!     !/S   Enable subroutine tracing.
+!     !/Tn  Enable test output.
+!
+! 10. Source code :
+!
+!/ ------------------------------------------------------------------- /
+!/
+      USE CONSTANTS
+      USE W3GDATMD, ONLY: NK, NTH, NSPEC, SDBC1, SDBC2, FDONLY, FSSOURCE, DDEN
+      USE W3ODATMD, ONLY: NDST
+      USE W3GDATMD, ONLY: SIG
+      USE W3ODATMD, only : IAPROC
+!/S      USE W3SERVMD, ONLY: STRACE
+!/T0      USE W3ARRYMD, ONLY: PRT2DS
+!/T1      USE W3ARRYMD, ONLY: OUTMAT
+!/
+      IMPLICIT NONE
+!/
+!/ ------------------------------------------------------------------- /
+!/ Parameter list
+!/
+      INTEGER, INTENT(IN)     :: IX ! Local grid number
+      REAL, INTENT(IN)        :: A(NSPEC)
+      REAL, INTENT(INOUT)     :: EMEAN, FMEAN, WNMEAN, DEPTH
+      REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC)
+      REAL, INTENT(IN)        :: CG(NK)
+      LOGICAL, INTENT(OUT)    :: LBREAK
+      INTEGER                 :: ITH, IK, IWB
+      REAL, PARAMETER         :: KDMAX = 20.
+!/
+!/ ------------------------------------------------------------------- /
+!/ Local parameters
+!/
+      INTEGER                 :: IS
+!/S      INTEGER, SAVE           :: IENT = 0
+!/T0     INTEGER                 :: IK, ITH
+      REAL                    :: ETOT, FMEAN2, TMP1, TMP2
+      REAL                    :: VCD   = 1.! drag coefficient 
+      REAL                    :: VDM   = 0.04 ! diam of veg. 
+      REAL                    :: VNV   = 10 ! veg. density 
+      REAL                    :: VLTH  = 2. ! vegetation height  
+      REAL                    :: VALPHAP   
+      REAL                    :: VALPHAD   
+      REAL                    :: VALPHADH  
+!/T0     REAL                   :: DOUT(NK,NTH)
+!/
+!/ ------------------------------------------------------------------- /
+!/
+!/S      CALL STRACE (IENT, 'W3SDB1')
+!
+! 0.  Initialzations ------------------------------------------------- /
+!     Never touch this 4 lines below ... otherwise my exceptionhandling will not work.
+
+      THR = DBLE(1.E-15)
+      IF (EMEAN .LT. THR) RETURN
+!       
+      IF (FMEAN .GT. THR) THEN ! Actually this cannot happen if the above is true we make it now double sure ...
+        KSBAR = KBAR/FMEAN ! Check units with 
+      ELSE
+        RETURN
+      ENDIF
+
+      S = 0.
+      D = 0.
+!
+!/T      WRITE (NDST,9000) SDBC1, SDBC2, FDONLY
+!
+      VALPHAP   = VDM*VNV*VCD/TWO
+      VALPHAD   = VLTH/DEPTH
+      VALPHADH  = VLTH
+!
+      TMP1 = SINH(MIN(KDMAX,WNMEAN*VALPHADH))**3+3*SINH(MIN(KDMAX,WNMEAN*VALPHADH))
+      TMP2 = 3*COSH(MIN(KDMAX,WNMEAN*DEPTH))**3
+      CVEG = - SQRT(TWO/PI)*G9**2*2*VALPHAP*KSBAR**3*TMP1/TMP2*SQRT(EMEAN)
+      D    = - CVEG
+      S    = D * A 
+!
+! ... Test output of arrays
+!
+!/T0      DO IK=1, NK
+!/T0        DO ITH=1, NTH
+!/T0          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
+!/T0          END DO
+!/T0        END DO
+!
+!/T0      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG, '  ', 1.,    &
+!/T0                         0.0, 0.001, 'Diag Sdb', ' ', 'NONAME')
+!     
+!/T1      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sdb')
+!  
+      RETURN
+!
+! Formats   
+!
+!/T 9000 FORMAT (' TEST W3SDB1 : PARAMETERS :',2F7.3,L4)
+!/
+!/ End of W3SVEG1 ----------------------------------------------------- /
+!/
+      END SUBROUTINE W3SVEG1
+!/
+!/
+!/ End of module W3SVEG1 -------------------------------------------- /
+!/
+      END MODULE W3SVEG1MD
