@@ -134,7 +134,7 @@
       LOGICAL, INTENT(OUT)    :: LBREAK
       INTEGER                 :: ITH, IK, IWB
       REAL, PARAMETER         :: KDMAX = 20.
-      REAL, PARAMETER         :: KBAR = 5.0 ! Not right, just putting a value to compile code TJH
+      REAL                    :: KBAR ! Not right, just putting a value to compile code TJH
       REAL(8), PARAMETER :: TWO  = 2.0D0
 !/
 !/ ------------------------------------------------------------------- /
@@ -165,6 +165,7 @@
       IF (EMEAN .LT. THR) RETURN
 !       
       IF (FMEAN .GT. THR) THEN ! Actually this cannot happen if the above is true we make it now double sure ...
+        KBAR = WNMEAN*GRAV  ! Aron is this correct  KBAR = kmean*g
         KSBAR = KBAR/FMEAN ! Check units with 
       ELSE
         RETURN
@@ -175,13 +176,20 @@
 !
 !/T      WRITE (NDST,9000) SDBC1, SDBC2, FDONLY
 !
-      VALPHAP   = VDM*VNV*VCD/TWO
-      VALPHAD   = VLTH/DEPTH
-      VALPHADH  = VLTH
+      !VALPHAP   = VDM*VNV*VCD/TWO
+       VALPHAP   = VDM*VNV*VCD
+      IF (DEPTH .LT. VLTH) THEN
+        VALPHAD = VLTH/DEPTH
+      ELSE
+        VALPHAD = 1.0
+      ENDIF 
+!      VALPHAD   = VLTH/DEPTH
+!      VALPHADH  = VLTH
 !
-      TMP1 = SINH(MIN(KDMAX,WNMEAN*VALPHADH))**3+3*SINH(MIN(KDMAX,WNMEAN*VALPHADH))
-      TMP2 = 3*COSH(MIN(KDMAX,WNMEAN*DEPTH))**3
-      CVEG = - SQRT(TWO/PI)*CG**2*2*VALPHAP*KSBAR**3*TMP1/TMP2*SQRT(EMEAN)    ! Replaced G9 with CG, is this correct? TJH
+!  alpha or VLTH is veg length/depth for submerged veg and  equal to 1 for emergent
+      TMP1 = SINH(MIN(KDMAX,WNMEAN*VALPHAD*DEPTH))**3+3*SINH(MIN(KDMAX,WNMEAN*VALPHAD*DEPTH))  !Recoded to account ffor both submerged and emergent cases TJH
+      TMP2 = 3*WNMEAN*COSH(MIN(KDMAX,WNMEAN*DEPTH))**3  !Are we missing a k in this 3*k*cosh(kh)^3
+      CVEG = - SQRT(TWO/PI)*GRAV**2*VALPHAP*KSBAR**3*TMP1/TMP2*SQRT(EMEAN)    ! Replaced G9 with CG, is this correct? TJH  I can't find any variables that are supposed to be squared in this equation.  
       D    = - CVEG
       S    = D * A 
 !
