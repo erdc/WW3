@@ -130,6 +130,7 @@
       REAL, INTENT(INOUT)     :: EMEAN, FMEAN, WNMEAN, DEPTH
       REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC)
       REAL, INTENT(IN)        :: CG(NK)
+      REAL                    :: CVEG(NSPEC)
       LOGICAL, INTENT(OUT)    :: LBREAK
       INTEGER                 :: ITH, IK, IWB
       REAL, PARAMETER         :: KDMAX = 20.
@@ -147,7 +148,8 @@
       REAL                    :: VLTH  = 2. ! vegetation height  
       REAL                    :: VALPHAP   
       REAL                    :: VALPHAD   
-      REAL                    :: VALPHADH  
+      REAL                    :: VALPHADH 
+      REAL                    :: THR, KSBAR  
 !/T0     REAL                   :: DOUT(NK,NTH)
 !/
 !/ ------------------------------------------------------------------- /
@@ -171,7 +173,7 @@
 !
 !/T      WRITE (NDST,9000) SDBC1, SDBC2, FDONLY
 !
-      VALPHAP   = VDM*VNV*VCD/TWO
+      VALPHAP   = VDM*VNV*VCD/2.0 !TWO
       VALPHAD   = VLTH/DEPTH
       VALPHADH  = VLTH
 !

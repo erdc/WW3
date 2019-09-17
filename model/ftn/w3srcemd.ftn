@@ -418,6 +418,7 @@
 !/REF1     USE W3REF1MD
 !/BSX      USE W3SBSXMD
 !/IG1      USE W3GDATMD, ONLY : IGPARS
+!/VEG1     USE W3SVEG1MD
 !/XXX      USE W3SXXXMD
 !/S      USE W3SERVMD, ONLY: STRACE
 !/NNT      USE W3SERVMD, ONLY: EXTCDE
@@ -491,6 +492,7 @@
                                  VSDS(NSPEC), VDDS(NSPEC),            &
 !/ST6                                 VSWL(NSPEC), VDWL(NSPEC),            &
                                  VSBT(NSPEC), VDBT(NSPEC),            &
+                                 VSVG(NSPEC), VDVG(NSPEC),            &
 !/IC1                                 VSIC(NSPEC), VDIC(NSPEC),            &
 !/IC2                                 VSIC(NSPEC), VDIC(NSPEC),            &
 !/IC3                                 VSIC(NSPEC), VDIC(NSPEC),            &
@@ -562,6 +564,8 @@
 !/ST0      VDDS = 0.
       VSBT = 0.
       VDBT = 0.
+      VSVG = 0.
+      VDVG = 0.
 !/DB1      VSDB = 0.
 !/DB1      VDDB = 0.
 !/IC1      VSIC = 0.
@@ -856,6 +860,8 @@
 !/BS1        CALL W3SBS1 ( SPEC, CG1, WN1, DEPTH, CX, CY,                &
 !/BS1                           TAUSCX, TAUSCY, VSBS, VDBS )
 !/BSX        CALL W3SBSX
+!/VEG1       CALL W3SVEG1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, CG1,       &
+!/VEG1                                                 LBREAK, VSVG  VDVG )
 !/PDLIB      ENDIF
 !
 ! 2.e Unresolved Obstacles Source Term
