@@ -861,7 +861,7 @@
 !/BS1                           TAUSCX, TAUSCY, VSBS, VDBS )
 !/BSX        CALL W3SBSX
 !/VEG1       CALL W3SVEG1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, CG1,       &
-!/VEG1                                                 LBREAK, VSVG  VDVG )
+!/VEG1                                                 LBREAK, VSVG,  VDVG )
 !/PDLIB      ENDIF
 !
 ! 2.e Unresolved Obstacles Source Term
@@ -946,7 +946,7 @@
         VD = 0
         DO IS=IS1, NSPECH
           VS(IS) = VSLN(IS) + VSIN(IS) + VSNL(IS)  &
-                 + VSDS(IS) + VSBT(IS) 
+                 + VSDS(IS) + VSBT(IS) + VSVG(IS)
 !/ST6          VS(IS) = VS(IS) + VSWL(IS)
 !/TR1          VS(IS) = VS(IS) + VSTR(IS)
 !/TRX          VS(IS) = VS(IS) + VSTR(IS)
@@ -955,7 +955,7 @@
 !/XXX          VS(IS) = VS(IS) + VSXX(IS)
 !/UOST         VS(IS) = VS(IS) + VSUO(IS)
           VD(IS) =  VDIN(IS) + VDNL(IS)  &
-                 + VDDS(IS) + VDBT(IS) 
+                 + VDDS(IS) + VDBT(IS) + VDVG(IS)
 !/ST6          VD(IS) = VD(IS) + VDWL(IS)
 !/TR1          VD(IS) = VD(IS) + VDTR(IS)
 !/TRX          VD(IS) = VD(IS) + VDTR(IS)
