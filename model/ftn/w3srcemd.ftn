@@ -847,6 +847,11 @@
 !/ST6           CALL W3SWL6 ( SPEC, CG1, WN1, VSWL, VDWL )
 !/ST6        END IF
 !
+!  Vegetation 
+!/PDLIB    IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
+!/VEG1       CALL W3SVEG1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG ) 
+!/PDLIB    ENDIF
+!
 ! 2.d Bottom interactions.
 !
 !/PDLIB    IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
@@ -868,11 +873,6 @@
 !/UOST        CALL UOST_SRCTRMCOMPUTE(IX, IY, SPEC, CG1, DT,            &
 !/UOST                                       U10ABS, U10DIR, VSUO, VDUO)
 !
-! 2.f Vegetation 
-!/PDLIB    IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
-!/VEG1       CALL W3SVEG1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG ) 
-!/PDLIB    ENDIF
-      
 ! 2.f Additional sources.
 !
 !/XXX        CALL W3SXXX
