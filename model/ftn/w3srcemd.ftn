@@ -860,8 +860,6 @@
 !/BS1        CALL W3SBS1 ( SPEC, CG1, WN1, DEPTH, CX, CY,                &
 !/BS1                           TAUSCX, TAUSCY, VSBS, VDBS )
 !/BSX        CALL W3SBSX
-!/VEG1       CALL W3SVEG1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, CG1,       &
-!/VEG1                                                 LBREAK, VSVG,  VDVG )
 !/PDLIB      ENDIF
 !
 ! 2.e Unresolved Obstacles Source Term
@@ -870,6 +868,12 @@
 !/UOST        CALL UOST_SRCTRMCOMPUTE(IX, IY, SPEC, CG1, DT,            &
 !/UOST                                       U10ABS, U10DIR, VSUO, VDUO)
 !
+! 2.f Vegetation 
+!/PDLIB    IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
+!/VEG1       CALL W3SVEG1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, CG1,       &
+!/VEG1                                                 LBREAK, VSVG,  VDVG ) 
+!/PDLIB    ENDIF
+      
 ! 2.f Additional sources.
 !
 !/XXX        CALL W3SXXX
