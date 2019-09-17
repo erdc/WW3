@@ -144,10 +144,10 @@
 !/S      INTEGER, SAVE           :: IENT = 0
 !/T0     INTEGER                 :: IK, ITH
       REAL                    :: ETOT, FMEAN2, TMP1, TMP2
-      REAL                    :: VCD   = 1.! drag coefficient 
-      REAL                    :: VDM   = 0.04 ! diam of veg. 
-      REAL                    :: VNV   = 10 ! veg. density 
-      REAL                    :: VLTH  = 2. ! vegetation height  
+      REAL                    :: VCD   = 0.9559! drag coefficient 
+      REAL                    :: VDM   = 0.0064 ! diam of veg. 
+      REAL                    :: VNV   = 200 ! veg. density 
+      REAL                    :: VLTH  = 0.415 ! vegetation height  
       REAL                    :: VALPHAP   
       REAL                    :: VALPHAD   
       REAL                    :: VALPHADH 
