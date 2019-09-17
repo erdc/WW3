@@ -50,7 +50,7 @@
 !/
       CONTAINS
 !/ ------------------------------------------------------------------- /
-      SUBROUTINE W3SVEG1 (IX, A, DEPTH, EMEAN, FMEAN, WNMEAN, CG, LBREAK, S, D )
+      SUBROUTINE W3SVEG1 (IX, A, DEPTH, EMEAN, FMEAN, WNMEAN, S, D )
 !/
 !/                  +-----------------------------------+
 !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -129,9 +129,9 @@
       REAL, INTENT(IN)        :: A(NSPEC)
       REAL, INTENT(INOUT)     :: EMEAN, FMEAN, WNMEAN, DEPTH
       REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC)
-      REAL, INTENT(IN)        :: CG(NK)
+!      REAL, INTENT(IN)        :: CG(NK)   We don't use CG in this formulation TJH
       REAL                    :: CVEG(NSPEC)
-      LOGICAL, INTENT(OUT)    :: LBREAK
+!      LOGICAL, INTENT(OUT)    :: LBREAK   We are not using LBREAK at this time TJH
       INTEGER                 :: ITH, IK, IWB
       REAL, PARAMETER         :: KDMAX = 20.
       REAL                    :: KBAR ! Not right, just putting a value to compile code TJH
@@ -179,9 +179,9 @@
       !VALPHAP   = VDM*VNV*VCD/TWO
        VALPHAP   = VDM*VNV*VCD
       IF (DEPTH .LT. VLTH) THEN
-        VALPHAD = VLTH/DEPTH
+        VALPHAD = VLTH/DEPTH   ! Submerged Case
       ELSE
-        VALPHAD = 1.0
+        VALPHAD = 1.0     ! Emergent case
       ENDIF 
 !      VALPHAD   = VLTH/DEPTH
 !      VALPHADH  = VLTH
@@ -189,7 +189,7 @@
 !  alpha or VLTH is veg length/depth for submerged veg and  equal to 1 for emergent
       TMP1 = SINH(MIN(KDMAX,WNMEAN*VALPHAD*DEPTH))**3+3*SINH(MIN(KDMAX,WNMEAN*VALPHAD*DEPTH))  !Recoded to account ffor both submerged and emergent cases TJH
       TMP2 = 3*WNMEAN*COSH(MIN(KDMAX,WNMEAN*DEPTH))**3  !Are we missing a k in this 3*k*cosh(kh)^3
-      CVEG = - SQRT(TWO/PI)*GRAV**2*VALPHAP*KSBAR**3*TMP1/TMP2*SQRT(EMEAN)    ! Replaced G9 with CG, is this correct? TJH  I can't find any variables that are supposed to be squared in this equation.  
+      CVEG = - SQRT(TWO/PI)*GRAV**2*VALPHAP*KSBAR**3*TMP1/TMP2*SQRT(EMEAN)
       D    = - CVEG
       S    = D * A 
 !

@@ -870,8 +870,7 @@
 !
 ! 2.f Vegetation 
 !/PDLIB    IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
-!/VEG1       CALL W3SVEG1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, CG1,       &
-!/VEG1                                                 LBREAK, VSVG,  VDVG ) 
+!/VEG1       CALL W3SVEG1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG ) 
 !/PDLIB    ENDIF
       
 ! 2.f Additional sources.
