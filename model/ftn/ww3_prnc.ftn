@@ -263,13 +263,13 @@
       DOUBLE PRECISION        :: REFJULDAY, CURJULDAY, STARTJULDAY, STPJULDAY
 !
       CHARACTER*1024          :: STRFIELDSNAME
-      CHARACTER*100           :: FIELDSNAME(4)
+      CHARACTER*100           :: FIELDSNAME(5)
       CHARACTER*1024          :: STRDIMSNAME
       CHARACTER*100           :: DIMSNAME(2)
       CHARACTER               :: COMSTR*1, IDFLD*3, IDTYPE*2,         &
                                  IDTIME*23, FROMLL*4, FORMLL*16,      &
                                  NAMELL*80, NAMEF*80, IDTIME2*23
-      CHARACTER*14            :: IDSTR1(-7:5)
+      CHARACTER*14            :: IDSTR1(-7:6)
       CHARACTER*15            :: IDSTR3(3)
       CHARACTER*32            :: FORMT(2), FORMF(2)
       CHARACTER*20            :: IDSTR2(6)
@@ -323,7 +323,7 @@
                     'mud thickness ', 'mud viscosity ' ,              &
                     'ice conc.     ' , 'water levels ' ,              &
                     'winds         ' , 'currents     ' ,              &
-                    'data          ' /
+                    'data          ' , 'vegetation   '/
       DATA IDSTR2 / 'pre-processed file  ' , 'long.-lat. grid     ' , &
                     'grid from file (1)  ' , 'grid from file (2)  ' , &
                     'data (assimilation) ' , 'pre-pro. file + tide'  /
@@ -480,6 +480,10 @@
            IFLD = 5
            ITYPE = 5
            NFIELDS = 1
+         ELSE IF (NML_FORCING%FIELD%VEGETATION) THEN
+           IDFLD = 'VEG'
+           IFLD = 6
+           NFIELDS = 4
          ELSE
             GOTO 810
          END IF ! NML_FORCING
@@ -576,6 +580,8 @@
             IFLD    = 4
           ELSE IF ( IDFLD.EQ.'DAT' ) THEN
             IFLD    = 5
+          ELSE IF ( IDFLD.EQ.'VEG' ) THEN
+            IFLD    = 6
           ELSE
             WRITE (NDSE,1030) IDFLD
             CALL EXTCDE ( 30 )
@@ -618,7 +624,7 @@
         DO I=1,2
           IF (LEN_TRIM(DIMSNAME(I)).NE.0) NIDIMS=NIDIMS+1
         END DO
-!
+
         CALL NEXTLN ( COMSTR , NDSI , NDSE )
         READ (NDSI,'(A)',END=801,ERR=802,IOSTAT=IERR) STRFIELDSNAME
 !
@@ -728,7 +734,6 @@
           CALL EXTCDE ( 27 )
         END IF
       END DO
-
       ! instanciates generic variables dimensions
       NXI=0
       NYI=0 
@@ -752,7 +757,6 @@
       ELSE
         FACTOR = 1.E-3
       END IF
-
       ! Get longitude and latitude
       IF (ITYPE.NE.1.AND.ITYPE.NE.6) THEN
         ALLOCATE (ALA(NXI,NYI))
@@ -806,7 +810,6 @@
           YNI=ALA(1,NYI)
         END IF
       END IF
-
 
 
 !
