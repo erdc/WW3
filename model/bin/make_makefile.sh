@@ -96,7 +96,7 @@
   for type in mach nco grib mcp c90 nec netcdf scrip scripnc \
               shared mpp mpiexp thread GSE prop \
               stress s_ln source stab s_nl snls s_bot s_db miche s_tr s_bs \
-              dstress s_ice s_is reflection s_veg s_xx \
+              dstress s_ice s_is s_veg reflection s_xx \
               wind windx wcor rwind curr currx mgwind mgprop mggse \
               subsec tdyn dss0 pdif tide refrx ig rotag arctic nnt mprf \
               cou oasis agcm ogcm igcm trknc setup pdlib memck uost
@@ -231,14 +231,14 @@
       s_is  ) TY='one'
                ID='ice scattering term'
                OK='IS0 IS1 IS2' ;;
+#sort:s_veg:
+      s_veg  ) TY='one'
+               ID='vegetation dissipation'
+               OK='VEG0 VEG1' ;;
 #sort:reflection:
   reflection ) TY='one'
                ID='wave reflections'
                OK='REF0 REF1' ;;
-#sort:vegetation:
-      s_veg  ) TY='one'
-               ID='vegetation dissipation'
-               OK='VEG0 VEG1' ;;
 #sort:s_xx:
       s_xx   ) TY='one'
                ID='arbitrary source'

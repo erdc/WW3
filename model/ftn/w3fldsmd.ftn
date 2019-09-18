@@ -255,7 +255,7 @@
            IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
            IDFLD.NE.'ICE' .AND. IDFLD.NE.'DT0' .AND.                  &
            IDFLD.NE.'DT1' .AND. IDFLD.NE.'DT2' .AND.                  &
-           IDFLD.NE.'ISI' )    GOTO 802
+           IDFLD.NE.'ISI' .AND. IDFLD.NE.'VEG')    GOTO 802
 !
       IF ( PRESENT(FEXT) ) THEN
           TEMPXT = FEXT
@@ -316,6 +316,9 @@
         ELSE IF ( IDFLD.EQ.'IC5' ) THEN
           FNAME = 'ice5.' // TEMPXT(:I)
           I     = I + 5
+        ELSE IF ( IDFLD.EQ.'VEG' ) THEN
+          FNAME = 'veg.' // TEMPXT(:I)
+          I     = I + 9
         END IF
 !
       WRITE  = INXOUT .EQ. 'WRITE'
@@ -1071,7 +1074,8 @@
            IDFLD.NE.'MTH' .AND. IDFLD.NE.'MVS' .AND.                  &
            IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
            IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
-           IDFLD.NE.'ICE' .AND. IDFLD.NE.'ISI'  )    GOTO 802
+           IDFLD.NE.'ICE' .AND. IDFLD.NE.'ISI' .AND.                  &
+           IDFLD.NE.'VEG' )    GOTO 802
 !
 ! Set internal variables --------------------------------------------- *
 !
