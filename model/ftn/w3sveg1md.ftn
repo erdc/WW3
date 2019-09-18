@@ -189,7 +189,7 @@
 !  alpha or VLTH is veg length/depth for submerged veg and  equal to 1 for emergent
       TMP1 = SINH(MIN(KDMAX,WNMEAN*VALPHAD*DEPTH))**3+3*SINH(MIN(KDMAX,WNMEAN*VALPHAD*DEPTH))  !Recoded to account ffor both submerged and emergent cases TJH
       TMP2 = 3*WNMEAN*COSH(MIN(KDMAX,WNMEAN*DEPTH))**3  !Are we missing a k in this 3*k*cosh(kh)^3
-      CVEG = - SQRT(TWO/PI)*GRAV**2*VALPHAP*KSBAR**3*TMP1/TMP2*SQRT(EMEAN)
+      CVEG = SQRT(TWO/PI)*GRAV**2*VALPHAP*KSBAR**3*TMP1/TMP2*SQRT(EMEAN)
       D    = - CVEG
       S    = D * A 
 !
