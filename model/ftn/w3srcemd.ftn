@@ -1020,6 +1020,8 @@
 !/DEBUGSRC!/BS1          WRITE(740+IAPROC,*) 'min/max/sum(VDBS)=', minval(VDBS), maxval(VDBS), sum(VDBS)
 !/DEBUGSRC!/BSX          WRITE(740+IAPROC,*) 'min/max/sum(VSBS)=', minval(VSBS), maxval(VSBS), sum(VSBS)
 !/DEBUGSRC!/BSX          WRITE(740+IAPROC,*) 'min/max/sum(VDBS)=', minval(VDBS), maxval(VDBS), sum(VDBS)
+!/DEBUGSRC!/VEG1         WRITE(740+IAPROC,*) 'min/max/sum(VSVG)=', minval(VSVG), maxval(VSVG), sum(VSVG)
+!/DEBUGSRC!/VEG1         WRITE(740+IAPROC,*) 'min/max/sum(VDVG)=', minval(VDVG), maxval(VDVG), sum(VDVG)
 !/DEBUGSRC!/XXX          WRITE(740+IAPROC,*) 'min/max/sum(VSXX)=', minval(VSXX), maxval(VSXX), sum(VSXX)
 !/DEBUGSRC!/XXX          WRITE(740+IAPROC,*) 'min/max/sum(VDXX)=', minval(VDXX), maxval(VDXX), sum(VDXX)
 !/DEBUGSRC               WRITE(740+IAPROC,*) 'min/max/sum(VSBT)=', minval(VSBT), maxval(VSBT), sum(VSBT)
