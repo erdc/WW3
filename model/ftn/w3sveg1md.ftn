@@ -165,7 +165,7 @@
       IF (EMEAN .LT. THR) RETURN
 !       
       IF (FMEAN .GT. THR) THEN ! Actually this cannot happen if the above is true we make it now double sure ...
-        KBAR = WNMEAN*GRAV  ! Aron is this correct  KBAR = kmean*g
+        KBAR = WNMEAN 
         KSBAR = KBAR/FMEAN ! Check units with 
       ELSE
         RETURN
@@ -188,7 +188,7 @@
 !
 !  alpha or VLTH is veg length/depth for submerged veg and  equal to 1 for emergent
       TMP1 = SINH(MIN(KDMAX,WNMEAN*VALPHAD*DEPTH))**3+3*SINH(MIN(KDMAX,WNMEAN*VALPHAD*DEPTH))  !Recoded to account ffor both submerged and emergent cases TJH
-      TMP2 = 3*WNMEAN*COSH(MIN(KDMAX,WNMEAN*DEPTH))**3  !Are we missing a k in this 3*k*cosh(kh)^3
+      TMP2 = 3*WNMEAN*COSH(MIN(KDMAX,WNMEAN*DEPTH))**3  !added the missing k in this 3*k*cosh(kh)^3
       CVEG = SQRT(TWO/PI)*GRAV**2*VALPHAP*KSBAR**3*TMP1/TMP2*SQRT(EMEAN)
       D    = - CVEG
       S    = D * A 
