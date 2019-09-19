@@ -50,7 +50,7 @@
 !/
       CONTAINS
 !/ ------------------------------------------------------------------- /
-      SUBROUTINE W3SVEG1 (IX, A, DEPTH, EMEAN, FMEAN, WNMEAN, S, D )
+      SUBROUTINE W3SVEG1 (IX, IY, A, DEPTH, EMEAN, FMEAN, WNMEAN, S, D )
 !/
 !/                  +-----------------------------------+
 !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -112,10 +112,12 @@
 !/ ------------------------------------------------------------------- /
 !/
       USE CONSTANTS
+      USE W3SERVMD, ONLY: EXTCDE
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, FSSOURCE, DDEN
       USE W3ODATMD, ONLY: NDST
       USE W3GDATMD, ONLY: SIG
-      USE W3ODATMD, only : IAPROC
+      USE W3ODATMD, only : IAPROC, NAPERR, NDSE
+      USE W3IDATMD, ONLY: INFLAGS2, VEGLS, VEGBV, VEGN, VEGCD
 !/S      USE W3SERVMD, ONLY: STRACE
 !/T0      USE W3ARRYMD, ONLY: PRT2DS
 !/T1      USE W3ARRYMD, ONLY: OUTMAT
@@ -125,7 +127,7 @@
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
 !/
-      INTEGER, INTENT(IN)     :: IX ! Local grid number
+      INTEGER, INTENT(IN)     :: IX, IY ! Local grid number
       REAL, INTENT(IN)        :: A(NSPEC)
       REAL, INTENT(INOUT)     :: EMEAN, FMEAN, WNMEAN, DEPTH
       REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC)
@@ -134,7 +136,7 @@
 !      LOGICAL, INTENT(OUT)    :: LBREAK   We are not using LBREAK at this time TJH
       INTEGER                 :: ITH, IK, IWB
       REAL, PARAMETER         :: KDMAX = 20.
-      REAL                    :: KBAR ! Not right, just putting a value to compile code TJH
+      REAL                    :: KBAR 
       REAL(8), PARAMETER :: TWO  = 2.0D0
 !/
 !/ ------------------------------------------------------------------- /
@@ -144,10 +146,11 @@
 !/S      INTEGER, SAVE           :: IENT = 0
 !/T0     INTEGER                 :: IK, ITH
       REAL                    :: ETOT, FMEAN2, TMP1, TMP2
-      REAL                    :: VCD   = 0.9559! drag coefficient 
-      REAL                    :: VDM   = 0.0064 ! diam of veg. 
-      REAL                    :: VNV   = 200 ! veg. density 
-      REAL                    :: VLTH  = 0.415 ! vegetation height  
+!      REAL                    :: VCD   = 0.9559! drag coefficient 
+!      REAL                    :: VDM   = 0.0064 ! diam of veg. 
+!      REAL                    :: VNV   = 200 ! veg. density 
+!      REAL                    :: VLTH  = 0.415 ! vegetation height  
+      REAL                    :: VCD, VDM, VNV, VLTH
       REAL                    :: VALPHAP   
       REAL                    :: VALPHAD   
       REAL                    :: VALPHADH 
@@ -160,6 +163,30 @@
 !
 ! 0.  Initialzations ------------------------------------------------- /
 !     Never touch this 4 lines below ... otherwise my exceptionhandling will not work.
+      VCD = 0.0
+      VDM = 0.0
+      VNV = 0.0
+      VLTH = 0.0
+
+      IF (INFLAGS2(-9)) THEN
+         VLTH = VEGLS(IX, IY)
+         VDM = VEGBV(IX, IY)
+         VNV = VEGN(IX, IY)
+      ELSE
+         IF ( IAPROC .EQ. NAPERR )                &
+         WRITE (NDSE,1001) 'VEGETATION PARAMETERS'
+         CALL EXTCDE(2)
+      END IF
+      
+      IF (INFLAGS2(-8)) THEN
+        VCD = VEGCD(IX, IY)
+      ELSE
+        IF ( IAPROC .EQ. NAPERR )                &
+        WRITE (NDSE,1001) 'VEGETATION DRAG COEFFICIENT'
+        CALL EXTCDE(2)
+      END IF
+
+      WRITE (*,*) VLTH, VDM, VNV, VCD
 
       THR = DBLE(1.E-15)
       IF (EMEAN .LT. THR) RETURN
@@ -209,6 +236,8 @@
       RETURN
 !
 ! Formats   
+ 1001 FORMAT(/' *** WAVEWATCH III ERROR IN W3SVEG1MD : '/   &
+              '     ',A,' IS NOT DEFINED IN ww3_shel.inp.')
 !
 !/T 9000 FORMAT (' TEST W3SDB1 : PARAMETERS :',2F7.3,L4)
 !/

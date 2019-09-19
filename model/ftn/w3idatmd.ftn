@@ -146,7 +146,7 @@
 !/ Data structure INPUT
 !/
       TYPE INPUT
-        INTEGER               :: TFN(2,-7:8), TC0(2), TW0(2),     &
+        INTEGER               :: TFN(2,-9:8), TC0(2), TW0(2),     &
                                  TDN(2), TG0(2)
         REAL                  :: GA0, GD0, GAN, GDN
         REAL, POINTER         :: WX0(:,:), WY0(:,:), DT0(:,:),        &
@@ -155,14 +155,16 @@
                                  CYN(:,:), WLEV(:,:), ICEI(:,:),      &
                                  BERGI(:,:), MUDT(:,:), MUDV(:,:),    &
                                  MUDD(:,:), ICEP1(:,:), ICEP2(:,:),   &
-                                 ICEP3(:,:), ICEP4(:,:), ICEP5(:,:)
+                                 ICEP3(:,:), ICEP4(:,:), ICEP5(:,:),  &
+                                 VEGLS(:,:), VEGBV(:,:), VEGN(:,:),   &
+                                 VEGCD(:,:)   
 !/TIDE REAL, POINTER         ::  CXTIDE(:,:,:,:), CYTIDE(:,:,:,:),    &
 !/TIDE                           WLTIDE(:,:,:,:)
         LOGICAL               :: IINIT
 ! note that if size of INFLAGS1 is changed, then TFLAGS in wminitmd.ftn
 !    also must be resized.
-        LOGICAL               :: INFLAGS1(-7:12), FLAGSC(-7:12),      &
-                                 INFLAGS2(-7:12)
+        LOGICAL               :: INFLAGS1(-9:12), FLAGSC(-9:12),      &
+                                 INFLAGS2(-9:12)
       END TYPE INPUT
 !/
 !/ Data storage
@@ -183,14 +185,17 @@
                                  CYN(:,:), WLEV(:,:), ICEI(:,:),      &
                                  BERGI(:,:), MUDT(:,:), MUDV(:,:),    &
                                  MUDD(:,:), ICEP1(:,:), ICEP2(:,:),   &
-                                 ICEP3(:,:), ICEP4(:,:), ICEP5(:,:)
+                                 ICEP3(:,:), ICEP4(:,:), ICEP5(:,:),  &
+                                 VEGLS(:,:), VEGBV(:,:), VEGN(:,:),   &
+                                 VEGCD(:,:)
 !/TIDE       REAL, POINTER           :: CXTIDE(:,:,:,:),         &
 !/TIDE                                  CYTIDE(:,:,:,:), WLTIDE(:,:,:,:)
       LOGICAL, POINTER        :: IINIT
       LOGICAL, POINTER        :: INFLAGS1(:), INFLAGS2(:), FLAGSC(:)
       LOGICAL, POINTER        :: FLLEV, FLCUR, FLWIND, FLICE
       LOGICAL, POINTER        :: FLMTH, FLMVS, FLMDN
-      LOGICAL, POINTER        :: FLIC1, FLIC2, FLIC3, FLIC4, FLIC5 
+      LOGICAL, POINTER        :: FLIC1, FLIC2, FLIC3, FLIC4, FLIC5
+      LOGICAL, POINTER        :: FLVG1, FLVG2 
 !/TIDE      LOGICAL, POINTER        ::  FLLEVTIDE, FLCURTIDE,  &
 !/TIDE                                  FLLEVRESI, FLCURRESI
 !/
@@ -434,6 +439,9 @@
 !/TIDE          FLAGSTIDE(:) = FLAGSTIDEIN(:)
 !/TIDE        END IF
 
+      FLVG1  => INPUTS(IMOD)%INFLAGS1(-9)
+      FLVG2  => INPUTS(IMOD)%INFLAGS1(-8)
+
       FLIC1  => INPUTS(IMOD)%INFLAGS1(-7)
       FLIC2  => INPUTS(IMOD)%INFLAGS1(-6)
       FLIC3  => INPUTS(IMOD)%INFLAGS1(-5)
@@ -462,6 +470,17 @@
 ! notes: future improvement: flags for ICEPx should be 
 !     "all or nothing" rather than 5 individual flags
 
+      IF ( FLVG1  ) THEN
+          ALLOCATE ( INPUTS(IMOD)%VEGLS(NX,NY),            &
+                     INPUTS(IMOD)%VEGBV(NX,NY),            &
+                     INPUTS(IMOD)%VEGN(NX,NY), STAT=ISTAT )
+          CHECK_ALLOC_STATUS ( ISTAT )
+        END IF
+      IF ( FLVG2 ) THEN
+          ALLOCATE ( INPUTS(IMOD)%VEGCD(NX,NY), STAT=ISTAT )
+          CHECK_ALLOC_STATUS ( ISTAT )
+        END IF
+!
       IF ( FLIC1  ) THEN
           ALLOCATE ( INPUTS(IMOD)%ICEP1(NX,NY), STAT=ISTAT )
           CHECK_ALLOC_STATUS ( ISTAT )
@@ -729,6 +748,9 @@
       INFLAGS2  => INPUTS(IMOD)%INFLAGS2
       FLAGSC => INPUTS(IMOD)%FLAGSC
 !
+      FLVG1  => INPUTS(IMOD)%INFLAGS1(-9)
+      FLVG2  => INPUTS(IMOD)%INFLAGS1(-8)
+!
       FLIC1  => INPUTS(IMOD)%INFLAGS1(-7)
       FLIC2  => INPUTS(IMOD)%INFLAGS1(-6)
       FLIC3  => INPUTS(IMOD)%INFLAGS1(-5)
@@ -775,6 +797,15 @@
           END IF
           IF ( FLMVS  ) THEN
               MUDV   => INPUTS(IMOD)%MUDV
+          END IF
+!
+          IF (FLVG1   ) THEN
+              VEGLS  => INPUTS(IMOD)%VEGLS
+              VEGBV  => INPUTS(IMOD)%VEGBV
+              VEGN   => INPUTS(IMOD)%VEGN
+          END IF
+          IF (FLVG2   ) THEN
+              VEGCD  => INPUTS(IMOD)%VEGCD
           END IF
 !
           IF ( FLLEV  ) THEN

@@ -848,7 +848,7 @@
 !/ST6        END IF
 !
 !  Vegetation 
-!/VEG1     CALL W3SVEG1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG ) 
+!/VEG1     CALL W3SVEG1 ( IX, IY, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG ) 
 !
 ! 2.d Bottom interactions.
 !
