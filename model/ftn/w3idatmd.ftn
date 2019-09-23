@@ -177,7 +177,8 @@
                                  TW0(:), TWN(:), TIN(:), T0N(:),      &
                                  T1N(:), T2N(:), TDN(:), TG0(:),      &
                                  TGN(:), TTN(:), TVN(:), TZN(:),      &
-                                 TI1(:), TI2(:), TI3(:), TI4(:), TI5(:) 
+                                 TI1(:), TI2(:), TI3(:), TI4(:),      &
+                                 TI5(:), TV1(:), TV2(:) 
       REAL, POINTER           :: GA0, GD0, GAN, GDN
       REAL, POINTER           :: WX0(:,:), WY0(:,:), DT0(:,:),        &
                                  WXN(:,:), WYN(:,:), DTN(:,:),        &
@@ -718,6 +719,9 @@
       TW0    => INPUTS(IMOD)%TW0
       TG0    => INPUTS(IMOD)%TG0
       TDN    => INPUTS(IMOD)%TDN
+!
+      TV1    => INPUTS(IMOD)%TFN(:,-9)
+      TV2    => INPUTS(IMOD)%TFN(:,-8)
 !
       TI1    => INPUTS(IMOD)%TFN(:,-7)
       TI2    => INPUTS(IMOD)%TFN(:,-6)

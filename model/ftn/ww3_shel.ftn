@@ -1832,12 +1832,12 @@
               IF ( FLH(J) ) THEN
                 CALL W3FLDH (J, NDST, NDSEN, NX, NY, NX, NY,    &
                              TIME0, TIMEN, NH(J), NHMAX, THO, HA, HD, HS, &
-                             TTT, XXX, XXX, XXX, TI1, VEGLS, VEGBV, VEGN, &
+                             TTT, XXX, XXX, XXX, TV1, VEGLS, VEGBV, VEGN, &
                              IERR)
               ELSE
                 CALL W3FLDG ('READ', IDSTR(J), NDSF(J),      &
                              NDST, NDSEN, NX, NY, NX, NY, TIME0, TIMEN, &
-                             TTT, XXX, XXX, XXX, TI1, VEGLS, VEGBV, VEGN, &
+                             TTT, XXX, XXX, XXX, TV1, VEGLS, VEGBV, VEGN, &
                              IERR, FLAGSC(J) )
 
               END IF
@@ -1847,11 +1847,11 @@
               IF ( FLH(J) ) THEN
                 CALL W3FLDH (J, NDST, NDSEN, NX, NY, NX, NY,    &
                              TIME0, TIMEN, NH(J), NHMAX, THO, HA, HD, HS, &
-                             TTT, XXX, XXX, XXX, TI1, XXX, XXX, VEGCD, IERR)
+                             TTT, XXX, XXX, XXX, TV2, XXX, XXX, VEGCD, IERR)
               ELSE
                 CALL W3FLDG ('READ', IDSTR(J), NDSF(J),      &
                              NDST, NDSEN, NX, NY, NX, NY, TIME0, TIMEN, &
-                             TTT, XXX, XXX, XXX, TI1, XXX, XXX, VEGCD,  &
+                             TTT, XXX, XXX, XXX, TV2, XXX, XXX, VEGCD,  &
                              IERR, FLAGSC(J) )
               END IF 
 ! IC1 : (in context of IC3 & IC2, this is ice thickness)
