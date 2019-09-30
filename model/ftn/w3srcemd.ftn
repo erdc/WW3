@@ -806,9 +806,14 @@
 !/NL4        CALL W3SNL4 ( SPEC, CG1, WN1, DEPTH,          VSNL, VDNL )
 !/NLX        CALL W3SNLX 
 !
-!/PDLIB    IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
-!/TR1        CALL W3STR1 ( SPEC, CG1, WN1, DEPTH, IX,        VSTR, VDTR )
-!/TRX        CALL W3STRX
+!/PDLIB    IF (.NOT. FSSOURCE) THEN
+!/PDLIB      IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
+!/TR1          CALL W3STR1 ( SPEC, CG1, WN1, DEPTH, IX,        VSTR, VDTR )
+!/TRX          CALL W3STRX
+!/PDLIB      ENDIF
+!/PDLIB    ELSE
+!/PDLIB      VSTR = 0.
+!/PDLIB      VDTR = 0.
 !/PDLIB    ENDIF
 !
 ! 2.c Dissipation... except for ST4
@@ -835,6 +840,9 @@
 !/DB1                                                   LBREAK, VSDB, VDDB )
 !/DBX          CALL W3SDBX
 !/PDLIB      ENDIF
+!/PDLIB    ELSE
+!/PDLIB      VSDB = 0.
+!/PDLIB      VDDB = 0.
 !/PDLIB    ENDIF
 !
 ! 2.c2   optional dissipation parameterisations
@@ -942,7 +950,7 @@
           VS(IS) = VSLN(IS) + VSIN(IS) + VSNL(IS)  &
                  + VSDS(IS) + VSBT(IS) 
 !/ST6          VS(IS) = VS(IS) + VSWL(IS)
-!/TR1          VS(IS) = VS(IS) + VSTR(IS)
+!!/TR1          VS(IS) = VS(IS) + VSTR(IS)
 !/TRX          VS(IS) = VS(IS) + VSTR(IS)
 !/BS1          VS(IS) = VS(IS) + VSBS(IS)
 !/BSX          VS(IS) = VS(IS) + VSBS(IS)
@@ -951,7 +959,7 @@
           VD(IS) =  VDIN(IS) + VDNL(IS)  &
                  + VDDS(IS) + VDBT(IS) 
 !/ST6          VD(IS) = VD(IS) + VDWL(IS)
-!/TR1          VD(IS) = VD(IS) + VDTR(IS)
+!!/TR1          VD(IS) = VD(IS) + VDTR(IS)
 !/TRX          VD(IS) = VD(IS) + VDTR(IS)
 !/BS1          VD(IS) = VD(IS) + VDBS(IS)
 !/BSX          VD(IS) = VD(IS) + VDBS(IS)
@@ -965,10 +973,6 @@
           AFAC   = 1. / MAX( 1.E-10 , ABS(VS(IS)/DAMAX) )
           DT     = MIN ( DT , AFAC / ( MAX ( 1.E-10,                  &
                          1. + OFFSET*AFAC*MIN(0.,VD(IS)) ) ) )
-          !IF (IX == 74) THEN!DEBUG_NODE) THEN
-          !  IF (SPECINIT(IS) .GT. 0.) WRITE(*,'(A20,2I10,10F20.10)') 'TIME STEP COMP', IS, NSPECH, DAMAX, VS(IS), VD(IS), DAM(IS), & 
-         !&                                                                     XREL*SPECINIT(IS), AFILT, AFAC, DT
-          !ENDIF
         END DO  ! end of loop on IS 
 !
 !        WRITE(*,*) 'NODE_NUMBER', IX
@@ -985,6 +989,12 @@
         IF (srce_call .eq. srce_imp_post) DT = DTG  ! for implicit part
         HDT    = OFFSET * DT
         DTTOT  = DTTOT + DT
+
+!          IF (ABS(SUM(VS)) .GT. 0. .and. JSEA == 176) WRITE(*,'(A20, I10,10F20.10)') 'W3SRCE', &
+!       &                             IX, SUM(VSTR), &
+!       &                             SUM(VDTR), SUM(VS), SUM(VD), &
+!       &                             SUM(SPEC), SUM(CG1), SUM(WN1), DEPTH
+
 
 !/DEBUGSRC        IF (IX == DEBUG_NODE) WRITE(*,'(A20,2I10,5F20.10,L20)') 'TIMINGS 2', IDT, NSTEPS, DT, DTMIN, DTDYN, HDT, DTTOT, SHAVE
 !/DEBUGSRC        IF (IX == DEBUG_NODE) THEN
@@ -1045,7 +1055,10 @@
             WRITE(740+IAPROC,*) 'min/max/sum(DeltaDS)=', minval(DeltaSRC), maxval(DeltaSRC), sum(DeltaSRC)
           END IF
      
-          CALL SIGN_VSD_SEMI_IMPLICIT_WW3(SPEC,VS,VD)
+!          CALL SIGN_VSD_SEMI_IMPLICIT_WW3(SPEC,VS,VD)
+          DO IS=1,NSPEC
+            VD(IS) = MIN(0., VD(IS))
+          END DO
           VSIO = VS
           VDIO = VD
 !!/DEBUGSRC          IF (IX == DEBUG_NODE) WRITE(44,'(10EN15.4)') SUM(VS), SUM(VD), SUM(VSIN), SUM(VDIN), SUM(VSDS), SUM(VDDS), SUM(VSNL), SUM(VDNL)

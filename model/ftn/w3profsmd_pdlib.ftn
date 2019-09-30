@@ -4724,6 +4724,7 @@
       USE W3PARALL, ONLY: IMEM
       USE W3GDATMD, ONLY: NSEAL, CLATS
 !/DB1      USE W3SDB1MD
+!/TR1      USE W3STR1MD
       USE W3WDATMD, ONLY: VA, VSTOT, VDTOT, SHAVETOT
       USE CONSTANTS, ONLY : TPI, TPIINV, GRAV
       IMPLICIT NONE
@@ -4734,7 +4735,7 @@
       INTEGER IK, ITH, ISP, IS0
       LOGICAL :: LBREAK
       REAL ::  eSI, eVS, eVD, SIDT
-      REAL :: DEPTH, DAM(NSPEC), DAM2(NSPEC), RATIO, MAXDAC, VSDB(NSPEC), VDDB(NSPEC), JAC
+      REAL :: DEPTH, DAM(NSPEC), DAM2(NSPEC), RATIO, MAXDAC, VSDB(NSPEC), VDDB(NSPEC), JAC, VSTR(NSPEC), VDTR(NSPEC)
       REAL :: PreVS, eDam, DVS, FREQ, EMEAN, FMEAN, WNMEAN, AMAX, SPEC_VA(NSPEC), CG1(NK), WN1(NK)
       REAL :: TAUWX, TAUWY, CD, Z0, CHARN, FMEANWS, U10ABS, U10DIR, USTAR, FMEAN1, COFRM4, USFM
       LOGICAL :: LLWS(NSPEC)
@@ -4742,6 +4743,9 @@
       REAL TheFactor
 
       !WRITE(*,*) NX, NY, NSEA, NSEAL, NSEALM, NP, NPA, NTRI, NE
+
+      VSTOT = 0.
+      VDTOT = 0.
 
       DO JSEA = 1, NP
 
@@ -4771,9 +4775,6 @@
             USFM   = USTAR*FMEAN
             JAC    = 1./TPI/SIG(IK) * CG(IK,ISEA)
             DAM2(1+(IK-1)*NTH) = COFRM4 * USFM * JAC
-!            IF (ISEA == 129) write(*,'(A20,I10,20F20.10)') 'PROFS', IK, DAM(1+(IK-1)*NTH), DAM2(1+(IK-1)*NTH), & 
-!     &                             DAM(1+(IK-1)*NTH)/DAM2(1+(IK-1)*NTH), & 
-!     &                             DTMIN, SIG(IK), CG(IK,ISEA), USTAR, FMEANWS, FMEAN
           END DO
           DO IK=1, NK
             IS0    = (IK-1)*NTH
@@ -4788,12 +4789,24 @@
 !/DB1          VSDB   = 0.
 !/DB1          VDDB   = 0.
 !/DB1          CALL W3SDB1 ( JSEA, SPEC_VA, DEPTH, EMEAN, FMEAN, WNMEAN, CG1, LBREAK, VSDB, VDDB )
+!/DB1          VSTOT(:,JSEA) = VSTOT(:,JSEA) + VSDB
+!/DB1          VDTOT(:,JSEA) = VDTOT(:,JSEA) + VDDB
+!/TR1          VSTR = 0.
+!/TR1          VDTR = 0.
+!/TR1          CALL W3STR1 ( SPEC_VA, CG1, WN1, DEPTH, JSEA, VSTR, VDTR )
+!/TR1          VSTOT(:,JSEA) = VSTOT(:,JSEA) + VSTR 
+!/TR1          DO ISP = 1, NSPEC
+!/TR1            VDTOT(ISP,JSEA) = VDTOT(ISP,JSEA) + MIN(0.,VDTR(ISP))
+!/TR1          ENDDO
+!/TR1          
+!          WRITE(12434,'(I10,10F20.10)') JSEA, SUM(SPEC_VA), SUM(VSTOT(:,JSEA)), SUM(VDTOT(:,JSEA)), &
+!         &     SUM(VSTR), SUM(VDTR), SUM(CG1), SUM(WN1), DEPTH 
           DO IK=1,NK
             DO ITH=1,NTH
               ISP=ITH + (IK-1)*NTH
               evs = 0.d0
               evd = 0.d0
-              !IF (.false.) THEN!SHAVETOT(JSEA)) THEN ! Limit ONLY the source term part ...
+              IF (.false.) THEN!SHAVETOT(JSEA)) THEN ! Limit ONLY the source term part ...
                 IF (LNEWLIMITER) THEN
                   MAXDAC    = MAX(DAM(ISP),DAM2(ISP))
                 ELSE
@@ -4803,13 +4816,16 @@
                 DVS       = VSTOT(ISP,JSEA) * TheFactor
                 DVS       = SIGN(MIN(MAXDAC,ABS(DVS)),DVS)
                 PreVS     = DVS / TheFactor
-              !ELSE
-              !  PreVS     = VSTOT(ISP,JSEA)
-              !END IF
+              ELSE
+                PreVS     = VSTOT(ISP,JSEA)
+              END IF
               eVS = PreVS / CG(IK,ISEA) * CLATS(ISEA)
-              eVD = DBLE(VDTOT(ISP,JSEA))
-!/DB1            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
-!/DB1            eVD = evD + DBLE(VDDB(ISP))
+              eVD = VDTOT(ISP,JSEA)
+!!/DB1            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+!!/DB1            eVD = evD + DBLE(VDDB(ISP))
+!!/TR1            eVS = eVS + DBLE(VSTR(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+!!/TR1            eVD = evD + DBLE(VDTR(ISP))
+              !WRITE(12434,'(I10,3F20.10)') JSEA, VSTOT(ISP,JSEA), VDTOT(ISP,JSEA)
               B_JAC(ISP,IP) = B_JAC(ISP,IP) + SIDT * (eVS - eVD*VA(ISP,JSEA))
               IF (IMEM == 1) THEN
                 ASPAR_JAC(ISP,PDLIB_I_DIAG(IP)) = ASPAR_JAC(ISP,PDLIB_I_DIAG(IP)) - SIDT * eVD

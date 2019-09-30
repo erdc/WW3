@@ -328,6 +328,9 @@
 !
 ! 1.  Integral over directions
 !
+
+      IF (DEPTH .LT. TINY(1.)) RETURN
+
       SIGM01 = 0.
       EMEAN  = 0.
 !      FMEAN  = 0.
