@@ -143,7 +143,7 @@
       USE CONSTANTS, ONLY: PI,GRAV,DWAT,NU_WATER
       USE W3ODATMD, ONLY: NDSE
       USE W3SERVMD, ONLY: EXTCDE
-      USE W3DISPMD, ONLY: WAVNU1
+      USE W3DISPMD, ONLY: WAVNU1, WAVNU3
 !/S      USE W3SERVMD, ONLY: STRACE
 !/
       IMPLICIT NONE
@@ -283,7 +283,7 @@
         SIGMA = SIG(IK)
 
         !     un-muddy wave number, to start things off 
-        CALL WAVNU1(SIGMA,H_WDEPTH,K_UNMUD,CG_UNMUD)
+        CALL WAVNU3(SIGMA,H_WDEPTH,K_UNMUD,CG_UNMUD)
         K=K_UNMUD
 
         !     start iterative loop

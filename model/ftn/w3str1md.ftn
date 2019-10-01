@@ -5,8 +5,9 @@
 !/                  +-----------------------------------+
 !/                  | WAVEWATCH III           NOAA/NCEP |
 !/                  |     A. J. van der Westhuysen      |
+!/                  |        A. Roland                  |
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         13-Jan-2013 |
+!/                  | Last update :         04-Apr-2019 |
 !/                  +-----------------------------------+
 !/
 !/    13 Jan-2013 : Origination, based on SWAN v40.91 code ( version 4.08 )
@@ -108,14 +109,15 @@
 !/                  +-----------------------------------+
 !/                  | WAVEWATCH III           NOAA/NCEP |
 !/                  |     A. J. van der Westhuysen      |
+!/                  |        A. Roland                  |
 !/                  |                        FORTRAN 90 |
 !/                  | Last update :         13-Jan-2013 |
 !/                  +-----------------------------------+
 !/
 !/    13 Jan-2013 : Origination, based on SWAN v40.91 code ( version 4.08 )
 !/    05 Oct-2016 : Avoiding divide by zero for EMEAN      ( version 5.15 )
-!/    12 Mar-2019 : Fix bug in source term computation (Aron Roland)   ( version 6.xx ) 
-!/    12 Mar-2019 : Add computation of diagonal part (Aron Roland) ( version 6.xx ) 
+!/    12 Mar-2019 : Fix bug in source term computation factor 2 in the source term (A. Roland)   ( version 6.xx ) 
+!/    12 Mar-2019 : Add computation of diagonal part for implicit integration (A- Roland) ( version 6.xx ) 
 !/ 
 !/
 !  1. Purpose :
@@ -329,11 +331,10 @@
 ! 1.  Integral over directions
 !
 
-      IF (DEPTH .LT. TINY(1.)) RETURN
+      IF (DEPTH .LT. TINY(1.) .or. SUM(A) .LT. TINY(1.)) RETURN
 
       SIGM01 = 0.
       EMEAN  = 0.
-!      FMEAN  = 0.
 
       DO IK=1, NK
         EB(IK) = 0.
@@ -411,7 +412,11 @@
 !
 !     --- compute 3-wave interactions
 !
-      IF ( .true. )THEN!URSELL.GE.PTRIAD(5) ) THEN
+!     AR: No need for switching, shallow water physics should 
+!         only be called when lowest freq. is touching botton
+!         will see this later ...
+!
+      IF ( .true.) THEN!URSELL.GE.PTRIAD(5) ) THEN
 !
 !       --- calculate biphase
 !
@@ -436,6 +441,7 @@
            DO IK = 1, ISMAX
 
               E0  = E(IK)
+              IF (E0 .lt. TINY(1.)) CYCLE
               W0  = SIG(IK)
               WN0 = WN(IK)
               C0  = W0 / WN0
@@ -446,6 +452,7 @@
                  WNM = WISM * WN(IK+ISM1)  + WISM1 * WN(IK+ISM)
                  CM  = WM / WNM
               ELSE
+                 CYCLE
                  EM  = 0.
                  WM  = 0.
                  WNM = 0.
@@ -453,14 +460,22 @@
               END IF
 
               AUX1 = WNM**2 * ( GRAV * DEP + 2.*CM**2 ) ! 1/m² * m²/s² = 1/s² 
-              AUX2 = WN0 * DEP * ( GRAV * DEP + &       ! 1/m * m * m/s² * m = m²/s²
-                                   (2./15.) * GRAV * DEP_3 * WN0**2 - &
-                                   (2./ 5.) * W0**2 * DEP_2 )
-              RINT = AUX1 / AUX2                        ! 1/s² * s²/m² = 1/m²
+              AUX2 = WN0 * DEP * ( GRAV * DEP )! + &       ! 1/m * m * m/s² * m = m²/s²
+              !                     (2./15.) * GRAV * DEP_3 * WN0**2 - &
+              !                     (2./ 5.) * W0**2 * DEP_2) 
+              IF (AUX2 .GT. TINY(1.)) RINT = AUX1 / AUX2                        ! 1/s² * s²/m² = 1/m²
               FT   = PTRIAD(1) * C0 * CG(IK) * RINT**2 * SINBPH ! m²/s² * 1/m4 = 1/(m²*s²)
 
               SA(ITH,IK) = MAX(0.,FT * ( EM * EM - 2. * EM * E0 )) ! 1/(m²*s²) * m4 = m²/s² !!! [m²/s]
 
+              IF (IX == 1775) WRITE(2222,'(3I10,20F20.10)') IX, ITH, IK, FT, EM, E0, AUX1, DEP, &
+             &                AUX2, RINT, C0, CG(IK), WN0 * DEP, GRAV * DEP!,&
+             !&                (2./15.) * GRAV * DEP_3 * WN0**2,  (2./ 5.) * W0**2 * DEP_2
+!
+              IF (IX == 1776) WRITE(3333,'(3I10,20F20.10)') IX, ITH, IK, FT, EM, E0, AUX1, DEP, & 
+             &                AUX2, RINT, C0, CG(IK), WN0 * DEP, GRAV * DEP!,&
+             !&                (2./15.) * GRAV * DEP_3 * WN0**2,  (2./ 5.) * W0**2 * DEP_2
+ 
 !              IF ( IK.GT.-ISM1 .and. A(ITH+(IK-1)*NTH) .gt. 0.) &
 !          &                     write(*,'(4I10,10F15.8)') IK, ITH, IK+ISM, IK+ISM1, FT, &
 !          &                     SA(ITH,IK), E(IK), EF(IK), A(ITH+(IK-1)*NTH), 4*SQRT(EMEAN)
@@ -479,7 +494,7 @@
 !           STRI = 2 * ( SA(ITH,IK) - 2 * (WISP * SA(ITH,IK+ISP1) + WISP1 * SA(ITH,IK+ISP)) ) / SIGPICG
             STRI =       SA(ITH,IK) - 2 * (WISP * SA(ITH,IK+ISP1) + WISP1 * SA(ITH,IK+ISP)) 
             !IF (ABS(STRI) .gt. 0.) WRITE(*,*) IK, ITH, STRI
-            IF (A(ITH+(IK-1)*NTH) .gt. 1.E-8) THEN
+            IF (A(ITH+(IK-1)*NTH) .gt. 1.E-12) THEN
              !write(*,*) IK, ITH, SA(ITH,IK), WISP, A(ITH+(IK-1)*NTH)
              !D(ITH+(IK-1)*NTH) = 0. 
               D(ITH+(IK-1)*NTH) = STRI / (A(ITH+(IK-1)*NTH)*SIGPICG)

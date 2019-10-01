@@ -1070,7 +1070,7 @@
 !
       USE CONSTANTS
 !/S      USE W3SERVMD, ONLY: STRACE
-      USE W3DISPMD, ONLY: WAVNU1
+      USE W3DISPMD, ONLY: WAVNU1, WAVNU3
 !
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, DTH, SIG, DSII, DSIP,       &
                           ECOS, ESIN, XFR, FACHFE, TH, FTE
@@ -1276,7 +1276,7 @@
            SIGP   = SIGP *( 1. + 0.5 * ( XL2*EH - XH2*EL ) &
                          / SIGN ( ABS(DENOM) , DENOM ) )
         END IF
-        CALL WAVNU1 ( SIGP, DEPTH, WNP, CGP )
+        CALL WAVNU3 ( SIGP, DEPTH, WNP, CGP )
 !
      !/ --- Parabolic fit around the spectral peak ---
         IK = IFPMAX(IP)

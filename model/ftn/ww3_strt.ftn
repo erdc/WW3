@@ -184,7 +184,7 @@
 !/O4      USE W3ARRYMD, ONLY : PRT1DS
 !/O5      USE W3ARRYMD, ONLY : PRT2DS
 !/O6      USE W3ARRYMD, ONLY : PRTBLK
-      USE W3DISPMD, ONLY : WAVNU1
+      USE W3DISPMD, ONLY : WAVNU3
       USE W3IOGRMD, ONLY: W3IOGR
       USE W3IORSMD, ONLY: W3IORS
       USE W3GSRUMD, ONLY: W3DIST
@@ -722,7 +722,7 @@
             DEPTH  = MAX ( DMIN , -ZB(ISEA) )
 !/O6            ETOT   = 0.
             DO IK=1, NK
-              CALL WAVNU1 ( SIG(IK), DEPTH, WN, CG )
+              CALL WAVNU3 ( SIG(IK), DEPTH, WN, CG )
 !/O6              E1I    = 0.
               DO ITH=1, NTH
 !/O6                E1I    = E1I + VA(ITH+(IK-1)*NTH,JSEA)

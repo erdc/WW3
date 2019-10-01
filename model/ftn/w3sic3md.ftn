@@ -710,7 +710,7 @@
 !/ ------------------------------------------------------------------- /
 !/
       USE W3GDATMD, ONLY: NK, SIG, IC3PARS
-      USE W3DISPMD, ONLY: WAVNU1
+      USE W3DISPMD, ONLY: WAVNU1, WAVNU3
       USE W3ODATMD, ONLY: NDSE
       USE W3SERVMD, ONLY: EXTCDE
       USE CONSTANTS, ONLY: TPI
@@ -767,7 +767,7 @@
       DO IK = KL,KU
 !     --- Input to routine (part 2): set 2 double precision variables 
 !         using single precision variable. --------------------------- /
-         CALL WAVNU1(SIGMA(IK),DPT,K_OCEAN,CG_OCEAN)
+         CALL WAVNU3(SIGMA(IK),DPT,K_OCEAN,CG_OCEAN)
          K_NOICE = DBLE(K_OCEAN)
 !
 !     --- Muller Method fails for deep water: workaround follows ----- /
@@ -1851,7 +1851,7 @@
       USE W3ADATMD, ONLY: IC3WN_R, IC3WN_I, IC3CG
       USE W3ODATMD, ONLY: NDSE
       USE W3SERVMD, ONLY: EXTCDE
-      USE W3DISPMD, ONLY: WAVNU1
+      USE W3DISPMD, ONLY: WAVNU1, WAVNU3
       !/
       IMPLICIT NONE
       !/
@@ -2083,7 +2083,7 @@ END SUBROUTINE IC3TABLE_CHENG
 !
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: NK, SIG
-      USE W3DISPMD, ONLY: WAVNU1
+      USE W3DISPMD, ONLY: WAVNU1, WAVNU3
       USE W3ODATMD, ONLY: NDSE
       USE W3SERVMD, ONLY: EXTCDE
 !/
@@ -2110,7 +2110,7 @@ END SUBROUTINE IC3TABLE_CHENG
       SWITCHID = 0
 
       DO IK = KL,KU
-        CALL WAVNU1(SIG(IK),DPT,K_OCEAN,CG_OCEAN)
+        CALL WAVNU3(SIG(IK),DPT,K_OCEAN,CG_OCEAN)
         K_NOICE = K_OCEAN
 
 !     --- Calculate complex wavenumber ------------------------------- /

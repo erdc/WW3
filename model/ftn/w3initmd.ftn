@@ -1200,7 +1200,7 @@
         DO IK=0, NK+1
 !
 !         Calculate wavenumbers and group velocities.
-          CALL WAVNU1(SIG(IK),DEPTH,WN(IK,IS),CG(IK,IS))
+          CALL WAVNU3(SIG(IK),DEPTH,WN(IK,IS),CG(IK,IS))
 !
 !/T1          WRITE (NDST,9052) IK, TPI/SIG(IK), WN(IK,IS), CG(IK,IS)
 !

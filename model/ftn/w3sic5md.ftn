@@ -626,7 +626,7 @@
 !/S      USE W3SERVMD, ONLY: STRACE
 !/
       USE CONSTANTS, ONLY: GRAV, TPI
-      USE W3DISPMD,  ONLY: WAVNU1
+      USE W3DISPMD,  ONLY: WAVNU1, WAVNU3
       USE W3SERVMD,  ONLY: EXTCDE
       USE W3ODATMD,  ONLY: NDSE, IAPROC, NAPROC, NAPERR
       USE W3GDATMD,  ONLY: IC5PARS
@@ -718,7 +718,7 @@
 ! water case, that is tanh(HWAT*k) ~ 1.
 ! Wavenumber in the open water
 !     WAVNU1(SI, H, K, CG)
-      CALL WAVNU1(SIGMA, THW, WNO, CGO)
+      CALL WAVNU3(SIGMA, THW, WNO, CGO)
       THKH = TANH(WNO * THW)
 !
 ! Get the first guess of the complex wavenumber

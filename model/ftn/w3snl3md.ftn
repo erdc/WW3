@@ -275,7 +275,7 @@
       USE W3ODATMD, ONLY: NDSE, NDST
 !
       USE W3SERVMD, ONLY: EXTCDE
-      USE W3DISPMD, ONLY: WAVNU1
+      USE W3DISPMD, ONLY: WAVNU1, WAVNU3
 !/S      USE W3SERVMD, ONLY: STRACE
 !/
       IMPLICIT NONE
@@ -326,7 +326,7 @@
       XCG(1:NFR) = CG
 !
       DO IFR = NFR+1, NFRMAX
-        CALL WAVNU1 ( XSI(IFR), DEPTH, XWN(IFR), XCG(IFR) )
+        CALL WAVNU3 ( XSI(IFR), DEPTH, XWN(IFR), XCG(IFR) )
         END DO
 !
 ! 1.b Expanded pseudo spetrum
@@ -769,7 +769,7 @@
       USE W3ODATMD, ONLY: NDSE, NDST
       USE W3GDATMD,       NFR => NK
 !
-      USE W3DISPMD, ONLY: WAVNU2
+      USE W3DISPMD, ONLY: WAVNU3
       USE W3SERVMD, ONLY: EXTCDE
 !/S      USE W3SERVMD, ONLY: STRACE
 !/
@@ -840,7 +840,7 @@
       DO IKD=1, NKD
 !
         S0     = S0 * XSIT
-        CALL WAVNU2 ( S0, DEPTH, WN0, CG0, 1.E-6, 25, IERR)
+        CALL WAVNU3 ( S0, DEPTH, WN0, CG0, 1.E-6, 25, IERR)
 !
 ! 2.b Loop over representative quadruplets
 !
@@ -874,13 +874,13 @@
 ! 2.c Offset angles
 !
           S1     = S0 * ( 1. + OFF12 )
-          CALL WAVNU2 ( S1, DEPTH, WN1, CG1, 1.E-6, 25, IERR)
+          CALL WAVNU3 ( S1, DEPTH, WN1, CG1, 1.E-6, 25, IERR)
           S2     = S0 * ( 1. - OFF12 )
-          CALL WAVNU2 ( S2, DEPTH, WN2, CG2, 1.E-6, 25, IERR)
+          CALL WAVNU3 ( S2, DEPTH, WN2, CG2, 1.E-6, 25, IERR)
           S3     = S0 * ( 1. + OFF34 )
-          CALL WAVNU2 ( S3, DEPTH, WN3, CG3, 1.E-6, 25, IERR)
+          CALL WAVNU3 ( S3, DEPTH, WN3, CG3, 1.E-6, 25, IERR)
           S4     = S0 * ( 1. - OFF34 )
-          CALL WAVNU2 ( S4, DEPTH, WN4, CG4, 1.E-6, 25, IERR)
+          CALL WAVNU3 ( S4, DEPTH, WN4, CG4, 1.E-6, 25, IERR)
 !
           AUXFR(1) = S1 / S0
           AUXFR(2) = S2 / S0
@@ -1106,7 +1106,7 @@
       DO IKD=1, NKD
 !
         S0     = S0 * XSIT
-        CALL WAVNU2 ( S0, DEPTH, WN0, CG0, 1.E-6, 25, IERR)
+        CALL WAVNU3 ( S0, DEPTH, WN0, CG0, 1.E-6, 25, IERR)
 !
 ! 3.b Loop over representative quadruplets
 !
@@ -1164,15 +1164,15 @@
                 END IF
 !
               SIOFF  = S0 * XFR**IFR
-              CALL WAVNU2 ( SIOFF, DEPTH, WN0, CG0, 1.E-6, 25, IERR)
+              CALL WAVNU3 ( SIOFF, DEPTH, WN0, CG0, 1.E-6, 25, IERR)
               S1     = SIOFF * ( 1. + OFF12 )
-              CALL WAVNU2 ( S1, DEPTH, WN1, CG1, 1.E-6, 25, IERR)
+              CALL WAVNU3 ( S1, DEPTH, WN1, CG1, 1.E-6, 25, IERR)
               S2     = SIOFF * ( 1. - OFF12 )
-              CALL WAVNU2 ( S2, DEPTH, WN2, CG2, 1.E-6, 25, IERR)
+              CALL WAVNU3 ( S2, DEPTH, WN2, CG2, 1.E-6, 25, IERR)
               S3     = SIOFF * ( 1. + OFF34 )
-              CALL WAVNU2 ( S3, DEPTH, WN3, CG3, 1.E-6, 25, IERR)
+              CALL WAVNU3 ( S3, DEPTH, WN3, CG3, 1.E-6, 25, IERR)
               S4     = SIOFF * ( 1. - OFF34 )
-              CALL WAVNU2 ( S4, DEPTH, WN4, CG4, 1.E-6, 25, IERR)
+              CALL WAVNU3 ( S4, DEPTH, WN4, CG4, 1.E-6, 25, IERR)
 !
 !/T2              WRITE (NDST,9034) JIQ, JOF, IFR, WFROFF, SIOFF/S0
 !
