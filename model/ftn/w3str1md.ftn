@@ -416,7 +416,7 @@
 !       --- calculate biphase
 !
         BIPH   = (0.5*PI)*(TANH(PTRIAD(4)/URSELL)-1.)
-        SINBPH = ABS( SIN(BIPH) )
+        SINBPH = ABS(SIN(BIPH) )
 !
         ALLOCATE (EF (1:NK))
         EF = 0.
@@ -467,12 +467,10 @@
 
            END DO
         END DO
+
         DEALLOCATE(EF)
-!
-!        ---  put source and diagonal terms together
-!             (using Jacobian for S(f) -> S(k))
-!
         ALLOCATE (SF (1:NK))
+
         SF = 0.
         DO IK = 1, NK
           SIGPICG = SIG(IK) * 2. * PI / CG(IK) ! 1/s * s/m = 1/m
@@ -481,7 +479,7 @@
 !           STRI = 2 * ( SA(ITH,IK) - 2 * (WISP * SA(ITH,IK+ISP1) + WISP1 * SA(ITH,IK+ISP)) ) / SIGPICG
             STRI =       SA(ITH,IK) - 2 * (WISP * SA(ITH,IK+ISP1) + WISP1 * SA(ITH,IK+ISP)) 
             !IF (ABS(STRI) .gt. 0.) WRITE(*,*) IK, ITH, STRI
-            IF (A(ITH+(IK-1)*NTH) .gt. tiny(1.)) THEN
+            IF (A(ITH+(IK-1)*NTH) .gt. 1.E-8) THEN
              !write(*,*) IK, ITH, SA(ITH,IK), WISP, A(ITH+(IK-1)*NTH)
              !D(ITH+(IK-1)*NTH) = 0. 
               D(ITH+(IK-1)*NTH) = STRI / (A(ITH+(IK-1)*NTH)*SIGPICG)
@@ -494,7 +492,6 @@
           END DO
         END DO
         DEALLOCATE(SF)
-
       ELSE
         D = 0.
         S = 0.

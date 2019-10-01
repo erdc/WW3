@@ -4789,15 +4789,15 @@
 !/DB1          VSDB   = 0.
 !/DB1          VDDB   = 0.
 !/DB1          CALL W3SDB1 ( JSEA, SPEC_VA, DEPTH, EMEAN, FMEAN, WNMEAN, CG1, LBREAK, VSDB, VDDB )
-!/DB1          VSTOT(:,JSEA) = VSTOT(:,JSEA) + VSDB
-!/DB1          VDTOT(:,JSEA) = VDTOT(:,JSEA) + VDDB
+!!/DB1          VSTOT(:,JSEA) = VSTOT(:,JSEA) + VSDB
+!!/DB1          VDTOT(:,JSEA) = VDTOT(:,JSEA) + VDDB
 !/TR1          VSTR = 0.
 !/TR1          VDTR = 0.
 !/TR1          CALL W3STR1 ( SPEC_VA, CG1, WN1, DEPTH, JSEA, VSTR, VDTR )
-!/TR1          VSTOT(:,JSEA) = VSTOT(:,JSEA) + VSTR 
-!/TR1          DO ISP = 1, NSPEC
-!/TR1            VDTOT(ISP,JSEA) = VDTOT(ISP,JSEA) + MIN(0.,VDTR(ISP))
-!/TR1          ENDDO
+!!/TR1          VSTOT(:,JSEA) = VSTOT(:,JSEA) + VSTR 
+!!/TR1          DO ISP = 1, NSPEC
+!!/TR1            VDTOT(ISP,JSEA) = VDTOT(ISP,JSEA) + MIN(0.,VDTR(ISP))
+!!/TR1          ENDDO
 !/TR1          
 !          WRITE(12434,'(I10,10F20.10)') JSEA, SUM(SPEC_VA), SUM(VSTOT(:,JSEA)), SUM(VDTOT(:,JSEA)), &
 !         &     SUM(VSTR), SUM(VDTR), SUM(CG1), SUM(WN1), DEPTH 
@@ -4806,7 +4806,7 @@
               ISP=ITH + (IK-1)*NTH
               evs = 0.d0
               evd = 0.d0
-              IF (.false.) THEN!SHAVETOT(JSEA)) THEN ! Limit ONLY the source term part ...
+              IF (.true.) THEN!SHAVETOT(JSEA)) THEN ! Limit ONLY the source term part ...
                 IF (LNEWLIMITER) THEN
                   MAXDAC    = MAX(DAM(ISP),DAM2(ISP))
                 ELSE
@@ -4821,8 +4821,8 @@
               END IF
               eVS = PreVS / CG(IK,ISEA) * CLATS(ISEA)
               eVD = VDTOT(ISP,JSEA)
-!!/DB1            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
-!!/DB1            eVD = evD + DBLE(VDDB(ISP))
+!/DB1            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+!/DB1            eVD = evD + DBLE(VDDB(ISP))
 !!/TR1            eVS = eVS + DBLE(VSTR(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
 !!/TR1            eVD = evD + DBLE(VDTR(ISP))
               !WRITE(12434,'(I10,3F20.10)') JSEA, VSTOT(ISP,JSEA), VDTOT(ISP,JSEA)
