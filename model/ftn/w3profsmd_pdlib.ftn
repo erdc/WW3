@@ -4823,8 +4823,8 @@
               eVD = VDTOT(ISP,JSEA)
 !/DB1            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
 !/DB1            eVD = evD + DBLE(VDDB(ISP))
-!!/TR1            eVS = eVS + DBLE(VSTR(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
-!!/TR1            eVD = evD + DBLE(VDTR(ISP))
+!/TR1            eVS = eVS + DBLE(VSTR(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+!/TR1            eVD = evD + DBLE(VDTR(ISP))
               !WRITE(12434,'(I10,3F20.10)') JSEA, VSTOT(ISP,JSEA), VDTOT(ISP,JSEA)
               B_JAC(ISP,IP) = B_JAC(ISP,IP) + SIDT * (eVS - eVD*VA(ISP,JSEA))
               IF (IMEM == 1) THEN
