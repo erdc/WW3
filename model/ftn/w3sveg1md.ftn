@@ -187,7 +187,7 @@
         CALL EXTCDE(2)
       END IF
 
-      WRITE (*,*) VLTH, VDM, VNV, VCD
+      !WRITE (*,*) VLTH, VDM, VNV, VCD
 
       THR = DBLE(1.E-15)
       IF (EMEAN .LT. THR) RETURN
