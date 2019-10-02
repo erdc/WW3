@@ -856,7 +856,15 @@
 !/ST6        END IF
 !
 !  Vegetation 
-!/VEG1     CALL W3SVEG1 ( IX, IY, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG ) 
+!/PDLIB    IF (.NOT. FSSOURCE) THEN
+!/PDLIB      IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
+!/VEG1         CALL W3SVEG1 ( IX, IY, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG ) 
+!/VEGX         CALL W3SVEGX
+!/PDLIB      ENDIF
+!/PDLIB    ELSE
+!/PDLIB      VSVG = 0.
+!/PDLIB      VDVG = 0.
+!/PDLIB    ENDIF
 !
 ! 2.d Bottom interactions.
 !
@@ -963,7 +971,7 @@
 !/BSX          VS(IS) = VS(IS) + VSBS(IS)
 !/XXX          VS(IS) = VS(IS) + VSXX(IS)
 !/UOST         VS(IS) = VS(IS) + VSUO(IS)
-!/VEG1         VS(IS) = VS(IS) + VSVG(IS)
+!!/VEG1         VS(IS) = VS(IS) + VSVG(IS)
           VD(IS) =  VDIN(IS) + VDNL(IS)  &
                  + VDDS(IS) + VDBT(IS) 
 !/ST6          VD(IS) = VD(IS) + VDWL(IS)
@@ -973,7 +981,7 @@
 !/BSX          VD(IS) = VD(IS) + VDBS(IS)
 !/XXX          VD(IS) = VD(IS) + VDXX(IS)
 !/UOST         VD(IS) = VD(IS) + VDUO(IS)
-!/VEG1         VD(IS) = VD(IS) + VDVG(IS)
+!!/VEG1         VD(IS) = VD(IS) + VDVG(IS)
           IF (LNEWLIMITER) THEN
             DAMAX  = MAX( DAM2(IS), MIN ( DAM(IS) , MAX ( XREL*SPECINIT(IS) , AFILT ) ) )
           ELSE
