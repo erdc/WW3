@@ -4744,9 +4744,6 @@
 
       !WRITE(*,*) NX, NY, NSEA, NSEAL, NSEALM, NP, NPA, NTRI, NE
 
-      VSTOT = 0.
-      VDTOT = 0.
-
       DO JSEA = 1, NP
 
         IP      = JSEA
@@ -4789,16 +4786,9 @@
 !/DB1          VSDB   = 0.
 !/DB1          VDDB   = 0.
 !/DB1          CALL W3SDB1 ( JSEA, SPEC_VA, DEPTH, EMEAN, FMEAN, WNMEAN, CG1, LBREAK, VSDB, VDDB )
-!!/DB1          VSTOT(:,JSEA) = VSTOT(:,JSEA) + VSDB
-!!/DB1          VDTOT(:,JSEA) = VDTOT(:,JSEA) + VDDB
 !/TR1          VSTR = 0.
 !/TR1          VDTR = 0.
 !/TR1          CALL W3STR1 ( SPEC_VA, CG1, WN1, DEPTH, JSEA, VSTR, VDTR )
-!!/TR1          VSTOT(:,JSEA) = VSTOT(:,JSEA) + VSTR 
-!!/TR1          DO ISP = 1, NSPEC
-!!/TR1            VDTOT(ISP,JSEA) = VDTOT(ISP,JSEA) + MIN(0.,VDTR(ISP))
-!!/TR1          ENDDO
-!/TR1          
 !          WRITE(12434,'(I10,10F20.10)') JSEA, SUM(SPEC_VA), SUM(VSTOT(:,JSEA)), SUM(VDTOT(:,JSEA)), &
 !         &     SUM(VSTR), SUM(VDTR), SUM(CG1), SUM(WN1), DEPTH 
           DO IK=1,NK
