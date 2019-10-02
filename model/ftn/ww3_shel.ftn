@@ -289,32 +289,32 @@
                              NDSEN, IERR, J, I, ILOOP, IPTS, NPTS,     &
                              NDTNEW, MPI_COMM = -99,                   &
                              FLAGTIDE, COUPL_COMM, IH, N_TOT
-      INTEGER             :: NDSF(-7:7), NDS(13), NTRACE(2), NDT(5:7), &
+      INTEGER             :: NDSF(-9:7), NDS(13), NTRACE(2), NDT(5:7), &
                              TIME0(2), TIMEN(2), TTIME(2), TTT(2),     &
-                             NH(-7:8), THO(2,-7:8,NHMAX), RCLD(5:7),   &
+                             NH(-9:8), THO(2,-7:8,NHMAX), RCLD(5:7),   &
                              NODATA(5:7), ODAT(35), IPRT(6) = 0,       &
-                             STARTDATE(8), STOPDATE(8), IHH(-7:8)
+                             STARTDATE(8), STOPDATE(8), IHH(-9:8)
 !/OASIS      INTEGER             :: OASISED
 !/COU      INTEGER             :: OFL
 !/F90      INTEGER             :: CLKDT1(8), CLKDT2(8), CLKDT3(8) 
 !/MPI      INTEGER             :: IERR_MPI
 !
       REAL                :: FACTOR, DTTST, XX, YY,                    &
-                             HA(NHMAX,-7:8), HD(NHMAX,-7:8),           &
-                             HS(NHMAX,-7:8)
+                             HA(NHMAX,-9:8), HD(NHMAX,-9:8),           &
+                             HS(NHMAX,-9:8)
 !/F90      REAL                :: CLKFIN, CLKFEL
       REAL, ALLOCATABLE   :: X(:), Y(:), XXX(:,:), DATA0(:,:),         &
                              DATA1(:,:), DATA2(:,:)
 !
       DOUBLE PRECISION    :: STARTJULDAY, STOPJULDAY
 !
-      CHARACTER(LEN=1)    :: COMSTR, FLAGTFC(-7:8)
-      CHARACTER(LEN=3)    :: IDSTR(-7:8), IDTST
+      CHARACTER(LEN=1)    :: COMSTR, FLAGTFC(-9:8)
+      CHARACTER(LEN=3)    :: IDSTR(-9:8), IDTST
       CHARACTER(LEN=6)    :: YESXNO
       CHARACTER(LEN=10)   :: PN
       CHARACTER(LEN=10),                                               &
               ALLOCATABLE :: PNAMES(:)
-      CHARACTER(LEN=13)   :: IDFLDS(-7:8)
+      CHARACTER(LEN=13)   :: IDFLDS(-9:8)
       CHARACTER(LEN=20)   :: STRNG
       CHARACTER(LEN=23)   :: DTME21
       CHARACTER(LEN=30)   :: IDOTYP(7)
@@ -327,8 +327,8 @@
                              PRTFRM, FLAGSCI, FLGNML
       LOGICAL             :: FLGRD(NOGRP,NGRPP), FLGD(NOGRP),          &
                              FLGR2(NOGRP,NGRPP), FLG2(NOGRP),          &
-                             FLAGSTIDE(4), FLH(-7:8), FLGDAS(3),       &
-                             FLLST_ALL(-7:8)
+                             FLAGSTIDE(4), FLH(-9:8), FLGDAS(3),       &
+                             FLLST_ALL(-9:8)
       LOGICAL             :: DEBUG_NCC = .FALSE.
 !/NCC      LOGICAL             :: CFLAG(10) 
 !/OASIS      LOGICAL             :: L_MASTER    
@@ -336,7 +336,8 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-      DATA IDFLDS / 'ice param. 1 ' , 'ice param. 2 ' ,               &
+      DATA IDFLDS / 'veg params 1 ' , 'veg params 2 ' ,               &
+                    'ice param. 1 ' , 'ice param. 2 ' ,               &
                     'ice param. 3 ' , 'ice param. 4 ' ,               &
                     'ice param. 5 ' ,                                 &
                     'mud density  ' , 'mud thkness  ' ,               &
@@ -352,9 +353,9 @@
                     'Nesting data                  ' ,                &
                     'Partitioned wave field data   ' ,                &
                     'Fields for coupling           ' /
-      DATA IDSTR  / 'IC1', 'IC2', 'IC3', 'IC4', 'IC5', 'MDN', 'MTH',  &
-                    'MVS', 'LEV', 'CUR', 'WND', 'ICE', 'DT0', 'DT1',  &
-                    'DT2', 'MOV' /
+      DATA IDSTR  / 'VG1', 'VG2', 'IC1', 'IC2', 'IC3', 'IC4', 'IC5',  &
+                    'MDN', 'MTH', 'MVS', 'LEV', 'CUR', 'WND', 'ICE',  &
+                    'DT0', 'DT1', 'DT2', 'MOV' /
 !
       FLGR2 = .FALSE.  
       FLAGSTIDE(:) = .FALSE.
@@ -430,7 +431,8 @@
 !/COU      NDSE   =  333
 !/COU      NDST   =  333
 
-
+      NDSF(-9)  = 1006
+      NDSF(-8)  = 1007
       NDSF(-7)  = 1008
       NDSF(-6)  = 1009
       NDSF(-5)  = 1010
@@ -546,6 +548,7 @@
 !/BT9      JFIRST=-7
 !/IC4      JFIRST=-7
 !/IC5      JFIRST=-7
+!/VEG1     JFIRST=-9
 
 !/DEBUGINIT      WRITE(740+IAPROC,*) 'ww3_shel, step 4'
 !/DEBUGINIT      WRITE(740+IAPROC,*) 'JFIRST=', JFIRST
@@ -573,7 +576,9 @@
 
 ! 2.1 forcing flags
 
-        FLH(-7:8)=.FALSE.
+        FLH(-7:9)=.FALSE.
+        FLAGTFC(-9)=TRIM(NML_INPUT%FORCING%VEG_PARAMS)
+        FLAGTFC(-8)=TRIM(NML_INPUT%FORCING%VEG_CDRAG)
         FLAGTFC(-7)=TRIM(NML_INPUT%FORCING%ICE_PARAM1)
         FLAGTFC(-6)=TRIM(NML_INPUT%FORCING%ICE_PARAM2)
         FLAGTFC(-5)=TRIM(NML_INPUT%FORCING%ICE_PARAM3)
@@ -590,6 +595,15 @@
         FLAGTFC(6)=TRIM(NML_INPUT%ASSIM%SPEC1D)
         FLAGTFC(7)=TRIM(NML_INPUT%ASSIM%SPEC2D)
 
+
+        IF (TRIM(NML_INPUT%FORCING%VEG_PARAMS) .EQ. 'H') THEN
+          FLAGTFC(-9)='T'
+          FLH(-9)=.TRUE.
+        END IF
+        IF (TRIM(NML_INPUT%FORCING%VEG_CDRAG)  .EQ. 'H') THEN
+          FLAGTFC(-8)='T'
+          FLH(-8)=.TRUE.
+        END IF
         IF (TRIM(NML_INPUT%FORCING%ICE_PARAM1) .EQ. 'H') THEN
           FLAGTFC(-7)='T'
           FLH(-7)=.TRUE.
@@ -638,7 +652,6 @@
           FLAGTFC(4)='T'
           FLH(4)=.TRUE.
         END IF
-
         IF ( IAPROC .EQ. NAPOUT ) WRITE (NDSO,920)
         DO J=JFIRST, 7
           IF ( J .LE. 4 ) THEN
@@ -696,14 +709,16 @@
         IF ( INFLAGS1(8) .AND. IAPROC.EQ.NAPOUT )                          &
              WRITE (NDSO,921) IDFLDS(8), 'YES/--', ' '
 !
-        FLFLG  = INFLAGS1(-7) .OR. INFLAGS1(-6) .OR. INFLAGS1(-5) .OR. INFLAGS1(-4) &
+        FLFLG  = INFLAGS1(-9) .OR. INFLAGS1(-8) .OR. INFLAGS1(-7)                &
+                 .OR. INFLAGS1(-6) .OR. INFLAGS1(-5) .OR. INFLAGS1(-4)           &
                  .OR. INFLAGS1(-3) .OR. INFLAGS1(-2) .OR. INFLAGS1(-1)           &
                  .OR. INFLAGS1(0)  .OR. INFLAGS1(1)  .OR. INFLAGS1(2)            &
                  .OR. INFLAGS1(3)  .OR. INFLAGS1(4)  .OR. INFLAGS1(5)            &
                  .OR. INFLAGS1(6)  .OR. INFLAGS1(7)
-        FLHOM  = FLH(-7) .OR. FLH(-6) .OR. FLH(-5) .OR. FLH(-4)       &
-                 .OR. FLH(-3) .OR. FLH(-2) .OR. FLH(-1) .OR. FLH(0)   &
-                 .OR. FLH(1) .OR. FLH(2) .OR. FLH(3) .OR. FLH(4) .OR. FLH(8)
+        FLHOM  = FLH(-9) .OR. FLH(-8) .OR. FLH(-7) .OR. FLH(-6)                  &
+                 .OR. FLH(-5) .OR. FLH(-4) .OR. FLH(-3) .OR. FLH(-2)             &
+                 .OR. FLH(-1) .OR. FLH(0) .OR. FLH(1) .OR. FLH(2)                &
+                 .OR. FLH(3) .OR. FLH(4) .OR. FLH(8)
 !
         IF ( IAPROC .EQ. NAPOUT ) WRITE (NDSO,922)
 !
@@ -900,7 +915,9 @@
         IF ( FLHOM ) THEN
           IF ( IAPROC .EQ. NAPOUT ) WRITE (NDSO,951)                   &
                           'Homogeneous field data (and moving grid) ...'
-
+          
+          NH(-9) = NML_HOMOG_COUNT%N_VG1
+          NH(-8) = NML_HOMOG_COUNT%N_VG2
           NH(-7) = NML_HOMOG_COUNT%N_IC1
           NH(-6) = NML_HOMOG_COUNT%N_IC2
           NH(-5) = NML_HOMOG_COUNT%N_IC3
@@ -914,6 +931,7 @@
           NH(3)  = NML_HOMOG_COUNT%N_WND
           NH(4)  = NML_HOMOG_COUNT%N_ICE
           NH(8)  = NML_HOMOG_COUNT%N_MOV
+
 !
           N_TOT = NML_HOMOG_COUNT%N_TOT
 !
@@ -928,6 +946,10 @@
             DO IH=1,N_TOT
               READ(NML_HOMOG_INPUT(IH)%NAME,*) IDTST
               SELECT CASE (IDTST)
+              CASE ('VG1')
+                J=-9
+              CASE ('VG2')
+                J=-8
               CASE ('IC1')
                 J=-7
               CASE ('IC2')
@@ -983,7 +1005,9 @@
 !/O7            END IF
 !/O7          END DO
 !
-          IF ( ( FLH(-7) .AND. (NH(-7).EQ.0) ) .OR.                     &
+          IF ( ( FLH(-9) .AND. (NH(-9).EQ.0) ) .OR.                     &
+               ( FLH(-8) .AND. (NH(-8).EQ.0) ) .OR.                     &
+               ( FLH(-7) .AND. (NH(-7).EQ.0) ) .OR.                     &
                ( FLH(-6) .AND. (NH(-6).EQ.0) ) .OR.                     &
                ( FLH(-5) .AND. (NH(-5).EQ.0) ) .OR.                     &
                ( FLH(-4) .AND. (NH(-4).EQ.0) ) .OR.                     &
@@ -995,7 +1019,7 @@
                ( FLH(2)  .AND. (NH(2).EQ.0)  ) .OR.                     &
                ( FLH(3)  .AND. (NH(3).EQ.0)  ) .OR.                     &
                ( FLH(4)  .AND. (NH(4).EQ.0)  ) .OR.                     &
-               ( FLH(8) .AND. (NH(8).EQ.0) ) ) GOTO 2007
+               ( FLH(8)  .AND. (NH(8).EQ.0) ))  GOTO 2007
 !
         END IF ! FLHOM
 
@@ -1109,14 +1133,16 @@
         IF ( INFLAGS1(8) .AND. IAPROC.EQ.NAPOUT )                          &
              WRITE (NDSO,921) IDFLDS(8), 'YES/--', ' '
 !
-        FLFLG  = INFLAGS1(-7) .OR. INFLAGS1(-6) .OR. INFLAGS1(-5) .OR. INFLAGS1(-4) &
+        FLFLG  = INFLAGS1(-9) .OR. INFLAGS1(-8) .OR. INFLAGS1(-7)                &
+                 .OR. INFLAGS1(-6) .OR. INFLAGS1(-5) .OR. INFLAGS1(-4)           &
                  .OR. INFLAGS1(-3) .OR. INFLAGS1(-2) .OR. INFLAGS1(-1)           &
                  .OR. INFLAGS1(0)  .OR. INFLAGS1(1)  .OR. INFLAGS1(2)            &
                  .OR. INFLAGS1(3)  .OR. INFLAGS1(4)  .OR. INFLAGS1(5)            &
                  .OR. INFLAGS1(6)  .OR. INFLAGS1(7)
-        FLHOM  = FLH(-7) .OR. FLH(-6) .OR. FLH(-5) .OR. FLH(-4)       &
-                 .OR. FLH(-3) .OR. FLH(-2) .OR. FLH(-1) .OR. FLH(0)   &
-                 .OR. FLH(1) .OR. FLH(2) .OR. FLH(3) .OR. FLH(4) .OR. FLH(8)
+        FLHOM  = FLH(-9) .OR. FLH(-8) .OR. FLH(-7) .OR. FLH(-6)                  &
+                 .OR. FLH(-5) .OR. FLH(-4) .OR. FLH(-3) .OR. FLH(-2)             &
+                 .OR. FLH(-1) .OR. FLH(0) .OR. FLH(1) .OR. FLH(2)                &
+                 .OR. FLH(3) .OR. FLH(4) .OR. FLH(8)
 !
         IF ( IAPROC .EQ. NAPOUT ) WRITE (NDSO,922)
 !
@@ -1297,7 +1323,6 @@
             ELSE IF ( J .EQ. 6 ) THEN
 !             IPRT: IX0, IXN, IXS, IY0, IYN, IYS
               CALL NEXTLN ( COMSTR , NDSI , NDSEN )
-              READ (NDSI,*,END=2001,ERR=2002) IPRT, PRTFRM
 !/DEBUGINIT              write(740+IAPROC,*), 'Before reading IPRT'
 !/DEBUGINIT              write(740+IAPROC,*), 'Before read 2002, case 10'
               READ (NDSI,*) IPRT, PRTFRM
@@ -1345,7 +1370,8 @@
 
 
             ! Exit if illegal id
-            IF ( IDTST.NE.IDSTR(-7) .AND. IDTST.NE.IDSTR(-6) .AND.   &
+            IF ( IDTST.NE.IDSTR(-9) .AND. IDTST.NE.IDSTR(-8) .AND.   &
+                 IDTST.NE.IDSTR(-7) .AND. IDTST.NE.IDSTR(-6) .AND.   &
                  IDTST.NE.IDSTR(-5) .AND. IDTST.NE.IDSTR(-4) .AND.   &
                  IDTST.NE.IDSTR(-3) .AND. IDTST.NE.IDSTR(-2) .AND.   &
                  IDTST.NE.IDSTR(-1) .AND. IDTST.NE.IDSTR(0)  .AND.   &
@@ -1365,7 +1391,11 @@
               IF ( IDTST .EQ. IDSTR(J) ) THEN
                 NH(J)    = NH(J) + 1
                 IF ( NH(J) .GT. NHMAX ) GOTO 2006
-                IF ( J .LE. 1  ) THEN ! water levels, etc. : get HA
+                IF ( J .EQ. -9 ) THEN
+                  READ (NDSI,*) IDTST,           &
+                        THO(1,J,NH(J)), THO(2,J,NH(J)),            &
+                        HA(NH(J),J), HD(NH(J),J), HS(NH(J),J)
+                ELSE IF ( J .GT. -9 .AND. J .LE. 1  ) THEN ! water levels, etc. : get HA
 !/DEBUGINIT                     write(740+IAPROC,*), 'Before read 2002, case 12'
                   READ (NDSI,*) IDTST,           &
                         THO(1,J,NH(J)), THO(2,J,NH(J)),            &
@@ -1396,7 +1426,7 @@
                         HA(NH(J),J), HD(NH(J),J)
 !/DEBUGINIT                     write(740+IAPROC,*), ' After read 2002, case 16'
                 END IF
-              END IF
+             END IF
             END DO
           END DO
 
@@ -1409,13 +1439,13 @@
 !/O7            IF ( FLH(J) .AND. IAPROC.EQ.NAPOUT ) THEN
 !/O7              WRITE (NDSO,952) NH(J), IDFLDS(J)
 !/O7              DO I=1, NH(J)
-!/O7                IF ( ( J .LE. 1 ) .OR. ( J .EQ. 4 ) ) THEN
+!/O7                IF ( ( J .GT. -9 .AND. J .LE. 1 ) .OR. ( J .EQ. 4 ) ) THEN
 !/O7                  WRITE (NDSO,953) I, THO(1,J,I), THO(2,J,I), &
 !/O7                                   HA(I,J)
 !/O7                ELSE IF ( ( J .EQ. 2 ) .OR. (J .EQ. 8) ) THEN
 !/O7                  WRITE (NDSO,953) I, THO(1,J,I), THO(2,J,I), &
 !/O7                                   HA(I,J), HD(I,J)
-!/O7                ELSE IF ( J .EQ. 3 ) THEN
+!/O7                ELSE IF ( ( J .EQ. 3 ) .OR. (J .EQ. -9) ) THEN
 !/O7                  WRITE (NDSO,953) I, THO(1,J,I), THO(2,J,I), &
 !/O7                                   HA(I,J), HD(I,J), HS(I,J)
 !/O7                END IF
@@ -1424,7 +1454,9 @@
 !/O7          END DO
 !
 !
-          IF ( ( FLH(-7) .AND. (NH(-7).EQ.0) ) .OR.                     &
+          IF ( ( FLH(-9) .AND. (NH(-9).EQ.0) ) .OR.                     &
+               ( FLH(-8) .AND. (NH(-8).EQ.0) ) .OR.                     &
+               ( FLH(-7) .AND. (NH(-7).EQ.0) ) .OR.                     &
                ( FLH(-6) .AND. (NH(-6).EQ.0) ) .OR.                     &
                ( FLH(-5) .AND. (NH(-5).EQ.0) ) .OR.                     &
                ( FLH(-4) .AND. (NH(-4).EQ.0) ) .OR.                     &
@@ -1436,7 +1468,7 @@
                ( FLH(2)  .AND. (NH(2).EQ.0)  ) .OR.                     &
                ( FLH(3)  .AND. (NH(3).EQ.0)  ) .OR.                     &
                ( FLH(4)  .AND. (NH(4).EQ.0)  ) .OR.                     &
-               ( FLH(8) .AND. (NH(8).EQ.0) ) ) GOTO 2007
+               ( FLH(8)  .AND. (NH(8).EQ.0) )) GOTO 2007
 !
         END IF ! FLHOM
 
@@ -1795,8 +1827,35 @@
             IF ( IAPROC .EQ. NAPOUT ) WRITE (NDSO,972) IDFLDS(J)
 !/TIDE            END IF
 !
+! VG1 : (in context of VEG1, this is the veg properties height, diameter, and density
+            IF ( J .EQ. -9 ) THEN
+              IF ( FLH(J) ) THEN
+                CALL W3FLDH (J, NDST, NDSEN, NX, NY, NX, NY,    &
+                             TIME0, TIMEN, NH(J), NHMAX, THO, HA, HD, HS, &
+                             TTT, XXX, XXX, XXX, TV1, VEGLS, VEGBV, VEGN, &
+                             IERR)
+              ELSE
+                CALL W3FLDG ('READ', IDSTR(J), NDSF(J),      &
+                             NDST, NDSEN, NX, NY, NX, NY, TIME0, TIMEN, &
+                             TTT, XXX, XXX, XXX, TV1, VEGLS, VEGBV, VEGN, &
+                             IERR, FLAGSC(J) )
+
+              END IF
+            
+! VG2 : (in context of VEG1, this in the veg bulk drag coefficient
+            ELSE IF ( J .EQ. -8 ) THEN
+              IF ( FLH(J) ) THEN
+                CALL W3FLDH (J, NDST, NDSEN, NX, NY, NX, NY,    &
+                             TIME0, TIMEN, NH(J), NHMAX, THO, HA, HD, HS, &
+                             TTT, XXX, XXX, XXX, TV2, XXX, XXX, VEGCD, IERR)
+              ELSE
+                CALL W3FLDG ('READ', IDSTR(J), NDSF(J),      &
+                             NDST, NDSEN, NX, NY, NX, NY, TIME0, TIMEN, &
+                             TTT, XXX, XXX, XXX, TV2, XXX, XXX, VEGCD,  &
+                             IERR, FLAGSC(J) )
+              END IF 
 ! IC1 : (in context of IC3 & IC2, this is ice thickness)
-            IF ( J .EQ. -7 ) THEN
+            ELSE IF ( J .EQ. -7 ) THEN
               IF ( FLH(J) ) THEN
                 CALL W3FLDH (J, NDST, NDSEN, NX, NY, NX, NY,    &
                              TIME0, TIMEN, NH(J), NHMAX, THO, HA, HD, HS,&
@@ -2098,6 +2157,8 @@
                            TGN, GAN, GDN, IERR)
             END IF
 !
+!
+              IF ( IERR .LT. 0 )FLLST_ALL(J) = .TRUE.
             IF ( IERR.GT.0 ) GOTO 2222
             IF ( IERR.LT.0 .AND. IAPROC.EQ.NAPOUT ) WRITE (NDSO,973) IDFLDS(J)
                            
@@ -2111,6 +2172,8 @@
             DTTST  = DSEC21 ( TTT , TTIME )
             IF ( DTTST.GT.0. .AND. .NOT.                          &
                    ( (FLLSTL .AND. J.EQ.1) .OR.                   &
+                     (FLLST_ALL(J) .AND. J.EQ.-9) .OR.            &
+                     (FLLST_ALL(J) .AND. J.EQ.-8) .OR.            &
                      (FLLST_ALL(J) .AND. J.EQ.-7) .OR.            &
                      (FLLST_ALL(J) .AND. J.EQ.-6) .OR.            &
                      (FLLST_ALL(J) .AND. J.EQ.-5) .OR.            &

@@ -418,6 +418,7 @@
 !/REF1     USE W3REF1MD
 !/BSX      USE W3SBSXMD
 !/IG1      USE W3GDATMD, ONLY : IGPARS
+!/VEG1     USE W3SVEG1MD
 !/XXX      USE W3SXXXMD
 !/S      USE W3SERVMD, ONLY: STRACE
 !/NNT      USE W3SERVMD, ONLY: EXTCDE
@@ -491,6 +492,7 @@
                                  VSDS(NSPEC), VDDS(NSPEC),            &
 !/ST6                                 VSWL(NSPEC), VDWL(NSPEC),            &
                                  VSBT(NSPEC), VDBT(NSPEC),            &
+                                 VSVG(NSPEC), VDVG(NSPEC),            &
 !/IC1                                 VSIC(NSPEC), VDIC(NSPEC),            &
 !/IC2                                 VSIC(NSPEC), VDIC(NSPEC),            &
 !/IC3                                 VSIC(NSPEC), VDIC(NSPEC),            &
@@ -562,6 +564,8 @@
 !/ST0      VDDS = 0.
       VSBT = 0.
       VDBT = 0.
+      VSVG = 0.
+      VDVG = 0.
 !/DB1      VSDB = 0.
 !/DB1      VDDB = 0.
 !/IC1      VSIC = 0.
@@ -851,6 +855,9 @@
 !/ST6           CALL W3SWL6 ( SPEC, CG1, WN1, VSWL, VDWL )
 !/ST6        END IF
 !
+!  Vegetation 
+!/VEG1     CALL W3SVEG1 ( IX, IY, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG ) 
+!
 ! 2.d Bottom interactions.
 !
 !/PDLIB    IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
@@ -956,6 +963,7 @@
 !/BSX          VS(IS) = VS(IS) + VSBS(IS)
 !/XXX          VS(IS) = VS(IS) + VSXX(IS)
 !/UOST         VS(IS) = VS(IS) + VSUO(IS)
+!/VEG1         VS(IS) = VS(IS) + VSVG(IS)
           VD(IS) =  VDIN(IS) + VDNL(IS)  &
                  + VDDS(IS) + VDBT(IS) 
 !/ST6          VD(IS) = VD(IS) + VDWL(IS)
@@ -965,6 +973,7 @@
 !/BSX          VD(IS) = VD(IS) + VDBS(IS)
 !/XXX          VD(IS) = VD(IS) + VDXX(IS)
 !/UOST         VD(IS) = VD(IS) + VDUO(IS)
+!/VEG1         VD(IS) = VD(IS) + VDVG(IS)
           IF (LNEWLIMITER) THEN
             DAMAX  = MAX( DAM2(IS), MIN ( DAM(IS) , MAX ( XREL*SPECINIT(IS) , AFILT ) ) )
           ELSE
@@ -1021,6 +1030,8 @@
 !/DEBUGSRC!/BS1          WRITE(740+IAPROC,*) 'min/max/sum(VDBS)=', minval(VDBS), maxval(VDBS), sum(VDBS)
 !/DEBUGSRC!/BSX          WRITE(740+IAPROC,*) 'min/max/sum(VSBS)=', minval(VSBS), maxval(VSBS), sum(VSBS)
 !/DEBUGSRC!/BSX          WRITE(740+IAPROC,*) 'min/max/sum(VDBS)=', minval(VDBS), maxval(VDBS), sum(VDBS)
+!/DEBUGSRC!/VEG1         WRITE(740+IAPROC,*) 'min/max/sum(VSVG)=', minval(VSVG), maxval(VSVG), sum(VSVG)
+!/DEBUGSRC!/VEG1         WRITE(740+IAPROC,*) 'min/max/sum(VDVG)=', minval(VDVG), maxval(VDVG), sum(VDVG)
 !/DEBUGSRC!/XXX          WRITE(740+IAPROC,*) 'min/max/sum(VSXX)=', minval(VSXX), maxval(VSXX), sum(VSXX)
 !/DEBUGSRC!/XXX          WRITE(740+IAPROC,*) 'min/max/sum(VDXX)=', minval(VDXX), maxval(VDXX), sum(VDXX)
 !/DEBUGSRC               WRITE(740+IAPROC,*) 'min/max/sum(VSBT)=', minval(VSBT), maxval(VSBT), sum(VSBT)

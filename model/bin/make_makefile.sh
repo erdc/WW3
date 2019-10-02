@@ -96,8 +96,8 @@
   for type in mach nco grib mcp c90 nec netcdf scrip scripnc \
               shared mpp mpiexp thread GSE prop \
               stress s_ln source stab s_nl snls s_bot s_db miche s_tr s_bs \
-              dstress s_ice s_is reflection s_xx \
-              wind windx rwind curr currx mgwind mgprop mggse \
+              dstress s_ice s_is s_veg reflection s_xx \
+              wind windx wcor rwind curr currx mgwind mgprop mggse \
               subsec tdyn dss0 pdif tide refrx ig rotag arctic nnt mprf \
               cou oasis agcm ogcm igcm trknc setup pdlib memck uost
   do
@@ -231,6 +231,10 @@
       s_is  ) TY='one'
                ID='ice scattering term'
                OK='IS0 IS1 IS2' ;;
+#sort:s_veg:
+      s_veg  ) TY='one'
+               ID='vegetation dissipation'
+               OK='VEG0 VEG1' ;;
 #sort:reflection:
   reflection ) TY='one'
                ID='wave reflections'
@@ -247,6 +251,11 @@
       windx  ) TY='one'
                ID='wind interpolation in space'
                OK='WNX0 WNX1 WNX2' ;;
+#sort:wcor:
+      wcor   ) TY='upto1'
+               ID='wind speed correction'
+               TS='WCOR'
+               OK='WCOR' ;;
 #sort:rwind:
       rwind  ) TY='upto1'
                ID='wind vs. current definition'
@@ -477,6 +486,7 @@
       s_db   ) s_db=$sw ;;
       s_tr   ) s_tr=$sw ;;
       s_bs   ) s_bs=$sw ;;
+      s_veg  ) s_veg=$sw ;;
       s_xx   ) s_xx=$sw ;;
       reflection    ) reflection=$sw ;;
       refrx  ) refrx=$sw ;;
@@ -722,6 +732,15 @@
         bsx=$NULL ;;
   esac
 
+  case $s_veg in
+   VEG0) veg=$NULL
+         vegx=$NULL ;;
+   VEG1) veg='w3sveg1md'
+         vegx=$NULL ;;
+   VEGX) veg='w3svegxmd'
+         vegx=$NULL ;;
+  esac
+
   ic=$NULL
   case $s_ic in
    IC1) ic='w3sic1md' ;;
@@ -851,6 +870,7 @@
          ww3_ounp ww3_gspl ww3_gint ww3_bound ww3_bounc ww3_systrk $tideprog"
   progs="$progs ww3_multi_esmf  ww3_uprstr"
   progs="$progs libww3"
+  progs="$progs libww3.so"
 
   for prog in $progs
   do
@@ -866,42 +886,42 @@
                core=
                data="$memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $tr $trx $bt $setupcode $stx $nlx $btx $is wmmdatmd w3parall $uostmd"
+             source="$pdlibcode $pdlibyow $db $tr $trx $bt $veg $setupcode $stx $nlx $btx $is wmmdatmd w3parall $uostmd"
                  IO='w3iogrmd w3iorsmd'
                 aux="constants w3triamd w3servmd w3arrymd w3dispmd w3gsrumd w3timemd" ;;
      ww3_bound) IDstring='boundary conditions program'
                core=
                data="w3adatmd $memcode w3gdatmd w3wdatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode $tr $trx $stx $nlx $btx $is wmmdatmd w3parall w3triamd $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $setupcode $tr $trx $veg $stx $nlx $btx $is wmmdatmd w3parall w3triamd $uostmd"
                  IO='w3iobcmd w3iogrmd w3dispmd w3gsrumd'
                 aux="constants w3servmd w3timemd w3arrymd w3cspcmd" ;;
      ww3_bounc) IDstring='NetCDF boundary conditions program'
                core=
                data="w3adatmd $memcode w3gdatmd w3wdatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode $stx $nlx $btx $is wmmdatmd w3parall w3triamd $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $setupcode $veg $stx $nlx $btx $is wmmdatmd w3parall w3triamd $uostmd"
                  IO='w3iobcmd w3iogrmd w3dispmd w3gsrumd'
                 aux="constants w3servmd w3arrymd w3timemd w3cspcmd w3nmlbouncmd" ;;
      ww3_prep) IDstring='Field preprocessor'
                core='w3fldsmd'
                data="$memcode w3gdatmd w3adatmd w3idatmd w3odatmd w3wdatmd wmmdatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode w3triamd $stx $nlx $btx  $is $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $setupcode w3triamd $veg $stx $nlx $btx  $is $uostmd"
                  IO="w3iogrmd $oasismd $agcmmd $ogcmmd $igcmmd"
                 aux="constants w3servmd w3timemd $tidecode w3arrymd w3dispmd w3gsrumd w3parall" ;;
      ww3_prnc) IDstring='NetCDF field preprocessor'
                core='w3fldsmd'
                data="$memcode w3gdatmd w3adatmd w3idatmd w3odatmd w3wdatmd wmmdatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode w3triamd $stx $nlx $btx $is w3parall $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $setupcode w3triamd $stx $veg $nlx $btx $is w3parall $uostmd"
                  IO="w3iogrmd $oasismd $agcmmd $ogcmmd $igcmmd"
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd $tidecode w3nmlprncmd" ;;
     ww3_prtide) IDstring='Tide prediction'
                core='w3fldsmd'
                data="wmmdatmd $memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop="$pr"
-             source="$pdlibcode $pdlibyow $db $bt $setupcode w3triamd $stx $nlx $btx $is w3parall $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $setupcode w3triamd $stx $veg $nlx $btx $is w3parall $uostmd"
                  IO="w3iogrmd $oasismd $agcmmd $ogcmmd $igcmmd"
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd $tidecode" ;;
      ww3_shel) IDstring='Generic shell'
@@ -909,7 +929,7 @@
                data="wmmdatmd $memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop="$pr"
              source="$pdlibcode $setupcode w3triamd w3srcemd $dsx $flx $ln $st $nl $bt $ic"
-             source="$source $is $db $tr $bs $xx $refcode $igcode w3parall $uostmd"
+             source="$source $is $db $tr $bs $xx $veg $refcode $igcode w3parall $uostmd"
                  IO="w3iogrmd w3iogomd w3iopomd w3iotrmd w3iorsmd w3iobcmd $oasismd $agcmmd $ogcmmd $igcmmd"
                  IO="$IO w3iosfmd w3partmd"
                 aux="constants w3servmd w3timemd $tidecode w3arrymd w3dispmd w3cspcmd w3gsrumd $cplcode"
@@ -927,7 +947,7 @@
                core="$core w3fldsmd w3initmd w3wavemd w3wdasmd w3updtmd"
                data="wmmdatmd $memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop="$pr"
-             source="$pdlibcode $pdlibyow $setupcode w3parall w3triamd w3srcemd $dsx $flx $ln $st $nl $bt $ic $is $db $tr $bs $xx $refcode $igcode $uostmd"
+             source="$pdlibcode $pdlibyow $setupcode w3parall w3triamd w3srcemd $dsx $flx $ln $st $nl $bt $ic $is $db $tr $veg $bs $xx $refcode $igcode $uostmd"
                  IO='w3iogrmd w3iogomd w3iopomd wmiopomd'
                  IO="$IO w3iotrmd w3iorsmd w3iobcmd w3iosfmd w3partmd $oasismd $agcmmd $ogcmmd $igcmmd"
                 aux="constants $tidecode w3servmd w3timemd w3arrymd w3dispmd w3cspcmd w3gsrumd $mprfaux"
@@ -947,7 +967,7 @@
                core="$core w3fldsmd w3initmd w3wavemd w3wdasmd w3updtmd" 
                data="w3parall wmmdatmd $memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd" 
                prop="$pr" 
-               source="$pdlibcode $pdlibyow w3triamd w3srcemd $dsx $flx $ln $st $nl $bt $db $tr $bs $xx $refcode $igcode $is $ic $uostmd" 
+               source="$pdlibcode $pdlibyow w3triamd w3srcemd $dsx $flx $ln $st $nl $bt $db $tr $bs $veg $xx $refcode $igcode $is $ic $uostmd" 
                  IO='w3iogrmd w3iogomd w3iopomd wmiopomd' 
                  IO="$IO w3iotrmd w3iorsmd w3iobcmd w3iosfmd w3partmd $oasismd $agcmmd $ogcmmd $igcmmd" 
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3cspcmd w3gsrumd $mprfaux $tidecode" 
@@ -966,7 +986,7 @@
                core=
                data="w3parall wmmdatmd $memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode $tr $trx $stx $nlx $btx $is $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $setupcode $veg $tr $trx $stx $nlx $btx $is $uostmd"
                  IO='w3iogrmd w3iogomd'
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd"
                 aux="$aux" ;;
@@ -974,7 +994,7 @@
                core='w3initmd'
                data="wmmdatmd $memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode w3parall w3triamd $stx $nlx $btx  $is $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $veg $setupcode w3parall w3triamd $stx $nlx $btx  $is $uostmd"
                  IO='w3iogrmd w3iogomd w3iorsmd w3iopomd'
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd"
                 aux="$aux w3nmlounfmd $smco" ;;
@@ -982,14 +1002,14 @@
                core=
                data="wmmdatmd w3parall w3triamd $memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $setupcode $flx $ln $st $nl $bt $ic $is $db $tr $bs $xx $igcode $uostmd"
+             source="$pdlibcode $pdlibyow $setupcode $flx $ln $st $nl $bt $ic $is $db $tr $veg $bs $xx $igcode $uostmd"
                  IO='w3bullmd w3iogrmd w3iopomd w3partmd'
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd" ;;
      ww3_ounp) IDstring='Point NetCDF output'
                core=
                data="wmmdatmd w3parall w3triamd $memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $setupcode $flx $ln $st $nl $bt $ic $is $db $tr $bs $xx $igcode $uostmd"
+             source="$pdlibcode $pdlibyow $setupcode $flx $ln $st $nl $bt $ic $is $db $tr $veg $bs $xx $igcode $uostmd"
                  IO='w3bullmd w3iogrmd w3iopomd w3partmd'
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd"
                 aux="$aux w3nmlounpmd" ;;
@@ -1011,7 +1031,7 @@
                core=
                data="w3parall wmmdatmd w3triamd $memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode $stx $nlx $btx $is $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $setupcode $veg $stx $nlx $btx $is $uostmd"
                  IO='w3iogrmd w3iogomd'
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd"
                 aux="$aux" ;;
@@ -1019,7 +1039,7 @@
                core='w3fldsmd'
                data="$memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode wmmdatmd w3parall w3triamd $stx $nlx $btx $is $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $setupcode $veg wmmdatmd w3parall w3triamd $stx $nlx $btx $is $uostmd"
                  IO="w3iogrmd  $oasismd $agcmmd $ogcmmd $igcmmd"
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd $tidecode" ;;
      ww3_gint) IDstring='Grid Interpolation'
@@ -1027,14 +1047,14 @@
                data="w3parall wmmdatmd $memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                  IO='w3iogrmd w3iogomd'
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $st $nl $is $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $veg $st $nl $is $uostmd"
                 aux="constants w3triamd w3servmd  w3arrymd w3dispmd w3timemd w3gsrumd"
                 aux="$aux" ;;
       gx_outf) IDstring='GrADS input file generation (gridded fields)'
                core=
                data="$memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode wmmdatmd w3parall w3triamd $stx $nlx $btx $tr $bs $xx $is $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $veg $setupcode wmmdatmd w3parall w3triamd $stx $nlx $btx $tr $bs $xx $is $uostmd"
                  IO='w3iogrmd w3iogomd'
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd"
                 aux="$aux" ;;
@@ -1042,28 +1062,35 @@
                core=
                data="$memcode w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode wmmdatmd w3parall w3triamd $ln $flx $st $nlx $btx $tr $bs $xx $is $ic $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $veg $setupcode wmmdatmd w3parall w3triamd $ln $flx $st $nlx $btx $tr $bs $xx $is $ic $uostmd"
                  IO='w3iogrmd w3iopomd'
                 aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd" ;;
       ww3_systrk) IDstring='Wave system tracking postprocessor'
                core='w3strkmd'
                data="$memcode w3gdatmd w3adatmd w3idatmd w3odatmd w3wdatmd"
                prop=
-             source="$pdlibcode $pdlibyow $db $bt $setupcode wmmdatmd w3dispmd w3triamd $ln $stx $nlx $btx $tr $bs $xx $is $uostmd"
+             source="$pdlibcode $pdlibyow $db $bt $veg $setupcode wmmdatmd w3dispmd w3triamd $ln $stx $nlx $btx $tr $bs $xx $is $uostmd"
                  IO=
                 aux="constants w3servmd w3timemd w3arrymd w3gsrumd w3parall" ;;
      libww3) IDstring='Object file archive'
                core='w3fldsmd w3initmd w3wavemd w3wdasmd w3updtmd'
                data='wmmdatmd w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd'
                prop="$pr"
-             source="w3triamd w3srcemd $dsx $flx $ln $st $nl $bt $ic $is $db $tr $bs $xx $refcode $igcode $uostmd"
+             source="w3triamd w3srcemd $dsx $flx $ln $st $nl $bt $ic $is $db $tr $veg $bs $xx $refcode $igcode $uostmd"
                  IO='w3iogrmd w3iogomd w3iopomd w3iotrmd w3iorsmd w3iobcmd w3iosfmd w3partmd'
                 aux="constants w3servmd w3timemd $tidecode w3arrymd w3dispmd w3cspcmd w3gsrumd" ;;
+     libww3.so) IDstring='Object file archive'
+               core='w3fldsmd w3initmd w3wavemd w3wdasmd w3updtmd'
+               data='wmmdatmd w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd'
+               prop="$pr"
+             source="w3triamd w3srcemd $dsx $flx $ln $st $nl $bt $ic $is $db $tr $veg $bs $xx $refcode $igcode $uostmd"
+                 IO='w3iogrmd w3iogomd w3iopomd w3iotrmd w3iorsmd w3iobcmd w3iosfmd w3partmd'
+                aux="constants w3servmd w3timemd $tidecode w3arrymd w3dispmd w3cspcmd w3gsrumd" ;;  
      ww3_uprstr) IDstring='Update Restart File' 
               core= 
 	          data='wmmdatmd w3triamd w3gdatmd w3wdatmd w3adatmd w3idatmd w3odatmd' 
               prop= 
-            source="$memcode $pdlibcode $pdlibyow $flx $ln $st $nl $bt $ic $is $db $tr $bs $xx $uostmd"
+            source="$memcode $pdlibcode $pdlibyow $flx $ln $st $nl $bt $ic $is $db $tr $veg $bs $xx $uostmd"
                 IO='w3iogrmd w3iogomd w3iorsmd' 
                aux="constants w3servmd w3timemd w3arrymd w3dispmd w3gsrumd" 
                aux="$aux w3parall" ;; 
@@ -1078,7 +1105,7 @@
       filesl="$data $core $prop $source $IO $aux"
     # if program name is libww3, then
     # the target is compile and create archive
-    elif [ "$prog" = "libww3" ]
+    elif [ "$prog" = "libww3" ] ||  [ "$prog" = "libww3.so" ]
     then
       d_string="$prog"' : $(aPo)/'
       files="$aux $core $data $prop $source $IO"
@@ -1123,6 +1150,19 @@
       done
       echo "	@cd \$(aPo); $ar_cmd $lib $objs" >> makefile
       echo ' '                                   >> makefile
+    # if program name is libww3.so, then
+    # the target is compile and create archive
+    elif [ "$prog" = "libww3.so" ]
+    then
+      lib=$prog
+      objs=""
+      for file in $filesl
+      do
+        objs="$objs $file.o"
+      done
+      echo "	@cd \$(aPo); ld -o $lib -shared $objs" >> makefile
+      echo ' '                                   >> makefile
+      
     else
       echo '	@$(aPb)/link '"$filesl"          >> makefile
       echo ' '                                   >> makefile
@@ -1294,6 +1334,8 @@
          'W3SIS1MD'     ) modtest=w3sis1md.o ;;
          'W3SIS2MD'     ) modtest=w3sis2md.o ;;
          'W3REF1MD'     ) modtest=w3ref1md.o ;;
+         'W3SVEG1MD'    ) modtest=w3sveg1md.o ;;
+         'W3SVEGXMD'    ) modtest=w3svegxmd.o ;;
          'W3SXXXMD'     ) modtest=w3sxxxmd.o ;;
          'CONSTANTS'    ) modtest=constants.o ;;
          'W3SERVMD'     ) modtest=w3servmd.o ;;

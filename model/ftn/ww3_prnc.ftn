@@ -269,7 +269,7 @@
       CHARACTER               :: COMSTR*1, IDFLD*3, IDTYPE*2,         &
                                  IDTIME*23, FROMLL*4, FORMLL*16,      &
                                  NAMELL*80, NAMEF*80, IDTIME2*23
-      CHARACTER*14            :: IDSTR1(-7:5)
+      CHARACTER*14            :: IDSTR1(-9:5)
       CHARACTER*15            :: IDSTR3(3)
       CHARACTER*32            :: FORMT(2), FORMF(2)
       CHARACTER*20            :: IDSTR2(6)
@@ -317,7 +317,8 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-      DATA IDSTR1 / 'ice thickness ' , 'ice viscosity' ,              &
+      DATA IDSTR1 / 'veg params    ' , 'veg cdrag    ' ,              &
+                    'ice thickness ' , 'ice viscosity' ,              &
                     'ice density   ' , 'ice modulus  ' ,              &
                     'ice flow diam.' , 'mud density  ' ,              &
                     'mud thickness ', 'mud viscosity ' ,              &
@@ -417,7 +418,16 @@
          ! Read namelist
          CALL W3NMLPRNC (NDSI, TRIM(FNMPRE)//'ww3_prnc.nml', NML_FORCING, NML_FILE, IERR)
          ! Check field
-         IF      (NML_FORCING%FIELD%ICE_PARAM1) THEN
+         IF      (NML_FORCING%FIELD%VEG_PARAMS) THEN
+           IDFLD = 'VG1'
+           IFLD = -9
+           FLSTAB = .TRUE.
+           NFIELDS = 3
+         ELSE IF (NML_FORCING%FIELD%VEG_CDRAG ) THEN
+           IDFLD = 'VG2'
+           IFLD = -8
+           NFIELDS = 1
+         ELSE IF (NML_FORCING%FIELD%ICE_PARAM1) THEN
            IDFLD = 'IC1'
            IFLD = -7
            NFIELDS = 1
@@ -483,7 +493,6 @@
          ELSE
             GOTO 810
          END IF ! NML_FORCING
-
         ! Check grid asis/latlon
         IF (NML_FORCING%GRID%ASIS) THEN
           ITYPE = 1
@@ -548,9 +557,13 @@
         READ (NDSI,*,END=801,ERR=802,IOSTAT=IERR) IDFLD, IDTYPE, FLTIME, FLHDR
 
         ! Check field
-        FLSTAB = IDFLD .EQ. 'WNS'
+        FLSTAB = IDFLD .EQ. 'WNS' .OR. IDFLD .EQ. 'VG1'
         FLBERG = IDFLD .EQ. 'ISI'
-        IF        ( IDFLD.EQ.'IC1' ) THEN
+        IF        ( IDFLD.EQ.'VG1' ) THEN
+            IFLD    = -9
+          ELSE IF ( IDFLD.EQ.'VG2' ) THEN
+            IFLD    = -8
+          ELSE IF ( IDFLD.EQ.'IC1' ) THEN
             IFLD    = -7
           ELSE IF ( IDFLD.EQ.'IC2' ) THEN
             IFLD    = -6
@@ -618,7 +631,7 @@
         DO I=1,2
           IF (LEN_TRIM(DIMSNAME(I)).NE.0) NIDIMS=NIDIMS+1
         END DO
-!
+
         CALL NEXTLN ( COMSTR , NDSI , NDSE )
         READ (NDSI,'(A)',END=801,ERR=802,IOSTAT=IERR) STRFIELDSNAME
 !
@@ -728,7 +741,6 @@
           CALL EXTCDE ( 27 )
         END IF
       END DO
-
       ! instanciates generic variables dimensions
       NXI=0
       NYI=0 
@@ -752,7 +764,6 @@
       ELSE
         FACTOR = 1.E-3
       END IF
-
       ! Get longitude and latitude
       IF (ITYPE.NE.1.AND.ITYPE.NE.6) THEN
         ALLOCATE (ALA(NXI,NYI))
@@ -806,7 +817,6 @@
           YNI=ALA(1,NYI)
         END IF
       END IF
-
 
 
 !
@@ -1588,7 +1598,7 @@
           IF ( IRET .EQ. NF90_NOERR) THEN
              IRET = NF90_GET_ATT(NCID,VARIDF(1),'add_offset',XCOFF)
           END IF
-          IF ( NFCOMP.EQ.2 .OR. IFLD.GE.3 .OR. FLBERG ) THEN
+          IF ( NFCOMP.EQ.2 .OR. IFLD.LT.-8 .OR. IFLD.GE.3 .OR. FLBERG ) THEN
             IRET = NF90_INQUIRE_ATTRIBUTE(NCID,VARIDF(2),'scale_factor')
             IF (IRET .EQ. NF90_NOERR) THEN
                IRET = NF90_GET_ATT(NCID,VARIDF(2),'scale_factor',YCFAC)
@@ -1679,7 +1689,7 @@
 !/T2                END IF
 !/T2              END DO
 !
-            IF (NFCOMP.EQ.2 .OR. IFLD.GE.3 .OR. FLBERG) THEN
+            IF (NFCOMP.EQ.2 .OR. IFLD.LT.-8 .OR. IFLD.GE.3 .OR. FLBERG) THEN
 
 ! This is a quick fix that works if the lon,lat,level,time dimensions are in that order
 ! otherwise, one should check the length of each dimension ... 
@@ -1792,7 +1802,7 @@
               END DO
             END DO
 
-            IF (( IFLD.LE.2 ).AND.( .NOT. FLBERG )) THEN
+            IF (( IFLD.GT.-9 .AND. IFLD.LE.2 ).AND.( .NOT. FLBERG )) THEN
                 DO IY=1, NY
                   DO IX=1, NX
                     FA(IX,IY) = XC(IX,IY)
@@ -1813,7 +1823,7 @@
 ! ... One-component fields
 !
 !/O3           IF ( IAPROC .EQ. NAPOUT )  WRITE (NDSO,976) ' '
-            IF (( IFLD.LE.2 ).AND.( .NOT. FLBERG )) THEN
+            IF (( IFLD.GT.-9 .AND. IFLD.LE.2 ).AND.( .NOT. FLBERG )) THEN
 !
                 DO IY=1,NY
                   DO IX=1,NX
