@@ -488,7 +488,7 @@
 
         SF = 0.
         DO IK = 1, NK
-          SIGPICG = SIG(IK) * 2. * PI / CG(IK) ! 1/s * s/m = 1/m
+          SIGPICG = SIG(IK) * TPI / CG(IK) ! 1/s * s/m = 1/m
           DO ITH = 1, NTH
 !           --- Source term
 !           STRI = 2 * ( SA(ITH,IK) - 2 * (WISP * SA(ITH,IK+ISP1) + WISP1 * SA(ITH,IK+ISP)) ) / SIGPICG

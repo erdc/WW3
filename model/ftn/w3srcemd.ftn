@@ -810,15 +810,15 @@
 !/NL4        CALL W3SNL4 ( SPEC, CG1, WN1, DEPTH,          VSNL, VDNL )
 !/NLX        CALL W3SNLX 
 !
-!/PDLIB    IF (.NOT. FSSOURCE) THEN
-!/PDLIB      IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
+!!/PDLIB    IF (.NOT. FSSOURCE) THEN
+!!/PDLIB      IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
 !/TR1          CALL W3STR1 ( SPEC, CG1, WN1, DEPTH, IX,        VSTR, VDTR )
 !/TRX          CALL W3STRX
-!/PDLIB      ENDIF
-!/PDLIB    ELSE
-!/PDLIB      VSTR = 0.
-!/PDLIB      VDTR = 0.
-!/PDLIB    ENDIF
+!!/PDLIB      ENDIF
+!!/PDLIB    ELSE
+!!/PDLIB      VSTR = 0.
+!!/PDLIB      VDTR = 0.
+!!/PDLIB    ENDIF
 !
 ! 2.c Dissipation... except for ST4
 ! 2.c1   as in source term package
@@ -965,7 +965,7 @@
           VS(IS) = VSLN(IS) + VSIN(IS) + VSNL(IS)  &
                  + VSDS(IS) + VSBT(IS) 
 !/ST6          VS(IS) = VS(IS) + VSWL(IS)
-!!/TR1          VS(IS) = VS(IS) + VSTR(IS)
+!/TR1          VS(IS) = VS(IS) + VSTR(IS)
 !/TRX          VS(IS) = VS(IS) + VSTR(IS)
 !/BS1          VS(IS) = VS(IS) + VSBS(IS)
 !/BSX          VS(IS) = VS(IS) + VSBS(IS)
@@ -975,7 +975,7 @@
           VD(IS) =  VDIN(IS) + VDNL(IS)  &
                  + VDDS(IS) + VDBT(IS) 
 !/ST6          VD(IS) = VD(IS) + VDWL(IS)
-!!/TR1          VD(IS) = VD(IS) + VDTR(IS)
+!/TR1          VD(IS) = VD(IS) + VDTR(IS)
 !/TRX          VD(IS) = VD(IS) + VDTR(IS)
 !/BS1          VD(IS) = VD(IS) + VDBS(IS)
 !/BSX          VD(IS) = VD(IS) + VDBS(IS)
