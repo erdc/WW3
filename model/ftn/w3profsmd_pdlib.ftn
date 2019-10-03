@@ -4786,17 +4786,17 @@
           SIDT   = eSI * DTG
           DEPTH  = DW(ISEA) 
 !/DB1          VSDB = 0.; VDDB = 0.
-!/DB1          CALL W3SDB1 ( JSEA, VA(:,JSEA), DEPTH, EMEAN, FMEAN, WNMEAN, CG1, LBREAK, VSDB, VDDB )
-!!/TR1          VSTR = 0.; VDTR = 0.
-!!/TR1          CALL W3STR1 ( VA(:,JSEA), CG1, WN1, DEPTH, JSEA, VSTR, VDTR )
+!/DB1          CALL W3SDB1 ( JSEA, SPEC_VA, DEPTH, EMEAN, FMEAN, WNMEAN, CG1, LBREAK, VSDB, VDDB )
+!/TR1          VSTR = 0.; VDTR = 0.
+!/TR1          CALL W3STR1 ( SPEC_VA, CG1, WN1, DEPTH, JSEA, VSTR, VDTR )
 !/VEG1         VSVG = 0.; VDVG = 0. 
-!!/VEG1         CALL W3SVEG1 ( JSEA, 1, VA(:,JSEA), DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG )
+!/VEG1         CALL W3SVEG1 ( JSEA, 1, SPEC_VA, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG )
           DO IK=1,NK
             DO ITH=1,NTH
               ISP=ITH + (IK-1)*NTH
               evs = 0.d0
               evd = 0.d0
-              IF (.false.) THEN!SHAVETOT(JSEA)) THEN ! Limit ONLY the source term part ...
+              IF (.true.) THEN!SHAVETOT(JSEA)) THEN ! Limit ONLY the source term part ...
                 IF (LNEWLIMITER) THEN
                   MAXDAC    = MAX(DAM(ISP),DAM2(ISP))
                 ELSE
@@ -4813,10 +4813,10 @@
               eVD = VDTOT(ISP,JSEA)
 !/DB1            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
 !/DB1            eVD = evD + DBLE(VDDB(ISP))
-!!/TR1            eVS = eVS + DBLE(VSTR(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
-!!/TR1            eVD = evD + MIN(0.,DBLE(VDTR(ISP)))
-!!/VEG1           eVS = eVS + DBLE(VSVG(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
-!!/VEG1           eVD = evD + MIN(0.,DBLE(VDVG(ISP)))
+!/TR1            eVS = eVS + DBLE(VSTR(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+!/TR1            eVD = evD + MIN(0.,DBLE(VDTR(ISP)))
+!/VEG1           eVS = eVS + DBLE(VSVG(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+!/VEG1           eVD = evD + MIN(0.,DBLE(VDVG(ISP)))
               !WRITE(12434,'(I10,3F20.10)') JSEA, VSTOT(ISP,JSEA), VDTOT(ISP,JSEA)
               B_JAC(ISP,IP) = B_JAC(ISP,IP) + SIDT * (eVS - eVD*VA(ISP,JSEA))
               IF (IMEM == 1) THEN

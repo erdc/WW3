@@ -364,7 +364,7 @@
 
 !---- Temporary parameters (to be replaced by namelists) -----
       PTRIAD(1) = 1. 
-      PTRIAD(2) = 20. 
+      PTRIAD(2) = 2.5 
       PTRIAD(3) = 10.
       PTRIAD(4) = 0.2
       PTRIAD(5) = 0.01
