@@ -3471,7 +3471,7 @@
 ! 2.  Integrate over directions
 !
       DO IK=1, NK
-        EB(IK) = EB(IK) * DDEN(IK)! / CG(IK)
+        EB(IK) = EB(IK) * DDEN(IK) / CG(IK)
         EMEAN  = EMEAN  + EB(IK)
         FMEAN  = FMEAN  + EB(IK) / SIG(IK)
         WNMEAN = WNMEAN + EB(IK) / SQRT(WN(IK))
@@ -4738,13 +4738,14 @@
       REAL ::  eSI, eVS, eVD, SIDT
       REAL :: DEPTH, DAM(NSPEC), DAM2(NSPEC), RATIO, MAXDAC, JAC
       REAL :: VSDB(NSPEC), VDDB(NSPEC), VSTR(NSPEC), VDTR(NSPEC), VSVG(NSPEC), VDVG(NSPEC)
-      REAL :: PreVS, eDam, DVS, FREQ, EMEAN, FMEAN, WNMEAN, AMAX, SPEC_VA(NSPEC), CG1(NK), WN1(NK)
+      REAL :: PreVS, eDam, DVS, FREQ, EMEAN, FMEAN, WNMEAN, AMAX, CG1(NK), WN1(NK)
       REAL :: TAUWX, TAUWY, CD, Z0, CHARN, FMEANWS, U10ABS, U10DIR, USTAR, FMEAN1, COFRM4, USFM
       LOGICAL :: LLWS(NSPEC)
       LOGICAL :: LNEWLIMITER = .FALSE.
       REAL :: TheFactor
 
       !WRITE(*,*) NX, NY, NSEA, NSEAL, NSEALM, NP, NPA, NTRI, NE
+
 
       DO JSEA = 1, NP
 
@@ -4760,13 +4761,7 @@
           U10DIR = U10D(ISEA)
           CG1 = CG(1:NK,ISEA)
           WN1 = WN(1:NK,ISEA)
-          DO IK=1,NK
-            DO ITH=1,NTH
-              ISP=ITH + (IK-1)*NTH
-              SPEC_VA(ISP) = VA(ISP,JSEA) * CG(IK,ISEA) / CLATS(ISEA)
-            ENDDO
-          ENDDO
-          CALL COMPUTE_MEAN_PARAM(SPEC_VA, CG1, WN1, EMEAN, FMEAN, WNMEAN, AMAX)
+          CALL COMPUTE_MEAN_PARAM(VA(:,JSEA), CG1, WN1, EMEAN, FMEAN, WNMEAN, AMAX)
           DO IK=1, NK
             DAM(1+(IK-1)*NTH)  = FACP / ( SIG(IK) * WN(IK,ISEA)**3)
             COFRM4 = DTMIN*COEF4*GRAV/(SIG(IK)*TPIINV)**4
@@ -4782,13 +4777,21 @@
               DAM2(ITH+IS0) = DAM2(1+IS0)
             END DO
           END DO
+
+          IF (JSEA == 4) WRITE(*,*) 'TEST PROFS', 4 * SQRT(EMEAN), SUM(VA(:,JSEA)), JSEA
           eSI    = PDLIB_SI(IP)
           SIDT   = eSI * DTG
           DEPTH  = DW(ISEA) 
 !/DB1          VSDB = 0.; VDDB = 0.
+<<<<<<< Updated upstream
 !/DB1          CALL W3SDB1 ( JSEA, SPEC_VA, DEPTH, EMEAN, FMEAN, WNMEAN, CG1, LBREAK, VSDB, VDDB )
 !/TR1          VSTR = 0.; VDTR = 0.
 !/TR1          CALL W3STR1 ( SPEC_VA, CG1, WN1, DEPTH, JSEA, VSTR, VDTR )
+=======
+!/DB1          CALL W3SDB1 ( JSEA, VA(:,JSEA), DEPTH, EMEAN, FMEAN, WNMEAN, CG1, LBREAK, VSDB, VDDB )
+!/TR1          VSTR = 0.; VDTR = 0.
+!/TR1          CALL W3STR1 ( VA(:,JSEA), CG1, WN1, DEPTH, JSEA, VSTR, VDTR )
+>>>>>>> Stashed changes
 !/VEG1         VSVG = 0.; VDVG = 0. 
 !/VEG1         CALL W3SVEG1 ( JSEA, 1, SPEC_VA, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG )
           DO IK=1,NK
@@ -4815,8 +4818,13 @@
 !/DB1            eVD = evD + DBLE(VDDB(ISP))
 !/TR1            eVS = eVS + DBLE(VSTR(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
 !/TR1            eVD = evD + MIN(0.,DBLE(VDTR(ISP)))
+<<<<<<< Updated upstream
 !/VEG1           eVS = eVS + DBLE(VSVG(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
 !/VEG1           eVD = evD + MIN(0.,DBLE(VDVG(ISP)))
+=======
+!!/VEG1           eVS = eVS + DBLE(VSVG(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+!!/VEG1           eVD = evD + MIN(0.,DBLE(VDVG(ISP)))
+>>>>>>> Stashed changes
               !WRITE(12434,'(I10,3F20.10)') JSEA, VSTOT(ISP,JSEA), VDTOT(ISP,JSEA)
               B_JAC(ISP,IP) = B_JAC(ISP,IP) + SIDT * (eVS - eVD*VA(ISP,JSEA))
               IF (IMEM == 1) THEN

@@ -299,9 +299,9 @@
               ISP, ISP1, ITH, IK
       REAL    AUX1, AUX2, BIPH, C0, CM, DEP, DEP_2, DEP_3, E0, EM, HS, &
               FT, RINT, SIGPICG, SINBPH, STRI, WISM, WISM1, WISP, & 
-              WISP1, W0, WM, WN0, WNM, XIS, XISLN
+              WISP1, W0, WM, WN0, WNM, XIS, XISLN, EDM, ED0
       REAL, ALLOCATABLE :: E(:), SA(:,:)
-      REAL              :: EB(NK), EBAND, EMEAN, SIGM01
+      REAL              :: EB(NK), EBAND, EMEAN, SIGM01, ED(NK)
 !----- Temp (to be moved) -----
       REAL, ALLOCATABLE :: EF(:),SF(:)
       REAL    :: PTRIAD(5)
@@ -330,7 +330,6 @@
 !
 ! 1.  Integral over directions
 !
-
       IF (DEPTH .LT. TINY(1.) .or. SUM(A) .LT. TINY(1.)) RETURN
 
       SIGM01 = 0.
@@ -338,12 +337,16 @@
 
       DO IK=1, NK
         EB(IK) = 0.
+        ED(IK) = 0.
         DO ITH=1, NTH
           EB(IK) = EB(IK) + A(ITH+(IK-1)*NTH)
+          ED(IK) = ED(IK) + A(ITH+(IK-1)*NTH) * DDEN(IK) / CG(IK)
         END DO
       END DO
+
+!      write(*,*) 'TEST SUM', SUM(EB), SUM(ED) 
 !
-! 2.  Integrate over directions
+! 2.  Integrate over frequencies. 
 !
       DO IK=1, NK
         EB(IK) = EB(IK) * DDEN(IK) / CG(IK)
@@ -363,8 +366,13 @@
       SIGM01 = MAX ( 1.E-7 , SIGM01 ) / MAX(EMEAN,0.001)
 
 !---- Temporary parameters (to be replaced by namelists) -----
+<<<<<<< Updated upstream
       PTRIAD(1) = 1. 
       PTRIAD(2) = 2.5 
+=======
+      PTRIAD(1) = 1.
+      PTRIAD(2) = 20.
+>>>>>>> Stashed changes
       PTRIAD(3) = 10.
       PTRIAD(4) = 0.2
       PTRIAD(5) = 0.01
@@ -376,6 +384,8 @@
       DEP   = DEPTH
       DEP_2 = DEP**2
       DEP_3 = DEP**3
+
+!      WRITE(*,*) IX, DEP, HS, URSELL, SIGM01
 !
 !     --- compute some indices in sigma space
 !
@@ -393,6 +403,7 @@
       ISM1   = ISM - 1
       WISM   = (XIS**ISM -0.5) / (XIS**ISM - XIS**ISM1)
       WISM1  = 1. - WISM
+
 
       ALLOCATE (E (1:NK))
       ALLOCATE (SA(1:NTH,1:NK+ISP1))
@@ -416,7 +427,7 @@
 !         only be called when lowest freq. is touching botton
 !         will see this later ...
 !
-      IF ( .true.) THEN!URSELL.GE.PTRIAD(5) ) THEN
+      IF ( .true. ) THEN!URSELL.GE.PTRIAD(5) ) THEN
 !
 !       --- calculate biphase
 !
@@ -441,40 +452,47 @@
            DO IK = 1, ISMAX
 
               E0  = E(IK)
-              IF (E0 .lt. TINY(1.)) CYCLE
+              ED0 = ED(IK) 
+              !IF (E0 .lt. TINY(1.)) CYCLE
               W0  = SIG(IK)
               WN0 = WN(IK)
               C0  = W0 / WN0
 
               IF ( IK.GT.-ISM1 ) THEN
                  EM  = WISM * E(IK+ISM1)   + WISM1 * E(IK+ISM)
+                 EDM = WISM * ED(IS+ISM1)  + WISM1 * ED(IS+ISM)
                  WM  = WISM * SIG(IK+ISM1) + WISM1 * SIG(IK+ISM)
                  WNM = WISM * WN(IK+ISM1)  + WISM1 * WN(IK+ISM)
                  CM  = WM / WNM
               ELSE
-                 CYCLE
+                 !CYCLE
                  EM  = 0.
+                 EDM = 0.
                  WM  = 0.
                  WNM = 0.
                  CM  = 0.
               END IF
 
-              AUX1 = WNM**2 * ( GRAV * DEP + 2.*CM**2 ) ! 1/m² * m²/s² = 1/s² 
-              AUX2 = WN0 * DEP * ( GRAV * DEP )! + &       ! 1/m * m * m/s² * m = m²/s²
-              !                     (2./15.) * GRAV * DEP_3 * WN0**2 - &
-              !                     (2./ 5.) * W0**2 * DEP_2) 
-              IF (AUX2 .GT. TINY(1.)) RINT = AUX1 / AUX2                        ! 1/s² * s²/m² = 1/m²
+              AUX1 = WNM**2 * ( GRAV * DEP + 2*CM**2 ) ! 1/m² * m²/s² = 1/s² 
+              AUX2 = WN0 * DEP * ( GRAV * DEP + &       ! 1/m * m * m/s² * m = m²/s²
+                                   (2./15.) * GRAV * DEP_3 * WN0**2 - &
+                                   (2./ 5.) * W0**2 * DEP_2)
+              RINT = AUX1 / AUX2                        ! 1/s² * s²/m² = 1/m²
               FT   = PTRIAD(1) * C0 * CG(IK) * RINT**2 * SINBPH ! m²/s² * 1/m4 = 1/(m²*s²)
 
-              SA(ITH,IK) = MAX(0.,FT * ( EM * EM - 2. * EM * E0 )) ! 1/(m²*s²) * m4 = m²/s² !!! [m²/s]
+              SA(ITH,IK) = MAX(0.,FT * ( EM * EM - 2. * EM * E0)) ! 1/(m²*s²) * m4 = m²/s² !!! [m²/s]
+!              SA(ITH,IK) = MAX(0.,FT * ( EDM * (EM-E0) - ED0 * EM))
 
-              IF (IX == 1775) WRITE(2222,'(3I10,20F20.10)') IX, ITH, IK, FT, EM, E0, AUX1, DEP, &
-             &                AUX2, RINT, C0, CG(IK), WN0 * DEP, GRAV * DEP!,&
-             !&                (2./15.) * GRAV * DEP_3 * WN0**2,  (2./ 5.) * W0**2 * DEP_2
+              !IF (IX == 1765) WRITE(2222,'(3I10,20F15.6)') IX, ITH, IK, WNM**2, GRAV * DEP, 2*CM**2
+              IF (IX == 1754) WRITE(2222,'(3I10,20F30.20)') IX, ITH, IK, SA(ITH,IK), FT, (EDM * (EM - E0) - ED0 * EM)
+
+!              IF (IX == 1765) WRITE(2222,'(3I10,20F15.6)') IX, ITH, IK, DEP, FT, EM, E0, WNM, CM, AUX1,&
+!             &                AUX2, RINT, C0, CG(IK), WN0 * DEP, GRAV * DEP, 4*SQRT(EMEAN)!, &
+!             &                (2./15.) * GRAV * DEP_3 * WN0**2,  (2./ 5.) * W0**2 * DEP_2
 !
-              IF (IX == 1776) WRITE(3333,'(3I10,20F20.10)') IX, ITH, IK, FT, EM, E0, AUX1, DEP, & 
-             &                AUX2, RINT, C0, CG(IK), WN0 * DEP, GRAV * DEP!,&
-             !&                (2./15.) * GRAV * DEP_3 * WN0**2,  (2./ 5.) * W0**2 * DEP_2
+              IF (IX == 1754) WRITE(3333,'(3I10,20F15.6)') IX, ITH, IK, DEP, FT, EM, E0, WNM, CM, AUX1,& 
+             &                AUX2, RINT, C0, CG(IK), WN0 * DEP, GRAV * DEP, 4*SQRT(EMEAN)!, &
+!             &                (2./15.) * GRAV * DEP_3 * WN0**2,  (2./ 5.) * W0**2 * DEP_2
  
 !              IF ( IK.GT.-ISM1 .and. A(ITH+(IK-1)*NTH) .gt. 0.) &
 !          &                     write(*,'(4I10,10F15.8)') IK, ITH, IK+ISM, IK+ISM1, FT, &
@@ -497,9 +515,10 @@
             IF (A(ITH+(IK-1)*NTH) .gt. 1.E-12) THEN
              !write(*,*) IK, ITH, SA(ITH,IK), WISP, A(ITH+(IK-1)*NTH)
              !D(ITH+(IK-1)*NTH) = 0. 
-              D(ITH+(IK-1)*NTH) = STRI / (A(ITH+(IK-1)*NTH)*SIGPICG)
+              D(ITH+(IK-1)*NTH) = STRI / (A(ITH+(IK-1)*NTH)*SIGPICG) 
               S(ITH+(IK-1)*NTH) = STRI / SIGPICG 
-              !write(*,*) SIG(IK), S(ITH+(IK-1)*NTH), D(ITH+(IK-1)*NTH), A(ITH+(IK-1)*NTH)
+              IF (IX == 1754) write(4444,'(2I10,4F30.20)') IK, ITH, & 
+           &         S(ITH+(IK-1)*NTH), D(ITH+(IK-1)*NTH), A(ITH+(IK-1)*NTH)
             ELSE
               D(ITH+(IK-1)*NTH) = 0.
               S(ITH+(IK-1)*NTH) = 0.
@@ -511,6 +530,8 @@
         D = 0.
         S = 0.
       END IF
+
+      !write(*,'(A20,I10,10F20.10)') 'TEST SUM', IX, SUM(S), SUM(D), SUM(A), URSELL 
 
       DEALLOCATE(E,SA)
 

@@ -656,6 +656,8 @@
 ! 1.c Set mean parameters
 !
 !/ST0      CALL W3SPR0 (SPEC, CG1, WN1, EMEAN, FMEAN, WNMEAN, AMAX)
+
+           IF (IX == 4) WRITE(*,*) 'TEST ST0', 4* SQRT(EMEAN), SUM(SPEC), SUM(VA(:,IX)), IX 
 !/ST0      FP     = 0.85 * FMEAN
 !/ST1      CALL W3SPR1 (SPEC, CG1, WN1, EMEAN, FMEAN, WNMEAN, AMAX)
 !/ST1      FP     = 0.85 * FMEAN
@@ -810,6 +812,7 @@
 !/NL4        CALL W3SNL4 ( SPEC, CG1, WN1, DEPTH,          VSNL, VDNL )
 !/NLX        CALL W3SNLX 
 !
+<<<<<<< Updated upstream
 !/PDLIB    IF (.NOT. FSSOURCE) THEN
 !/PDLIB      IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
 !/TR1          CALL W3STR1 ( SPEC, CG1, WN1, DEPTH, IX,        VSTR, VDTR )
@@ -819,6 +822,17 @@
 !/PDLIB      VSTR = 0.
 !/PDLIB      VDTR = 0.
 !/PDLIB    ENDIF
+=======
+!!/PDLIB    IF (.NOT. FSSOURCE) THEN
+!!/PDLIB      IF (.NOT. B_JGS_SOURCE_NONLINEAR) THEN
+!!/TR1          CALL W3STR1 ( SPEC, CG1, WN1, DEPTH, IX,        VSTR, VDTR )
+!!/TRX          CALL W3STRX
+!!/PDLIB      ENDIF
+!!/PDLIB    ELSE
+!!/PDLIB      VSTR = 0.
+!!/PDLIB      VDTR = 0.
+!!/PDLIB    ENDIF
+>>>>>>> Stashed changes
 !
 ! 2.c Dissipation... except for ST4
 ! 2.c1   as in source term package
@@ -1106,7 +1120,7 @@
 ! 5.  Increment spectrum --------------------------------------------- *
 !
         IF (srce_call .eq. srce_direct) THEN
-!          SHAVE = .FALSE. 
+          SHAVE = .FALSE. 
 !         IF (IX == DEBUG_NODE) THEN
 !            WRITE(*,'(A20,I20,F20.10,L20,4F20.10)') 'BEFORE', IX, DEPTH, SHAVE, SUM(VS), SUM(VD), SUM(SPEC)
 !          ENDIF
