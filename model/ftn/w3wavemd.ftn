@@ -1996,8 +1996,6 @@
 
 !/DEBUGRUN          IF (JSEA == DEBUG_NODE) WRITE(*,*) 'W3WAVE TEST', ISEA, JSEA, SUM(VA(:,JSEA))
 
-                IF (JSEA == 4) WRITE(*,*) 'TEST TEST TEST TEST', SUM(VA(:,JSEA))
-
                 IF (MAPSTA(IY,IX) .EQ. 1 .AND. FLAGST(ISEA)) THEN
                      TMP1   = WHITECAP(JSEA,1:4)
                      TMP2   = BEDFORMS(JSEA,1:3)

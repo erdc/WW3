@@ -343,8 +343,6 @@
           ED(IK) = ED(IK) + A(ITH+(IK-1)*NTH) * DDEN(IK) / CG(IK)
         END DO
       END DO
-
-!      write(*,*) 'TEST SUM', SUM(EB), SUM(ED) 
 !
 ! 2.  Integrate over frequencies. 
 !
@@ -363,22 +361,19 @@
 !
 ! 4.  Final processing
 !
-      SIGM01 = MAX ( 1.E-7 , SIGM01 ) / MAX(EMEAN,0.001)
+      SIGM01 = SIGM01 / EMEAN
 
 !---- Temporary parameters (to be replaced by namelists) -----
-<<<<<<< Updated upstream
+
       PTRIAD(1) = 1. 
-      PTRIAD(2) = 2.5 
-=======
-      PTRIAD(1) = 1.
-      PTRIAD(2) = 20.
->>>>>>> Stashed changes
-      PTRIAD(3) = 10.
+      PTRIAD(2) = 1000. 
+      PTRIAD(3) = 10. ! not used 
       PTRIAD(4) = 0.2
       PTRIAD(5) = 0.01
 
       HS     = 4.*SQRT( MAX(0.,EMEAN) )
       URSELL = (GRAV*HS)/(2.*SQRT(2.)*SIGM01**2*DEPTH**2)
+      !write(*,*) HS, URSELL, SIGM01
 !---------------------------------------------
 
       DEP   = DEPTH
@@ -404,12 +399,10 @@
       WISM   = (XIS**ISM -0.5) / (XIS**ISM - XIS**ISM1)
       WISM1  = 1. - WISM
 
-
       ALLOCATE (E (1:NK))
       ALLOCATE (SA(1:NTH,1:NK+ISP1))
       E  = 0.
       SA = 0.
-
 !
 !     --- compute maximum frequency for which interactions are calculated
 !
@@ -427,7 +420,7 @@
 !         only be called when lowest freq. is touching botton
 !         will see this later ...
 !
-      IF ( .true. ) THEN!URSELL.GE.PTRIAD(5) ) THEN
+      IF (.true.) THEN!URSELL.GE.PTRIAD(5) ) THEN
 !
 !       --- calculate biphase
 !
@@ -443,16 +436,14 @@
 !          --- (convert from N(k) to E(f) using proper Jacobian)
 !
            DO IK = 1, NK
-              E(IK) = A(ITH+(IK-1)*NTH) * TPI * SIG(IK) / CG(IK)
-!------------ Test ------------------------------------------ 
+              E(IK)  = A(ITH+(IK-1)*NTH) * TPI * SIG(IK) / CG(IK)
               EF(IK) = EF(IK) + E(IK)        
-!------------------------------------------------------------
            END DO
 !
            DO IK = 1, ISMAX
 
               E0  = E(IK)
-              ED0 = ED(IK) 
+              ED0 = EB(IK) 
               !IF (E0 .lt. TINY(1.)) CYCLE
               W0  = SIG(IK)
               WN0 = WN(IK)
@@ -460,7 +451,7 @@
 
               IF ( IK.GT.-ISM1 ) THEN
                  EM  = WISM * E(IK+ISM1)   + WISM1 * E(IK+ISM)
-                 EDM = WISM * ED(IS+ISM1)  + WISM1 * ED(IS+ISM)
+                 EDM = WISM * EB(IK+ISM1)  + WISM1 * EB(IK+ISM)
                  WM  = WISM * SIG(IK+ISM1) + WISM1 * SIG(IK+ISM)
                  WNM = WISM * WN(IK+ISM1)  + WISM1 * WN(IK+ISM)
                  CM  = WM / WNM
@@ -479,21 +470,19 @@
                                    (2./ 5.) * W0**2 * DEP_2)
               RINT = AUX1 / AUX2                        ! 1/s² * s²/m² = 1/m²
               FT   = PTRIAD(1) * C0 * CG(IK) * RINT**2 * SINBPH ! m²/s² * 1/m4 = 1/(m²*s²)
-
               SA(ITH,IK) = MAX(0.,FT * ( EM * EM - 2. * EM * E0)) ! 1/(m²*s²) * m4 = m²/s² !!! [m²/s]
-!              SA(ITH,IK) = MAX(0.,FT * ( EDM * (EM-E0) - ED0 * EM))
-
+              !SA(ITH,IK) =  MAX(0., FT * ( EDM * (EM - E0) - ED0 * EM )) 
+              !IF (MAX(0.,FT * ( EM * EM - 2. * EM * E0)) .gt. 0.) THEN
+                !write(*,*) MAX(0.,FT * ( EDM * (EM-E0) - ED0 * EM))/MAX(0.,FT * ( EM * EM - 2. * EM * E0))
+              !ENDIF
               !IF (IX == 1765) WRITE(2222,'(3I10,20F15.6)') IX, ITH, IK, WNM**2, GRAV * DEP, 2*CM**2
-              IF (IX == 1754) WRITE(2222,'(3I10,20F30.20)') IX, ITH, IK, SA(ITH,IK), FT, (EDM * (EM - E0) - ED0 * EM)
-
+!              IF (IX == 1754) WRITE(2222,'(3I10,20F30.20)') IX, ITH, IK, SA(ITH,IK), FT, (EDM * (EM - E0) - ED0 * EM)
 !              IF (IX == 1765) WRITE(2222,'(3I10,20F15.6)') IX, ITH, IK, DEP, FT, EM, E0, WNM, CM, AUX1,&
 !             &                AUX2, RINT, C0, CG(IK), WN0 * DEP, GRAV * DEP, 4*SQRT(EMEAN)!, &
 !             &                (2./15.) * GRAV * DEP_3 * WN0**2,  (2./ 5.) * W0**2 * DEP_2
-!
-              IF (IX == 1754) WRITE(3333,'(3I10,20F15.6)') IX, ITH, IK, DEP, FT, EM, E0, WNM, CM, AUX1,& 
-             &                AUX2, RINT, C0, CG(IK), WN0 * DEP, GRAV * DEP, 4*SQRT(EMEAN)!, &
+!              IF (IX == 1754) WRITE(3333,'(3I10,20F15.6)') IX, ITH, IK, DEP, FT, EM, E0, WNM, CM, AUX1,& 
+!             &                AUX2, RINT, C0, CG(IK), WN0 * DEP, GRAV * DEP, 4*SQRT(EMEAN)!, &
 !             &                (2./15.) * GRAV * DEP_3 * WN0**2,  (2./ 5.) * W0**2 * DEP_2
- 
 !              IF ( IK.GT.-ISM1 .and. A(ITH+(IK-1)*NTH) .gt. 0.) &
 !          &                     write(*,'(4I10,10F15.8)') IK, ITH, IK+ISM, IK+ISM1, FT, &
 !          &                     SA(ITH,IK), E(IK), EF(IK), A(ITH+(IK-1)*NTH), 4*SQRT(EMEAN)
@@ -506,19 +495,19 @@
 
         SF = 0.
         DO IK = 1, NK
-          SIGPICG = SIG(IK) * TPI / CG(IK) ! 1/s * s/m = 1/m
+          SIGPICG = SIG(IK)*TPI/CG(IK) ! 1/s * s/m = 1/m
           DO ITH = 1, NTH
 !           --- Source term
 !           STRI = 2 * ( SA(ITH,IK) - 2 * (WISP * SA(ITH,IK+ISP1) + WISP1 * SA(ITH,IK+ISP)) ) / SIGPICG
             STRI =       SA(ITH,IK) - 2 * (WISP * SA(ITH,IK+ISP1) + WISP1 * SA(ITH,IK+ISP)) 
             !IF (ABS(STRI) .gt. 0.) WRITE(*,*) IK, ITH, STRI
-            IF (A(ITH+(IK-1)*NTH) .gt. 1.E-12) THEN
+            IF (A(ITH+(IK-1)*NTH) .gt. 1.E-18) THEN
              !write(*,*) IK, ITH, SA(ITH,IK), WISP, A(ITH+(IK-1)*NTH)
              !D(ITH+(IK-1)*NTH) = 0. 
-              D(ITH+(IK-1)*NTH) = STRI / (A(ITH+(IK-1)*NTH)*SIGPICG) 
+              D(ITH+(IK-1)*NTH) = STRI / (A(ITH+(IK-1)*NTH)*SIGPICG)
               S(ITH+(IK-1)*NTH) = STRI / SIGPICG 
-              IF (IX == 1754) write(4444,'(2I10,4F30.20)') IK, ITH, & 
-           &         S(ITH+(IK-1)*NTH), D(ITH+(IK-1)*NTH), A(ITH+(IK-1)*NTH)
+!              IF (IX == 1754) write(4444,'(2I10,4F30.20)') IK, ITH, & 
+!           &         S(ITH+(IK-1)*NTH), D(ITH+(IK-1)*NTH), A(ITH+(IK-1)*NTH)
             ELSE
               D(ITH+(IK-1)*NTH) = 0.
               S(ITH+(IK-1)*NTH) = 0.
