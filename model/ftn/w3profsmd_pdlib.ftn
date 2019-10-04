@@ -4746,9 +4746,6 @@
 
       !WRITE(*,*) NX, NY, NSEA, NSEAL, NSEALM, NP, NPA, NTRI, NE
 
-      VSTOT = 0.
-      VDTOT = 0.
-
       DO JSEA = 1, NP
 
         IP      = JSEA
@@ -4789,21 +4786,9 @@
           eSI    = PDLIB_SI(IP)
           SIDT   = eSI * DTG
           DEPTH  = DW(ISEA) 
-!/DB1          VSDB   = 0.
-!/DB1          VDDB   = 0.
-!/DB1          CALL W3SDB1 ( JSEA, SPEC_VA, DEPTH, EMEAN, FMEAN, WNMEAN, CG1, LBREAK, VSDB, VDDB )
-!!/DB1          VSTOT(:,JSEA) = VSTOT(:,JSEA) + VSDB
-!!/DB1          VDTOT(:,JSEA) = VDTOT(:,JSEA) + VDDB
-!/TR1          VSTR = 0.
-!/TR1          VDTR = 0.
-!/TR1          CALL W3STR1 ( SPEC_VA, CG1, WN1, DEPTH, JSEA, VSTR, VDTR )
-!!/TR1          VSTOT(:,JSEA) = VSTOT(:,JSEA) + VSTR 
-!!/TR1          DO ISP = 1, NSPEC
-!!/TR1            VDTOT(ISP,JSEA) = VDTOT(ISP,JSEA) + MIN(0.,VDTR(ISP))
-!!/TR1          ENDDO
-!/TR1          
-!          WRITE(12434,'(I10,10F20.10)') JSEA, SUM(SPEC_VA), SUM(VSTOT(:,JSEA)), SUM(VDTOT(:,JSEA)), &
-!         &     SUM(VSTR), SUM(VDTR), SUM(CG1), SUM(WN1), DEPTH 
+!/DB1     CALL W3SDB1 ( JSEA, SPEC_VA, DEPTH, EMEAN, FMEAN, WNMEAN, CG1, LBREAK, VSDB, VDDB )
+!/TR1     CALL W3STR1 ( SPEC_VA, CG1, WN1, DEPTH, JSEA, VSTR, VDTR )
+!/VEG1    CALL W3SVEG1 ( JSEA, 1, SPEC_VA, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG ) 
           DO IK=1,NK
             DO ITH=1,NTH
               ISP=ITH + (IK-1)*NTH
@@ -4828,6 +4813,8 @@
 !/DB1            eVD = evD + DBLE(VDDB(ISP))
 !/TR1            eVS = eVS + DBLE(VSTR(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
 !/TR1            eVD = evD + MIN(0.,DBLE(VDTR(ISP)))
+!/VEG1           eVS = eVS + DBLE(VSVG(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+!/VEG1           eVD = evD + MIN(0.,DBLE(VDVG(ISP)))
               !WRITE(12434,'(I10,3F20.10)') JSEA, VSTOT(ISP,JSEA), VDTOT(ISP,JSEA)
               B_JAC(ISP,IP) = B_JAC(ISP,IP) + SIDT * (eVS - eVD*VA(ISP,JSEA))
               IF (IMEM == 1) THEN
