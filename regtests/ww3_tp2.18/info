@@ -1,0 +1,58 @@
+#############################################################################
+#                                                                           #
+# ww3_tp2.18 Test script for WW-III, unstructured grid with vegetation      # 
+# source term (Dalrymple et al., 1984 and Mendez & Losada, 2004).           #
+# The lab case is taken from Anderson and Smith (2014):                     #
+#                                                                           #
+#  > Homogeneous vegetation field (defiend in ww3_shel.inp)                 #              
+#    > CD = drag coefficient                                                #
+#    > bv = stem diameter                                                   #
+#    > 𝜶 = relative stem length                                             #
+#    > 𝑵 = vegetation density                                               #
+#  > Neumann boundary condtion along lateral flume walls (meshbnd.msh)      #
+#  > Single peak spectrum at wavemaker  (ww3_bounc.inp)                     #
+#    waterdepth 53.3 cm, Tp = 1.5 s, Hs = 11.1 cm, L = 2.89 m               #
+#    Three scenarios:                                                       #
+#    > boundary.nc (no vegetation): (𝜶,bv,N,CD) = (0.415 0.0064 0 0.369)    #
+#    > boundaryMed.nc : (𝜶,bv,N,CD) = (0.415 0.0064 200 0.369)              #
+#    > boundaryHigh.nc: (𝜶,bv,N,CD) = (0.415 0.0064 400 0.369)              #
+#      > domain decomposition  (ww3_grid_b.inp)                             #
+#  > Implicit (domain decomposition) (dt = 0.1 s)                           #
+#                                                                           #
+# Grid:                                                                     # 
+# Flume Dimension: 9.8 x 3 m^2, x0 = 26.9 m, xend = 36.7 m                  #
+# Triangular Unstructured Grids:                                            #
+#===========================================================================#
+# #of Nodes |  # of Elements  |  lowest res  |  # of open boundary nodes    #
+#---------------------------------------------------------------------------#
+#   3,566   |      6,905      |    10 cm     |            28                #
+#---------------------------------------------------------------------------#
+#                                                                           #
+# Lateral Forcing: open boundary condtion (netcdf)                          #
+#                                                                           #
+# Model should be compiled with the switches :                              #
+#                                                                           #
+# F90 PDLIB NOGRB NC4 DIST MPI PR3 UQ FLX0 LN0 ST0 NL0 BT0 DB0 MLIM TR0 BS0 #
+# IC0 IS0 VEG1 REF0 XX0 WNT1 WNX1 CRT1 CRX1 SEC1 O0 O1 O2 O3 O4 O5 O6 O7    #
+#                                                                           #
+#  -the domain decomposition and implicit scheme need PDLIB switch          #
+#                                                                           #
+#   The choice of propagation schemes for unstructured grids is done via    #
+#   namelists.                                                              #
+#                                                                           #
+# Remarks :                                                                 #
+#                                                                           #
+# - No other optional switches should be used.                              #
+#                                                                           #
+#  Sample run_test commands :                                               #
+#  ./bin/run_test -b slurm -c Intel -S -T -w work_veg0  -f -p srun -n 24    #
+#                                     -o netcdf ../model ww3_tp2.18/Veg0    #
+#  ./bin/run_test -b slurm -c Intel -S -T -w work_med   -f -p srun -n 24    # 
+#                                      -o netcdf ../model ww3_tp2.18/Med    #
+#  ./bin/run_test -b slurm -c Intel -S -T -w work_high  -f -p srun -n 24    # 
+#                                     -o netcdf ../model ww3_tp2.18/High    #
+#                                                                           #
+#                                  Ali Abdolali, Tyler Hesser, March 2020   #
+#                                                                           #
+#                                                                           #
+#############################################################################

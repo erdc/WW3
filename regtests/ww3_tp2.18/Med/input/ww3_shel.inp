@@ -1,0 +1,56 @@
+$ WAVEWATCH III shell input file
+$ ------------------------------
+   T T     Veg parameters
+   T T     Veg cdrag
+   F F     Ice parameter 1
+   F F     Ice parameter 2
+   F F     Ice parameter 3
+   F F     Ice parameter 4
+   F F     Ice parameter 5
+   F F     Mud parameter 1
+   F F     Mud parameter 2
+   F F     Mud parameter 3
+   F F     Water levels
+   F F     Currents
+   F F     Winds
+   F       Ice concentrations
+   F       Assimilation data : Mean parameters
+   F       Assimilation data : 1-D spectra
+   F       Assimilation data : 2-D spectra.
+$
+   20180701 000000
+   20180701 000200
+$
+   1
+$
+   20180701 000000 1 20180701 010000
+$
+N
+DPT HS TM10 FP DIR 
+$
+   20180701 000000  1  20180701 010000
+$
+$output points for Inlet
+$
+$
+26.0 0 WG4
+26.9 0 WG5
+27.4 0 WG6
+27.9 0 WG7
+28.5 0 WG8
+29.5 0 WG9
+31.0 0 WG10
+32.7 0 WG11
+34.4 0 WG12
+36.2 0 WG13
+$
+     0.0   0.0  'STOPSTRING'
+$
+   19680606 000000      0  19680608 000000
+   19680606 000000      0  19680608 000000
+   19680606 000000      0  19680608 000000
+   19680606 000000      0  19680608 000000
+$
+'VG1' 20180701 000000 0.415 0.0064 200
+'VG2' 20180801 000000 0.282
+'STP'
