@@ -128,6 +128,7 @@ fi
   export    pdlib='y' # unstr with pdlib for domain decomposition and implicit solver
   export    smcgr='y' # SMC/Rotated grid test
   export   mudice='y' # Mud/Ice and wave interaction tests 
+  export      veg='y' # vegetation and wave interaction tests
   export   infgrv='y' # Second harmonic generation tests
   export     uost='y' # ww3_ts4 Unresolved Obstacles Source Term (UOST)
   export    assim='y' # Restart spectra update

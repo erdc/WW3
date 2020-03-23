@@ -75,6 +75,7 @@
   echo "  echo '      SMC / Rotated grid tests           : $smcgr'"            >> matrix.head
   echo "  echo '      Hurricane with one moving grid     : $hur1mg'"           >> matrix.head
   echo "  echo '      Mud/Ice and wave interaction tests : $mudice'"           >> matrix.head
+  echo "  echo '      Vegetation-wave interaction tests  : $veg'"              >> matrix.head
   echo "  echo '      Second harmonic generation tests   : $infgrv'"           >> matrix.head
   echo "  echo '      Multi 01 (wet and dry)             : $multi01'"          >> matrix.head
   echo "  echo '      Multi 02 (basic nesting)           : $multi02'"          >> matrix.head
@@ -1957,6 +1958,16 @@
    echo "$rtst -s MPI -s PDLIB -w work_pdlib -g pdlib -f -p $mpi -n $np $ww3 ww3_tp2.6" >> matrix.body 
    echo "$rtst -s MPI -s PDLIB -w work_mb -m grdset_b -f -p $mpi -n $np $ww3 ww3_tp2.17" >> matrix.body
    echo "$rtst -s MPI -s PDLIB -w work_mc -m grdset_c -f -p $mpi -n $np $ww3 ww3_tp2.17" >> matrix.body
+ fi
+
+
+ # unstructured grid with PDLIB for vegetation source term
+ if [ "$veg" = 'y' ] && [ "$pdlib" = 'y' ] && [ "$dist" = 'y' ]
+ then
+   echo ' ' >> matrix.body
+   echo "$rtst -w work_veg0 -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.18/Veg0" >> matrix.body
+   echo "$rtst -w work_Med -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.18/Med" >> matrix.body
+   echo "$rtst -w work_High -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.18/High" >> matrix.body
  fi
 
  #Unresolved Obstacles Source Term (UOST) 
