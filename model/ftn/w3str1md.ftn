@@ -501,7 +501,7 @@
 !           STRI = 2 * ( SA(ITH,IK) - 2 * (WISP * SA(ITH,IK+ISP1) + WISP1 * SA(ITH,IK+ISP)) ) / SIGPICG
             STRI =       SA(ITH,IK) - 2 * (WISP * SA(ITH,IK+ISP1) + WISP1 * SA(ITH,IK+ISP)) 
             !IF (ABS(STRI) .gt. 0.) WRITE(*,*) IK, ITH, STRI
-            IF (A(ITH+(IK-1)*NTH) .gt. 1.E-18) THEN
+            IF (A(ITH+(IK-1)*NTH) .gt. 1.E-12) THEN
              !write(*,*) IK, ITH, SA(ITH,IK), WISP, A(ITH+(IK-1)*NTH)
              !D(ITH+(IK-1)*NTH) = 0. 
               D(ITH+(IK-1)*NTH) = STRI / (A(ITH+(IK-1)*NTH)*SIGPICG)

@@ -1235,7 +1235,7 @@ module yowpdlibMain
     COUNT_MAX = J
     ALLOCATE (PDLIB_IE_CELL(COUNT_MAX), PDLIB_POS_CELL(COUNT_MAX), stat=istat)
     IF (istat/=0) CALL PARALLEL_ABORT('wwm_fluctsplit, allocate error 5a')
-    ALLOCATE (PDLIB_IE_CELL2(npa,MAXMNECON), PDLIB_POS_CELL2(npa,MAXMNECON), stat=istat)
+    ALLOCATE (PDLIB_IE_CELL2(MAXMNECON,NPA), PDLIB_POS_CELL2(MAXMNECON, NPA), stat=istat)
     IF (istat/=0) CALL PARALLEL_ABORT('wwm_fluctsplit, allocate error 5b')
 ! Just a remapping from CELLVERTEX ... Element number in the
 ! order of the occurence in the loop during runtime
@@ -1243,15 +1243,14 @@ module yowpdlibMain
 ! Just a remapping from CELLVERTEX ... Position of the node
 ! in the Element index -"-
     PDLIB_POS_CELL = 0
-!
     J = 0
     DO IP = 1, npa
       DO I = 1, PDLIB_CCON(IP)
         J = J + 1
         PDLIB_IE_CELL(J)      = CELLVERTEX(IP,I,1)
         PDLIB_POS_CELL(J)     = CELLVERTEX(IP,I,2)
-        PDLIB_IE_CELL2(IP,I)  = CELLVERTEX(IP,I,1)
-        PDLIB_POS_CELL2(IP,I) = CELLVERTEX(IP,I,2)
+        PDLIB_IE_CELL2(I,IP)  = CELLVERTEX(IP,I,1)
+        PDLIB_POS_CELL2(I,IP) = CELLVERTEX(IP,I,2)
       END DO
     END DO
     deallocate(CELLVERTEX)
@@ -1337,8 +1336,8 @@ module yowpdlibMain
       ITMP=0
       DO I = 1, PDLIB_CCON(IP) ! Check how many entries there are ...
         J = J + 1
-        IP_J  = PTABLE(J,2)
-        IP_K  = PTABLE(J,3)
+        IP_J = PTABLE(J,2)
+        IP_K = PTABLE(J,3)
         ITMP(IP)   = 1
         ITMP(IP_J) = 1
         ITMP(IP_K) = 1
@@ -1371,7 +1370,7 @@ module yowpdlibMain
     J=0
     DO IP=1,npa
       DO I = 1, PDLIB_CCON(IP)
-        J=J+1
+        J = J + 1
         IE    =  PDLIB_IE_CELL(J)
         POS   =  PDLIB_POS_CELL(J)
         I1    =  PDLIB_POSI(1,J)

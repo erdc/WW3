@@ -696,7 +696,7 @@
         INTEGER               :: COUNTRI,COUNTOT,NNZ, NBEDGE
         INTEGER, POINTER      :: CCON(:), COUNTCON(:), IE_CELL(:), &
                                  POS_CELL(:), IOBP(:), IOBPD(:,:), IOBDP(:), IOBPA(:),   &
-!/PDLIB                          IOBPD_loc(:,:), IOBP_loc(:),                    &
+!/PDLIB                          IOBPD_loc(:,:), IOBP_loc(:), IOBPA_loc(:), IOBDP_loc(:),&
                                  IAA(:), JAA(:), POSI(:,:), INDEX_CELL(:),       &
                                  I_DIAG(:), JA_IE(:,:,:)
         INTEGER, POINTER      :: EDGES(:,:), NEIGH(:,:)
@@ -958,7 +958,7 @@
       REAL, POINTER           :: ANGLE(:,:),ANGLE0(:,:)
       INTEGER,  POINTER       :: CCON(:),  COUNTCON(:), IE_CELL(:),           &
                                  POS_CELL(:), IOBP(:), IOBPD(:,:), IOBDP(:), IOBPA(:),  &
-!/PDLIB                                 IOBPD_loc(:,:), IOBP_loc(:),          &
+!/PDLIB                                 IOBPD_loc(:,:), IOBP_loc(:), IOBPA_loc(:), IOBDP_loc(:),&
                                  IAA(:), JAA(:), POSI(:,:),                   &
                                  I_DIAG(:), JA_IE(:,:,:),                     &
                                  INDEX_CELL(:)
@@ -2022,6 +2022,8 @@
       IOBPA     => GRIDS(IMOD)%IOBPA
 !/PDLIB      IOBP_loc     => GRIDS(IMOD)%IOBP_loc
 !/PDLIB      IOBPD_loc     => GRIDS(IMOD)%IOBPD_loc
+!/PDLIB      IOBPA_loc     => GRIDS(IMOD)%IOBPA_loc
+!/PDLIB      IOBDP_loc     => GRIDS(IMOD)%IOBDP_loc
       TRIA     => GRIDS(IMOD)%TRIA
       CROSSDIFF => GRIDS(IMOD)%CROSSDIFF
       MAXX     => GRIDS(IMOD)%MAXX

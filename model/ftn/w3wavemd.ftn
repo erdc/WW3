@@ -401,6 +401,7 @@
 !/OASICM      USE W3IGCMMD, ONLY: SND_FIELDS_TO_ICE
 
 !/PDLIB      USE PDLIB_FIELD_VEC, only : DO_OUTPUT_EXCHANGES
+!/PDLIB      USE PDLIB_W3PROFSMD, ONLY: ASPAR_JAC, ASPAR_DIAG_ALL, B_JAC, SETDEPTH_PDLIB
 !/TIMINGS    USE W3PARALL, only : PRINT_MY_TIME
 !
       IMPLICIT NONE
@@ -438,7 +439,6 @@
                                  FAC, VGX, VGY, FACK, FACTH,          &
                                  FACX, XXX, REFLEC(4),                &
                                  DELX, DELY, DELA, DEPTH, D50, PSIC
-     REAL                     :: VSioDummy(NSPEC), VDioDummy(NSPEC), VAoldDummy(NSPEC)
      LOGICAL                  :: SHAVETOTioDummy
 !/SEC1     REAL                    :: DTGTEMP
 !
@@ -471,8 +471,6 @@
       CHARACTER(LEN=23)       :: IDTIME
       INTEGER eIOBP
       INTEGER ITH_F
-!/PDLIB     REAL ::             VS_SPEC(NSPEC)
-!/PDLIB     REAL ::             VD_SPEC(NSPEC)
 
 !
 !/SBS      CHARACTER(LEN=30)       :: FOUTNAME
@@ -1334,13 +1332,9 @@
 !
 !/PDLIB!/DEBUGSRC          WRITE(740+IAPROC,*) 'ITIME=', ITIME, ' IT=', IT
 !/PDLIB!/DEBUGSRC          CALL ALL_VA_INTEGRAL_PRINT(IMOD, "VA before W3SRCE_IMP_PRE")
-!/PDLIB!/DEBUGSRC          CALL ALL_FIELD_INTEGRAL_PRINT(VSTOT, "VSTOT before W3SRCE_IMP_PRE")
-!/PDLIB!/DEBUGSRC          CALL ALL_FIELD_INTEGRAL_PRINT(VDTOT, "VDTOT before W3SRCE_IMP_PRE")
 !/PDLIB!/DEBUGSRC          IF (DEBUG_NODE .le. NSEAL) THEN
 !/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     Values for DEBUG_NODE=', DEBUG_NODE
 !/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     sum(VA)=', sum(VA(:,DEBUG_NODE))
-!/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     sum(VSTOT)=', sum(VSTOT(:,DEBUG_NODE))
-!/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     sum(VDTOT)=', sum(VDTOT(:,DEBUG_NODE))
 !/PDLIB!/DEBUGSRC          END IF
 !/PDLIB       IF (IT .eq. 0) THEN
 !/PDLIB         DTGpre = 1.
@@ -1352,45 +1346,48 @@
 !/MEMCHECK       call getMallocInfo(mallinfos)
 !/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
 !
-        IF ( FLSOU .and. LPDLIB) THEN
+        IF ( FLSOU .and. FSSOURCE .and. LPDLIB) THEN
 !
 !/OMP0/!$OMP PARALLEL DO PRIVATE (JSEA,ISEA,IX,IY) SCHEDULE (DYNAMIC,1)
-          D50=0.0002
-          REFLEC(:)=0.
-          REFLED(:)=0
-          PSIC=0.
-!/PDLIB          VSTOT = 0.
-!/PDLIB          VDTOT = 0.
+          D50       = 0.0002
+          REFLEC(:) = 0.
+          REFLED(:) = 0
+          PSIC      = 0.
 
-          DO JSEA=1, NSEAL
+          CALL SETDEPTH_PDLIB
+
+          DO JSEA = 1, NSEAL
+
             CALL INIT_GET_ISEA(ISEA, JSEA)
+
             IX     = MAPSF(ISEA,1)
             IY     = MAPSF(ISEA,2)
             DELA=1. 
             DELX=1. 
             DELY=1. 
-!/REF1                IF (GTYPE.EQ.RLGTYPE) THEN 
-!/REF1                  DELX=SX*CLATS(ISEA)/FACX
-!/REF1                  DELY=SY/FACX
-!/REF1                  DELA=DELX*DELY
-!/REF1                END IF
-!/REF1                IF (GTYPE.EQ.CLGTYPE) THEN 
+
+!/PDLIB     IF (IOBP_LOC(JSEA) == 2) CYCLE
+!/REF1        IF (GTYPE.EQ.RLGTYPE) THEN 
+!/REF1          DELX=SX*CLATS(ISEA)/FACX
+!/REF1          DELY=SY/FACX
+!/REF1          DELA=DELX*DELY
+!/REF1        ELSE IF (GTYPE.EQ.CLGTYPE) THEN 
 !/REF1! Maybe what follows works also for RLGTYPE ... to be verified
-!/REF1                  DELX=HPFAC(IY,IX)/ FACX
-!/REF1                  DELY=HQFAC(IY,IX)/ FACX 
-!/REF1                  DELA=DELX*DELY
-!/REF1                END IF
+!/REF1          DELX=HPFAC(IY,IX)/ FACX
+!/REF1          DELY=HQFAC(IY,IX)/ FACX 
+!/REF1          DELA=DELX*DELY
+!/REF1        END IF
 !
-!/REF1       REFLEC=REFLC(:,ISEA)
-!/REF1       REFLEC(4)=BERG(ISEA)*REFLEC(4)
-!/REF1       REFLED=REFLD(:,ISEA)
-!/BT4        D50=SED_D50(ISEA)
-!/BT4        PSIC=SED_PSIC(ISEA)
-!/REF1       REFLEC=REFLC(:,ISEA)
-!/REF1       REFLEC(4)=BERG(ISEA)*REFLEC(4)
-!/REF1       REFLED=REFLD(:,ISEA)
-!/BT4        D50=SED_D50(ISEA)
-!/BT4        PSIC=SED_PSIC(ISEA)
+!/REF1       REFLECi    = REFLC(:,ISEA)
+!/REF1       REFLEC(4)  = BERG(ISEA)*REFLEC(4)
+!/REF1       REFLED     = REFLD(:,ISEA)
+!/BT4        D50        = SED_D50(ISEA)
+!/BT4        PSIC       = SED_PSIC(ISEA)
+!/REF1       REFLEC     = REFLC(:,ISEA)
+!/REF1       REFLEC(4)  = BERG(ISEA)*REFLEC(4)
+!/REF1       REFLED     = REFLD(:,ISEA)
+!/BT4        D50        = SED_D50(ISEA)
+!/BT4        PSIC       = SED_PSIC(ISEA)
 !
 !/DEBUGRUN        DO IS = 1, NSPEC
 !/DEBUGRUN          IF (VA(IS, JSEA) .LT. 0.) THEN
@@ -1399,8 +1396,6 @@
 !/DEBUGRUN          ENDIF
 !/DEBUGRUN        ENDDO
 !
-            IF ( MAPSTA(IY,IX) .EQ. 1 .AND. FLAGST(ISEA)) THEN
-              IF (FSSOURCE) THEN
 !/PDLIB!/DEBUGSRC         IF (IX .eq. DEBUG_NODE) THEN
 !/PDLIB!/DEBUGSRC           WRITE(740+IAPROC,*) 'NODE_SRCE_IMP_PRE : IX=', IX, ' JSEA=', JSEA
 !/PDLIB!/DEBUGSRC         END IF
@@ -1408,9 +1403,8 @@
 !/PDLIB!/DEBUGSRC      WRITE(740+IAPROC,*) 'ISEA/JSEA=', ISEA, JSEA
 !/PDLIB!/DEBUGSRC      WRITE(740+IAPROC,*) 'Before sum(VA)=', sum(VA(:,JSEA))
 !/PDLIB!/DEBUGSRC      FLUSH(740+IAPROC)
-!/PDLIB                CALL W3SRCE(srce_imp_pre, IT, JSEA, IX, IY, IMOD, &
-!/PDLIB                   VAoldDummy, VA(:,JSEA),                        &
-!/PDLIB                   VSTOT(:,JSEA), VDTOT(:,JSEA), SHAVETOT(JSEA),  &
+!/PDLIB                CALL W3SRCE(srce_imp_pre, IT, ISEA, JSEA, IX, IY, IMOD, &
+!/PDLIB                   VA(:,JSEA), CLATS(ISEA),                       &
 !/PDLIB                   ALPHA(1:NK,JSEA), WN(1:NK,ISEA),               &
 !/PDLIB                   CG(1:NK,ISEA), DW(ISEA), U10(ISEA),            &
 !/PDLIB                   U10D(ISEA), AS(ISEA), UST(ISEA),               &
@@ -1428,32 +1422,18 @@
 !/PDLIB                   PHIBBL(JSEA), TMP3, TMP4, PHICE(JSEA),         &
 !/PDLIB                   ASF(ISEA))
 !/PDLIB!/DEBUGSRC      WRITE(740+IAPROC,*) 'After sum(VA)=', sum(VA(:,JSEA))
-!/PDLIB!/DEBUGSRC      WRITE(740+IAPROC,*) '   sum(VSTOT)=', sum(VSTOT(:,JSEA))
-!/PDLIB!/DEBUGSRC      WRITE(740+IAPROC,*) '   sum(VDTOT)=', sum(VDTOT(:,JSEA))
-!/PDLIB!/DEBUGSRC      WRITE(740+IAPROC,*) '     SHAVETOT=', SHAVETOT(JSEA)
 !/PDLIB!/DEBUGSRC      FLUSH(740+IAPROC)
-!/PDLIB           IF (IOBP(ISEA) .EQ. 3) THEN 
-!/PDLIB                  VSTOT(:,JSEA) = MIN(0.,VSTOT(:,JSEA))
-!/PDLIB                  VDTOT(:,JSEA) = MAX(0.,VDTOT(:,JSEA))
-!/PDLIB                ENDIF
-              ENDIF
-            ELSE
               UST   (ISEA) = UNDEF
               USTDIR(ISEA) = UNDEF
               DTDYN (JSEA) = UNDEF
               FCUT  (JSEA) = UNDEF
-            END IF
           END DO ! JSEA 
         END IF ! PDLIB 
 !/PDLIB!/DEBUGSRC          WRITE(740+IAPROC,*) 'ITIME=', ITIME, ' IT=', IT
 !/PDLIB!/DEBUGSRC          CALL ALL_VA_INTEGRAL_PRINT(IMOD, "VA after W3SRCE_IMP_PRE")
-!/PDLIB!/DEBUGSRC          CALL ALL_FIELD_INTEGRAL_PRINT(VSTOT, "VSTOT after W3SRCE_IMP_PRE")
-!/PDLIB!/DEBUGSRC          CALL ALL_FIELD_INTEGRAL_PRINT(VDTOT, "VDTOT after W3SRCE_IMP_PRE")
 !/PDLIB!/DEBUGSRC          IF (DEBUG_NODE .le. NSEAL) THEN
 !/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     Values for DEBUG_NODE=', DEBUG_NODE
 !/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     sum(VA)=', sum(VA(:,DEBUG_NODE))
-!/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     sum(VSTOT)=', sum(VSTOT(:,DEBUG_NODE))
-!/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     sum(VDTOT)=', sum(VDTOT(:,DEBUG_NODE))
 !/PDLIB!/DEBUGSRC          END IF
 
 !/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WW3_WAVE TIME LOOP 14'
@@ -1948,6 +1928,11 @@
 ! 3.7 Calculate and integrate source terms.
 !
   370     CONTINUE
+!
+!
+!/PDLIB       B_JAC = 0.
+!/PDLIB       ASPAR_JAC= 0.
+
           IF ( FLSOU ) THEN
 !
             D50=0.0002
@@ -1961,8 +1946,6 @@
 !/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     Values for DEBUG_NODE=', DEBUG_NODE
 !/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     sum(VA)=', sum(VA(:,DEBUG_NODE))
 !/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     sum(VAOLD)=', sum(VAOLD(:,DEBUG_NODE))
-!/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     sum(VSTOT)=', sum(VSTOT(:,DEBUG_NODE))
-!/PDLIB!/DEBUGSRC            WRITE(740+IAPROC,*) '     sum(VDTOT)=', sum(VDTOT(:,DEBUG_NODE))
 !/PDLIB!/DEBUGSRC          END IF
 !
 !/OMPG/!$OMP PARALLEL PRIVATE (JSEA,ISEA,IX,IY,DELA,DELX,DELY,        &
@@ -1970,6 +1953,7 @@
 !/OMPG/!$OMP DO SCHEDULE (DYNAMIC,1)
 !
               DO JSEA=1, NSEAL
+
                 CALL INIT_GET_ISEA(ISEA, JSEA)
                 IX     = MAPSF(ISEA,1)
                 IY     = MAPSF(ISEA,2)
@@ -2002,9 +1986,8 @@
                      TMP3   = TAUBBL(JSEA,1:2)
                      TMP4   = TAUICE(JSEA,1:2)
 !/PDLIB              IF (FSSOURCE) THEN
-!/PDLIB                   CALL W3SRCE(srce_imp_post,IT,JSEA,IX,IY,IMOD,  &
-!/PDLIB                      VAOLD(:,JSEA), VA(:,JSEA),                  &
-!/PDLIB                      VSTOT(:,JSEA),VDTOT(:,JSEA),SHAVETOT(JSEA), &
+!/PDLIB                   CALL W3SRCE(srce_imp_post,IT,ISEA,JSEA,IX,IY,IMOD,  &
+!/PDLIB                      VA(:,JSEA), CLATS(ISEA),                    &
 !/PDLIB                      ALPHA(1:NK,JSEA), WN(1:NK,ISEA),            &
 !/PDLIB                      CG(1:NK,ISEA), DW(ISEA), U10(ISEA),         &
 !/PDLIB                      U10D(ISEA), AS(ISEA), UST(ISEA),            &
@@ -2022,9 +2005,8 @@
 !/PDLIB                      PHIBBL(JSEA), TMP3, TMP4, PHICE(JSEA),      &
 !/PDLIB                      ASF(ISEA))
 !/PDLIB              ELSE
-                       CALL W3SRCE(srce_direct, IT, JSEA, IX, IY, IMOD, &
-                            VAoldDummy, VA(:,JSEA),                     &
-                            VSioDummy, VDioDummy, SHAVETOTioDummy,      &
+                       CALL W3SRCE(srce_direct,IT,ISEA,JSEA, IX, IY, IMOD,   &
+                            VA(:,JSEA), CLATS(ISEA),                    &
                             ALPHA(1:NK,JSEA), WN(1:NK,ISEA),            &
                             CG(1:NK,ISEA), DW(ISEA), U10(ISEA),         &
                             U10D(ISEA), AS(ISEA), UST(ISEA),            &
@@ -2051,7 +2033,6 @@
                     USTDIR(ISEA) = UNDEF
                     DTDYN (JSEA) = UNDEF
                     FCUT  (JSEA) = UNDEF
-!                    VA(:,JSEA)  = 0.
                 END IF
 !/DEBUGRUN        WRITE(740+IAPROC,*) 'RET: min/max/sum(VA)=',minval(VA(:,JSEA)),maxval(VA(:,JSEA)),sum(VA(:,JSEA))
               END DO
@@ -2265,7 +2246,7 @@
 !/MPI       END IF
 !/MPI     END IF
 
-!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WW3_WAVE AFTER TIME LOOP 1'
+!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WW3_WAVE AFTER TIME LOOP DOING OUTPUT'
 !/MEMCHECK       call getMallocInfo(mallinfos)
 !/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
 

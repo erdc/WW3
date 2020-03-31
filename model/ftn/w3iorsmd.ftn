@@ -232,7 +232,7 @@
 !/
       USE W3GDATMD, ONLY: NX, NY, NSEA, NSEAL, NSPEC, MAPSTA, MAPST2, &
                           GNAME, FILEXT, GTYPE, UNGTYPE
-      USE W3TRIAMD, ONLY: SETUGIOBP
+      USE W3TRIAMD, ONLY: SET_UG_IOBP
       USE W3WDATMD
       USE W3ODATMD, ONLY: NDSE, NDST, IAPROC, NAPROC, NAPERR, NAPRST, &
                           IFILE => IFILE4, FNMPRE, NTPROC, IOSTYP
@@ -812,7 +812,7 @@
 ! Updates reflections maps: 
 !
               IF (GTYPE.EQ.UNGTYPE) THEN 
-                CALL SETUGIOBP
+                CALL SET_UG_IOBP
 !/REF1              ELSE 
 !/REF1                CALL W3SETREF
                 ENDIF 

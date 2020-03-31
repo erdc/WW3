@@ -120,7 +120,7 @@
                                  ICEH(:), ICEF(:), ICEDMAX(:)
 !/SETUP  REAL, POINTER :: ZETA_SETUP(:), FX_zs(:), FY_zs(:)
 !/SETUP  REAL, POINTER :: SXX_zs(:), SXY_zs(:), SYY_zs(:)
-!/PDLIB  REAL, POINTER     :: VSTOT(:,:), VDTOT(:,:)
+!!/PDLIB  REAL, POINTER     :: VSTOT(:,:), VDTOT(:,:)
 !/PDLIB  REAL, POINTER     :: VAOLD(:,:)
 !/PDLIB  LOGICAL, POINTER  :: SHAVETOT(:)
 !!/PDLIB     REAL, POINTER     :: VAOLD(:,:)
@@ -142,7 +142,7 @@
                                  ICEH(:), ICEF(:), ICEDMAX(:)
 !/SETUP        REAL, POINTER :: ZETA_SETUP(:), FX_zs(:), FY_zs(:)
 !/SETUP        REAL, POINTER :: SXX_zs(:), SXY_zs(:), SYY_zs(:)
-!/PDLIB      REAL, POINTER           :: VSTOT(:,:), VDTOT(:,:)
+!!/PDLIB      REAL, POINTER           :: VSTOT(:,:), VDTOT(:,:)
 !/PDLIB      REAL, POINTER           :: VAOLD(:,:)
 !/PDLIB      LOGICAL, POINTER        :: SHAVETOT(:)
 !!/PDLIB      REAL, POINTER           :: VAOLD(:,:)
@@ -428,10 +428,10 @@
 !/PDLIB          ALLOCATE ( WDATAS(IMOD)%SHAVETOT(NSEAL), stat=istat )
 !/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.4, stat=', istat
 !/DEBUGINIT    FLUSH(740+IAPROC)
-!/PDLIB          ALLOCATE ( WDATAS(IMOD)%VSTOT(NSPEC,NSEAL), stat=istat )
+!!/PDLIB          ALLOCATE ( WDATAS(IMOD)%VSTOT(NSPEC,NSEAL), stat=istat )
 !/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.5, stat=', istat
 !/DEBUGINIT    FLUSH(740+IAPROC)
-!/PDLIB          ALLOCATE ( WDATAS(IMOD)%VDTOT(NSPEC,NSEAL), stat=istat )
+!!/PDLIB          ALLOCATE ( WDATAS(IMOD)%VDTOT(NSPEC,NSEAL), stat=istat )
 !/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.6, stat=', istat
 !/DEBUGINIT    FLUSH(740+IAPROC)
 !/PDLIB          ALLOCATE ( WDATAS(IMOD)%VAOLD(NSPEC,NSEAL), stat=istat )
@@ -440,11 +440,11 @@
 !/PDLIB          DO ISEA=1,NSEAL
 !/DEBUGINIT        WRITE(740+IAPROC,*) 'Setting to ZERO at ISEA=', ISEA
 !/DEBUGINIT        FLUSH(740+IAPROC)
-!/PDLIB            WDATAS(IMOD)%VSTOT(:,ISEA)=0
+!!/PDLIB            WDATAS(IMOD)%VSTOT(:,ISEA)=0
 !/PDLIB          END DO
 !/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.8'
 !/DEBUGINIT    FLUSH(740+IAPROC)
-!/PDLIB          WDATAS(IMOD)%VDTOT=0
+!!/PDLIB          WDATAS(IMOD)%VDTOT=0
 !/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.9'
 !/DEBUGINIT    FLUSH(740+IAPROC)
 !/PDLIB          WDATAS(IMOD)%SHAVETOT=.FALSE.
@@ -645,10 +645,9 @@
       IF ( DINIT ) THEN
           IF ( FL_ALL ) THEN
             VA     => WDATAS(IMOD)%VA
-!!/PDLIB            VAOLD     => WDATAS(IMOD)%VAOLD
 !/PDLIB            SHAVETOT     => WDATAS(IMOD)%SHAVETOT
-!/PDLIB            VSTOT     => WDATAS(IMOD)%VSTOT
-!/PDLIB            VDTOT     => WDATAS(IMOD)%VDTOT
+!!/PDLIB            VSTOT     => WDATAS(IMOD)%VSTOT
+!!/PDLIB            VDTOT     => WDATAS(IMOD)%VDTOT
 !/PDLIB            VAOLD     => WDATAS(IMOD)%VAOLD
           END IF
           WLV    => WDATAS(IMOD)%WLV
