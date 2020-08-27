@@ -1965,12 +1965,12 @@
  if [ "$veg" = 'y' ] && [ "$pdlib" = 'y' ] && [ "$dist" = 'y' ]
  then
    echo ' ' >> matrix.body
-   echo "$rtst -w work_veg0 -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.18/Veg0" >> matrix.body
-   echo "$rtst -w work_Med -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.18/Med" >> matrix.body
-   echo "$rtst -w work_High -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.18/High" >> matrix.body
-   echo "$rtst -w work_veg0 -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.18/Veg0_Spatial" >> matrix.body
-   echo "$rtst -w work_Med -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.18/Med_Spatial" >> matrix.body
-   echo "$rtst -w work_High -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.18/High_Spatial" >> matrix.body
+   echo "$rtst -w work_veg0 -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20/Veg0" >> matrix.body
+   echo "$rtst -w work_Med -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20/Med" >> matrix.body
+   echo "$rtst -w work_High -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20/High" >> matrix.body
+   echo "$rtst -w work_veg0 -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20/Veg0_Spatial" >> matrix.body
+   echo "$rtst -w work_Med -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20/Med_Spatial" >> matrix.body
+   echo "$rtst -w work_High -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20/High_Spatial" >> matrix.body
  fi
 
  #Unresolved Obstacles Source Term (UOST) 

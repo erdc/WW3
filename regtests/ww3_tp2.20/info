@@ -1,6 +1,6 @@
 #############################################################################
 #                                                                           #
-# ww3_tp2.18 Test script for WW-III, unstructured grid with vegetation      # 
+# ww3_tp2.20 Test script for WW-III, unstructured grid with vegetation      # 
 # source term (Dalrymple et al., 1984 and Mendez & Losada, 2004).           #
 # The lab case is taken from Anderson and Smith (2014):                     #
 #                                                                           #
@@ -53,18 +53,18 @@
 #  Sample run_test commands :                                               #
 #  Homogeneous vegetation field                                             #                      
 #  ./bin/run_test -b slurm -c Intel -S -T -w work_veg0  -f -p srun -n 24    #
-#                                     -o netcdf ../model ww3_tp2.18/Veg0    #
+#                                     -o netcdf ../model ww3_tp2.20/Veg0    #
 #  ./bin/run_test -b slurm -c Intel -S -T -w work_med   -f -p srun -n 24    # 
-#                                      -o netcdf ../model ww3_tp2.18/Med    #
+#                                      -o netcdf ../model ww3_tp2.20/Med    #
 #  ./bin/run_test -b slurm -c Intel -S -T -w work_high  -f -p srun -n 24    # 
-#                                     -o netcdf ../model ww3_tp2.18/High    #
+#                                     -o netcdf ../model ww3_tp2.20/High    #
 #  Spatially variable vegetation field                                      #
 #  ./bin/run_test -b slurm -c Intel -S -T -w work_veg0  -f -p srun -n 24    #
-#                             -o netcdf ../model ww3_tp2.18/Veg0_Spatial    #
+#                             -o netcdf ../model ww3_tp2.20/Veg0_Spatial    #
 #  ./bin/run_test -b slurm -c Intel -S -T -w work_med   -f -p srun -n 24    # 
-#                              -o netcdf ../model ww3_tp2.18/Med_Spatial    #
+#                              -o netcdf ../model ww3_tp2.20/Med_Spatial    #
 #  ./bin/run_test -b slurm -c Intel -S -T -w work_high  -f -p srun -n 24    # 
-#                             -o netcdf ../model ww3_tp2.18/High_Spatial    #        
+#                             -o netcdf ../model ww3_tp2.20/High_Spatial    #        
 #                                                                           #
 #                                  Ali Abdolali, Tyler Hesser, March 2020   #
 #                                                                           #
