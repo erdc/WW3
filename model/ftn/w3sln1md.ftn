@@ -179,11 +179,12 @@
       DO IK=1, NK
         RFR    = SIG(IK) / FFILT
         IF ( RFR .LT. 0.5 ) THEN
-            WNF(IK) = 0.
-          ELSE
-            WNF(IK) = FAC / K(IK) * EXP(-RFR**(-4))
-          END IF
-        END DO
+          WNF(IK) = 0.
+        ELSE
+          WNF(IK) = FAC / K(IK) * EXP(-RFR**(-4))
+        END IF
+        !write(*,*) IK, WNF(IK), SLNC1, USTAR**4, FAC, K(IK), EXP(-RFR**(-4))
+      END DO
 !
 ! 2.  Compose source term -------------------------------------------- *
 !

@@ -31,15 +31,52 @@
   echo "Save source codes : $source"
   echo "Save listings     : $list"
 
-# Set batchq queue to define headers etc (default to original version if empty)
-batchq="slurm"
+# Compiler option. Choose appropriate compiler and set cmplOption to
+# y if using for the first time or using a different compiler
+
+  cmplr=intel
+  export cmplOption='y'
+
+# Set batchq queue, choose modules and other custom variables to fit system and 
+# to define headers etc (default to original version if empty)
+ishera=`hostname | grep hfe`
+isorion=`hostname | grep Orion`
+if [ $ishera ]
+then
+# If no other h, assuming Hera 
+  cmplr=hera
+  batchq="slurm"
+  modcomp='intel/18.0.5.274'
+  modmpi='impi/2018.0.4'
+  modnetcdf='netcdf/4.6.1'
+  metispath='/scratch2/COASTAL/coastal/save/Ali.Abdolali/parmetis-4.0.3'
+elif [ $isorion ]
+then
+  cmplr=orion
+  batchq="slurm"
+  modcomp='intel/2018.4'
+  modmpi='impi/2018.4'
+  modnetcdf='netcdf/4.7.2'
+  metispath='/work/noaa/marine/ali.abdolali/Source/parmetis-4.0.3'
+else
+  batchq=
+fi
 
 # 1. Set up
 # 1.a Computer/ user dependent set up
 
   echo '#!/bin/sh --login'                                   > matrix.head
   echo ' '                                                  >> matrix.head
-if [ $batchq = "slurm" ]
+if [ $batchq = "slurm" ] && [ $isorion ]
+then
+  echo '#SBATCH -n 24'                                      >> matrix.head
+  echo '#SBATCH -q batch'                                   >> matrix.head
+  echo '#SBATCH -t 08:00:00'                                >> matrix.head
+  echo '#SBATCH -A marine-cpu'                              >> matrix.head
+  echo '#SBATCH -J ww3_regtest'                             >> matrix.head
+  echo '#SBATCH -o matrix.out'                              >> matrix.head
+  echo '#SBATCH -p orion'                                   >> matrix.head
+elif [ $batchq = "slurm" ]
 then
   echo '#SBATCH -n 24'                                      >> matrix.head
   echo '#SBATCH -q batch'                                   >> matrix.head
@@ -62,6 +99,7 @@ fi
 
 # Netcdf and Parmetis modules & variables
 
+<<<<<<< HEAD
 istheia=`hostname | grep tfe`
 if [ $istheia ]
 then
@@ -74,18 +112,18 @@ fi
   echo "  export WWATCH3_NETCDF=NC4"                        >> matrix.head
   echo "  export NETCDF_CONFIG=`which nc-config`"           >> matrix.head
   echo "  export METIS_PATH=/scratch2/COASTAL/coastal/save/Ali.Abdolali/parmetis-4.0.3"   >> matrix.head
+=======
+  echo "  module load $modcomp $modmpi $modnetcdf"                   >> matrix.head
+  echo "  export WWATCH3_NETCDF=NC4"                        >> matrix.head
+  echo "  export NETCDF_CONFIG=`which nc-config`"           >> matrix.head
+  echo "  export METIS_PATH=${metispath}"   >> matrix.head
+>>>>>>> upstream/scalability
   echo "  export WW3_PARCOMPN=4"                            >> matrix.head
   echo ' ' 
 
-# Compiler option. Choose appropriate compiler and set cmplOption to
-# y if using for the first time or using a different compiler
-
-  cmplr=Intel
-  export cmplOption='y'
-
   if [ "$batchq" = 'slurm' ]
   then
-    export  mpi='srun'
+    export  mpi='mpirun'
   else
     export  mpi='mpirun'
   fi
@@ -116,7 +154,7 @@ fi
   export     shrd='y' # Do shared architecture tests
   export     dist='y' # Do distributed architecture (MPI) tests
   export      omp='y' # Threaded (OpenMP) tests
-  export     hybd='n' # Hybrid options
+  export     hybd='y' # Hybrid options
 
   export   prop1D='y' # 1-D propagation tests (ww3_tp1.X)
   export   prop2D='y' # 2-D propagation tests (ww3_tp2.X)
@@ -126,12 +164,15 @@ fi
   export    shwtr='y' # shallow water tests
   export    unstr='y' # unstructured grid tests
   export    pdlib='y' # unstr with pdlib for domain decomposition and implicit solver
+  export   db1tr1='y' # unstr w/ pdlib Neumann Bnd, depth breaking & triad interaction ST
   export    smcgr='y' # SMC/Rotated grid test
   export   mudice='y' # Mud/Ice and wave interaction tests 
   export      veg='y' # vegetation and wave interaction tests
   export   infgrv='y' # Second harmonic generation tests
   export     uost='y' # ww3_ts4 Unresolved Obstacles Source Term (UOST)
   export    assim='y' # Restart spectra update
+  export    oasis='y' # Atmosphere, ocean, and ice coupling using OASIS
+  export calendar='y' # Calendar type
 
   export  multi01='y' # mww3_test_01 (wetting and drying)
   export  multi02='y' # mww3_test_02 (basic two-way nesting test))

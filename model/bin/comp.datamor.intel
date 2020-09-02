@@ -78,10 +78,13 @@
 # Intel compiler on Linux ----------------------------------------------------
 # 2.b.1 Build options and determine compiler name
 
-  opt="-c $list -O3 -assume byterecl -ip -module $path_m"
-# opt="-c $list -O3 -assume byterecl -xSSE4.2 -ip  -module $path_m"
+# opt="-c $list -g -ggdb -fno-omit-frame-pointer -ffree-line-length-none -fbacktrace -Wall -Wextra -Wconversion  -Wno-unused  -Wno-unused-dummy-argument -fcheck=all -fsanitize=address -fsanitize=undefined -ffpe-trap=invalid,zero,overflow -DPDLIB -J$path_m"
+
+# opt="-c $list -g -O1 -traceback -assume byterecl -no-wrap-margin -DPDLIB -ip -module $path_m"
+# opt="-c $list -traceback -O1 -g -check all  -warn all -gen-interface -assume byterecl -no-wrap-margin -DPDLIB -ip -module $path_m"
+ opt="-c $list -O3 -ipo -assume byterecl -DPDLIB -axSSE4.2 -g -traceback -module $path_m"
 # opt="-c $list -O3 -assume byterecl -prec-div -prec-sqrt -xHost -align array128byte -ip  -module $path_m"
-# opt="-c $list -O0 -assume byterecl -g -traceback -check all -fpe0 -ftrapuv -module $path_m"
+# opt="-c $list -O0 -assume byterecl -g -traceback -check all -module $path_m"
 
   if [ "$name" != 'ww3_gspl' ]
   then
@@ -97,10 +100,12 @@
     if [ $OK != 0 ]
     then 
       comp=ifort
+      #comp=gfortran
     fi
     
   else
     comp=ifort
+    #comp=gfortran
   fi
 
   # open mpi implementation
@@ -176,7 +181,7 @@
     fi
   fi
 
-# 3.b Make file comp.stat.$name  - - - - - - - - - - - - - - - - - - - - - - - - - - 
+# 3.b Make file comp.stat  - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
   echo "ERROR    $nr_err"   > comp.stat.$name
   echo "WARNING  $nr_war"  >> comp.stat.$name

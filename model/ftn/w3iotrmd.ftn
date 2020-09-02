@@ -59,7 +59,7 @@
 !/
 !/ Private parameter statements (ID strings)
 !/
-      CHARACTER(LEN=10), PARAMETER, PRIVATE :: VERTRK = 'III  1.02 '
+      CHARACTER(LEN=10), PARAMETER, PRIVATE :: VERTRK = '2018-06-08'
       CHARACTER(LEN=34), PARAMETER, PRIVATE ::                        &
                        IDSTRI = 'WAVEWATCH III TRACK LOCATIONS DATA', &
                        IDSTRO = 'WAVEWATCH III TRACK OUTPUT SPECTRA'
@@ -186,12 +186,12 @@
       USE W3ODATMD, ONLY: W3SETO, W3DMO3
 !/
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, NSEA, NSEAL, NX, NY,        &
-                          FLAGLL, ICLOSE, XGRD, YGRD, GSU,            &
+                          FLAGLL, ICLOSE, GSU, XGRD, YGRD,&
                           DPDX, DPDY, DQDX, DQDY, MAPSTA, MAPST2,     &
                           MAPFS, TH, DTH, SIG, DSIP, XFR, FILEXT
       USE W3GSRUMD, ONLY: W3GFCL
 !/T      USE W3GSRUMD, ONLY: W3GSUP      
-      USE W3GDATMD, ONLY: XYB, MAXX, MAXY, GTYPE, UNGTYPE
+      USE W3GDATMD, ONLY:  MAXX, MAXY, GTYPE, UNGTYPE
       USE W3WDATMD, ONLY: TIME, UST
       USE W3ADATMD, ONLY: CG, DW, CX, CY, UA, UD, AS
 !/MPI      USE W3ADATMD, ONLY: MPI_COMM_WAVE
@@ -230,9 +230,9 @@
 !/T3      INTEGER                 :: ISPT
 !/MPI      INTEGER                 :: IT, IROOT, IFROM, IERR_MPI
 !/MPI      INTEGER, ALLOCATABLE    :: STATUS(:,:)
-      REAL                    :: XN, YN, XT, YT, RD, X, Y, WX, WY,    &
+      REAL                    :: XN, YN, XT, YT, RD, WX, WY,    &
                                  SPEC(NK,NTH), FACTOR, ASPTRK(NTH,NK),&
-                                 DTOUT, XX(4), YY(4)
+                                 DTOUT, XX(4), YY(4), X, Y 
       REAL, SAVE              :: RDCHCK = 0.05, RTCHCK = 0.05
       LOGICAL                 :: FORMI, FLAG1, FLAG2, INGRID
       CHARACTER               :: TRCKT*32, LINE*1024, TSTSTR*3, IDTST*34
@@ -470,9 +470,9 @@
           IX     = IXX(J)
           IY     = IYY(J)
           IF(GTYPE .EQ. UNGTYPE) THEN
-            X = XYB(IX,1)
-            Y = XYB(IX,2)
-            ENDIF
+            X = XGRD(1,IX)
+            Y = YGRD(1,IX)
+          ENDIF
           MASK1(IY,IX) = MASK1(IY,IX) .OR. FLAG1
           MASK2(IY,IX) = MASK2(IY,IX) .OR. FLAG2
           TRCKID(IY,IX) = TRCKT
@@ -543,8 +543,8 @@
           IF ( MASK1(IY,IX) ) THEN
 !
             IF(GTYPE .EQ. UNGTYPE) THEN
-                X = XYB(IX,1)
-                Y = XYB(IX,2)
+                X = XGRD(1,IX)
+                Y = YGRD(1,IX) 
               ELSE
                 X = XGRD(IY,IX)
                 Y = YGRD(IY,IX)

@@ -180,11 +180,14 @@
 ! 0.  Initialzations ------------------------------------------------- /
 !     Never touch this 4 lines below ... otherwise my exceptionhandling will not work.
 
-      THR = DBLE(1.E-15)
-      IF (SUM(A) .LT. THR) RETURN
-
       S = 0.
       D = 0.
+<<<<<<< HEAD
+=======
+      THR = 1.E-12
+      IF (SUM(A) .LT. THR) RETURN
+
+>>>>>>> upstream/scalability
       IWB = 1 !TJH
 !
 !/T      WRITE (NDST,9000) SDBC1, SDBC2, FDONLY

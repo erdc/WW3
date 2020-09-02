@@ -31,9 +31,9 @@
 ! -------------------------------------------------------------------- !
 &FIELD_NML
   FIELD%TIMESTART        =  '20151214 000000'
-  FIELD%TIMESTRIDE       =  '3600.'
+  FIELD%TIMESTRIDE       =  '60.'
   FIELD%TIMECOUNT        =  '9999'
-  FIELD%LIST             =  'HS'
+  FIELD%LIST             =  'HS WND'
   FIELD%PARTITION        =  '0 1 2'
   FIELD%SAMEFILE         =  F
   FIELD%TYPE             =  4

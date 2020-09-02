@@ -193,6 +193,7 @@
       USE W3WDATMD
       USE W3ODATMD, ONLY: NDSE, NDST, NDSO, NAPROC, IAPROC,           &
                           NAPOUT, NAPERR, FNMPRE
+!/WRST      USE W3IDATMD, ONLY: W3NINP
 !/
       IMPLICIT NONE
 !
@@ -203,8 +204,7 @@
 !/
       INTEGER                 :: NDSI, NDSM, NDSR, NDSTRC, NTRACE,    &
                                  NDSEN, IERR, ITYPE, NCOS, IKM, IK,   &
-                                 ITHM, ITH, JSEA, ISEA, IX, IY,      &
-                                 INTYPE, J
+                                 ITHM, ITH, JSEA, ISEA, IX, IY, J 
 !/MPI      INTEGER                 :: IERR_MPI
 !/S      INTEGER, SAVE           :: IENT = 0
 !/O6      INTEGER                 :: NSX, NSY
@@ -233,6 +233,7 @@
 !/NL1      CALL W3SETA ( 1, 6, 6 )
       CALL W3NOUT (    6, 6 )
       CALL W3SETO ( 1, 6, 6 )
+!/WRST      CALL W3NINP(    6, 6 )
 !
 ! 1.b IO set-up.
 !
@@ -460,8 +461,8 @@
 !/SHRD            ISEA   = JSEA
             IF (GTYPE .EQ. UNGTYPE) THEN 
                IX     = MAPSF(ISEA,1)
-               X      = XYB(IX,1)
-               Y      = XYB(IX,2)
+               X      = XGRD(1,IX)
+               Y      = YGRD(1,IX)
             ELSE
                IX     = MAPSF(ISEA,1)
                IY     = MAPSF(ISEA,2)
@@ -627,8 +628,8 @@
 !/SHRD            ISEA   = JSEA
             IF (GTYPE .EQ. UNGTYPE) THEN 
                IX     = MAPSF(ISEA,1)
-               X      = XYB(IX,1)
-               Y      = XYB(IX,2)
+               X      = XGRD(1,IX)
+               Y      = YGRD(1,IX)
             ELSE
                IX     = MAPSF(ISEA,1)
                IY     = MAPSF(ISEA,2)
@@ -771,7 +772,7 @@
 !/DEBUGINIT      WRITE(740+IAPROC,*) 'Before call to W3IORS'
 !/DEBUGINIT      WRITE(740+IAPROC,*) 'min/max/sum(VA)=', minval(VA), maxval(VA), sum(VA)
 !/DEBUGINIT      FLUSH(740+IAPROC)
-      CALL W3IORS ( INXOUT, NDSR, SIG(NK), INTYPE )
+      CALL W3IORS ( INXOUT, NDSR, SIG(NK) )
 !/DEBUGINIT      WRITE(740+IAPROC,*) 'Before call to W3IORS'
 !/DEBUGINIT      WRITE(740+IAPROC,*) 'min/max/sum(VA)=', minval(VA), maxval(VA), sum(VA)
 !/DEBUGINIT      DO ISEA=1,NSEA

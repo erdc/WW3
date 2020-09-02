@@ -8,7 +8,7 @@
 !/                  |           J. H. Alves             |
 !/                  |            F. Ardhuin             |
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         06-Jun-2018 |
+!/                  | Last update :         15-Apr-2020 |
 !/                  +-----------------------------------+
 !/
 !/    14-Jan-1999 : Final FORTRAN 77                    ( version 1.18 )
@@ -103,6 +103,10 @@
 !/    20-Jun-2018 : Update of ST6  (Q. Liu)             ( version 6.06 )
 !/    26-Aug-2018 : UOST (Mentaschi et al. 2015, 2018)  ( version 6.06 )
 !/    27-Aug-2018 : Add WBT parameter                   ( version 6.06 )
+!/    22-Jan-2020 : Update default values for IS2       ( version 7.05 ) 
+!/    20-Feb-2020 : Include Romero's dissipation in ST4 ( version 7.06 )
+!/    15-Apr-2020 : Adds optional opt-out for CFL on BC ( version 7.08 )
+!/    18-Jun-2020 : Adds 360-day calendar option        ( version 7.08 )
 !/
 !/    Copyright 2009-2013 National Weather Service (NWS),
 !/       National Oceanic and Atmospheric Administration.  All rights
@@ -423,7 +427,8 @@
 !     !/ST1   WAM-3 physics package.
 !     !/ST2   Tolman and Chalikov (1996) physics package.
 !     !/ST3   WAM 4+ source terms from P.A.E.M. Janssen and J-R. Bidlot
-!     !/ST4   Ardhuin et al. (2009,2010) input and dissipation 
+!     !/ST4   Input and dissipation using saturation following Ardhuin et al. (2009,2010)
+!             Filipot & Ardhuin (2010) or Romero (2019)
 !     !/ST6   BYDRZ source term package featuring Donelan et al.
 !             (2006) input and Babanin et al. (2001,2010) dissipation.
 !     !/STX   Open slot.
@@ -518,7 +523,7 @@
                           IPBPO, ISBPO, XBPO, YBPO, RDBPO, FNMPRE,    &
                           IHMAX, HSPMIN, WSMULT, WSCUT, FLCOMB,       &
                           NOSWLL, PTMETH, PTFCUT
-      USE W3TIMEMD, ONLY: NOLEAP
+      USE W3TIMEMD, ONLY: CALTYPE
       USE W3NMLGRIDMD
 !
 !/NL3      USE W3SNL3MD, ONLY: LAMMAX, DELTHM
@@ -710,6 +715,7 @@
       LOGICAL                 :: FLC, ICEDISP, TRCKCMPR
       INTEGER                 :: PTM   ! Partitioning method
       REAL                    :: PTFC  ! Part. cut off freq (for method 5)
+      REAL                    :: AIRCMIN, AIRGB
       CHARACTER               :: PMNAME*45, PMNAM2*45  ! Part. method desc.
 !/FLD1      INTEGER                 :: TAILTYPE
 !/FLD1      REAL                    :: TAILLEV, TAILT1, TAILT2
@@ -728,23 +734,23 @@
 !/ST3      REAL                    :: STXFTFTAIL, SDSC1,                   &
 !/ST3                                 SDSDELTA1, SDSDELTA2
 !
-!/ST4      INTEGER                 :: SWELLFPAR,SDSISO,SDSBRFDF
+!/ST4      INTEGER                 :: SWELLFPAR, SDSISO, SDSBRFDF
+!/ST4      REAL 		   :: SDSBCHOICE
 !/ST4      REAL                    :: ZWND, ALPHA0, Z0MAX, BETAMAX, SINTHP,&
 !/ST4                                 ZALP, Z0RAT, TAUWSHELTER, SWELLF,    &
 !/ST4                                 SWELLF2,SWELLF3,SWELLF4, SWELLF5,    &
 !/ST4                                 SWELLF6, SWELLF7, FXPM3, FXFM3,      &
-!/ST4                                 WNMEANPTAIL, WNMEANP, STXFTF,        &
-!/ST4                                 STXFTWN, SINBR, FXFMAGE, FXINCUT,    &
-!/ST4                                 FXDSCUT
-!/ST4      REAL                    :: STXFTFTAIL, SDSC1, SDSC2, SDSCUM,    &
-!/ST4                                 SDSC4, SDSC5, SDSC6, WHITECAPWIDTH,  &
+!/ST4                                 WNMEANPTAIL, WNMEANP, STXFTF, STXFTFTAIL,       &
+!/ST4                                 STXFTWN, SINBR, FXFMAGE,             &
+!/ST4                                 SDSC2, SDSCUM, SDSC4, SDSC5, SDSC6, WHITECAPWIDTH, WHITECAPDUR, &
 !/ST4                                 SDSSTRAIN, SDSSTRAINA, SDSSTRAIN2,   &
-!/ST4                                 SDSBR, SDSP,                         &
+!/ST4                                 SDSBR, SDSP, SDSBT, SDS4A, SDKOF,    &
 !/ST4                                 SDSCOS, SDSDTH, SDSBCK, SDSABK,      &
 !/ST4                                 SDSPBK, SDSBINT, SDSHCK,             &               
-!/ST4                                 SDSBR2, SDSBRF1,                     &
+!/ST4                                 SDSBRF1,                             &
 !/ST4                                 SDSBM0, SDSBM1, SDSBM2, SDSBM3,      &
-!/ST4                                 SDSBM4, SDSLFGEN, SDSHFGEN
+!/ST4                                 SDSBM4, SDSFACMTF, SDSCUMP,  SDSNUW, &
+!/ST4                                 SDSL, SDSMWD, SDSMWPOW, SPMSS, SDSNMTF
 !
 !/ST6      REAL                    :: SINA0, SINWS, SINFC,                 &
 !/ST6                                 SDSA1, SDSA2, SWLB1
@@ -766,14 +772,15 @@
 !/SMC      LOGICAL                 :: UNO3, AVERG, SEAWND 
 !
 !/PR3      REAL                    :: WDTHCG, WDTHTH
-           LOGICAL :: JGS_TERMINATE_MAXITER = .TRUE.
-           LOGICAL :: JGS_TERMINATE_DIFFERENCE = .TRUE.
-           LOGICAL :: JGS_TERMINATE_NORM = .TRUE.
-           LOGICAL :: JGS_LIMITER = .FALSE.
-           LOGICAL :: JGS_BLOCK_GAUSS_SEIDEL = .TRUE.
-           LOGICAL :: JGS_USE_JACOBI = .TRUE.
-           LOGICAL :: JGS_SOURCE_NONLINEAR = .FALSE.
+           LOGICAL :: JGS_TERMINATE_MAXITER    =  .TRUE.
+           LOGICAL :: JGS_TERMINATE_DIFFERENCE =  .TRUE.
+           LOGICAL :: JGS_TERMINATE_NORM       = .FALSE.
+           LOGICAL :: JGS_LIMITER              = .FALSE.
+           LOGICAL :: JGS_BLOCK_GAUSS_SEIDEL   = .TRUE.
+           LOGICAL :: JGS_USE_JACOBI           = .TRUE.
+           LOGICAL :: JGS_SOURCE_NONLINEAR     = .FALSE.
            LOGICAL :: UGOBCAUTO = .FALSE.
+           LOGICAL :: UGBCCFL   = .FALSE.
            LOGICAL :: EXPFSN    = .TRUE.
            LOGICAL :: EXPFSPSI  = .FALSE.
            LOGICAL :: EXPFSFCT  = .FALSE.
@@ -786,13 +793,13 @@
            LOGICAL :: SETUP_APPLY_WLV = .FALSE.
            INTEGER :: JGS_MAXITER=100
            INTEGER :: nbSel
-           INTEGER :: UNSTSCHEMES(4)
+           INTEGER :: UNSTSCHEMES(6)
            INTEGER :: UNSTSCHEME
            INTEGER :: JGS_NLEVEL = 0
            REAL*8  :: JGS_PMIN = 0.
            REAL*8  :: JGS_DIFF_THR = 1.E-10
-           REAL*8  :: JGS_NORM_THR = 1.E-20
-           REAL*8  :: SOLVERTHR_SETUP = 1.E-20
+           REAL*8  :: JGS_NORM_THR = 1.E-12
+           REAL*8  :: SOLVERTHR_SETUP = 1.E-12
            REAL*8  :: CRIT_DEP_SETUP = 0.
 !
            CHARACTER               :: UGOBCFILE*60
@@ -840,14 +847,15 @@
 !/ST2      NAMELIST /SDS2/ SDSA0, SDSA1, SDSA2, SDSB0, SDSB1, PHIMIN
 !/ST3      NAMELIST /SDS3/ SDSC1, WNMEANP, FXPM3, FXFM3, SDSDELTA1,        &
 !/ST3                      SDSDELTA2
-!/ST4      NAMELIST /SDS4/ SDSC1, WNMEANP, WNMEANPTAIL, FXPM3, FXFM3,      &
+!/ST4      NAMELIST /SDS4/ SDSBCHOICE, WNMEANP, WNMEANPTAIL, FXPM3, FXFM3, &
 !/ST4                      FXFMAGE, SDSC2, SDSCUM, SDSSTRAIN, SDSSTRAINA,  &
-!/ST4                      SDSSTRAIN2, SDSC4,                              &
-!/ST4                      SDSC5, SDSC6, SDSBR, SDSBR2, SDSP, SDSISO,      &
+!/ST4                      SDSSTRAIN2, SDSC4, SDSFACMTF, SDSNMTF,SDSCUMP,  &
+!/ST4                      SDSC5, SDSC6, SDSBR, SDSBT, SDSP, SDSISO,       &
 !/ST4                      SDSBCK, SDSABK, SDSPBK, SDSBINT, SDSHCK,        &
-!/ST4                      SDSDTH, SDSCOS, SDSBRF1, SDSBRFDF,              &
+!/ST4                      SDSDTH, SDSCOS, SDSBRF1, SDSBRFDF,  SDSNUW,     &
 !/ST4                      SDSBM0, SDSBM1, SDSBM2, SDSBM3, SDSBM4,         &
-!/ST4                      SDSHFGEN, SDSLFGEN, WHITECAPWIDTH, FXINCUT, FXDSCUT
+!/ST4                      WHITECAPWIDTH, WHITECAPDUR, SDSMWD, SDSMWPOW, SDKOF
+
 !/ST6      NAMELIST /SIN6/ SINA0, SINWS, SINFC
 !/ST6      NAMELIST /SDS6/ SDSET, SDSA1, SDSA2, SDSP1, SDSP2
 !/ST6      NAMELIST /SWL6/ SWLB1, CSTB1
@@ -866,7 +874,7 @@
 ! 
 !/PR3      NAMELIST /PRO3/ CFLTM, WDTHCG, WDTHTH
            NAMELIST /UNST/ UGOBCAUTO, UGOBCDEPTH, UGOBCFILE,          &
-                           EXPFSN, EXPFSPSI, EXPFSFCT,                &
+                           UGBCCFL, EXPFSN, EXPFSPSI, EXPFSFCT,       &
                            IMPFSN, IMPTOTAL, EXPTOTAL,                &
                            IMPREFRACTION, IMPFREQSHIFT,               &
                            IMPSOURCE,                                 &
@@ -889,8 +897,8 @@
                       RWNDC, FACBERG, NOSW, GSHIFT, WCOR1, WCOR2,     &
                       STDX, STDY, STDT, ICEHMIN, ICEHINIT, ICEDISP,   &
                       ICESLN, ICEWIND, ICESNL, ICESDS, ICEHFAC,       &
-                      ICEHDISP, ICEDDISP, ICEFDISP, NOLEAP, TRCKCMPR, &
-                      PTM, PTFC, BTBET
+                      ICEHDISP, ICEDDISP, ICEFDISP, CALTYPE,          &
+                      TRCKCMPR, PTM, PTFC, BTBET
            NAMELIST /OUTS/ P2SF, I1P2SF, I2P2SF,                      &
                              US3D, I1US3D, I2US3D,                    &
                              USSP, IUSSP, STK_WN,                     &
@@ -1687,20 +1695,19 @@
 !/ST3      SDSDELTA1 = 0.4 !! This is Bidlot et al. 2005,  Otherwise WAM4 uses 0.5
 !/ST3      SDSDELTA2 = 0.6 !! This is Bidlot et al. 2005,  Otherwise WAM4 uses 0.5
 !
-!/ST4      SDSC1  = 0.0     ! not used in ST4, should be cleaned up                                                             
 !/ST4      WNMEANP = 0.5    ! taken from Bidlot et al. 2005
 !/ST4      FXFM3 = 2.5 
 !/ST4      FXFMAGE = 0. 
-!/ST4      FXINCUT = 0. 
-!/ST4      FXDSCUT = 0. 
 !/ST4      FXPM3 = 4.
-!/ST4      WNMEANPTAIL = -0.5 
-!/ST4      SDSC2     = -2.2E-5
-!/ST4      SDSCUM     = -0.40344
+!/ST4      WNMEANPTAIL = -0.5
+!/ST4      SDSBCHOICE =1 ! 1: Ardhuin et al., 2: Filipot & Ardhuin, 3: Romero 
+!/ST4      SDSC2     = -2.2E-5     ! -3.8 for Romero
+!/ST4      SDSCUM    = -0.40344
 !/ST4      SDSC4     = 1.
 !/ST4      SDSC5     = 0. 
+!/ST4      SDSNUW    = 0.
 !/ST4      SDSC6     = 0.3
-!/ST4      SDSBR     = 0.90E-3                                     
+!/ST4      SDSBR     = 0.90E-3     ! 0.005 for Romero                                
 !/ST4      SDSBRFDF  = 0
 !/ST4      SDSBRF1   = 0.5
 !/ST4      SDSP      = 2.   ! this is now fixed in w3sds4, should be cleaned up 
@@ -1712,18 +1719,29 @@
 !/ST4      SDSBM2    = 0.
 !/ST4      SDSBM3    = 0.
 !/ST4      SDSBM4    = 0.
-!/ST4      SDSBR2    = 0.8
 !/ST4      SDSBCK    = 0.
 !/ST4      SDSABK    = 1.5
 !/ST4      SDSPBK    = 4.
 !/ST4      SDSBINT   = 0.3
 !/ST4      SDSHCK    = 1.5
 !/ST4      WHITECAPWIDTH = 0.3
-!/ST4      SDSSTRAIN = 0.
-!/ST4      SDSSTRAINA = 0.
+!/ST4      SDSSTRAIN = 0.       
+!/ST4      SDSFACMTF =  400    ! MTF factor for Lambda , Romero (2019)
+!/ST4      SDSSTRAINA = 15.
 !/ST4      SDSSTRAIN2 = 0.
-!/ST4      SDSHFGEN  = 0.
-!/ST4      SDSLFGEN  = 0.
+!/ST4      WHITECAPDUR   = 0.56 ! breaking duration factor 
+!/ST4! b (strength of breaking)
+!/ST4      SDSBT     = 1.100E-3 ! B_T (sturation threshold for dissipation rate b) 
+!/ST4! Lambda parameters
+!/ST4      SDSL     = 3.5000e-05  ! L scaling 
+!/ST4! MTF
+!/ST4      SPMSS     = 0.5    ! cmss^SPMSS 
+!/ST4      SDSNMTF   = 1.5    ! MTF power 
+!/ST4      SDSCUMP   = 2.
+!/ST4! MW
+!/ST4      SDSMWD    = .9  ! new AFo
+!/ST4      SDSMWPOW  = 1.  ! (k )^pow
+!/ST4      SDKOF     = 3.  !  ko factor such that ko= g (SDKOF/(28 us))^2 
 !
 !/ST6      SDSET  = .TRUE.
 !/ST6      SDSA1  = 4.75E-06
@@ -1782,17 +1800,28 @@
 !/ST4      CALL READNL ( NDSS, 'SDS4', STATUS )
 !/ST4      WRITE (NDSO,924) STATUS
 !/ST4      WRITE (NDSO,925) SDSC2, SDSBCK, SDSCUM, WNMEANP 
-!/ST4      SSDSC(1)   = SDSLFGEN
+!/ST4      SSDSC(1)   = REAL(SDSBCHOICE)
 !/ST4      SSDSC(2)   = SDSC2
 !/ST4      SSDSC(3)   = SDSCUM
 !/ST4      SSDSC(4)   = SDSC4
 !/ST4      SSDSC(5)   = SDSC5
 !/ST4      SSDSC(6)   = SDSC6
 !/ST4      SSDSC(7)   = WHITECAPWIDTH
-!/ST4      SSDSC(8)   = SDSSTRAIN ! Straining constant ... 
-!/ST4      SSDSC(9)   = SDSHFGEN
-!/ST4      SSDSC(10)   = SDSSTRAINA*NTH/360. ! angle for enhanced straining
-!/ST4      SSDSC(11)   = SDSSTRAIN2 ! enhanced straining constant ... 
+!/ST4      SSDSC(8)   = SDSSTRAIN   ! Straining constant ... 
+!/ST4      SSDSC(9)   = SDSL
+!/ST4      SSDSC(10)  = SDSSTRAINA*NTH/360. ! angle Aor enhanced straining
+!/ST4      SSDSC(11)  = SDSSTRAIN2  ! straining constant for directional part 
+!/ST4      SSDSC(12)  = SDSBT
+!/ST4      SSDSC(13)  = SDSMWD
+!/ST4      SSDSC(14)  = SPMSS
+!/ST4      SSDSC(15)  = SDSMWPOW 
+!/ST4      SSDSC(16)  = SDKOF
+!/ST4      SSDSC(17)  = WHITECAPDUR  
+!/ST4      SSDSC(18)  = SDSFACMTF
+!/ST4      SSDSC(19)  = SDSNMTF 
+!/ST4      SSDSC(20)  = SDSCUMP 
+!/ST4      SSDSC(21)  = SDSNUW 
+!
 !/ST4      SSDSBR   = SDSBR
 !/ST4      SSDSBRF1 = SDSBRF1
 !/ST4      SSDSBRFDF= SDSBRFDF
@@ -1801,7 +1830,7 @@
 !/ST4      SSDSBM(2)   = SDSBM2
 !/ST4      SSDSBM(3)   = SDSBM3
 !/ST4      SSDSBM(4)   = SDSBM4
-!/ST4      SSDSBR2  = SDSBR2
+!/ST4      SSDSBT   = SDSBT
 !/ST4      SSDSISO  = SDSISO
 !/ST4      SSDSCOS  = SDSCOS
 !/ST4      SSDSP    = SDSP
@@ -1809,8 +1838,6 @@
 !/ST4      WWNMEANP   = WNMEANP
 !/ST4      FFXFM = FXFM3 * TPI
 !/ST4      FFXFA = FXFMAGE * TPI
-!/ST4      FFXFI = FXINCUT * TPI
-!/ST4      FFXFD = FXDSCUT * TPI
 !/ST4      FFXPM = FXPM3 * GRAV / 28.
 !/ST4      WWNMEANPTAIL   = WNMEANPTAIL
 !/ST4      SSDSBCK   = SDSBCK
@@ -1961,16 +1988,17 @@
 !
 ! 6.l Read unstructured data 
 ! initialisation of logical related to unstructured grid
-       UGOBCAUTO = .TRUE.
-       UGOBCDEPTH= -10.
-       UGOBCOK = .FALSE.
-       UGOBCFILE = 'unset'
-       EXPFSN    = .TRUE.
-       EXPFSPSI  = .FALSE.
-       EXPFSFCT  = .FALSE.
-       IMPFSN    = .FALSE.
-       IMPTOTAL  = .FALSE.
-       EXPTOTAL  = .FALSE. 
+       UGOBCAUTO  = .TRUE.
+       UGBCCFL    = .FALSE.
+       UGOBCDEPTH = -10.
+       UGOBCOK    = .FALSE.
+       UGOBCFILE  = 'unset'
+       EXPFSN     = .FALSE.
+       EXPFSPSI   = .FALSE.
+       EXPFSFCT   = .FALSE.
+       IMPFSN     = .FALSE.
+       IMPTOTAL   = .FALSE.
+       EXPTOTAL   = .FALSE. 
        IMPREFRACTION = .FALSE.
        IMPFREQSHIFT = .FALSE.
        IMPSOURCE = .FALSE.
@@ -2005,33 +2033,23 @@
        B_JGS_NLEVEL = JGS_NLEVEL
        B_JGS_SOURCE_NONLINEAR = JGS_SOURCE_NONLINEAR
 
-       IF ((EXPFSN .eqv. .FALSE.).and.(EXPFSPSI .eqv. .FALSE.)     &
-           .and.(EXPFSFCT .eqv. .FALSE.)                           &
-           .and.(IMPFSN .eqv. .FALSE.)                             &
-           .and.(EXPTOTAL .eqv. .FALSE.)                           &
-           .and.(IMPTOTAL .eqv. .FALSE.)) THEN
-         EXPFSN=.TRUE. ! This is the default scheme ...
-       END IF
        nbSel=0
-
-       IF (EXPFSN) nbSel=nbSel+1
-       IF (EXPFSPSI) nbSel=nbSel+1
-       IF (EXPFSFCT) nbSel=nbSel+1
-       IF (IMPFSN) nbSel=nbSel+1
-       IF (IMPTOTAL) nbSel=nbSel+1
-       IF (EXPTOTAL) nbSel=nbSel+1
+       IF (EXPFSN)   nbSel = nbSel+1
+       IF (EXPFSPSI) nbSel = nbSel+1
+       IF (EXPFSFCT) nbSel = nbSel+1
+       IF (IMPFSN)   nbSel = nbSel+1
+       IF (IMPTOTAL) nbSel = nbSel+1
+       IF (EXPTOTAL) nbSel = nbSel+1
 
        IF (GTYPE .EQ. UNGTYPE) THEN
          IF (nbSel .ne. 1) THEN
-           WRITE(NDSE,*) ' *** WAVEWATCH III ERROR IN WW3_GRID:'
            IF (nbSel .gt. 1) THEN
-             WRITE (NDSE,*) 'More than one scheme selected'
+             WRITE (*,*) 'MORE THAN ONE UNSTRUCTURED SCHEME SELECTED'
+             CALL EXTCDE ( 19 )
            ELSE IF (nbSel .eq. 0) THEN
-             WRITE (NDSE,*) 'no scheme selected'
+             WRITE (*,*) 'NOTHIN SELECTED FROM THE UNSTRUCTURED PART'
+             CALL EXTCDE ( 19 )
            END IF
-           WRITE (NDSE,*)'Select only one of EXPFSN, EXPFSFCT, EXPFSPSI'
-           WRITE (NDSE,*)'IMPFSN, IMPTOTAL'
-           CALL EXTCDE ( 30 )
          END IF
        END IF
 !
@@ -2206,6 +2224,14 @@
       FLC    = .TRUE.
       TRCKCMPR = .TRUE.
       NOSW   = 5
+!
+! Gas fluxes 
+!
+      AIRCMIN   = 2.0  ! cmin for whitecap coverage and entrained air
+      AIRGB     = 0.2  ! volume of entrained air constant (Deike et al. 2017)
+!
+!/NCO/! NCEP operations retains first three swell systems.
+!/NCO      NOSW=3
       PTM    = 1    ! Default to standard WW3 partitioning. C. Bunney
       PTFC   = 0.1  ! Part. method 5 cutoff freq default. C. Bunney
       FMICHE = 1.6
@@ -2220,17 +2246,17 @@
       STDY = -1. 
       STDT = -1. 
       ICEDISP = .FALSE.
-      NOLEAP = .FALSE.
+      CALTYPE = 'standard'
 ! Variables for 3D array output
       E3D=0 
       I1E3D=1
       I2E3D=NK
       P2SF   = 0
-      I1P2SF = 1
+      I1P2SF = 1	
       I2P2SF = 15
-      US3D=0 
-      I1US3D=1
-      I2US3D=NK
+      US3D   = 0 
+      I1US3D = 1
+      I2US3D = NK
       USSP=0
       IUSSP=1
       STK_WN(:)=0.0
@@ -2264,7 +2290,7 @@
 !/IS2      IS2BACKSCAT = 1.
 !/IS2      IS2BREAK = .FALSE.
 !/IS2      IS2BREAKF = 3.6
-!/IS2      IS2FLEXSTR=2.7414E+05  ! value used in Boutin et al. JGR 2018. 
+!/IS2      IS2FLEXSTR=6.00E+05   ! value used in Ardhuin et al. 2020
 !/IS2      IS2ISOSCAT=.TRUE.     ! uses isotropic back-scatter
 !/IS2      IS2DISP=.FALSE. !not dispersion only attenuation following Liu disp. eq.
 !/IS2      IS2DUPDATE=.TRUE.
@@ -2272,14 +2298,15 @@
 !/IS2      IS2DMIN=20
 !/IS2      IS2DAMP=0.
 !/IS2      IS2CREEPB=0.
-!/IS2      IS2CREEPC=0.2
-!/IS2      IS2CREEPD=0.4
+!/IS2      IS2CREEPC=0.4     ! This gives an impact of break-up over a wider freq. range
+!                            ! compared to the 0.2 value in Boutin et al. 2018
+!/IS2      IS2CREEPD=0.5
 !/IS2      IS2CREEPN=3.0
 !/IS2      IS2BREAKE=1.
 !/IS2      IS2WIM1=1.
-!/IS2      IS2ANDISB=.FALSE. !anelastic instead of inelastic dissipation if IS2CREEPB>0
+!/IS2      IS2ANDISB=.TRUE.  !anelastic instead of inelastic dissipation if IS2CREEPB>0
 !/IS2      IS2ANDISE=0.55    !energy of activation
-!/IS2      IS2ANDISD=1.672E-9!
+!/IS2      IS2ANDISD=2.0E-9  !see Ardhuin et al. 2020
 !/IS2      IS2ANDISN=1.      !dependency on stress. Equal to 1 normally?
 !/IS2      CALL READNL ( NDSS, 'SIS2', STATUS )
 !/IS2      WRITE (NDSO,947) STATUS
@@ -2462,6 +2489,8 @@
       PFMOVE = PMOVE
 !
       BTBETA = MIN(MAX (1., BTBET), 2.)
+      AAIRCMIN = ALOG(GRAV/AIRCMIN/SIG(1))/ALOG(XFR)+1 ! goes from phase speed C=g/sig to index
+      AAIRGB = AIRGB
 !
 ! Notes: Presently, if we select CICE0.ne.CICEN requires an obstruction
 !     grid, that is initialized with zeros as default.
@@ -2560,6 +2589,11 @@
 !/MLIM      J      = 1
       WRITE (NDSO,967) FHMAX, FHMAX/SQRT(2.), YESXNO(J)
       IF ( FHMAX.LT.0.50 .AND. J.EQ.1 ) WRITE (NDST,968)
+!
+      IF (TRIM(CALTYPE) .NE. 'standard' .AND.                           &
+          TRIM(CALTYPE) .NE. '360_day'  .AND.                           &
+          TRIM(CALTYPE) .NE. '365_day' ) GOTO 2003 
+      WRITE (NDST,1973) CALTYPE
       WRITE (NDSO,*)
 !
 ! 6.x Read values for FLD stress calculation
@@ -2641,14 +2675,16 @@
 !/ST2          WRITE (NDSO,2924) SDSA0, SDSA1, SDSA2, SDSB0, SDSB1, PHIMIN
 !/ST3          WRITE (NDSO,2924) SDSC1, WNMEANP, FXPM3, FXFM3, SDSDELTA1,  &
 !/ST3                            SDSDELTA2
-!/ST4          WRITE (NDSO,2924) SDSC1, SDSC2, SDSCUM, SDSC4, SDSC5, SDSC6, &
-!/ST4                    WNMEANP, FXPM3, FXFM3, FXFMAGE, FXINCUT, FXDSCUT, &
+
+!/ST4          WRITE (NDSO,2924) SDSBCHOICE, SDSC2, SDSCUM, SDSC4,         &
+!/ST4                            SDSC5, SDSC6, &
+!/ST4                    WNMEANP, FXPM3, FXFM3, FXFMAGE,                   &
 !/ST4                    SDSBINT, SDSBCK, SDSABK, SDSPBK, SDSHCK,          &
 !/ST4                    SDSBR, SDSSTRAIN,  SDSSTRAINA,  SDSSTRAIN2,       &
-!/ST4                    SDSBR2, SDSP, SDSISO, SDSCOS,   &
-!/ST4                    SDSDTH, SDSBRF1, SDSBRFDF,                        &
-!/ST4                    SDSBM0, SDSBM1, SDSBM2, SDSBM3, SDSBM4,           &
-!/ST4                    WHITECAPWIDTH, SDSLFGEN, SDSHFGEN
+!/ST4                    SDSBT, SDSP, SDSISO, SDSCOS, SDSDTH, SDSBRF1,     &
+!/ST4                    SDSBRFDF, SDSBM0, SDSBM1, SDSBM2, SDSBM3, SDSBM4, &
+!/ST4                    SPMSS, SDKOF, SDSMWD, SDSFACMTF, SDSNMTF,SDSMWPOW,&
+!/ST4                    SDSCUMP, SDSNUW, WHITECAPWIDTH, WHITECAPDUR
 !/ST6          WRITE (NDSO,2924) SDSET, SDSA1, SDSA2, SDSP1, SDSP2
 !/ST6          WRITE (NDSO,2937) SWLB1, CSTB1
 !/BT1          WRITE (NDSO,2926) GAMMA
@@ -2666,7 +2702,7 @@
 !/SMC                      AVERG, LvSMC, NBISMC, ISHFT, JEQT, SEAWND 
 !/PR3          WRITE (NDSO,2953) CFLTM, WDTHCG, WDTHTH
 !
-        WRITE (NDSO,2956) UGOBCAUTO, UGOBCDEPTH, TRIM(UGOBCFILE),     &
+        WRITE (NDSO,*) UGBCCFL, UGOBCAUTO, UGOBCDEPTH,UGOBCFILE, &
                           EXPFSN, EXPFSPSI, EXPFSFCT, IMPFSN, EXPTOTAL,&
                           IMPTOTAL, IMPREFRACTION, IMPFREQSHIFT,      &
                           IMPSOURCE, SETUP_APPLY_WLV,                 &
@@ -2737,7 +2773,7 @@
                                 STDX, STDY, STDT, ICEHMIN, ICEHFAC,   &
                                 ICEHINIT, ICEDISP, ICEHDISP,          &
                                 ICESLN, ICEWIND, ICESNL, ICESDS,      &
-                                ICEDDISP,ICEFDISP, NOLEAP, TRCKCMPR,  &
+                                ICEDDISP,ICEFDISP, CALTYPE, TRCKCMPR, &
                                 BTBETA
         ELSE
           WRITE (NDSO,2966) CICE0, CICEN, LICE, PMOVE, XSEED, FLAGTR, &
@@ -2747,7 +2783,7 @@
                                 STDX, STDY, STDT,  ICEHMIN, ICEHFAC,  &
                                 ICEHINIT, ICEDISP, ICEHDISP,          &
                                 ICESLN, ICEWIND, ICESNL, ICESDS,      &
-                                ICEDDISP, ICEFDISP, NOLEAP, TRCKCMPR, &
+                                ICEDDISP, ICEFDISP, CALTYPE, TRCKCMPR,&
                                 BTBETA
           END IF
 !
@@ -2922,43 +2958,56 @@
 !
       DO_CHANGE_WLV=.FALSE.
       IF ( GTYPE.EQ.UNGTYPE) THEN 
-        UNSTSCHEMES(:)=0
-        IF (EXPFSN)   UNSTSCHEMES(1)=1
-        IF (EXPFSPSI) UNSTSCHEMES(2)=1
-        IF (EXPFSFCT) UNSTSCHEMES(3)=1
-        IF (IMPFSN)   UNSTSCHEMES(4)=1
+        UNSTSCHEMES = 0
+        IF (EXPFSN)   UNSTSCHEMES(1) = 1
+        IF (EXPFSPSI) UNSTSCHEMES(2) = 1
+        IF (EXPFSFCT) UNSTSCHEMES(3) = 1
+        IF (IMPFSN)   UNSTSCHEMES(4) = 1
+        IF (IMPTOTAL) UNSTSCHEMES(5) = 1
+        IF (EXPTOTAL) UNSTSCHEMES(6) = 1
+
+        IF (SUM(UNSTSCHEMES) .eq. 0) THEN
+          WRITE(*,*) 'NO UNST SCHEME SELECTED'
+          CALL EXTCDE ( 19 )
+        ELSE IF (SUM(UNSTSCHEMES) .gt. 1) THEN
+          WRITE(*,*) 'MORE THAN ONE UNST SCHEME SELECTED'
+          CALL EXTCDE ( 19 )
+        ENDIF
+ 
         UNSTSCHEME=-1
-        DO IX=1,4
+        DO IX=1,6
           IF (UNSTSCHEMES(IX).EQ.1) THEN 
             UNSTSCHEME=IX
             EXIT
           END IF
         END DO
  
+        FSBCCFL = UGBCCFL
         SELECT CASE (UNSTSCHEME)
         CASE (1) 
           FSN = EXPFSN
-          PNAME2 = 'N Explicit (Fluctuation Splitting) '
+          PNAME2 = 'N Explicit'
         CASE (2) 
           FSPSI = EXPFSPSI
-          PNAME2 = 'PSI Explicit (Fluctuation Splitting)  '
+          PNAME2 = 'PSI Explicit'
         CASE (3) 
           FSFCT = EXPFSFCT
-          PNAME2 = ' Flux Corrected Transport Explicit'
+          PNAME2 = 'Flux Corrected Transport Explicit'
         CASE (4) 
           FSNIMP = IMPFSN 
-          PNAME2 = 'N Implicit (Fluctuation Splitting) '
-          END SELECT
+          PNAME2 = 'N Implicit fractional step'
+        END SELECT
 !
         IF (SUM(UNSTSCHEMES).GT.1) WRITE(NDSO,1035)
-        WRITE (NDSO,2951) PNAME2
         IF (IMPTOTAL) THEN
           FSTOTALIMP = IMPTOTAL
-          PNAME2 = 'N Implicit (Fluctuation Splitting) for total implicit'
+          PNAME2 = 'N fully Implicit'
+          WRITE (NDSO,2951) PNAME2
         END IF
         IF (EXPTOTAL) THEN
           FSTOTALEXP = EXPTOTAL 
-          PNAME2 = 'N Explicit (Fluctuation Splitting) for one exchange explicit DC HPCF '
+          PNAME2 = 'N Block Explicit'
+          WRITE (NDSO,2951) PNAME2
         END IF
         IF (IMPREFRACTION .and. IMPTOTAL .AND. FLCTH) THEN
           FSREFRACTION = .TRUE.
@@ -3298,7 +3347,7 @@
 !
         CALL READMSH(NDSG,FNAME)
         ALLOCATE(ZBIN(NX, NY),OBSX(NX,NY),OBSY(NX,NY))
-        ZBIN(:,1) = VSC*XYB(:,3)
+        ZBIN(:,1) = VSC * ZB(:)
 !/DEBUGSTP        WRITE(740,*) 'VSC=', VSC
 !/DEBUGSTP        WRITE(740,*) 'Printing ZBIN 1'
 !/DEBUGSTP        DO IX=1,NX
@@ -3307,8 +3356,8 @@
 !
 ! subgrid obstructions are not yet handled in unstructured grids
 !
-        OBSX(:,:)=0.
-        OBSY(:,:)=0.
+        OBSX(:,:) = 0.
+        OBSY(:,:) = 0.
 
       END IF
 !
@@ -4001,6 +4050,7 @@
 ! ... Branch back input / excluded points ( ILOOP in 8.b )
 !
         END DO
+
 !/DEBUGGRID      WRITE(740+IAPROC,*) 'nbCase1=', nbCase1
 !/DEBUGGRID      WRITE(740+IAPROC,*) 'nbCase2=', nbCase2
 !/DEBUGGRID      WRITE(740+IAPROC,*) 'nbCase3=', nbCase3
@@ -4112,6 +4162,8 @@
       NLAND  = 0
       NBI    = 0
       NBT    = 0
+
+
 !
       DO IX=1, NX
         DO IY=1, NY
@@ -4121,6 +4173,9 @@
           IF ( TMPSTA(IY,IX) .EQ. 2 ) NBI    = NBI + 1
           END DO
         END DO
+
+
+        
 !
 !/SMC !Li   Moved before FLBPI is defined with NBI value.  JGLi05Jun2015
 !/SMC !Li   Overwrite NSEA with NCel for SMC grid. 
@@ -4149,11 +4204,13 @@
 !/O1                X = FACTOR * ( XGRDIN(IX,IY) )
 !/O1                Y = FACTOR * ( YGRDIN(IX,IY) )
 !/O1              ELSE
-!/O1                X = FACTOR * XYB(IX,1)
-!/O1                Y = FACTOR * XYB(IX,2)
+!/O1                X = FACTOR * XGRD(1,IX)
+!/O1                Y = FACTOR * YGRD(1,IX)
 !/O1                END IF
 !/O1            IF ( TMPSTA(IY,IX).EQ.2 ) THEN
 !/O1                  IF ( FLAGLL ) THEN
+!/O1                      WRITE (*, 988) IBI, IX, IY, X, Y
+!/O1                      WRITE (*, *) IBI, IX, IY, X, Y
 !/O1                      WRITE (NDSO, 988) IBI, IX, IY, X, Y
 !/O1                    ELSE
 !/O1                      WRITE (NDSO,1988) IBI, IX, IY, X, Y
@@ -4164,6 +4221,7 @@
 !/O1            END DO
         END IF
 !
+
       WRITE (NDSO,1980)
       IF ( NBT .EQ. 0 ) THEN
           WRITE (NDSO,1985)
@@ -4202,20 +4260,13 @@
           DO IX=1, NX
             XGRD(IY,IX) = XGRDIN(IX,IY)
             YGRD(IY,IX) = YGRDIN(IX,IY)
-            END DO
           END DO
-          DEALLOCATE ( XGRDIN, YGRDIN )   
-          CALL W3GNTX ( 1, 6, 6 )  
+        END DO
+        DEALLOCATE ( XGRDIN, YGRDIN )   
+        CALL W3GNTX ( 1, 6, 6 )  
       ELSE 
-!
-!FA:  This distinction  between structured and unstructured
-! should be removed when XYB is replaced by XGRD and YGRD
-!
-        DO IX=1, NX
-          XGRD(:,IX) = XYB(IX,1)
-          YGRD(:,IX) = XYB(IX,2)
-          END DO
-        END IF   ! GTYPE
+!AR: This is already done in readmsh 
+      END IF   ! GTYPE
 !      
 !
 !!Li  MAPSTA = TMPSTA
@@ -4239,7 +4290,6 @@
       TRNY   = 0.
 !
 !Li  Shelter MAPSTA etc LLG definitions for SMC by logical RGLGRD !
-!AR  This is only .FALSE. for SMC ..
       IF( RGLGRD ) THEN
       ISEA   = 0
       DO IY=1, NY
@@ -4389,7 +4439,18 @@
 !/SMC          JS=MAX(1, IJKCel(4,ISEA)/MRFct)
 !/ARC        ENDIF
 !/ARC
-!/SMC !!Li  Minimum DMIN depth is used as well for SMC. 
+!/SMC !      Check that IX, IY are in the bound of [1,NX] and [1,NY] respec.
+!/SMC        IF ((IX+IK-1 .GT. NX) .OR. (IX .LE. 0)) THEN
+!/SMC             WRITE (NDSE,1014) ISEA, IX, IX+IK-1, NX
+!/SMC             CALL EXTCDE(65)
+!/SMC        END IF
+!/SMC 
+!/SMC        IF ((IY+JS-1 .GT. NY) .OR. (IY .LE. 0)) THEN
+!/SMC             WRITE (NDSE,1015) ISEA, IY, IY+JS-1, NY
+!/SMC             CALL EXTCDE(65)
+!/SMC        END IF
+!/SMC
+!/SMC !Li  Minimum DMIN depth is used as well for SMC. 
 !/SMC          ZB(ISEA)= - MAX( DMIN, FLOAT( IJKCel(5, ISEA) ) )
 !/SMC          MAPFS(IY:IY+JS-1,IX:IX+IK-1)  = ISEA
 !/SMC         MAPSTA(IY:IY+JS-1,IX:IX+IK-1)  = 1
@@ -4520,6 +4581,7 @@
 !/T                   1, NX, IX3, 1, NY, IY3, 'Sea points', 'm')
 !/T      DEALLOCATE ( MAPOUT )
 !
+
       DO ISP=1, NSPEC+NTH
         MAPWN(ISP) = 1 + (ISP-1)/NTH
         MAPTH(ISP) = 1 + MOD(ISP-1,NTH)
@@ -4567,7 +4629,7 @@
 !/O2b          WRITE (NDSO,1104)
 !/O2b        END IF
 !
-!/O2c      OPEN (NDSM,FILE=TRIM(FNMPRE)//'mapsta.ww3')
+!/O2c      OPEN (NDSM,FILE=TRIM(FNMPRE)//'mapsta.ww3', RECL=2*NX*NY*50+1)
 !/O2c      DO IY=NY,1, -1
 !/O2c        DO IX=1,NX
 !/O2c          DO I=1,50
@@ -4677,6 +4739,13 @@
 ! AR: this is not anymore needed and will be deleted ...
 !
       IF (GTYPE.EQ.UNGTYPE) THEN 
+<<<<<<< HEAD
+=======
+        !WRITE(*,*) MAPSTA
+        !WRITE(*,*) '-----------------------'
+        !WRITE(*,*) TMPSTA 
+        !STOP
+>>>>>>> upstream/scalability
         CALL SET_UG_IOBP 
 !/REF1      ELSE
 !/REF1        CALL W3SETREF
@@ -4892,7 +4961,8 @@
 !     ILOOP = 2 to fill data arrays
 !
       WRITE (NDSO,990)
-      OPEN (NDSS,FILE=TRIM(FNMPRE)//'ww3_grid.scratch',FORM='FORMATTED')
+      IF ( .NOT. FLGNML ) &
+        OPEN (NDSS,FILE=TRIM(FNMPRE)//'ww3_grid.scratch',FORM='FORMATTED')
 !
       DO ILOOP = 1, 2
 !
@@ -4904,11 +4974,13 @@
         NBO(0) = 0
         NBO2(0)= 0
         FIRST  = .TRUE.
-        REWIND (NDSS)
-        IF ( ILOOP .EQ. 1 ) THEN
-          NDSI2 = NDSI
-        ELSE
-          NDSI2 = NDSS
+        IF ( .NOT. FLGNML ) THEN
+          REWIND (NDSS)
+          IF ( ILOOP .EQ. 1 ) THEN
+            NDSI2 = NDSI
+          ELSE
+            NDSI2 = NDSS
+          END IF
         END IF
 !
         DO
@@ -4922,21 +4994,17 @@
               NPO = NML_OUTBND_LINE(I)%NP
               I=I+1
             ELSE
-              EXIT
+              NPO=0
             END IF
           ELSE
             CALL NEXTLN ( COMSTR , NDSI2 , NDSE )
             READ (NDSI2,*,END=2001,ERR=2002) XO0, YO0, DXO, DYO, NPO
           END IF
 !
-          IF ( ILOOP .EQ. 1 ) THEN
-            IF (FLGNML) THEN
-              WRITE(NDSS,'(A)') NML_OUTBND_LINE(I-1)
-            ELSE
-              BACKSPACE (NDSI)
-              READ (NDSI,'(A)') LINE
-              WRITE (NDSS,'(A)') LINE
-            END IF
+          IF ( .NOT. FLGNML .AND. ILOOP .EQ. 1 ) THEN
+            BACKSPACE (NDSI)
+            READ (NDSI,'(A)') LINE
+            WRITE (NDSS,'(A)') LINE
           END IF
 !
 ! ... Check if new file to be used
@@ -5125,7 +5193,7 @@
 !
         END DO
 !
-      CLOSE ( NDSS, STATUS='DELETE' )
+      IF ( .NOT. FLGNML ) CLOSE ( NDSS, STATUS='DELETE' )
 !
       FLBPO  = NBOTOT .GT. 0
       IF ( .NOT. FLBPO ) THEN
@@ -5164,6 +5232,10 @@
  2002 CONTINUE
       WRITE (NDSE,1002) IERR
       CALL EXTCDE ( 62 )
+!
+ 2003 CONTINUE
+      WRITE (NDSE,1003)
+      CALL EXTCDE ( 64 )
 !
  2222 CONTINUE
       IF ( GTYPE .NE. UNGTYPE) THEN
@@ -5412,31 +5484,35 @@
 !/ST3               '        SDSDELTA1 =', F5.2,', SDSDELTA2 =',F5.2, &
 !/ST3               ' /')                               
 !
-!/ST4  924 FORMAT (/' Dissipation (Ardhuin et al. 2010) ',A/          &
+!/ST4  924 FORMAT (/' Dissipation (Ardhuin / Filipot / Romero ) ',A/          &
 !/ST4        ' --------------------------------------------------')
 !/ST4  925 FORMAT ( '       SDSC2, SDSBCK, SDSCUM       :',3E11.3/    &
 !/ST4               '       Power of k in mean k        :',F8.2/)      
-!/ST4 2924 FORMAT ( '  &SDS4 SDSC1 =',E12.4,', SDSC2 =',E12.4,        &
-!/ST4               ', SDSCUM =',F6.2,', '/                           &
+
+
+!/ST4 2924 FORMAT ( '  &SDS4 SDSBCHOICE = ',F3.1,                       &
+!/ST4               ', SDSC2 =',E12.4,', SDSCUM =',F6.2,', '/         &
 !/ST4               '        SDSC4 =',F6.2,', SDSC5 =',E12.4,         &
 !/ST4               ', SDSC6 =',E12.4,','/                            &
 !/ST4               '        WNMEANP =',F4.2,', FXPM3 =', F4.2,       &
-!/ST4               ', FXFM3 =',F4.2,', FXFMAGE =',F6.3,              &
-!/ST4               ', FXINCUT =',F6.3,', FXDSCUT =',F6.3,', '/       &
+!/ST4               ', FXFM3 =',F4.1,', FXFMAGE =',F6.3, ', '/       &
 !/ST4               '        SDSBINT =',E12.4,', SDSBCK =',E12.4,     &
 !/ST4               ', SDSABK =',F6.3,', SDSPBK =',F6.3,', '/         &
 !/ST4               '        SDSHCK =',F5.2,', SDSBR = ',E12.4,       &
-!/ST4               ', SDSSTRAIN =',F4.1,', SDSSTRAINA =',F4.1,       &
+!/ST4               ', SDSSTRAIN =',F5.1,', SDSSTRAINA =',F4.1,       &
 !/ST4               ', SDSSTRAIN2 =',F5.1,', '/                       &
-!/ST4               '        SDSBR2 =',F5.2,', SDSP =',F5.2,          &
+!/ST4               '        SDSBT =',F5.2,', SDSP =',F5.2,          &
 !/ST4               ', SDSISO =',I2, &
 !/ST4               ', SDSCOS =',F3.1,', SDSDTH =',F5.1,', '/         &
 !/ST4               '        SDSBRF1 = ',F5.2,', SDSBRFDF =',I2,', '/ &
 !/ST4               '        SDSBM0 = ',F5.2, ', SDSBM1 =',F5.2,      &
 !/ST4               ', SDSBM2 =',F5.2,', SDSBM3 =',F5.2,', SDSBM4 =', &
 !/ST4               F5.2,', '/,                                       &
-!/ST4               '        WHITECAPWIDTH =',F5.2,', SDSLFGEN = ',   &
-!/ST4               F5.2,', SDSHFGEN = ',F5.2,' /')
+!/ST4               '        SPMSS = ',F5.2, ', SDKOF =',F5.2,        &
+!/ST4               ', SDSMWD =',F5.2,', SDSFACMTF =',F5.1,', '/      &
+!/ST4               '        SDSMWPOW =',F3.1,', SDSNMTF =', F5.2,    &
+!/ST4               ', SDSCUMP =', F3.1,', SDSNUW =', E8.3,', '/,     &
+!/ST4               '        WHITECAPWIDTH =',F5.2, ' WHITECAPDUR =',F5.2,' /')
 !
 !/ST6  924 FORMAT (/'  Dissipation (Rogers et al. 2012) ',A/             &
 !/ST6               ' --------------------------------------------------')
@@ -5613,8 +5689,8 @@
 !/PR3 2953 FORMAT ( '  &PRO3 CFLTM =',F5.2,                           &
 !/PR3                      ', WDTHCG = ',F4.2,', WDTHTH = ',F4.2,' /')
 !
- 2956 FORMAT ( '  &UNST UGOBCAUTO =',L3,', UGOBCDEPTH =', F8.3,        &
-               ', UGOBCFILE=',A,','/                                   &
+ 2956 FORMAT ( '  &UNST UGBCCFL =',L3,', UGOBCAUTO =',L3,             &
+               ', UGOBCDEPTH =', F8.3,', UGOBCFILE=',A256,','/           &
                ',  EXPFSN =',L3,',EXPFSPSI =',L3,                     &
                ',  EXPFSFCT =', L3,',IMPFSN =',L3,',EXPTOTAL=',L3,    &
                ',  IMPTOTAL=',L3,',IMPREFRACTION=', L3,               &
@@ -5664,6 +5740,7 @@
                '       Hrms,max/d factor       (-) :',F9.3/           &
                '       Limiter activated           :  ',A)
   968 FORMAT ( '          *** FACTOR DANGEROUSLY LOW ***')
+ 1973 FORMAT (/'    Calendar type                  :  ',A)
 !
 !/REF1  969 FORMAT (/'  Shoreline reflection     ',A/                  &
 !/REF1               ' --------------------------------------------------')
@@ -5756,7 +5833,7 @@
                '        ICESLN = ',F6.2,', ICEWIND = ',F6.2,          &
                      ', ICESNL = ',F6.2,', ICESDS = ',F5.2,','/       &
                '        ICEDDISP = ',F5.2,', ICEFDISP = ',F5.2,       &
-                     ', NOLEAP = ',L3,' , TRCKCMPR = ', L3,','/       &
+                     ', CALTYPE = ',A8,' , TRCKCMPR = ', L3,','/      &
                '        BTBET  = ', F6.2, ' /')
 !
  2976 FORMAT ( '  &OUTS P2SF  =',I2,', I1P2SF =',I2,', I2P2SF =',I3,','/&    
@@ -5890,8 +5967,8 @@
                '       -----|-------|-------|---------|---------')
  1987 FORMAT ( '         Nr.|   IX  |   IY  |     X     |     Y     '/    &
                '       -----|-------|-------|-----------|-----------')
-  988 FORMAT ( '       ',I4,2(' |',I6),2(' |',F8.2))
- 1988 FORMAT ( '       ',I4,2(' |',I6),2(' |',F8.1,'E3'))
+  988 FORMAT ( '       ',I8,2(' |',I10),2(' |',F8.2))
+ 1988 FORMAT ( '       ',I8,2(' |',I10),2(' |',F8.1,'E3'))
   989 FORMAT ( ' ')
 !
   990 FORMAT (/'  Output boundary points : '/                         &
@@ -5940,6 +6017,10 @@
                '     ERROR IN READING FROM INPUT FILE'/               &
                '     IOSTAT =',I5/)
 !
+ 1003 FORMAT (/' *** WAVEWATCH III ERROR IN W3GRID : '/               &
+               '     INVALID CALENDAR TYPE: SELECT ONE OF:',          &
+               '     standard, 360_day, or 365_day '/)
+!
  1004 FORMAT (/' *** WAVEWATCH III ERROR IN W3GRID : '/               &
                '     CANNOT READ UNFORMATTED (IDFM = 3) FROM UNIT',   &
                I4,' (ww3_grid.inp)'/)
@@ -5978,6 +6059,14 @@
                '     AND REPLACED WITH A STRING INDICATING THE TYPE'/ &
                '     OF GRID INDEX CLOSURE (NONE, SMPL or TRPL).'/    &
                ' *** PLEASE UPDATE YOUR GRID INPUT FILE ACCORDINGLY ***'/)
+!
+ 1014 FORMAT (/' *** WAVEWATCH-III ERROR IN W3GRID :'/                &
+               '   SMC CELL LONGITUDE RANGE OUTSIDE BASE GRID RANGE:'/&
+               '   ISEA =', I6, '; IX =', I4, ':', I4,'; NX =', I4/)
+!
+ 1015 FORMAT (/' *** WAVEWATCH-III ERROR IN W3GRID :'/                &
+               '   SMC CELL LATITUDE RANGE OUTSIDE BASE GRID RANGE: '/&
+               '   ISEA =', I6, '; IY =', I4, ':', I4,'; NY =', I4/)
 !
  1020 FORMAT (/' *** WAVEWATCH-III ERROR IN W3GRID :'/                &
                '     SOURCE TERMS REQUESTED BUT NOT SELECTED'/)

@@ -7,7 +7,7 @@
 !/                  |           H. L. Tolman            |
 !/                  !            F. Ardhuin             !
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         20-Aug-2016 |
+!/                  | Last update :         15-Apr-2020 |
 !/                  +-----------------------------------+
 !/
 !/    For updates see W3IOGR documentation.
@@ -67,7 +67,7 @@
 !/
 !/ Private parameter statements (ID strings)
 !/
-      CHARACTER(LEN=10), PARAMETER, PRIVATE :: VERGRD = '2018-09-20'
+      CHARACTER(LEN=10), PARAMETER, PRIVATE :: VERGRD = '2020-06-18'
       CHARACTER(LEN=35), PARAMETER, PRIVATE ::                        &
                          IDSTR = 'WAVEWATCH III MODEL DEFINITION FILE'
 !/
@@ -83,7 +83,7 @@
 !/                  |           H. L. Tolman            |
 !/                  !            F. Ardhuin             !
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         05-Jun-2018 |
+!/                  | Last update :         15-Apr-2020 |
 !/                  +-----------------------------------+
 !/
 !/    14-Jan-1999 : Distributed FORTRAN 77 version.     ( version 1.18 )
@@ -145,6 +145,8 @@
 !/                  (C. Bunney, UKMO)
 !/    18-Aug-2018 : S_{ice} IC5 (Q. Liu)                ( version 6.06 )
 !/    26-Aug-2018 : UOST (Mentaschi et al. 2015, 2018)  ( version 6.06 )
+!/    15-Apr-2020 : Adds optional opt-out for CFL on BC ( version 7.08 )
+!/    18-Jun-2020 : Adds 360-day calendar option        ( version 7.08 )
 !/
 !/    Copyright 2009-2013 National Weather Service (NWS),
 !/       National Oceanic and Atmospheric Administration.  All rights
@@ -233,7 +235,7 @@
 !/NLX      USE W3SNLXMD, ONLY: INSNLX
 !/NLS      USE W3SNLSMD, ONLY: INSNLS
 !/IS2      USE W3SIS2MD, ONLY: INSIS2
-      USE W3TIMEMD, ONLY: NOLEAP
+      USE W3TIMEMD, ONLY: CALTYPE
       USE W3SERVMD, ONLY: EXTCDE
 !/S      USE W3SERVMD, ONLY: STRACE
       USE W3DISPMD
@@ -281,13 +283,13 @@
 !/ ------------------------------------------------------------------- /
 !/
 !/S      CALL STRACE (IENT, 'W3IOGR')
+
 !
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 1'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 1'
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 1'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
-
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
 
       MESSAGE =(/ '     MOD DEF FILE WAS GENERATED WITH A DIFFERENT    ', &
                   '     WW3 VERSION OR USING A DIFFERENT SWITCH FILE.  ', &
@@ -380,6 +382,7 @@
 !
 ! test input parameters ---------------------------------------------- *
 !
+
       IF ( PRESENT(IMOD) ) THEN
           IGRD   = IMOD
         ELSE
@@ -409,9 +412,9 @@
       FILEXT = TEMPXT
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 4'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 2'
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 2'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
 !
 ! open file ---------------------------------------------------------- *
 !
@@ -452,15 +455,15 @@
 !/T          WRITE (NDST,9002) (NBO(I),I=0,NFBPO)
 !/T          WRITE (NDST,9003) (NBO2(I),I=0,NFBPO)
         ELSE
-          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                     &
+          READ (NDSM,END=801 ,IOSTAT=IERR)                     &
                 IDTST, VERTST, NX, NY, NSEA, MTH, MK,                 &
                 NBI, NFBPO, GNAME, FNAME0, FNAME1, FNAME2, FNAME3,    &
                 FNAME4, FNAME5, FNAME6, FNAME7, FNAMEP, FNAMEG,       &
                 FNAMEF, FNAMEI
 !
-!/SMC          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/SMC          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/SMC                     NCel, NUFc, NVFc, NRLv, MRFct
-!/ARC          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/ARC          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/ARC                     NGLO, NARC, NBGL, NBAC 
 !
           NK     = MK
@@ -509,12 +512,14 @@
                IF ( IAPROC .EQ. NAPERR )                              &
                   WRITE (NDSE,905) 3, FILEXT(:I), FNAME3, TNAME3,     &
                                    MESSAGE
+                  WRITE(*,*) 'TEST TEST TEST', I, FILEXT(:I), FNAMEI, TNAMEI, MESSAGE
                CALL EXTCDE ( 17 )
             END IF
           IF ( FNAMEI .NE. TNAMEI ) THEN
                IF ( IAPROC .EQ. NAPERR )                              &
                   WRITE (NDSE,905) 3, FILEXT(:I), FNAMEI, TNAMEI,     &
                                    MESSAGE
+                  WRITE(*,*) 'TEST TEST TEST', I, FILEXT(:I), FNAMEI, TNAMEI, MESSAGE
                CALL EXTCDE ( 17 )
             END IF
           IF ( FNAME4 .NE. TNAME4 ) THEN
@@ -557,7 +562,7 @@
                CALL EXTCDE ( 24 )
             END IF
 !
-          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                     &
+          READ (NDSM,END=801 ,IOSTAT=IERR)                     &
                 (NBO(I),I=0,NFBPO), (NBO2(I),I=0,NFBPO)
 !/T          WRITE (NDST,9002) (NBO(I),I=0,NFBPO)
 !/T          WRITE (NDST,9003) (NBO2(I),I=0,NFBPO)
@@ -565,9 +570,9 @@
         ENDIF
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 6'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 3'
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 3'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
 
 !
 ! Parameters in modules  --------------------------------------------- *
@@ -594,7 +599,7 @@
             CASE (UNGTYPE) 
               WRITE (NDSM)                                            &
                 FSN, FSPSI,FSFCT,FSNIMP,FSTOTALIMP,FSTOTALEXP,        &
-                FSREFRACTION, FSFREQSHIFT, FSSOURCE,                  &
+                FSBCCFL, FSREFRACTION, FSFREQSHIFT, FSSOURCE,         &
                 DO_CHANGE_WLV, SOLVERTHR_STP, CRIT_DEP_STP,           &
                 NTRI,COUNTOT, COUNTRI, NNZ,                           &
                 B_JGS_TERMINATE_MAXITER,                              &
@@ -612,6 +617,7 @@
               !Init COUNTCON to zero, it needs to be set somewhere or
               !removed
               COUNTCON=0
+<<<<<<< HEAD
 #ifndef PDLIB 
                 WRITE (NDSM)                                            &
                 X0, Y0, SX, SY, DXYMAX, XYB, TRIGP, TRIA,             &
@@ -625,6 +631,11 @@
                 DXYMAX, &
                 IOBP, IOBPA, IOBDP, IOBPD
 #endif
+=======
+              WRITE (NDSM)                                            &
+              X0, Y0, SX, SY, DXYMAX, XGRD, YGRD, TRIGP,    &
+              MAXX, MAXY, IOBPD, IOBP 
+>>>>>>> upstream/scalability
             END SELECT !GTYPE
 !
           WRITE (NDSM)                                                &
@@ -647,7 +658,7 @@
                FICE0, FICEN, FICEL, PFMOVE, FLDRY, FLCX, FLCY, FLCTH, &
                FLCK, FLSOU, FLBPI, FLBPO, CLATS, CLATIS, CTHG0S,      &
                STEXU, STEYU, STEDU, IICEHMIN, IICEHINIT, IICEDISP,    &
-               ICESCALES(1:4), NOLEAP, CMPRTRCK, IICEHFAC, IICEHDISP, &
+               ICESCALES(1:4), CALTYPE, CMPRTRCK, IICEHFAC, IICEHDISP,&
                IICEDDISP, IICEFDISP, BTBETA
 
           WRITE(NDSM)GRIDSHIFT
@@ -660,11 +671,11 @@
         ELSE
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.1'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 4'
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 4'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
 
-          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                     &
+          READ (NDSM,END=801 ,IOSTAT=IERR)                     &
                GTYPE, FLAGLL, ICLOSE
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.2'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
@@ -680,7 +691,7 @@
 !
           SELECT CASE ( GTYPE )
             CASE ( RLGTYPE )
-              READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                 &
+              READ (NDSM,END=801 ,IOSTAT=IERR)                 &
                    SX, SY, X0, Y0
               DO IX=1,NX
                 XGRD(:,IX) = X0 + REAL(IX-1)*SX
@@ -689,7 +700,7 @@
                 YGRD(IY,:) = Y0 + REAL(IY-1)*SY
                 END DO
             CASE ( CLGTYPE )
-              READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                 &
+              READ (NDSM,END=801 ,IOSTAT=IERR)                 &
                    XGRD, YGRD
               !Set SX, SY, X0, Y0 to large values if curvilinear grid
               X0 = HUGE(X0); Y0 = HUGE(Y0)
@@ -697,9 +708,9 @@
             CASE (UNGTYPE) 
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.4'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-              READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                 & 
+              READ (NDSM,END=801 ,IOSTAT=IERR)                 & 
                 FSN, FSPSI,FSFCT,FSNIMP,FSTOTALIMP,FSTOTALEXP,        &
-                FSREFRACTION, FSFREQSHIFT, FSSOURCE,                  &
+                FSBCCFL, FSREFRACTION, FSFREQSHIFT, FSSOURCE,         &
                 DO_CHANGE_WLV, SOLVERTHR_STP, CRIT_DEP_STP,           &
                 NTRI,COUNTOT, COUNTRI, NNZ,                           &
                 B_JGS_TERMINATE_MAXITER,                              &
@@ -721,11 +732,12 @@
 !/DEBUGIOGR     FLUSH(740+IAPROC)
                 CALL W3DIMUG ( IGRD, NTRI, NX, COUNTOT, NNZ, NDSE, NDST )
               END IF
-!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 5'
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 5'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.6'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
+<<<<<<< HEAD
 
 #ifndef PDLIB 
                 READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                 &
@@ -740,50 +752,71 @@
                 DXYMAX, &
                 IOBP, IOBPA, IOBDP, IOBPD
 #endif
+=======
+!
+!AR: Todo: write dedicated I/O for domain decomposition ...
+!
+                READ (NDSM,END=801 ,IOSTAT=IERR)                 &
+                X0, Y0, SX, SY, DXYMAX, XGRD, YGRD, TRIGP,&
+                MAXX, MAXY, IOBPD, IOBP 
+!/MEMCHECK                write(20000+IAPROC,*) 'SIZE OF XO YO', SIZEOF(X0), SIZEOF(Y0)
+!/MEMCHECK                write(20000+IAPROC,*) 'SIZE OF SX SY', SIZEOF(SX), SIZEOF(SY)
+!/MEMCHECK                write(20000+IAPROC,*) 'SIZE OF GRID', SIZEOF(XGRD), SIZEOF(YGRD), SIZEOF(ZB)
+!/MEMCHECK                write(20000+IAPROC,*) 'SIZE OF TRIG', SIZEOF(TRIGP), SIZEOF(TRIA)
+!/MEMCHECK                write(20000+IAPROC,*) 'SIZE OF MAXX', SIZEOF(MAXX), SIZEOF(MAXY)
+!/MEMCHECK                write(20000+IAPROC,*) 'SIZE OF IOBP', SIZEOF(IOBPD), SIZEOF(IOBP)
+!/MEMCHECK                WRITE(20000+IAPROC,*) 'SUM', (SIZEOF(X0)+SIZEOF(Y0)+SIZEOF(SX)+SIZEOF(SY)+ &
+!/MEMCHECK                &  SIZEOF(XGRD)+SIZEOF(YGRD)+SIZEOF(ZB)+SIZEOF(TRIGP)+SIZEOF(TRIA)+&
+!/MEMCHECK                &  SIZEOF(MAXX)+SIZEOF(MAXY)+SIZEOF(IOBPD)+SIZEOF(IOBP))/1024./1024.
+>>>>>>> upstream/scalability
 
 
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.6.4'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 6'
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 6'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
 
-                XGRD(1,:)=XYB(:,1)
-                YGRD(1,:)=XYB(:,2)
-!/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.7'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
             END SELECT !GTYPE
 !
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.8'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
           IF (GTYPE.NE.UNGTYPE) CALL W3GNTX ( IGRD, NDSE, NDST ) 
+
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 6a'
+!/MEMCHECK       call getMallocInfo(mallinfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
+
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.9'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                     &
+          READ (NDSM,END=801 ,IOSTAT=IERR)                     &
                ZB, MAPTMP, MAPFS, MAPSF, TRFLAG
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.10'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
 !
-!/SMC          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/SMC          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/SMC                     NLvCel, NLvUFc, NLvVFc
-!/SMC          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/SMC          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/SMC                     IJKCel, IJKUFc, IJKVFc
-!/ARC          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/ARC          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/ARC                     ICLBAC 
-!/ARC          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/ARC          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/ARC                     ANGARC 
-!/SMC          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/SMC          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/SMC                     CTRNX,  CTRNY,  CLATF
 !
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.11'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
           MAPSTA = MOD(MAPTMP+2,8) - 2
           MAPST2 = (MAPTMP-MAPSTA) / 8
+          DEALLOCATE ( MAPTMP )
           MAPSF(:,3) = MAPSF(:,2) + (MAPSF(:,1)-1)*NY
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.12'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
+
           IF ( TRFLAG .NE. 0 ) THEN
-              READ (NDSM,END=801,ERR=802,IOSTAT=IERR) TRNX, TRNY
+              READ (NDSM,END=801 ,IOSTAT=IERR) TRNX, TRNY
             END IF
 !/UOST          ! UOST (Unresolved Obstacles Source Term) is enabled.
 !/UOST          ! setting TRNX, TRNY to null values
@@ -792,20 +825,21 @@
 
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.13'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                     &
+          READ (NDSM,END=801 ,IOSTAT=IERR)                     &
                DTCFL, DTCFLI, DTMAX, DTMIN, DMIN, CTMAX,              &
                FICE0, FICEN, FICEL, PFMOVE, FLDRY, FLCX, FLCY,        &
                FLCTH, FLCK, FLSOU, FLBPI, FLBPO, CLATS, CLATIS,       &
                CTHG0S, STEXU, STEYU, STEDU, IICEHMIN, IICEHINIT,      &
-               IICEDISP, ICESCALES(1:4), NOLEAP, CMPRTRCK, IICEHFAC,  &
+               IICEDISP, ICESCALES(1:4), CALTYPE, CMPRTRCK, IICEHFAC, &
                IICEDDISP, IICEHDISP, IICEFDISP, BTBETA
+
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.14'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
 
-              READ(NDSM,END=801,ERR=802,IOSTAT=IERR)GRIDSHIFT
+              READ(NDSM,END=801 ,IOSTAT=IERR)GRIDSHIFT
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.15'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-!/SEC1         READ (NDSM) NITERSEC1
+!/SEC1         READ (NDSM,IOSTAT=IERR) NITERSEC1
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 7.16'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
 !
@@ -817,9 +851,9 @@
 !/DEBUGIOGR     FLUSH(740+IAPROC)
         END IF
 
-!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7'
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
 
 
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 8'
@@ -851,7 +885,6 @@
 !
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 9'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-      DEALLOCATE ( MAPTMP )
 !
 !/T      WRITE (NDST,9015) DTCFL, DTCFLI, DTMAX, DTMIN,               &
 !/T                        DMIN, CTMAX, FICE0, FICEN, FICEL, PFMOVE,  &
@@ -871,15 +904,21 @@
                FTF, FTWN, FTTR, FTWL, FACTI1, FACTI2, FACHFA, FACHFE
         ELSE
           IF (.NOT.SINIT) CALL W3DIMS ( IGRD, NK, NTH, NDSE, NDST )
-          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                     &
+          READ (NDSM,END=801 ,IOSTAT=IERR)                     &
                MAPWN, MAPTH, DTH, TH, ESIN, ECOS, ES2, ESC, EC2,      &
                XFR, FR1, SIG, SIG2, DSIP, DSII, DDEN, DDEN2, FTE,     &
                FTF, FTWN, FTTR, FTWL, FACTI1, FACTI2, FACHFA, FACHFE
         END IF
 
+<<<<<<< HEAD
 !/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7a'
 !/MEMCHECK       call getMallocInfo(mallinfos)
 !/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+=======
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7a'
+!/MEMCHECK       call getMallocInfo(mallinfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
+>>>>>>> upstream/scalability
 
 
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 10'
@@ -897,7 +936,7 @@
           WRITE (NDSM)                                                &
                 E3DF, P2MSF, US3DF,USSPF, USSP_WN
         ELSE
-          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                     &
+          READ (NDSM,END=801 ,IOSTAT=IERR)                     &
                 E3DF, P2MSF, US3DF,USSPF, USSP_WN
         END IF
 
@@ -916,15 +955,21 @@
                XBPO, YBPO, RDBPO, IPBPO, ISBPO
         ELSE
           CALL W3DMO5 ( IGRD, NDSE, NDST, 2 )
-          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                     &
+          READ (NDSM,END=801 ,IOSTAT=IERR)                     &
                XBPO, YBPO, RDBPO, IPBPO, ISBPO
         END IF
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 12'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
 
+<<<<<<< HEAD
 !/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7b'
 !/MEMCHECK       call getMallocInfo(mallinfos)
 !/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+=======
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7b'
+!/MEMCHECK       call getMallocInfo(mallinfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
+>>>>>>> upstream/scalability
 
 !
 !/T      WRITE (NDST,9020)
@@ -945,7 +990,7 @@
                 IHMAX, HSPMIN, WSMULT, WSCUT, FLCOMB, NOSWLL,         &
                 PTMETH, PTFCUT
         ELSE
-          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                     &
+          READ (NDSM,END=801 ,IOSTAT=IERR)                     &
                 IHMAX, HSPMIN, WSMULT, WSCUT, FLCOMB, NOSWLL,         &
                 PTMETH, PTFCUT
         END IF
@@ -978,7 +1023,7 @@
 !/IC5          WRITE   (NDSM)                                              &
 !/IC5                IC5PARS
         ELSE
-          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                     &
+          READ (NDSM,END=801 ,IOSTAT=IERR)                     &
                 FACP, XREL, XFLT, FXFM, FXPM, XFT, XFC, FACSD, FHMAX, &
                 FFACBERG, DELAB, FWTABLE
 !/RWND          READ  (NDSM)                                                &
@@ -1014,7 +1059,7 @@
 !/FLX2      IF ( WRITE ) THEN
 !/FLX2          WRITE (NDSM)                            NITTIN, CINXSI
 !/FLX2        ELSE
-!/FLX2          READ (NDSM,END=801,ERR=802,IOSTAT=IERR) NITTIN, CINXSI
+!/FLX2          READ (NDSM,END=801 ,IOSTAT=IERR) NITTIN, CINXSI
 !/FLX2        END IF
 !
 !/FLX2      IF ( FLTEST ) WRITE (NDST,9048) NITTIN, CINXSI
@@ -1023,7 +1068,7 @@
 !/FLX3          WRITE (NDSM)                                          &
 !/FLX3                 NITTIN, CINXSI, CD_MAX, CAP_ID
 !/FLX3        ELSE
-!/FLX3          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)               &
+!/FLX3          READ (NDSM,END=801 ,IOSTAT=IERR)               &
 !/FLX3                 NITTIN, CINXSI, CD_MAX, CAP_ID
 !/FLX3        END IF
 !
@@ -1034,19 +1079,25 @@
 !/FLX4      IF ( WRITE ) THEN
 !/FLX4          WRITE (NDSM)                            FLX4A0
 !/FLX4        ELSE
-!/FLX4          READ (NDSM,END=801,ERR=802,IOSTAT=IERR) FLX4A0
+!/FLX4          READ (NDSM,END=801 ,IOSTAT=IERR) FLX4A0
 !/FLX4        END IF
 
+<<<<<<< HEAD
 !/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7c'
 !/MEMCHECK       call getMallocInfo(mallinfos)
 !/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+=======
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7c'
+!/MEMCHECK       call getMallocInfo(mallinfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
+>>>>>>> upstream/scalability
 
 !
 ! 
 !/LN1      IF ( WRITE ) THEN
 !/LN1          WRITE (NDSM)                            SLNC1, FSPM, FSHF
 !/LN1        ELSE
-!/LN1          READ (NDSM,END=801,ERR=802,IOSTAT=IERR) SLNC1, FSPM, FSHF
+!/LN1          READ (NDSM,END=801 ,IOSTAT=IERR) SLNC1, FSPM, FSHF
 !/LN1        END IF
 !
 !/LN1      IF ( FLTEST ) WRITE (NDST,9049) SLNC1, FSPM, FSHF
@@ -1054,7 +1105,7 @@
 !/ST1      IF ( WRITE ) THEN
 !/ST1          WRITE (NDSM)                            SINC1, SDSC1
 !/ST1        ELSE
-!/ST1          READ (NDSM,END=801,ERR=802,IOSTAT=IERR) SINC1, SDSC1
+!/ST1          READ (NDSM,END=801 ,IOSTAT=IERR) SINC1, SDSC1
 !/ST1        END IF
 !
 !/ST1      IF ( FLTEST ) WRITE (NDST,9050) SINC1, SDSC1
@@ -1066,7 +1117,7 @@
 !/ST2                CDSA0, CDSA1, CDSA2, SDSALN,                     &
 !/ST2                CDSB0, CDSB1, CDSB2, CDSB3, FPIMIN, XFH, XF1, XF2
 !/ST2        ELSE
-!/ST2          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/ST2          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/ST2                ZWIND, FSWELL,                                   &
 !/ST2                SHSTAB, OFSTAB, CCNG, CCPS, FFNG, FFPS,          &
 !/ST2                CDSA0, CDSA1, CDSA2, SDSALN,                     &
@@ -1090,7 +1141,7 @@
 !/ST3                DDELTA1, DDELTA2, SSTXFTF, SSTXFTWN,             &
 !/ST3                FFXPM, FFXFM
 !/ST3        ELSE
-!/ST3          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/ST3          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/ST3                ZZWND, AALPHA, ZZ0MAX, BBETA, SSINTHP, ZZALP,    &
 !/ST3                SSWELLF, SSDSC1, WWNMEANP, WWNMEANPTAIL, SSTXFTF,&
 !/ST3                SSTXFTFTAIL, SSTXFTWN,                           &
@@ -1102,9 +1153,15 @@
 !/ST3            END IF
 !/ST3        END IF
 
+<<<<<<< HEAD
 !/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7d'
 !/MEMCHECK       call getMallocInfo(mallinfos)
 !/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+=======
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7d'
+!/MEMCHECK       call getMallocInfo(mallinfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
+>>>>>>> upstream/scalability
 
 !
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 17'
@@ -1115,34 +1172,40 @@
 !/ST4                ZZWND, AALPHA, ZZ0MAX, BBETA, SSINTHP, ZZALP,    &
 !/ST4                TTAUWSHELTER, SSWELLFPAR, SSWELLF, SSINBR,       &
 !/ST4                ZZ0RAT, SSDSC,                                   &
-!/ST4                SSDSISO, SSDSBR, SSDSBR2, SSDSBM, SSDSP,         &
+!/ST4                SSDSISO, SSDSBR, SSDSBT, SSDSBM, SSDSP,         &
 !/ST4                SSDSCOS, SSDSDTH, WWNMEANP, WWNMEANPTAIL,SSTXFTF,&
 !/ST4                SSTXFTFTAIL, SSTXFTWN, SSTXFTF, SSTXFTWN,        &
 !/ST4                SSDSBRF1, SSDSBRF2, SSDSBRFDF,SSDSBCK, SSDSABK,  &
-!/ST4                SSDSPBK, SSDSBINT, FFXPM, FFXFM, FFXFA, FFXFI,   &
-!/ST4                FFXFD, SSDSHCK, DELUST, DELTAIL, DELTAUW,        &
+!/ST4                SSDSPBK, SSDSBINT, FFXPM, FFXFM, FFXFA,   &
+!/ST4                SSDSHCK, DELUST, DELTAIL, DELTAUW,        &
 !/ST4                DELU, DELALP, TAUT, TAUHFT, TAUHFT2,             &
 !/ST4                IKTAB, DCKI, QBI, SATINDICES, SATWEIGHTS,        &
 !/ST4                DIKCUMUL, CUMULW
 !/ST4        ELSE
-!/ST4          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/ST4          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/ST4                ZZWND, AALPHA, ZZ0MAX, BBETA, SSINTHP, ZZALP,    &
 !/ST4                TTAUWSHELTER, SSWELLFPAR, SSWELLF, SSINBR,       &
 !/ST4                ZZ0RAT, SSDSC,                                   &
-!/ST4                SSDSISO, SSDSBR, SSDSBR2, SSDSBM, SSDSP,         &
+!/ST4                SSDSISO, SSDSBR, SSDSBT, SSDSBM, SSDSP,         &
 !/ST4                SSDSCOS, SSDSDTH, WWNMEANP, WWNMEANPTAIL,SSTXFTF,&
 !/ST4                SSTXFTFTAIL, SSTXFTWN, SSTXFTF, SSTXFTWN,        &
 !/ST4                SSDSBRF1, SSDSBRF2, SSDSBRFDF,SSDSBCK, SSDSABK,  &
-!/ST4                SSDSPBK, SSDSBINT, FFXPM, FFXFM, FFXFA, FFXFI,   &
-!/ST4                FFXFD, SSDSHCK, DELUST, DELTAIL, DELTAUW,        &
+!/ST4                SSDSPBK, SSDSBINT, FFXPM, FFXFM, FFXFA,   &
+!/ST4                 SSDSHCK, DELUST, DELTAIL, DELTAUW,        &
 !/ST4                DELU, DELALP, TAUT, TAUHFT, TAUHFT2,             &
 !/ST4                IKTAB, DCKI, QBI, SATINDICES, SATWEIGHTS,        &
 !/ST4                DIKCUMUL, CUMULW
 !/ST4        END IF
 
+<<<<<<< HEAD
 !/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7e'
 !/MEMCHECK       call getMallocInfo(mallinfos)
 !/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+=======
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'AFTER READING ST4 STUFF'
+!/MEMCHECK       call getMallocInfo(mallinfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
+>>>>>>> upstream/scalability
 
 !
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 18'
@@ -1152,15 +1215,21 @@
 !/ST6                       SDS6P1, SDS6P2, SWL6S6, SWL6B1, SWL6CSTB1,&
 !/ST6                       SIN6WS, SIN6FC
 !/ST6        ELSE
-!/ST6          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/ST6          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/ST6                       SIN6A0, SDS6ET, SDS6A1, SDS6A2,           &
 !/ST6                       SDS6P1, SDS6P2, SWL6S6, SWL6B1, SWL6CSTB1,&
 !/ST6                       SIN6WS, SIN6FC
 !/ST6        END IF
 
+<<<<<<< HEAD
 !/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7f'
 !/MEMCHECK       call getMallocInfo(mallinfos)
 !/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+=======
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 7f'
+!/MEMCHECK       call getMallocInfo(mallinfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
+>>>>>>> upstream/scalability
 
 !
 ! ... Nonlinear interactions
@@ -1171,7 +1240,7 @@
 !/NL1          WRITE (NDSM)                                           &
 !/NL1                SNLC1, LAM, KDCON, KDMN, SNLS1, SNLS2, SNLS3
 !/NL1        ELSE
-!/NL1          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/NL1          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/NL1                SNLC1, LAM, KDCON, KDMN, SNLS1, SNLS2, SNLS3
 !/NL1        END IF
 !
@@ -1182,12 +1251,12 @@
 !/NL2          WRITE (NDSM) IQTPE, NLTAIL, NDPTHS
 !/NL2          WRITE (NDSM) DPTHNL
 !/NL2        ELSE
-!/NL2          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/NL2          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/NL2                       IQTPE, NLTAIL, NDPTHS
 !/NL2          ALLOCATE ( MPARS(IGRD)%SNLPS%DPTHNL(NDPTHS) )
 !/NL2          DPTHNL => MPARS(IGRD)%SNLPS%DPTHNL
 !/NL2          PINIT  = .TRUE.
-!/NL2          READ (NDSM,END=801,ERR=802,IOSTAT=IERR) DPTHNL
+!/NL2          READ (NDSM,END=801 ,IOSTAT=IERR) DPTHNL
 !/NL2        END IF
 !
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 20'
@@ -1201,7 +1270,7 @@
 !/NL3                       SNLT(1:SNLNQ), SNLCD(1:SNLNQ),            &
 !/NL3                       SNLCS(1:SNLNQ)
 !/NL3        ELSE
-!/NL3          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/NL3          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/NL3                       SNLNQ, SNLMSC, SNLNSC, SNLSFD, SNLSFS
 !/NL3          ALLOCATE ( MPARS(IGRD)%SNLPS%SNLL(SNLNQ),              &
 !/NL3                     MPARS(IGRD)%SNLPS%SNLM(SNLNQ),              &
@@ -1214,7 +1283,7 @@
 !/NL3          SNLCD  => MPARS(IGRD)%SNLPS%SNLCD
 !/NL3          SNLCS  => MPARS(IGRD)%SNLPS%SNLCS
 !/NL3          PINIT  = .TRUE.
-!/NL3          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/NL3          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/NL3                       SNLL, SNLM, SNLT, SNLCD, SNLCS
 !/NL3        END IF
 !
@@ -1232,7 +1301,7 @@
 !/NL4      IF ( WRITE ) THEN
 !/NL4          WRITE (NDSM) ITSA, IALT
 !/NL4        ELSE
-!/NL4          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/NL4          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/NL4                       ITSA, IALT
 !/NL4        END IF
 !
@@ -1242,7 +1311,7 @@
 !/NLS          WRITE (NDSM)                                           &
 !/NLS                CNLSA, CNLSC, CNLSFM, CNLSC1, CNLSC2, CNLSC3
 !/NLS        ELSE
-!/NLS          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/NLS          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/NLS                CNLSA, CNLSC, CNLSFM, CNLSC1, CNLSC2, CNLSC3
 !/NLS        END IF
 !
@@ -1275,7 +1344,7 @@
 !/BT1      IF ( WRITE ) THEN
 !/BT1          WRITE (NDSM)                            SBTC1
 !/BT1        ELSE
-!/BT1          READ (NDSM,END=801,ERR=802,IOSTAT=IERR) SBTC1
+!/BT1          READ (NDSM,END=801 ,IOSTAT=IERR) SBTC1
 !/BT1        END IF
 !
 !/BT1      IF ( FLTEST ) WRITE (NDST,9052) SBTC1
@@ -1285,7 +1354,7 @@
 !/BT4          WRITE (NDSM)                                          &
 !/BT4                SBTCX, SED_D50, SED_PSIC
 !/BT4        ELSE
-!/BT4          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)               &
+!/BT4          READ (NDSM,END=801 ,IOSTAT=IERR)               &
 !/BT4                SBTCX, SED_D50, SED_PSIC
 !/BT4        END IF
 !
@@ -1293,25 +1362,25 @@
 !
 !/DEBUGIOGR     WRITE(740+IAPROC,*) 'W3IOGR, step 23'
 !/DEBUGIOGR     FLUSH(740+IAPROC)
-!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 8'
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 8'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
 
 !/DB1      IF ( WRITE ) THEN
 !/DB1          WRITE (NDSM)                                           &
 !/DB1                 SDBC1, SDBC2, FDONLY
 !/DB1        ELSE
-!/DB1          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/DB1          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/DB1                 SDBC1, SDBC2, FDONLY
 !/DB1        END IF
 !
 !/DB1      IF ( FLTEST ) WRITE (NDST,9053) SDBC1, SDBC2, FDONLY
 
 !/UOST      IF ( WRITE ) THEN
-!/UOST          WRITE (NDSM), UOSTFILELOCAL, UOSTFILESHADOW,           &
-!/UOST                        UOSTFACTORLOCAL, UOSTFACTORSHADOW
+!/UOST          WRITE (NDSM) UOSTFILELOCAL, UOSTFILESHADOW,            &
+!/UOST                       UOSTFACTORLOCAL, UOSTFACTORSHADOW
 !/UOST        ELSE
-!/UOST          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/UOST          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/UOST                 UOSTFILELOCAL, UOSTFILESHADOW,                  &
 !/UOST                 UOSTFACTORLOCAL, UOSTFACTORSHADOW
 !/UOST          CALL UOST_INITGRID(IGRD, UOSTFILELOCAL, UOSTFILESHADOW, &
@@ -1323,13 +1392,13 @@
 !/IS1      IF ( WRITE ) THEN
 !/IS1          WRITE (NDSM)                            IS1C1, IS1C2
 !/IS1        ELSE
-!/IS1          READ (NDSM,END=801,ERR=802,IOSTAT=IERR) IS1C1, IS1C2
+!/IS1          READ (NDSM,END=801 ,IOSTAT=IERR) IS1C1, IS1C2
 !/IS1        END IF
 !
 !/IS2      IF ( WRITE ) THEN
 !/IS2          WRITE (NDSM)                            IS2PARS
 !/IS2        ELSE
-!/IS2          READ (NDSM,END=801,ERR=802,IOSTAT=IERR) IS2PARS
+!/IS2          READ (NDSM,END=801 ,IOSTAT=IERR) IS2PARS
 !/IS2          IF ( .NOT. FLIS ) THEN
 !/IS2            CALL INSIS2
 !/IS2            FLIS  = .TRUE.
@@ -1344,7 +1413,7 @@
 !/PR2      IF ( WRITE ) THEN
 !/PR2          WRITE (NDSM) DTME, CLATMN
 !/PR2        ELSE
-!/PR2          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/PR2          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/PR2                       DTME, CLATMN
 !/PR2        END IF
 !
@@ -1353,7 +1422,7 @@
 !/PR3      IF ( WRITE ) THEN
 !/PR3          WRITE (NDSM) WDCG, WDTH
 !/PR3        ELSE
-!/PR3          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/PR3          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/PR3                       WDCG, WDTH
 !/PR3        END IF
 !
@@ -1362,7 +1431,7 @@
 !/SMC      IF ( WRITE ) THEN
 !/SMC          WRITE (NDSM) DTME, CLATMN, Refran, FUNO3, FVERG, FSWND
 !/SMC        ELSE
-!/SMC          READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                &
+!/SMC          READ (NDSM,END=801 ,IOSTAT=IERR)                &
 !/SMC                       DTME, CLATMN, Refran, FUNO3, FVERG, FSWND
 !/SMC        END IF
 !
@@ -1371,13 +1440,13 @@
 !/FLD1      IF ( WRITE ) THEN
 !/FLD1          WRITE (NDSM)  TAIL_ID, TAIL_LEV, TAIL_TRAN1, TAIL_TRAN2
 !/FLD1        ELSE
-!/FLD1          READ (NDSM,END=801,ERR=802,IOSTAT=IERR) &
+!/FLD1          READ (NDSM,END=801 ,IOSTAT=IERR) &
 !/FLD1                         TAIL_ID, TAIL_LEV, TAIL_TRAN1, TAIL_TRAN2
 !/FLD1        END IF
 !/FLD2      IF ( WRITE ) THEN
 !/FLD2          WRITE (NDSM) TAIL_ID, TAIL_LEV, TAIL_TRAN1, TAIL_TRAN2
 !/FLD2        ELSE
-!/FLD2          READ (NDSM,END=801,ERR=802,IOSTAT=IERR) &
+!/FLD2          READ (NDSM,END=801 ,IOSTAT=IERR) &
 !/FLD2                         TAIL_ID, TAIL_LEV, TAIL_TRAN1, TAIL_TRAN2
 !/FLD2        END IF
 !
@@ -1394,9 +1463,9 @@
 !
       CLOSE ( NDSM )
 
-!/MEMCHECK       write(740+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 9'
+!/MEMCHECK       write(20000+IAPROC,*) 'memcheck_____:', 'WIOGR SECTION 9'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(20000+IAPROC,mallInfos)
 !
       RETURN
 !

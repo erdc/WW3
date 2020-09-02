@@ -313,10 +313,11 @@
 !       
 ! 4.b.ii Check if point is enclosed in grid domain
 !
+!AR: Here we need to check the interpolation with respect to REAL*4 and *8 with respect to XGRD, YGRD 
             INGRID=.FALSE.
             IF (GRIDS(IG)%GTYPE .EQ. UNGTYPE) THEN
               ! Look for a triangle at the coarse cell center
-              CALL IS_IN_UNGRID(IG, XGRD(IY,IX), YGRD(IY,IX),  &
+              CALL IS_IN_UNGRID(IG, REAL(XGRD(IY,IX)), REAL(YGRD(IY,IX)),  &
                                                  ITOUT, IS, JS, RW)
               IF (ITOUT.GT.0) INGRID=.TRUE.
 !              ! If extrapolation activated, force to find if a triangles is inside 
@@ -325,7 +326,7 @@
                 WRITE(991,'(2I6,2F9.4,I8,3I8,3F5.3)') IX,IY,XGRD(IY,IX), YGRD(IY,IX), ITOUT, IS(1:3), RW(1:3)
                 IF (ITOUT.EQ.0)  WRITE(992,*) IX,IY,ISEA,XGRD(IY,IX), YGRD(IY,IX)
                 IF (ITOUT.EQ.0) THEN 
-                   CALL IS_IN_UNGRID2(IG, XGRD(IY,IX), YGRD(IY,IX), EXTRA,  &
+                   CALL IS_IN_UNGRID2(IG, REAL(XGRD(IY,IX)), REAL(YGRD(IY,IX)), EXTRA,  &
                                                  ITOUT, IS, JS, RW)
                    WRITE(993,'(2I6,2F9.4,I8,3I8,3F6.3)') IX,IY,XGRD(IY,IX), YGRD(IY,IX), ITOUT, IS(1:3), RW(1:3)
                 ENDIF  
@@ -339,7 +340,7 @@
                 !IF (ITOUT.GT.0) INGRID=.TRUE.
               END IF           
             ELSE
-              IF ( W3GRMP ( GRIDS(IG)%GSU, XGRD(IY,IX), YGRD(IY,IX), IS,        &
+              IF ( W3GRMP ( GRIDS(IG)%GSU, REAL(XGRD(IY,IX)), REAL(YGRD(IY,IX)), IS,        &
                    JS, RW ) ) INGRID=.TRUE.
               END IF
            IF (INGRID) THEN 

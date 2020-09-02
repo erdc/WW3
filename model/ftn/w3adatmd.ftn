@@ -343,7 +343,9 @@
 !
 ! The grid
 ! 
+#ifndef NOCGTABLE 
         REAL, POINTER         :: CG(:,:), WN(:,:)
+#endif
 !/IC3   REAL, POINTER         :: IC3WN_R(:,:), IC3WN_I(:,:), IC3CG(:,:)
 !
 ! Arrays for processing model input
@@ -720,6 +722,9 @@
         WADATS(I)%ITIME  = 0
         WADATS(I)%IPASS  = 0
         WADATS(I)%IDLAST = 0
+        WADATS(I)%NSEALM = 0
+        WADATS(I)%FLCOLD = .FALSE.
+        WADATS(I)%FLIWND = .FALSE.
         WADATS(I)%AINIT  = .FALSE.
         WADATS(I)%AINIT2 = .FALSE.
         WADATS(I)%FL_ALL = .FALSE.
@@ -850,9 +855,9 @@
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
 !
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 0'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 0'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 
       IF ( PRESENT(D_ONLY) ) THEN
           FL_ALL = .NOT. D_ONLY
@@ -880,9 +885,9 @@
       JGRID  = IGRID
       IF ( JGRID .NE. IMOD ) CALL W3SETG ( IMOD, NDSE, NDST )
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 1'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 1'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Allocate arrays
@@ -913,9 +918,9 @@
                  WADATS(IMOD)%AS(0:NSEA) , STAT=ISTAT )
       CHECK_ALLOC_STATUS ( ISTAT )
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 2'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 2'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 !
 !     Water level WLV stored in W3WDATMD
 !     Ice concentration ICE stored in W3WDATMD
@@ -967,9 +972,9 @@
       WADATS(IMOD)%QP     = UNDEF
       WADATS(IMOD)%WBT    = UNDEF
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 3'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 3'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 !
 ! 3) Frequency-dependent standard parameters
 !
@@ -1012,9 +1017,9 @@
       IF (  E3DF(1,4).GT.0 ) WADATS(IMOD)%TH2M    = UNDEF
       IF (  E3DF(1,5).GT.0 ) WADATS(IMOD)%STH2M   = UNDEF
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 4'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 4'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 
 !
 ! 4) Spectral Partitions parameters
@@ -1083,9 +1088,9 @@
       WADATS(IMOD)%TAUWNY   = UNDEF
       WADATS(IMOD)%WHITECAP = UNDEF
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 5'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 5'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 
 !
 ! 6) Wave-ocean layer
@@ -1146,9 +1151,9 @@
       IF (  US3DF(1).GT.0 ) WADATS(IMOD)%US3D   = UNDEF
       IF (  USSPF(1).GT.0 ) WADATS(IMOD)%USSP   = UNDEF
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 6'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 6'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 !
 ! 7) Wave-bottom layer
 !
@@ -1167,9 +1172,9 @@
       WADATS(IMOD)%PHIBBL = UNDEF
       WADATS(IMOD)%TAUBBL = UNDEF
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 7'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 7'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 !
 ! 8) Spectrum parameters
 !
@@ -1185,9 +1190,9 @@
       WADATS(IMOD)%MSCX   = UNDEF
       WADATS(IMOD)%MSCY   = UNDEF
       WADATS(IMOD)%MSCD   = UNDEF
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 8'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 8'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 !
 ! 9) Numerical diagnostics
 !
@@ -1205,9 +1210,9 @@
       WADATS(IMOD)%CFLTHMAX = UNDEF
       WADATS(IMOD)%CFLKMAX  = UNDEF
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 9'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 9'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 !
 ! 10) User defined
 !
@@ -1216,22 +1221,26 @@
 !
       WADATS(IMOD)%USERO  = UNDEF
 !
+#ifndef NOCGTABLE
       ALLOCATE ( WADATS(IMOD)%WN(0:NK+1,0:NSEA), STAT=ISTAT )
       CHECK_ALLOC_STATUS ( ISTAT )
+#endif
 
 !/IC3     ALLOCATE (WADATS(IMOD)%IC3WN_R(0:NK+1,0:300), STAT=ISTAT )
 !/IC3     CHECK_ALLOC_STATUS ( ISTAT )
 !/IC3     ALLOCATE (WADATS(IMOD)%IC3WN_I(0:NK+1,0:300), STAT=ISTAT )
 !/IC3     CHECK_ALLOC_STATUS ( ISTAT )
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 10'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 10'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 !
       IF ( FL_ALL ) THEN
 !
+#ifndef NOCGTABLE
           ALLOCATE ( WADATS(IMOD)%CG(0:NK+1,0:NSEA), STAT=ISTAT )
           CHECK_ALLOC_STATUS ( ISTAT )
+#endif
 
 !/IC3     ALLOCATE (WADATS(IMOD)%IC3CG(0:NK+1,0:300), STAT=ISTAT )
 !/IC3     CHECK_ALLOC_STATUS ( ISTAT )
@@ -1271,14 +1280,15 @@
                        WADATS(IMOD)%DCXDY(NY,NX) ,                      &
                        WADATS(IMOD)%DCYDY(NY,NX) , STAT=ISTAT           )
           ELSE
-            ALLOCATE ( WADATS(IMOD)%DDDX(NY,NSEAL)  ,                      &
-                       WADATS(IMOD)%DDDY(NY,NSEAL)  ,                      &
-                       WADATS(IMOD)%DCDX(0:NK+1,NY,NSEAL)  ,               &
-                       WADATS(IMOD)%DCDY(0:NK+1,NY,NSEAL)  ,               &
-                       WADATS(IMOD)%DCXDX(NY,NSEAL) ,                      &
-                       WADATS(IMOD)%DCYDX(NY,NSEAL) ,                      &
-                       WADATS(IMOD)%DCXDY(NY,NSEAL) ,                      &
-                       WADATS(IMOD)%DCYDY(NY,NSEAL) , STAT=ISTAT           )
+            ALLOCATE ( WADATS(IMOD)%DDDX(1,NSEAL)  ,                      &
+                       WADATS(IMOD)%DDDY(1,NSEAL)  ,                      &
+                       WADATS(IMOD)%DCDX(0:NK+1,1,NSEAL)  ,               &
+                       WADATS(IMOD)%DCDY(0:NK+1,1,NSEAL)  ,               &
+                       WADATS(IMOD)%DCXDX(1,NSEAL) ,                      &
+                       WADATS(IMOD)%DCYDX(1,NSEAL) ,                      &
+                       WADATS(IMOD)%DCXDY(1,NSEAL) ,                      &
+                       WADATS(IMOD)%DCYDY(1,NSEAL) ,                      &
+                       STAT=ISTAT           )
           ENDIF
           CHECK_ALLOC_STATUS ( ISTAT )
           WADATS(IMOD)%DDDX = 0.
@@ -1345,9 +1355,9 @@
 !
       WADATS(IMOD)%AINIT  = .TRUE.
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 11'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 11'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 
 !
 !/T      WRITE (NDST,9001)
@@ -1357,9 +1367,9 @@
 !
       CALL W3SETA ( IMOD, NDSE, NDST )
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA 12'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA 12'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 
 !
 !/T      WRITE (NDST,9002)
@@ -1374,9 +1384,9 @@
 !
       IF ( JGRID .NE. IMOD ) CALL W3SETG ( JGRID, NDSE, NDST )
  
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3DIMA END'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3DIMA END'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 !
       RETURN
 !
@@ -2226,9 +2236,9 @@
 !
       IF ( JGRID .NE. IMOD ) CALL W3SETG ( JGRID, NDSE, NDST )
 
-!/MEMCHECK       WRITE(740+IAPROC,*) 'memcheck_____:', 'W3XDMA'
+!/MEMCHECK       WRITE(30000+IAPROC,*) 'memcheck_____:', 'W3XDMA'
 !/MEMCHECK       call getMallocInfo(mallinfos)
-!/MEMCHECK       call printMallInfo(IAPROC,mallInfos)
+!/MEMCHECK       call printMallInfo(30000+IAPROC,mallInfos)
 !
       RETURN
 !
@@ -2724,13 +2734,17 @@
 !
           USERO  => WADATS(IMOD)%USERO
 !
+#ifndef NOCGTABLE
           WN     => WADATS(IMOD)%WN
+#endif
 !/IC3     IC3WN_R=> WADATS(IMOD)%IC3WN_R
 !/IC3     IC3WN_I=> WADATS(IMOD)%IC3WN_I
 !
           IF ( FL_ALL ) THEN
 !
+#ifndef NOCGTABLE
               CG     => WADATS(IMOD)%CG
+#endif
 !/IC3         IC3CG  => WADATS(IMOD)%IC3CG
 !
               ATRNX  => WADATS(IMOD)%ATRNX
@@ -2793,6 +2807,7 @@
 !/SMC              MAPXY  => WADATS(IMOD)%MAPXY
 !/SMC              MAPTH2 => WADATS(IMOD)%MAPTH2
 !/SMC              MAPWN2 => WADATS(IMOD)%MAPWN2
+
 !
                IF (GTYPE .EQ. UNGTYPE) ITER   => WADATS(IMOD)%ITER
 !

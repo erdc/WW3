@@ -1,0 +1,144 @@
+
+SPECTRUM %  XFR        =     1.10
+SPECTRUM %  FREQ1      =     0.05
+SPECTRUM %  NK         =       32
+SPECTRUM %  NTH        =       36
+SPECTRUM %  THOFF      =     0.00
+
+RUN %  FLDRY      = F
+RUN %  FLCX       = T
+RUN %  FLCY       = T
+RUN %  FLCTH      = T
+RUN %  FLCK       = T
+RUN %  FLSOU      = T
+
+TIMESTEPS %  DTMAX      =   600.00
+TIMESTEPS %  DTXY       =   600.00
+TIMESTEPS %  DTKTH      =   600.00
+TIMESTEPS %  DTMIN      =   600.00
+
+GRID %  NAME       = Inlet
+GRID %  NML        = ../input/namelists_a.nml
+GRID %  TYPE       = UNST
+GRID %  COORD      = SPHE
+GRID %  CLOS       = F
+GRID %  ZLIM       =     4.00
+GRID %  DMIN       =     0.30
+
+RECT %  NX         =        0
+RECT %  NY         =        0
+RECT %  SX         =         0.00
+RECT %  SY         =         0.00
+RECT %  SF         =         1.00
+RECT %  X0         =         0.00
+RECT %  Y0         =         0.00
+RECT %  SF0        =         1.00
+
+CURV %  NX                 =        0
+CURV %  NY                 =        0
+CURV %  XCOORD % SF        =     1.00
+CURV %  XCOORD % OFF       =     0.00
+CURV %  XCOORD % FILENAME  = unset
+CURV %  XCOORD % IDF       =       21
+CURV %  XCOORD % IDLA      =        1
+CURV %  XCOORD % IDFM      =        1
+CURV %  XCOORD % FORMAT    = (....)
+CURV %  XCOORD % FROM      = NAME
+CURV %  YCOORD % SF        =     1.00
+CURV %  YCOORD % OFF       =     0.00
+CURV %  YCOORD % FILENAME  = unset
+CURV %  YCOORD % IDF       =       22
+CURV %  YCOORD % IDLA      =        1
+CURV %  YCOORD % IDFM      =        1
+CURV %  YCOORD % FORMAT    = (....)
+CURV %  YCOORD % FROM      = NAME
+
+UNST %  SF        =    -1.00
+UNST %  FILENAME  = ../input/inlet.msh
+UNST %  IDF       =       20
+UNST %  IDLA      =        4
+UNST %  IDFM      =        1
+UNST %  FORMAT    = (20f10.2)
+UNST %  UGOBCFILE = unset
+
+SMC %  MCELS % FILENAME  = unset
+SMC %  MCELS % IDF       =       31
+SMC %  MCELS % IDLA      =        1
+SMC %  MCELS % IDFM      =        1
+SMC %  MCELS % FORMAT    = (....)
+SMC %  ISIDE % FILENAME  = unset
+SMC %  ISIDE % IDF       =       32
+SMC %  ISIDE % IDLA      =        1
+SMC %  ISIDE % IDFM      =        1
+SMC %  ISIDE % FORMAT    = (....)
+SMC %  JSIDE % FILENAME  = unset
+SMC %  JSIDE % IDF       =       33
+SMC %  JSIDE % IDLA      =        1
+SMC %  JSIDE % IDFM      =        1
+SMC %  JSIDE % FORMAT    = (....)
+SMC %  SUBTR % FILENAME  = unset
+SMC %  SUBTR % IDF       =       34
+SMC %  SUBTR % IDLA      =        1
+SMC %  SUBTR % IDFM      =        1
+SMC %  SUBTR % FORMAT    = (....)
+SMC %  BUNDY % FILENAME  = unset
+SMC %  BUNDY % IDF       =       35
+SMC %  BUNDY % IDLA      =        1
+SMC %  BUNDY % IDFM      =        1
+SMC %  BUNDY % FORMAT    = (....)
+
+DEPTH %  SF        =     1.00
+DEPTH %  FILENAME  = unset
+DEPTH %  IDF       =       50
+DEPTH %  IDLA      =        1
+DEPTH %  IDFM      =        1
+DEPTH %  FORMAT    = (....)
+DEPTH %  FROM      = NAME
+
+MASK %  FILENAME  = unset
+MASK %  IDF       =       60
+MASK %  IDLA      =        1
+MASK %  IDFM      =        1
+MASK %  FORMAT    = (....)
+MASK %  FROM      = NAME
+
+OBST %  SF        =     1.00
+OBST %  FILENAME  = unset
+OBST %  IDF       =       70
+OBST %  IDLA      =        1
+OBST %  IDFM      =        1
+OBST %  FORMAT    = (....)
+OBST %  FROM      = NAME
+
+SLOPE %  SF        =     1.00
+SLOPE %  FILENAME  = unset
+SLOPE %  IDF       =       80
+SLOPE %  IDLA      =        1
+SLOPE %  IDFM      =        1
+SLOPE %  FORMAT    = (....)
+SLOPE %  FROM      = NAME
+
+SED %  SF        =     1.00
+SED %  FILENAME  = unset
+SED %  IDF       =       90
+SED %  IDLA      =        1
+SED %  IDFM      =        1
+SED %  FORMAT    = (....)
+SED %  FROM      = NAME
+
+INBND_COUNT %  N_POINT       =        2
+
+INBND_POINT(       1) %  X_INDEX   =        1
+INBND_POINT(       1) %  Y_INDEX   =        1
+INBND_POINT(       1) %  CONNECT   = F
+
+
+INBND_POINT(       2) %  X_INDEX   =       75
+INBND_POINT(       2) %  Y_INDEX   =        1
+INBND_POINT(       2) %  CONNECT   = T
+
+
+EXCL_COUNT %  N_POINT       =        0
+EXCL_COUNT %  N_BODY        =        0
+
+OUTBND_COUNT %  N_LINE        =        0
