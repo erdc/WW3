@@ -1394,8 +1394,10 @@
 !/ ------------ SCALAR FUNCTIONALITY --------------------------------- /
 !/ --------------- REAL V(NSEAL) ------------------------------------- /
 !/ --------------- NSEAL = npa --------------------------------------- /
+!/ ------- maxidx = npa or np for arrays that have been -------------- /
+!/ ------- synchronized or not --------------------------------------- /
 !/ ------------------------------------------------------------------- /
-      SUBROUTINE SCAL_INTEGRAL_PRINT_GENERAL(V, string, PrintFullValue)
+      SUBROUTINE SCAL_INTEGRAL_PRINT_GENERAL(V, string, maxidx, PrintFullValue)
       USE W3GDATMD, ONLY : NK, NTH, FTE
       USE W3GDATMD, ONLY : NSPEC, NX, NY, NSEAL, MAPFS
       USE W3ADATMD, ONLY : MPI_COMM_WCMP
@@ -1409,6 +1411,7 @@
       !
       REAL*8, INTENT(in) :: V(NSEAL)
       CHARACTER(*), INTENT(in) :: string
+      INTEGER, INTENT(IN) :: maxidx
       LOGICAL, INTENT(in) :: PrintFullValue
       !
       REAL*8, allocatable :: Vcoll(:)
@@ -1416,8 +1419,8 @@
       REAL CoherencyError, eVal1, eVal2, eErr
       REAL*8, allocatable :: ListVal(:)
       INTEGER, allocatable :: ListIdx(:)
-      INTEGER singV(1)
-      INTEGER NSEAL_dist
+      INTEGER singV(2)
+      INTEGER NSEAL_dist, maxidx_dist
       INTEGER JSEA, ISEA, iProc, I, IX, ierr, ISP, IP, IP_glob
       INTEGER nbIncorr, idx
       INTEGER ITH, IK
@@ -1435,7 +1438,7 @@
         allocate(Vcoll(NX), Status(NX))
         Vcoll=0
         Status=0
-        DO JSEA=1,NSEAL
+        DO JSEA=1,maxidx
           IP      = JSEA
           IP_glob = iplg(IP)
           ISEA=MAPFS(1,IP_glob)
@@ -1443,12 +1446,13 @@
           Status(IP_glob)=1
         END DO
         DO iProc=2,NAPROC
-          CALL MPI_RECV(singV,1,MPI_INTEGER, iProc-1, 360, MPI_COMM_WCMP, istatus, ierr)
+          CALL MPI_RECV(singV,2,MPI_INTEGER, iProc-1, 360, MPI_COMM_WCMP, istatus, ierr)
           NSEAL_dist = singV(1)
+          maxidx_dist = singV(2)
           allocate(ListVal(NSEAL_dist), ListIdx(NSEAL_dist))
           CALL MPI_RECV(ListVal, NSEAL_dist, MPI_REAL8, iProc-1, 370, MPI_COMM_WCMP, istatus, ierr)
           CALL MPI_RECV(ListIdx, NSEAL_dist, MPI_INTEGER, iProc-1, 430, MPI_COMM_WCMP, istatus, ierr)
-          DO idx=1,NSEAL_dist
+          DO idx=1,maxidx_dist
             IP_glob = ListIdx(idx)
             eVal1 = Vcoll(IP_glob)
             eVal2 = ListVal(idx)
@@ -1487,7 +1491,8 @@
         FLUSH(740+IAPROC)
       ELSE
         singV(1) = NSEAL
-        CALL MPI_SEND(singV,1,MPI_INTEGER, 0, 360, MPI_COMM_WCMP, ierr)
+        singV(2) = maxidx
+        CALL MPI_SEND(singV,2,MPI_INTEGER, 0, 360, MPI_COMM_WCMP, ierr)
         allocate(ListVal(NSEAL), ListIdx(NSEAL))
         DO JSEA=1,NSEAL
           IP      = JSEA
@@ -1510,7 +1515,7 @@
       REAL*8 :: V8(NSEAL)
       LOGICAL :: PrintFullValue = .FALSE.
       V8 = V
-      CALL SCAL_INTEGRAL_PRINT_GENERAL(V8, string, PrintFullValue)
+      CALL SCAL_INTEGRAL_PRINT_GENERAL(V8, string, NSEAL, PrintFullValue)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
       SUBROUTINE SCAL_INTEGRAL_PRINT_R4(V, string)
@@ -1521,7 +1526,7 @@
       LOGICAL :: PrintFullValue = .FALSE.
       REAL*8 V8(NSEAL)
       V8 = DBLE(V)
-      CALL SCAL_INTEGRAL_PRINT_GENERAL(V8, string, PrintFullValue)
+      CALL SCAL_INTEGRAL_PRINT_GENERAL(V8, string, NSEAL, PrintFullValue)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
 !/ ------- FIELD(NSPEC,NSEAL) printint-------------------------------- /
@@ -1929,11 +1934,11 @@
       CHARACTER(*), INTENT(in) :: string
       INTEGER, INTENT(in) :: maxidx
       REAL, INTENT(in) :: TheARR(NSPEC, npa)
-      REAL :: TheARR_red(npa)
-      LOGICAL :: PrintMinISP, LocalizeMaximum
+      REAL*8 :: TheARR_red(npa)
       LOGICAL :: FULL_NSPEC = .FALSE.
-      PrintMinISP = .false.
-      LocalizeMaximum = .false.
+      LOGICAL :: PrintMinISP = .FALSE.
+      LOGICAL :: LocalizeMaximum = .FALSE.
+      LOGICAL :: PrintFullValue = .FALSE.
       
 
       IF (FULL_NSPEC) THEN
@@ -1942,7 +1947,7 @@
         DO IP=1,npa
           TheARR_red(IP) = SUM(ABS(TheArr(:,IP)))
         END DO
-        
+        CALL SCAL_INTEGRAL_PRINT_GENERAL(TheARR_red, string, maxidx, PrintFullValue)
       END IF
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
