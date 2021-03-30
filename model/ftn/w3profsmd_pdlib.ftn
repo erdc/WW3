@@ -1328,6 +1328,38 @@
       END DO ! IT
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
+      SUBROUTINE TEST_MPI_STATUS(string)
+      USE W3ADATMD, ONLY : MPI_COMM_WCMP
+      USE W3GDATMD, ONLY : GTYPE, UNGTYPE
+      USE W3ODATMD, ONLY : IAPROC, NAPROC, NTPROC
+      use yowDatapool, ONLY: rtype, istatus
+      IMPLICIT NONE
+      INCLUDE "mpif.h"
+      CHARACTER(*), INTENT(in) :: string
+      REAL VcollExp(1)
+      REAL rVect(1)
+      INTEGER iProc, ierr
+      WRITE(740+IAPROC,*) 'TEST_MPI_STATUS, at string=', string
+      FLUSH(740+IAPROC)
+      IF (IAPROC .gt. NAPROC) THEN
+        RETURN
+      END IF
+      WRITE(740+IAPROC,*) 'After status settings'
+      FLUSH(740+IAPROC)
+      !
+      ! Now find global arrays
+      !
+      IF (IAPROC .eq. 1) THEN
+        DO iProc=2,NAPROC
+          CALL MPI_RECV(rVect,1,MPI_REAL, iProc-1, 37, MPI_COMM_WCMP, istatus, ierr)
+        END DO
+      ELSE
+        CALL MPI_SEND(VcollExp,1,MPI_REAL, 0, 37, MPI_COMM_WCMP, ierr)
+      END IF
+      WRITE(740+IAPROC,*) 'Leaving the TEST_MPI_STATUS'
+      FLUSH(740+IAPROC)
+      END SUBROUTINE
+!/ ------------------------------------------------------------------- /
       SUBROUTINE HACK_CHECK(string)
       USE W3GDATMD, ONLY : NK, NTH
       USE W3WDATMD, ONLY : VA
@@ -1755,70 +1787,15 @@
       IMPLICIT NONE
       REAL, INTENT(in) :: FIELD(NSPEC,NSEAL)
       CHARACTER(*), INTENT(in) :: string
-!      LOGICAL :: PrintHsNode = .FALSE.
       LOGICAL :: PrintHs = .FALSE.
       LOGICAL :: PrintHsNode = .FALSE.
       INTEGER :: ScalMeth = 1
       CALL ALL_FIELD_INTEGRAL_PRINT_GENERAL(FIELD, string, PrintHs, PrintHsNode, ScalMeth)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
-      SUBROUTINE TEST_MPI_STATUS(string)
-      USE W3ADATMD, ONLY : MPI_COMM_WCMP
-      USE W3GDATMD, ONLY : GTYPE, UNGTYPE
-      USE W3ODATMD, ONLY : IAPROC, NAPROC, NTPROC
-      use yowDatapool, ONLY: rtype, istatus
-      IMPLICIT NONE
-      INCLUDE "mpif.h"
-      CHARACTER(*), INTENT(in) :: string
-      REAL VcollExp(1)
-      REAL rVect(1)
-      INTEGER iProc, ierr
-      WRITE(740+IAPROC,*) 'TEST_MPI_STATUS, at string=', string
-      FLUSH(740+IAPROC)
-      IF (IAPROC .gt. NAPROC) THEN
-        RETURN
-      END IF
-      WRITE(740+IAPROC,*) 'After status settings'
-      FLUSH(740+IAPROC)
-      !
-      ! Now find global arrays
-      !
-      IF (IAPROC .eq. 1) THEN
-        DO iProc=2,NAPROC
-          CALL MPI_RECV(rVect,1,MPI_REAL, iProc-1, 37, MPI_COMM_WCMP, istatus, ierr)
-        END DO
-      ELSE
-        CALL MPI_SEND(VcollExp,1,MPI_REAL, 0, 37, MPI_COMM_WCMP, ierr)
-      END IF
-      WRITE(740+IAPROC,*) 'Leaving the TEST_MPI_STATUS'
-      FLUSH(740+IAPROC)
-      END SUBROUTINE
+!/ ------- Coherency info for TheARR(NSPEC,npa) ---------------------- /
+!/ ----------- maxidx is np or npa ----------------------------------- /
 !/ ------------------------------------------------------------------- /
-!*    maxidx should be "np" or "npa"                                  *
-      SUBROUTINE CHECK_ARRAY_INTEGRAL_NX_R8(TheARR, string, maxidx)
-      USE W3GDATMD, ONLY : NSPEC
-      USE YOWNODEPOOL, ONLY: npa
-      CHARACTER(*), INTENT(in) :: string
-      INTEGER, INTENT(in) :: maxidx
-      REAL, INTENT(in) :: TheARR(NSPEC, npa)
-      REAL :: TheARR_red(npa)
-      LOGICAL :: PrintMinISP, LocalizeMaximum
-      LOGICAL FULL_NSPEC = .FALSE.
-      PrintMinISP = .false.
-      LocalizeMaximum = .false.
-      
-
-      IF (FULL_NSPEC) THEN
-        CALL CHECK_ARRAY_INTEGRAL_NX_R8_MaxFunct(TheARR, string, maxidx, PrintMinISP, LocalizeMaximum)
-      ELSE
-        DO IP=1,npa
-          TheARR_red(IP) = SUM(ABS(TheArr(:,IP)))
-        END DO
-        
-      END IF
-      END SUBROUTINE
-!/ ------------------------------------------------------------------- /
-!*    maxidx should be "np" or "npa"                                  *
       SUBROUTINE CHECK_ARRAY_INTEGRAL_NX_R8_MaxFunct(TheARR, string, maxidx, PrintMinISP, LocalizeMaximum)
       USE W3GDATMD, ONLY : NK, NTH
       USE W3WDATMD, ONLY : VA
@@ -1963,94 +1940,28 @@
       END IF
       END SUBROUTINE CHECK_ARRAY_INTEGRAL_NX_R8_MaxFunct
 !/ ------------------------------------------------------------------- /
-      SUBROUTINE COLLECT_AND_PRINT(V, ifile)
-      USE W3GDATMD, ONLY: NX, NSEAL, NSEA
-      USE W3ADATMD, ONLY: MPI_COMM_WCMP
-      USE W3ODATMD, ONLY : IAPROC, NAPROC, NTPROC
-      USE YOWNODEPOOL, ONLY: iplg, npa
-      use yowDatapool, ONLY: rtype, istatus
-      IMPLICIT NONE
-      INCLUDE "mpif.h"
-      INTEGER, INTENT(in) :: ifile
-      REAL, INTENT(in) :: V(npa)
-      REAL Vcoll(NX), rVect(NX)
-      INTEGER rStatus(NX), Status(NX)
-      INTEGER JSEA, ISEA, iProc, I, ierr
-      INTEGER nbIncorr
-      Vcoll=0
-      Status=0
-      DO JSEA=1,npa
-        ISEA=iplg(JSEA)
-        Vcoll(ISEA)=V(JSEA)
-        Status(ISEA)=1
-      END DO
-      !
-      ! Now find global arrays
-      !
-      IF (IAPROC .eq. 1) THEN
-        DO iProc=2,NAPROC
-          CALL MPI_RECV(rVect,NX,rtype, iProc-1, 19, MPI_COMM_WCMP, istatus, ierr)
-          CALL MPI_RECV(rStatus,NX,MPI_INTEGER, iProc-1, 23, MPI_COMM_WCMP, istatus, ierr)
-          DO I=1,NX
-            IF (rStatus(I) .eq. 1) THEN
-              Vcoll(I)=rVect(I)
-              Status(I)=1
-            END IF
-          END DO
-        END DO
+!*    maxidx should be "np" or "npa"                                  *
+      SUBROUTINE CHECK_ARRAY_INTEGRAL_NX_R8(TheARR, string, maxidx)
+      USE W3GDATMD, ONLY : NSPEC
+      USE YOWNODEPOOL, ONLY: npa
+      CHARACTER(*), INTENT(in) :: string
+      INTEGER, INTENT(in) :: maxidx
+      REAL, INTENT(in) :: TheARR(NSPEC, npa)
+      REAL :: TheARR_red(npa)
+      LOGICAL :: PrintMinISP, LocalizeMaximum
+      LOGICAL FULL_NSPEC = .FALSE.
+      PrintMinISP = .false.
+      LocalizeMaximum = .false.
+      
+
+      IF (FULL_NSPEC) THEN
+        CALL CHECK_ARRAY_INTEGRAL_NX_R8_MaxFunct(TheARR, string, maxidx, PrintMinISP, LocalizeMaximum)
       ELSE
-        CALL MPI_SEND(Vcoll,NX,rtype, 0, 19, MPI_COMM_WCMP, ierr)
-        CALL MPI_SEND(Status,NX,MPI_INTEGER, 0, 23, MPI_COMM_WCMP, ierr)
-      END IF
-      IF (IAPROC .eq. 1) THEN
-        nbIncorr=0
-        DO I=1,NX
-          IF (Status(I) .eq. 0) THEN
-            nbIncorr=nbIncorr+1
-          END IF
+        DO IP=1,npa
+          TheARR_red(IP) = SUM(ABS(TheArr(:,IP)))
         END DO
-        IF (nbIncorr .gt. 0) THEN
-          WRITE(740+IAPROC,*) '    nbIncorr=', nbIncorr
-          WRITE(740+IAPROC,*) 'NX - NSEAL=', NX - NSEAL
-          FLUSH(740+IAPROC)
-          STOP
-        END IF
-!/DEBUGSOLVER       DO I=1,NX
-!/DEBUGSOLVER         WRITE(ifile,*) 'I=', I, ' var=', Vcoll(I)
-!/DEBUGSOLVER       END DO
+        
       END IF
-      END SUBROUTINE
-!/ ------------------------------------------------------------------- /
-      SUBROUTINE DOMAIN_INTEGRAL(V, eScal)
-      USE W3GDATMD, ONLY: NX
-      USE W3ADATMD, ONLY: MPI_COMM_WCMP
-      use yowDatapool, ONLY: rtype, istatus
-      use YOWNODEPOOL, ONLY: np, npa
-      USE W3ODATMD, ONLY : IAPROC, NAPROC, NTPROC
-      IMPLICIT NONE
-      REAL, INTENT(in) :: V(npa)
-      REAL, INTENT(inout) :: eScal
-      INTEGER IP
-      REAL :: rScal(1), lScal(1)
-      INTEGER iProc
-      INTEGER ierr
-      lScal=0
-      DO IP=1,np
-        lScal(1)=lScal(1) + V(IP)
-      END DO
-      IF (IAPROC .eq. 1) THEN
-        DO iProc=2,NAPROC
-          CALL MPI_RECV(rScal,1,rtype, iProc-1, 19, MPI_COMM_WCMP, istatus, ierr)
-          lScal = lScal + rScal
-        END DO
-        DO iProc=2,NAPROC
-          CALL MPI_SEND(lScal,1,rtype, iProc-1, 23, MPI_COMM_WCMP, ierr)
-        END DO
-      ELSE
-        CALL MPI_SEND(lScal,1,rtype, 0, 19, MPI_COMM_WCMP, ierr)
-        CALL MPI_RECV(lScal,1,rtype, 0, 23, MPI_COMM_WCMP, istatus, ierr)
-      END IF
-      eScal=lScal(1)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
       SUBROUTINE PDLIB_W3XYPFSFCT2 ( ISP, C, LCALC, RD10, RD20, DT, AC)
