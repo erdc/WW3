@@ -923,14 +923,7 @@
 !/S      CALL STRACE (IENT, 'W3XYPFSN')
 !/DEBUGSOLVER     WRITE(740+IAPROC,*) 'PDLIB_W3XYPFSN2, step 1'
 !/DEBUGSOLVER     FLUSH(740+IAPROC)
-!/DEBUGSOLVER     CALL GET_SCAL_INTEGRAL_COH_R4(AC, eSumAC)
-!/DEBUGSOLVER     testWrite=.FALSE.
-!/DEBUGSOLVER     IF (eSumAC .gt. 0) THEN
-!/DEBUGSOLVER       testWrite=.TRUE.
-!/DEBUGSOLVER     END IF
-!/DEBUGSOLVER     IF (testWrite) THEN
-!/DEBUGSOLVER       CALL SCAL_INTEGRAL_PRINT_R4(AC, "AC in input")
-!/DEBUGSOLVER     END IF
+!/DEBUGSOLVER     CALL SCAL_INTEGRAL_PRINT_R4(AC, "AC in input")
 
       ITH    = 1 + MOD(ISP-1,NTH)
       IK     = 1 + (ISP-1)/NTH
@@ -1010,10 +1003,10 @@
       END DO
 !/DEBUGSOLVER     WRITE(740+IAPROC,*) 'PDLIB_W3XYPFSN2, step 4.1'
 !/DEBUGSOLVER     FLUSH(740+IAPROC)
-!!/DEBUGSOLVER     CALL SCAL_INTEGRAL_PRINT_R8(PDLIB_SI, "PDLIB_SI in input")
+!/DEBUGSOLVER     CALL SCAL_INTEGRAL_PRINT_R4(PDLIB_SI, "PDLIB_SI in input")
 !/DEBUGSOLVER     WRITE(740+IAPROC,*) 'PDLIB_W3XYPFSN2, step 4.2'
 !/DEBUGSOLVER     FLUSH(740+IAPROC)
-!!/DEBUGSOLVER     CALL SCAL_INTEGRAL_PRINT_R8(DTSI, "DTSI in input")
+!/DEBUGSOLVER     CALL SCAL_INTEGRAL_PRINT_R4(DTSI, "DTSI in input")
 !/DEBUGSOLVER     WRITE(740+IAPROC,*) 'PDLIB_W3XYPFSN2, step 5'
 !/DEBUGSOLVER     WRITE(740+IAPROC,*) 'IK=', IK, ' ITH=', ITH
 !/DEBUGSOLVER     WRITE(740+IAPROC,*) 'ITER=', ITER(IK,ITH)
@@ -1034,7 +1027,7 @@
           ST(NI) = ST(NI) + KELEM(:,IE) * (U(NI) - UTILDE) ! the 2nd term are the theta values of each node ...
         END DO ! IE
 !/DEBUGSOLVER     IF (testWrite) THEN
-!/DEBUGSOLVER       CALL SCAL_INTEGRAL_PRINT_R8(ST, "ST in loop")
+!/DEBUGSOLVER       CALL SCAL_INTEGRAL_PRINT_R4(ST, "ST in loop")
 !/DEBUGSOLVER     END IF
 !
 ! IOBPD=0  : waves coming from land
@@ -1045,7 +1038,7 @@
 !/REF1    IF (REFPARS(3).LT.0.5.AND.IOBPD_LOC(ITH,IP).EQ.0.AND.IOBPA_LOC(IP).EQ.0) U(IP) = AC(IP) ! restores reflected boundary values 
         END DO
 !/DEBUGSOLVER     IF (testWrite) THEN
-!/DEBUGSOLVER       CALL SCAL_INTEGRAL_PRINT_R8(U, "U in loop")
+!/DEBUGSOLVER       CALL SCAL_INTEGRAL_PRINT_R4(U, "U in loop")
 !/DEBUGSOLVER     END IF
         AC = REAL(U)
 
@@ -1399,8 +1392,10 @@
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
 !/ ------------ SCALAR FUNCTIONALITY --------------------------------- /
+!/ --------------- REAL V(NSEAL) ------------------------------------- /
+!/ --------------- NSEAL = npa --------------------------------------- /
 !/ ------------------------------------------------------------------- /
-      SUBROUTINE SCAL_INTEGRAL_PRINT_GENERAL(eSum, V, string, PrintFullValue, PrintBasicData)
+      SUBROUTINE SCAL_INTEGRAL_PRINT_GENERAL(V, string, PrintFullValue)
       USE W3GDATMD, ONLY : NK, NTH, FTE
       USE W3GDATMD, ONLY : NSPEC, NX, NY, NSEAL, MAPFS
       USE W3ADATMD, ONLY : MPI_COMM_WCMP
@@ -1412,68 +1407,61 @@
       IMPLICIT NONE
       INCLUDE "mpif.h"
       !
-      REAL, INTENT(out) :: eSum
-      REAL, INTENT(in) :: V(NSEAL)
+      REAL*8, INTENT(in) :: V(NSEAL)
       CHARACTER(*), INTENT(in) :: string
-      LOGICAL, INTENT(in) :: PrintFullValue, PrintBasicData
+      LOGICAL, INTENT(in) :: PrintFullValue
       !
-      REAL Vcoll(NX), rVect(NX)
+      REAL*8, allocatable :: Vcoll(:)
+      INTEGER, allocatable :: Status(:)
       REAL CoherencyError, eVal1, eVal2, eErr
-      INTEGER rStatus(NX), Status(NX)
+      REAL*8, allocatable :: ListVal(:)
+      INTEGER, allocatable :: ListIdx(:)
+      INTEGER singV(1)
+      INTEGER NSEAL_dist
       INTEGER JSEA, ISEA, iProc, I, IX, ierr, ISP, IP, IP_glob
-      INTEGER nbIncorr
+      INTEGER nbIncorr, idx
       INTEGER ITH, IK
-!      WRITE(740+IAPROC,*) 'IAPROC=', IAPROC
-!      WRITE(740+IAPROC,*) 'NAPROC=', NAPROC
-!      WRITE(740+IAPROC,*) 'NTPROC=', NTPROC
-!      WRITE(740+IAPROC,*) 'Beginning of routine'
-!      WRITE(740+IAPROC,*) 'string=', string
-!      WRITE(740+IAPROC,*) 'NX=', NX
-!      FLUSH(740+IAPROC)
       IF (IAPROC .gt. NAPROC) THEN
         RETURN
       END IF
       IF (GTYPE .ne. UNGTYPE) THEN
         RETURN
       END IF
-      Vcoll=0
-      Status=0
-      DO JSEA=1,NSEAL
-        IP      = JSEA
-        IP_glob = iplg(IP)
-        ISEA=MAPFS(1,IP_glob)
-        Vcoll(IP_glob)=V(JSEA)
-        Status(IP_glob)=1
-      END DO
       !
       ! Now find global arrays
       !
       CoherencyError=0
       IF (IAPROC .eq. 1) THEN
-        DO iProc=2,NAPROC
-          CALL MPI_RECV(rVect,NX,MPI_REAL8, iProc-1, 370, MPI_COMM_WCMP, istatus, ierr)
-          CALL MPI_RECV(rStatus,NX,MPI_INTEGER, iProc-1, 430, MPI_COMM_WCMP, istatus, ierr)
-          DO I=1,NX
-            IF (rStatus(I) .eq. 1) THEN
-              eVal1=Vcoll(I)
-              eVal2=rVect(I)
-              Vcoll(I)=rVect(I)
-              IF (Status(I) .eq. 1) THEN
-                eErr=abs(eVal1 - eVal2)
-                CoherencyError = CoherencyError + eErr
-              ELSE
-                Vcoll(I)=eVal2
-              END IF
-              Status(I)=1
-            END IF
-          END DO
+        allocate(Vcoll(NX), Status(NX))
+        Vcoll=0
+        Status=0
+        DO JSEA=1,NSEAL
+          IP      = JSEA
+          IP_glob = iplg(IP)
+          ISEA=MAPFS(1,IP_glob)
+          Vcoll(IP_glob)=V(JSEA)
+          Status(IP_glob)=1
         END DO
-      ELSE
-        CALL MPI_SEND(Vcoll,NX,MPI_REAL8, 0, 370, MPI_COMM_WCMP, ierr)
-        CALL MPI_SEND(Status,NX,MPI_INTEGER, 0, 430, MPI_COMM_WCMP, ierr)
-      END IF
-      eSum=sum(Vcoll)
-      IF ((IAPROC .eq. 1).and. PrintBasicData) THEN
+        DO iProc=2,NAPROC
+          CALL MPI_RECV(singV,1,MPI_INTEGER, iProc-1, 360, MPI_COMM_WCMP, istatus, ierr)
+          NSEAL_dist = singV(1)
+          allocate(ListVal(NSEAL_dist), ListIdx(NSEAL_dist))
+          CALL MPI_RECV(ListVal, NSEAL_dist, MPI_REAL8, iProc-1, 370, MPI_COMM_WCMP, istatus, ierr)
+          CALL MPI_RECV(ListIdx, NSEAL_dist, MPI_INTEGER, iProc-1, 430, MPI_COMM_WCMP, istatus, ierr)
+          DO idx=1,NSEAL_dist
+            IP_glob = ListIdx(idx)
+            eVal1 = Vcoll(IP_glob)
+            eVal2 = ListVal(idx)
+            Vcoll(IP_glob) = eVal2
+            IF (Status(IP_glob) .eq. 1) THEN
+              eErr=abs(eVal1 - eVal2)
+              CoherencyError = CoherencyError + eErr
+            END IF
+            Status(IP_glob) = 1
+          END DO
+          deallocate(ListVal, ListIdx)
+        END DO
+        WRITE(740+IAPROC,*) 'VA_INTEGRAL sum,coh=', sum(Vcoll), CoherencyError, TRIM(string)
         nbIncorr=0
         DO IX=1,NX
           ISEA=MAPFS(1,IX)
@@ -1486,47 +1474,43 @@
         IF (nbIncorr .gt. 0) THEN
           WRITE(*,*) '    nbIncorr=', nbIncorr
           WRITE(*,*) '          NX=', NX
+          WRITE(*,*) '       NSEAL=', NSEAL
           WRITE(*,*) '         npa=', npa
           STOP
         END IF
-        WRITE(740+IAPROC,*) 'VA_INTEGRAL sum,coh=', sum(Vcoll), CoherencyError, TRIM(string)
-        FLUSH(740+IAPROC)
         IF (PrintFullValue) THEN
           WRITE(740+IAPROC,*) 'Value of V at nodes'
           DO IX=1,NX
             WRITE(740+IAPROC,*) 'IX=', IX, ' V=', Vcoll(IX)
           END DO
-          FLUSH(740+IAPROC)
         END IF
+        FLUSH(740+IAPROC)
+      ELSE
+        singV(1) = NSEAL
+        CALL MPI_SEND(singV,1,MPI_INTEGER, 0, 360, MPI_COMM_WCMP, ierr)
+        allocate(ListVal(NSEAL), ListIdx(NSEAL))
+        DO JSEA=1,NSEAL
+          IP      = JSEA
+          IP_glob = iplg(IP)
+          ISEA=MAPFS(1,IP_glob)
+          ListVal(IP_glob) = V(JSEA)
+          ListIdx(JSEA) = IP_glob
+        END DO
+        CALL MPI_SEND(ListVal, NSEAL, MPI_REAL8,   0, 370, MPI_COMM_WCMP, ierr)
+        CALL MPI_SEND(ListIdx, NSEAL, MPI_INTEGER, 0, 430, MPI_COMM_WCMP, ierr)
+        deallocate(ListVal, ListIdx)
       END IF
-      END SUBROUTINE
-!/ ------------------------------------------------------------------- /
-      SUBROUTINE GET_SCAL_INTEGRAL_COH_R4(V, eSum)
-      USE W3GDATMD, ONLY : NSEAL
-      IMPLICIT NONE
-      REAL, INTENT(in) :: V(NSEAL)
-      CHARACTER (len = *), PARAMETER :: string = "Test a view"
-      REAL, INTENT(out) :: eSum
-      REAL :: V8(NSEAL)
-      LOGICAL :: PrintFullValue = .FALSE.
-      LOGICAL :: PrintBasicData = .FALSE.
-      !
-      V8 = DBLE(V)
-      CALL SCAL_INTEGRAL_PRINT_GENERAL(eSum, V8, string, PrintFullValue, PrintBasicData)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
       SUBROUTINE SCAL_INTEGRAL_PRINT_R8(V, string)
       USE W3GDATMD, ONLY : NSEAL
       IMPLICIT NONE
-      REAL, INTENT(in) :: V(NSEAL)
+      REAL*8, INTENT(in) :: V(NSEAL)
       CHARACTER(*), INTENT(in) :: string
-      REAL :: V8(NSEAL)
+      REAL*8 :: V8(NSEAL)
       LOGICAL :: PrintFullValue = .FALSE.
-      LOGICAL :: PrintBasicData = .TRUE.
-      REAL :: eSum
-      !
-      V8 = DBLE(V)
-      CALL SCAL_INTEGRAL_PRINT_GENERAL(eSum, V8, string, PrintFullValue, PrintBasicData)
+      V8 = V
+      CALL SCAL_INTEGRAL_PRINT_GENERAL(V8, string, PrintFullValue)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
       SUBROUTINE SCAL_INTEGRAL_PRINT_R4(V, string)
@@ -1535,10 +1519,9 @@
       REAL, INTENT(in) :: V(NSEAL)
       CHARACTER(*), INTENT(in) :: string
       LOGICAL :: PrintFullValue = .FALSE.
-      LOGICAL :: PrintBasicData = .TRUE.
-      REAL :: eSum
-      !
-      CALL SCAL_INTEGRAL_PRINT_GENERAL(eSum, V, string, PrintFullValue, PrintBasicData)
+      REAL*8 V8(NSEAL)
+      V8 = DBLE(V)
+      CALL SCAL_INTEGRAL_PRINT_GENERAL(V8, string, PrintFullValue)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
 !/ ------- FIELD(NSPEC,NSEAL) printint-------------------------------- /
@@ -1711,7 +1694,6 @@
         IF (PrintHsNode) THEN
           WRITE(740+IAPROC,*) 'Value of HS at nodes'
           DO IX=1,NX
-!            WRITE(740+IAPROC,*) 'IX=', IX, ' hs/cg(mm)=', Vhs(IX), VminCG(IX), VmaxCG(IX)
             WRITE(740+IAPROC,*) 'IX=', IX, ' hs/sumV=', Vhs(IX), sum(Vcoll(:,IX))
           END DO
           FLUSH(740+IAPROC)
@@ -1949,7 +1931,7 @@
       REAL, INTENT(in) :: TheARR(NSPEC, npa)
       REAL :: TheARR_red(npa)
       LOGICAL :: PrintMinISP, LocalizeMaximum
-      LOGICAL FULL_NSPEC = .FALSE.
+      LOGICAL :: FULL_NSPEC = .FALSE.
       PrintMinISP = .false.
       LocalizeMaximum = .false.
       
