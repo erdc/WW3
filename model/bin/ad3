@@ -227,6 +227,7 @@
       echo '-- end of file ----------------------------------------------------'
     fi
 
+    cp w3adc.inp.$name /tmp/w3adc.inp
     $path_b/w3adc < w3adc.inp.$name > w3adc.out.$name 2> w3adc.err.$name
 
 # 2.c Test the output of w3adc - - - - - - - - - - - - - - - - - - - - - - - -

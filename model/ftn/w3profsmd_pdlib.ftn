@@ -1329,73 +1329,15 @@
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
       SUBROUTINE HACK_CHECK(string)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel debugging 
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
       USE W3GDATMD, ONLY : NK, NTH
       USE W3WDATMD, ONLY : VA
       USE W3GDATMD, ONLY : NSPEC, NX, NY, NSEAL
       USE W3ODATMD, ONLY : IAPROC, NAPROC, NTPROC
-!/
       IMPLICIT NONE
-!/
-!/ ------------------------------------------------------------------- /
-!/ Parameter list
-!/
-!/ ------------------------------------------------------------------- /
-!/ Local PARAMETERs
-!/
-!/S      INTEGER, SAVE           :: IENT = 0
-!/
-!/ ------------------------------------------------------------------- /
-!/
       CHARACTER(*), INTENT(in) :: string
       INTEGER ITH_F, IK
       INTEGER ITH, ISP, JSEA
       REAL eVal, eErr
-!/S      CALL STRACE (IENT, 'HACK_CHECK')
       ITH_F=4
       WRITE(740+IAPROC,*) 'HACK_CHECK, begin'
       DO ITH=1,NTH
@@ -1424,266 +1366,9 @@
       WRITE(740+IAPROC,*) 'HACK_CHECK, end'
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
-      SUBROUTINE GET_SCAL_INTEGRAL_COH_R4(V, eSum)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-      USE W3GDATMD, ONLY : NSEAL
-!/
-      IMPLICIT NONE
-!/
-!/ ------------------------------------------------------------------- /
-!/ Parameter list
-!/
-!/ ------------------------------------------------------------------- /
-!/ Local PARAMETERs
-!/
-!/S      INTEGER, SAVE           :: IENT = 0
-!/
-!/ ------------------------------------------------------------------- /
-!/
-      REAL, INTENT(in) :: V(NSEAL)
-      CHARACTER (len = *), PARAMETER :: string = "Test a view"
-      REAL, INTENT(out) :: eSum
-      REAL :: V8(NSEAL)
-      LOGICAL :: PrintFullValue = .FALSE.
-      LOGICAL :: PrintBasicData = .FALSE.
-      !
-!/S      CALL STRACE (IENT, 'GET_SCAL_INTEGRAL_COH_R4')
-      V8 = DBLE(V)
-      CALL SCAL_INTEGRAL_PRINT_GENERAL(eSum, V8, string, PrintFullValue, PrintBasicData)
-      END SUBROUTINE
-!/ ------------------------------------------------------------------- /
-      SUBROUTINE SCAL_INTEGRAL_PRINT_R8(V, string)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel Debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-      USE W3GDATMD, ONLY : NSEAL
-!/
-      IMPLICIT NONE
-!/
-!/ ------------------------------------------------------------------- /
-!/ Parameter list
-!/
-!/ ------------------------------------------------------------------- /
-!/ Local PARAMETERs
-!/
-!/S      INTEGER, SAVE           :: IENT = 0
-!/
-!/ ------------------------------------------------------------------- /
-!/
-      REAL, INTENT(in) :: V(NSEAL)
-      CHARACTER(*), INTENT(in) :: string
-      REAL :: V8(NSEAL)
-      LOGICAL :: PrintFullValue = .FALSE.
-      LOGICAL :: PrintBasicData = .TRUE.
-      REAL :: eSum
-      !
-!/S      CALL STRACE (IENT, 'SCAL_INTEGRAL_PRINT_R8')
-      V8 = DBLE(V)
-      CALL SCAL_INTEGRAL_PRINT_GENERAL(eSum, V8, string, PrintFullValue, PrintBasicData)
-      END SUBROUTINE
-!/ ------------------------------------------------------------------- /
-      SUBROUTINE SCAL_INTEGRAL_PRINT_R4(V, string)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel Debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-      USE W3GDATMD, ONLY : NSEAL
-!/
-      IMPLICIT NONE
-!/
-!/ ------------------------------------------------------------------- /
-!/ Parameter list
-!/
-!/ ------------------------------------------------------------------- /
-!/ Local PARAMETERs
-!/
-!/S      INTEGER, SAVE           :: IENT = 0
-!/
-!/ ------------------------------------------------------------------- /
-!/
-      REAL, INTENT(in) :: V(NSEAL)
-      CHARACTER(*), INTENT(in) :: string
-      LOGICAL :: PrintFullValue = .FALSE.
-      LOGICAL :: PrintBasicData = .TRUE.
-      REAL :: eSum
-      !
-!/S      CALL STRACE (IENT, 'SCAL_INTEGRAL_PRINT_R4')
-      CALL SCAL_INTEGRAL_PRINT_GENERAL(eSum, V, string, PrintFullValue, PrintBasicData)
-      END SUBROUTINE
+!/ ------------ SCALAR FUNCTIONALITY --------------------------------- /
 !/ ------------------------------------------------------------------- /
       SUBROUTINE SCAL_INTEGRAL_PRINT_GENERAL(eSum, V, string, PrintFullValue, PrintBasicData)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel Debugging 
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
       USE W3GDATMD, ONLY : NK, NTH, FTE
       USE W3GDATMD, ONLY : NSPEC, NX, NY, NSEAL, MAPFS
       USE W3ADATMD, ONLY : MPI_COMM_WCMP
@@ -1692,21 +1377,8 @@
       use yowDatapool, ONLY: rtype, istatus
       USE YOWNODEPOOL, ONLY: npa, iplg
       USE W3PARALL, ONLY: INIT_GET_ISEA
-!/
       IMPLICIT NONE
       INCLUDE "mpif.h"
-!/
-!/ ------------------------------------------------------------------- /
-!/ Parameter list
-!/
-!/ ------------------------------------------------------------------- /
-!/ Local PARAMETERs
-!/
-!/S      INTEGER, SAVE           :: IENT = 0
-!/
-!/ ------------------------------------------------------------------- /
-!/
-!!      INCLUDE "mpif.h"
       !
       REAL, INTENT(out) :: eSum
       REAL, INTENT(in) :: V(NSEAL)
@@ -1719,14 +1391,13 @@
       INTEGER JSEA, ISEA, iProc, I, IX, ierr, ISP, IP, IP_glob
       INTEGER nbIncorr
       INTEGER ITH, IK
-!/S      CALL STRACE (IENT, 'SCAL_INTEGRAL_PRINT_GENERAL')
-      WRITE(740+IAPROC,*) 'IAPROC=', IAPROC
-      WRITE(740+IAPROC,*) 'NAPROC=', NAPROC
-      WRITE(740+IAPROC,*) 'NTPROC=', NTPROC
-      WRITE(740+IAPROC,*) 'Beginning of routine'
-      WRITE(740+IAPROC,*) 'string=', string
-      WRITE(740+IAPROC,*) 'NX=', NX
-      FLUSH(740+IAPROC)
+!      WRITE(740+IAPROC,*) 'IAPROC=', IAPROC
+!      WRITE(740+IAPROC,*) 'NAPROC=', NAPROC
+!      WRITE(740+IAPROC,*) 'NTPROC=', NTPROC
+!      WRITE(740+IAPROC,*) 'Beginning of routine'
+!      WRITE(740+IAPROC,*) 'string=', string
+!      WRITE(740+IAPROC,*) 'NX=', NX
+!      FLUSH(740+IAPROC)
       IF (IAPROC .gt. NAPROC) THEN
         RETURN
       END IF
@@ -1735,8 +1406,6 @@
       END IF
       Vcoll=0
       Status=0
-!      WRITE(740+IAPROC,*) 'PrintFullValue=', PrintFullValue
-!      FLUSH(740+IAPROC)
       DO JSEA=1,NSEAL
         IP      = JSEA
         IP_glob = iplg(IP)
@@ -1750,14 +1419,8 @@
       CoherencyError=0
       IF (IAPROC .eq. 1) THEN
         DO iProc=2,NAPROC
-          WRITE(740+IAPROC,*) 'Before MPI_RECV, 1'
-          FLUSH(740+IAPROC)
           CALL MPI_RECV(rVect,NX,MPI_REAL8, iProc-1, 370, MPI_COMM_WCMP, istatus, ierr)
-          WRITE(740+IAPROC,*) 'Before MPI_RECV, 2'
-          FLUSH(740+IAPROC)
           CALL MPI_RECV(rStatus,NX,MPI_INTEGER, iProc-1, 430, MPI_COMM_WCMP, istatus, ierr)
-          WRITE(740+IAPROC,*) 'After MPI_RECV, 2'
-          FLUSH(740+IAPROC)
           DO I=1,NX
             IF (rStatus(I) .eq. 1) THEN
               eVal1=Vcoll(I)
@@ -1774,14 +1437,8 @@
           END DO
         END DO
       ELSE
-        WRITE(740+IAPROC,*) 'Before MPI_SEND, 1'
-        FLUSH(740+IAPROC)
         CALL MPI_SEND(Vcoll,NX,MPI_REAL8, 0, 370, MPI_COMM_WCMP, ierr)
-        WRITE(740+IAPROC,*) 'Before MPI_SEND, 2'
-        FLUSH(740+IAPROC)
         CALL MPI_SEND(Status,NX,MPI_INTEGER, 0, 430, MPI_COMM_WCMP, ierr)
-        WRITE(740+IAPROC,*) 'After MPI_SEND, 2'
-        FLUSH(740+IAPROC)
       END IF
       eSum=sum(Vcoll)
       IF ((IAPROC .eq. 1).and. PrintBasicData) THEN
@@ -1812,280 +1469,49 @@
       END IF
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
-      SUBROUTINE ALL_VAOLD_INTEGRAL_PRINT(string)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel Debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-!
+      SUBROUTINE GET_SCAL_INTEGRAL_COH_R4(V, eSum)
       USE W3GDATMD, ONLY : NSEAL
-      USE W3WDATMD, ONLY : VAOLD
-      USE W3ODATMD, ONLY : IAPROC
-      USE W3GDATMD, ONLY : NSPEC
       IMPLICIT NONE
-      REAL :: FIELD(NSPEC,NSEAL)
-      CHARACTER(*), INTENT(in) :: string
-!      LOGICAL :: PrintHsNode = .FALSE.
-      LOGICAL :: PrintHs = .TRUE.
-      LOGICAL :: PrintHsNode = .FALSE.
-      INTEGER :: ScalMeth = 4
-      INTEGER ISPEC, JSEA
-      DO JSEA=1,NSEAL
-        DO ISPEC=1,NSPEC
-          FIELD(ISPEC,JSEA) = VAOLD(ISPEC,JSEA)
-        END DO
-      END DO
-      CALL ALL_FIELD_INTEGRAL_PRINT_GENERAL(FIELD, string, PrintHs, PrintHsNode, ScalMeth)
+      REAL, INTENT(in) :: V(NSEAL)
+      CHARACTER (len = *), PARAMETER :: string = "Test a view"
+      REAL, INTENT(out) :: eSum
+      REAL :: V8(NSEAL)
+      LOGICAL :: PrintFullValue = .FALSE.
+      LOGICAL :: PrintBasicData = .FALSE.
+      !
+      V8 = DBLE(V)
+      CALL SCAL_INTEGRAL_PRINT_GENERAL(eSum, V8, string, PrintFullValue, PrintBasicData)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
-      SUBROUTINE ALL_VA_INTEGRAL_PRINT(IMOD, string)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel debugging 
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-!
-      USE W3GDATMD, ONLY : NSEAL, NSEA, NX, NY
-      USE W3WDATMD, ONLY : VA
-      USE W3ODATMD, ONLY : IAPROC, NAPROC
-      USE W3GDATMD, ONLY : NSPEC, GRIDS, GTYPE, UNGTYPE
-      IMPLICIT NONE
-      REAL :: FIELD(NSPEC,NSEAL)
-      INTEGER, INTENT(in) :: IMOD
-      CHARACTER(*), INTENT(in) :: string
-!      LOGICAL :: PrintHsNode = .FALSE.
-      LOGICAL :: PrintHs = .TRUE.
-      LOGICAL :: PrintHsNode = .FALSE.
-      INTEGER :: ScalMeth = 4
-      INTEGER ISTAT
-      INTEGER ISPEC, JSEA
-      IF (GRIDS(IMOD)%GTYPE .ne. UNGTYPE) THEN
-        RETURN
-      END IF
-      IF (IAPROC .gt. NAPROC) THEN
-        RETURN
-      END IF
-!      WRITE(*,*) 'IMOD=', IMOD, ' NSEA=', NSEA, ' NSEAL=', NSEAL
-!      WRITE(*,*) 'GRIDS(IMOD)%NSEA  = ', GRIDS(IMOD)%NSEA
-!      WRITE(*,*) 'GRIDS(IMOD)%NSEAL = ', GRIDS(IMOD)%NSEAL
-!      WRITE(*,*) 'NX=', NX, ' NY=', NY
-!      WRITE(*,*) 'Bonjour'
-!      WRITE(740+IAPROC,*) 'Bonjour, ALL_VA_INTEGRAL'
-!      FLUSH(740+IAPROC)
-!      RETURN
-      WRITE(740+IAPROC,*) 'Entering ALL_INTEGRAL_PRINT, NSEAL=', NSEAL
-      FLUSH(740+IAPROC)
-      DO JSEA=1,NSEAL
-!        WRITE(740+IAPROC,*) 'JSEA=', JSEA
-!        FLUSH(740+IAPROC)
-        DO ISPEC=1,NSPEC
-          FIELD(ISPEC,JSEA) = VA(ISPEC,JSEA)
-        END DO
-      END DO
-      WRITE(740+IAPROC,*) 'Before call to ALL_FIELD_INTEGRAL_PRINT_GENERAL'
-      WRITE(740+IAPROC,*) 'NSPEC=', NSPEC, ' NX=', NX
-      FLUSH(740+IAPROC)
-      CALL ALL_FIELD_INTEGRAL_PRINT_GENERAL(FIELD, string, PrintHs, PrintHsNode, ScalMeth)
-      WRITE(740+IAPROC,*) 'After call to ALL_FIELD_INTEGRAL_PRINT_GENERAL'
-      FLUSH(740+IAPROC)
-!      IF (NSEAL >= 40) THEN
-!        WRITE(740+IAPROC,*) 'min/max/sum(VA(:,TESTNODE))=', minval(VA(:,TESTNODE)), maxval(VA(:,TESTNODE)), sum(VA(:,TESTNODE))
-!        FLUSH(740+IAPROC)
-!      END IF
-      END SUBROUTINE
-!/ ------------------------------------------------------------------- /
-      SUBROUTINE ALL_FIELD_INTEGRAL_PRINT(FIELD, string)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-!
+      SUBROUTINE SCAL_INTEGRAL_PRINT_R8(V, string)
       USE W3GDATMD, ONLY : NSEAL
-      USE W3WDATMD, ONLY : VA
-      USE W3ODATMD, ONLY : IAPROC
-      USE W3GDATMD, ONLY : NSPEC
       IMPLICIT NONE
-      REAL, INTENT(in) :: FIELD(NSPEC,NSEAL)
+      REAL, INTENT(in) :: V(NSEAL)
       CHARACTER(*), INTENT(in) :: string
-!      LOGICAL :: PrintHsNode = .FALSE.
-      LOGICAL :: PrintHs = .FALSE.
-      LOGICAL :: PrintHsNode = .FALSE.
-      INTEGER :: ScalMeth = 1
-      CALL ALL_FIELD_INTEGRAL_PRINT_GENERAL(FIELD, string, PrintHs, PrintHsNode, ScalMeth)
-!/
-!/ End of JACOBI_FINALIZE -------------------------------------------- /
-!/
+      REAL :: V8(NSEAL)
+      LOGICAL :: PrintFullValue = .FALSE.
+      LOGICAL :: PrintBasicData = .TRUE.
+      REAL :: eSum
+      !
+      V8 = DBLE(V)
+      CALL SCAL_INTEGRAL_PRINT_GENERAL(eSum, V8, string, PrintFullValue, PrintBasicData)
       END SUBROUTINE
+!/ ------------------------------------------------------------------- /
+      SUBROUTINE SCAL_INTEGRAL_PRINT_R4(V, string)
+      USE W3GDATMD, ONLY : NSEAL
+      IMPLICIT NONE
+      REAL, INTENT(in) :: V(NSEAL)
+      CHARACTER(*), INTENT(in) :: string
+      LOGICAL :: PrintFullValue = .FALSE.
+      LOGICAL :: PrintBasicData = .TRUE.
+      REAL :: eSum
+      !
+      CALL SCAL_INTEGRAL_PRINT_GENERAL(eSum, V, string, PrintFullValue, PrintBasicData)
+      END SUBROUTINE
+!/ ------------------------------------------------------------------- /
+!/ ------- FIELD(NSPEC,NSEAL) printint-------------------------------- /
 !/ ------------------------------------------------------------------- /
       SUBROUTINE ALL_FIELD_INTEGRAL_PRINT_GENERAL(FIELD, string, PrintHs, PrintHsNode, ScalMeth)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-!
       USE W3GDATMD, ONLY : CLATS, SIG
       USE W3ADATMD, ONLY : CG
       USE W3GDATMD, ONLY : NK, NTH, FTE
@@ -2147,22 +1573,12 @@
       WRITE(740+IAPROC,*) 'FTE=', FTE
       FLUSH(740+IAPROC)
       DO JSEA=1,NSEAL
-!        WRITE(740+IAPROC,*) 'JSEA=', JSEA
-!        FLUSH(740+IAPROC)
         IP      = JSEA
-!        WRITE(740+IAPROC,*) 'IP=', IP
-!        FLUSH(740+IAPROC)
         IP_glob = iplg(IP)
-!        WRITE(740+IAPROC,*) 'IP_glob=', IP_glob
-!        FLUSH(740+IAPROC)
         ISEA=MAPFS(1,IP_glob)
-!        WRITE(740+IAPROC,*) 'ISEA=', ISEA
-!        FLUSH(740+IAPROC)
         DO ISP=1,NSPEC
           VcollExp(ISP+NSPEC*(IP_glob-1))=FIELD(ISP,JSEA)
         END DO
-!        WRITE(740+IAPROC,*) 'After VcollExp assignation'
-!        FLUSH(740+IAPROC)
         !
         ET = 0
         DO IK=1, NK
@@ -2185,8 +1601,6 @@
           END DO
           ET     = ET  + EBND
         END DO
-!        WRITE(740+IAPROC,*) 'After IK loop'
-!        FLUSH(740+IAPROC)
         ET     = ET  + FTE *EBND
         IF (PrintHs) THEN
           HSIG   = 4. * SQRT ( ET )
@@ -2195,28 +1609,18 @@
         VminCG(IP_glob)=minval(CG(:,ISEA))
         VmaxCG(IP_glob)=maxval(CG(:,ISEA))
         Status(IP_glob)=1
-!        WRITE(740+IAPROC,*) 'After Status assignation'
-!        FLUSH(740+IAPROC)
       END DO
-      WRITE(740+IAPROC,*) 'After status settings'
-      FLUSH(740+IAPROC)
       !
       ! Now find global arrays
       !
       CoherencyError=0
       IF (IAPROC .eq. 1) THEN
         DO iProc=2,NAPROC
-          WRITE(740+IAPROC,*) '1: iProc=', iProc
-          FLUSH(740+IAPROC)
           CALL MPI_RECV(rVect,NSPEC*NX,MPI_REAL, iProc-1, 37, MPI_COMM_WCMP, istatus, ierr)
           CALL MPI_RECV(rHs,NX,MPI_REAL, iProc-1, 38, MPI_COMM_WCMP, istatus, ierr)
           CALL MPI_RECV(rMinCG,NX,MPI_REAL, iProc-1, 39, MPI_COMM_WCMP, istatus, ierr)
           CALL MPI_RECV(rMaxCG,NX,MPI_REAL, iProc-1, 40, MPI_COMM_WCMP, istatus, ierr)
-          WRITE(740+IAPROC,*) '2: iProc=', iProc
-          FLUSH(740+IAPROC)
           CALL MPI_RECV(rStatus,NX,MPI_INTEGER, iProc-1, 43, MPI_COMM_WCMP, istatus, ierr)
-          WRITE(740+IAPROC,*) '3: iProc=', iProc
-          FLUSH(740+IAPROC)
           DO I=1,NX
             IF (rStatus(I) .eq. 1) THEN
               DO ISP=1,NSPEC
@@ -2238,17 +1642,11 @@
           END DO
         END DO
       ELSE
-        WRITE(740+IAPROC,*) 'Second case 1'
-        FLUSH(740+IAPROC)
         CALL MPI_SEND(VcollExp,NSPEC*NX,MPI_REAL, 0, 37, MPI_COMM_WCMP, ierr)
         CALL MPI_SEND(Vhs,NX,MPI_REAL, 0, 38, MPI_COMM_WCMP, ierr)
         CALL MPI_SEND(VminCG,NX,MPI_REAL, 0, 39, MPI_COMM_WCMP, ierr)
         CALL MPI_SEND(VmaxCG,NX,MPI_REAL, 0, 40, MPI_COMM_WCMP, ierr)
-        WRITE(740+IAPROC,*) 'Second case 2'
-        FLUSH(740+IAPROC)
         CALL MPI_SEND(Status,NX,MPI_INTEGER, 0, 43, MPI_COMM_WCMP, ierr)
-        WRITE(740+IAPROC,*) 'Second case 3'
-        FLUSH(740+IAPROC)
       END IF
       IF (IAPROC .eq. 1) THEN
         DO I=1,NX
@@ -2288,58 +1686,83 @@
         END IF
         FLUSH(740+IAPROC)
       END IF
-!/
-!/ End of JACOBI_FINALIZE -------------------------------------------- /
-!/
+      END SUBROUTINE
+!/ ------------------------------------------------------------------- /
+      SUBROUTINE ALL_VAOLD_INTEGRAL_PRINT(string)
+      USE W3GDATMD, ONLY : NSEAL
+      USE W3WDATMD, ONLY : VAOLD
+      USE W3ODATMD, ONLY : IAPROC
+      USE W3GDATMD, ONLY : NSPEC
+      IMPLICIT NONE
+      REAL :: FIELD(NSPEC,NSEAL)
+      CHARACTER(*), INTENT(in) :: string
+      LOGICAL :: PrintHs = .TRUE.
+      LOGICAL :: PrintHsNode = .FALSE.
+      INTEGER :: ScalMeth = 4
+      INTEGER ISPEC, JSEA
+      DO JSEA=1,NSEAL
+        DO ISPEC=1,NSPEC
+          FIELD(ISPEC,JSEA) = VAOLD(ISPEC,JSEA)
+        END DO
+      END DO
+      CALL ALL_FIELD_INTEGRAL_PRINT_GENERAL(FIELD, string, PrintHs, PrintHsNode, ScalMeth)
+      END SUBROUTINE
+!/ ------------------------------------------------------------------- /
+      SUBROUTINE ALL_VA_INTEGRAL_PRINT(IMOD, string)
+      USE W3GDATMD, ONLY : NSEAL, NSEA, NX, NY
+      USE W3WDATMD, ONLY : VA
+      USE W3ODATMD, ONLY : IAPROC, NAPROC
+      USE W3GDATMD, ONLY : NSPEC, GRIDS, GTYPE, UNGTYPE
+      IMPLICIT NONE
+      REAL :: FIELD(NSPEC,NSEAL)
+      INTEGER, INTENT(in) :: IMOD
+      CHARACTER(*), INTENT(in) :: string
+      LOGICAL :: PrintHs = .TRUE.
+      LOGICAL :: PrintHsNode = .FALSE.
+      INTEGER :: ScalMeth = 4
+      INTEGER ISTAT
+      INTEGER ISPEC, JSEA
+      IF (GRIDS(IMOD)%GTYPE .ne. UNGTYPE) THEN
+        RETURN
+      END IF
+      IF (IAPROC .gt. NAPROC) THEN
+        RETURN
+      END IF
+      WRITE(740+IAPROC,*) 'Entering ALL_INTEGRAL_PRINT, NSEAL=', NSEAL
+      FLUSH(740+IAPROC)
+      DO JSEA=1,NSEAL
+        DO ISPEC=1,NSPEC
+          FIELD(ISPEC,JSEA) = VA(ISPEC,JSEA)
+        END DO
+      END DO
+      WRITE(740+IAPROC,*) 'Before call to ALL_FIELD_INTEGRAL_PRINT_GENERAL'
+      WRITE(740+IAPROC,*) 'NSPEC=', NSPEC, ' NX=', NX
+      FLUSH(740+IAPROC)
+      CALL ALL_FIELD_INTEGRAL_PRINT_GENERAL(FIELD, string, PrintHs, PrintHsNode, ScalMeth)
+      WRITE(740+IAPROC,*) 'After call to ALL_FIELD_INTEGRAL_PRINT_GENERAL'
+      FLUSH(740+IAPROC)
+!      IF (NSEAL >= 40) THEN
+!        WRITE(740+IAPROC,*) 'min/max/sum(VA(:,TESTNODE))=', minval(VA(:,TESTNODE)), maxval(VA(:,TESTNODE)), sum(VA(:,TESTNODE))
+!        FLUSH(740+IAPROC)
+!      END IF
+      END SUBROUTINE
+!/ ------------------------------------------------------------------- /
+      SUBROUTINE ALL_FIELD_INTEGRAL_PRINT(FIELD, string)
+      USE W3GDATMD, ONLY : NSEAL
+      USE W3WDATMD, ONLY : VA
+      USE W3ODATMD, ONLY : IAPROC
+      USE W3GDATMD, ONLY : NSPEC
+      IMPLICIT NONE
+      REAL, INTENT(in) :: FIELD(NSPEC,NSEAL)
+      CHARACTER(*), INTENT(in) :: string
+!      LOGICAL :: PrintHsNode = .FALSE.
+      LOGICAL :: PrintHs = .FALSE.
+      LOGICAL :: PrintHsNode = .FALSE.
+      INTEGER :: ScalMeth = 1
+      CALL ALL_FIELD_INTEGRAL_PRINT_GENERAL(FIELD, string, PrintHs, PrintHsNode, ScalMeth)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
       SUBROUTINE TEST_MPI_STATUS(string)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-!
       USE W3ADATMD, ONLY : MPI_COMM_WCMP
       USE W3GDATMD, ONLY : GTYPE, UNGTYPE
       USE W3ODATMD, ONLY : IAPROC, NAPROC, NTPROC
@@ -2362,132 +1785,41 @@
       !
       IF (IAPROC .eq. 1) THEN
         DO iProc=2,NAPROC
-          WRITE(740+IAPROC,*) '1: iProc=', iProc
-          FLUSH(740+IAPROC)
           CALL MPI_RECV(rVect,1,MPI_REAL, iProc-1, 37, MPI_COMM_WCMP, istatus, ierr)
         END DO
       ELSE
-        WRITE(740+IAPROC,*) 'Second case 1'
-        FLUSH(740+IAPROC)
         CALL MPI_SEND(VcollExp,1,MPI_REAL, 0, 37, MPI_COMM_WCMP, ierr)
       END IF
       WRITE(740+IAPROC,*) 'Leaving the TEST_MPI_STATUS'
       FLUSH(740+IAPROC)
-!/
-!/ End of W3XYPFSN ----------------------------------------------------- /
-!/
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
 !*    maxidx should be "np" or "npa"                                  *
       SUBROUTINE CHECK_ARRAY_INTEGRAL_NX_R8(TheARR, string, maxidx)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-!
       USE W3GDATMD, ONLY : NSPEC
       USE YOWNODEPOOL, ONLY: npa
       CHARACTER(*), INTENT(in) :: string
       INTEGER, INTENT(in) :: maxidx
       REAL, INTENT(in) :: TheARR(NSPEC, npa)
+      REAL :: TheARR_red(npa)
       LOGICAL :: PrintMinISP, LocalizeMaximum
+      LOGICAL FULL_NSPEC = .FALSE.
       PrintMinISP = .false.
       LocalizeMaximum = .false.
-      CALL CHECK_ARRAY_INTEGRAL_NX_R8_MaxFunct(TheARR, string, maxidx, PrintMinISP, LocalizeMaximum)
-!/
-!/ End of W3XYPFSN ----------------------------------------------------- /
-!/
+      
+
+      IF (FULL_NSPEC) THEN
+        CALL CHECK_ARRAY_INTEGRAL_NX_R8_MaxFunct(TheARR, string, maxidx, PrintMinISP, LocalizeMaximum)
+      ELSE
+        DO IP=1,npa
+          TheARR_red(IP) = SUM(ABS(TheArr(:,IP)))
+        END DO
+        
+      END IF
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
 !*    maxidx should be "np" or "npa"                                  *
       SUBROUTINE CHECK_ARRAY_INTEGRAL_NX_R8_MaxFunct(TheARR, string, maxidx, PrintMinISP, LocalizeMaximum)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-!
       USE W3GDATMD, ONLY : NK, NTH
       USE W3WDATMD, ONLY : VA
       USE W3GDATMD, ONLY : NSPEC, NX, NY, NSEAL, MAPFS
@@ -2629,59 +1961,9 @@
           FLUSH(740+IAPROC)
         END IF
       END IF
-!/
-!/ End of W3XYPFSN --------------------------------------------------- /
-!/
       END SUBROUTINE CHECK_ARRAY_INTEGRAL_NX_R8_MaxFunct
 !/ ------------------------------------------------------------------- /
       SUBROUTINE COLLECT_AND_PRINT(V, ifile)
-!/ ------------------------------------------------------------------- /
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-!
       USE W3GDATMD, ONLY: NX, NSEAL, NSEA
       USE W3ADATMD, ONLY: MPI_COMM_WCMP
       USE W3ODATMD, ONLY : IAPROC, NAPROC, NTPROC
@@ -2740,52 +2022,6 @@
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
       SUBROUTINE DOMAIN_INTEGRAL(V, eScal)
-!/
-!/                  +-----------------------------------+
-!/                  | WAVEWATCH III           NOAA/NCEP |
-!/                  |                                   |  
-!/                  | Aron Roland (BGS IT&E GmbH)       |
-!/                  | Mathieu Dutour-Sikiric (IRB)      |
-!/                  |                                   |
-!/                  |                        FORTRAN 90 |
-!/                  | Last update :        01-June-2018 |
-!/                  +-----------------------------------+
-!/
-!/    01-June-2018 : Origination.                        ( version 6.04 )
-!/
-!  1. Purpose : Source code for parallel debugging
-!  2. Method :
-!  3. Parameters :
-!
-!     Parameter list
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  4. Subroutines used :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!      STRACE    Subr. W3SERVMD Subroutine tracing.
-!     ----------------------------------------------------------------
-!
-!  5. Called by :
-!
-!      Name      Type  Module   Description
-!     ----------------------------------------------------------------
-!     ----------------------------------------------------------------
-!
-!  6. Error messages :
-!  7. Remarks
-!  8. Structure :
-!  9. Switches :
-!
-!     !/S  Enable subroutine tracing.
-!
-! 10. Source code :
-!
-!/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
-!
       USE W3GDATMD, ONLY: NX
       USE W3ADATMD, ONLY: MPI_COMM_WCMP
       use yowDatapool, ONLY: rtype, istatus
@@ -2815,9 +2051,6 @@
         CALL MPI_RECV(lScal,1,rtype, 0, 23, MPI_COMM_WCMP, istatus, ierr)
       END IF
       eScal=lScal(1)
-!/
-!/ End of W3XYPFSN --------------------------------------------------- /
-!/
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
       SUBROUTINE PDLIB_W3XYPFSFCT2 ( ISP, C, LCALC, RD10, RD20, DT, AC)
@@ -6117,6 +5350,7 @@
 
 !AR: this is missing in init ... but there is a design error in ww3_grid with FLCUR and FLLEV
       LSIG = FLCUR .OR. FLLEV
+!/DEBUGSOLVERCOH      OffDIAG = ZERO
 
 !/MEMCHECK      write(50000+IAPROC,*) 'memcheck_____:', 'WW3_PROP SECTION 0'
 !/MEMCHECK      call getMallocInfo(mallinfos)
@@ -6378,7 +5612,7 @@
             ENDIF ! IMEM
 
 !/DEBUGSOLVERCOH          OffDiag(:, IP)=REAL(eOff)
-!/DEBUGSOLVERCOH          WRITE(740+IAPROC,*) 'Step 2: sum(eSum)=', sum(eSum), ' eOff=', sum(eOff)
+!/DEBUGSOLVERCOHALL          WRITE(740+IAPROC,*) 'Step 2: sum(eSum)=', sum(eSum), ' eOff=', sum(eOff)
             IF (FSREFRACTION) THEN
 !/DEBUGREFRACTION         WRITE(740+IAPROC,*) 'Adding refraction terms to eSum'
               CAD = CAD_THE(:,IP)
