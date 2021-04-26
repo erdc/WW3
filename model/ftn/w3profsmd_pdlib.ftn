@@ -1396,8 +1396,10 @@
 !/ --------------- NSEAL = npa --------------------------------------- /
 !/ ------- maxidx = npa or np for arrays that have been -------------- /
 !/ ------- synchronized or not --------------------------------------- /
+!/ ------- CheckUncovered is because some the triangulation ---------- /
+!/ ------- may not cover all nodes ----------------------------------- /
 !/ ------------------------------------------------------------------- /
-      SUBROUTINE SCAL_INTEGRAL_PRINT_GENERAL(V, string, maxidx, PrintFullValue)
+      SUBROUTINE SCAL_INTEGRAL_PRINT_GENERAL(V, string, maxidx, CheckUncovered, PrintFullValue)
       USE W3GDATMD, ONLY : NK, NTH, FTE
       USE W3GDATMD, ONLY : NSPEC, NX, NY, NSEAL, MAPFS
       USE W3ADATMD, ONLY : MPI_COMM_WCMP
@@ -1412,18 +1414,20 @@
       REAL*8, INTENT(in) :: V(NSEAL)
       CHARACTER(*), INTENT(in) :: string
       INTEGER, INTENT(IN) :: maxidx
+      LOGICAL, INTENT(in) :: CheckUncovered
       LOGICAL, INTENT(in) :: PrintFullValue
       !
       REAL*8, allocatable :: Vcoll(:)
       INTEGER, allocatable :: Status(:)
-      REAL CoherencyError, eVal1, eVal2, eErr
       REAL*8, allocatable :: ListVal(:)
       INTEGER, allocatable :: ListIdx(:)
       INTEGER singV(2)
+      REAL CoherencyError, eVal1, eVal2, eErr
       INTEGER NSEAL_dist, maxidx_dist
       INTEGER JSEA, ISEA, iProc, I, IX, ierr, ISP, IP, IP_glob
       INTEGER nbIncorr, idx
       INTEGER ITH, IK
+
       IF (IAPROC .gt. NAPROC) THEN
         RETURN
       END IF
@@ -1433,8 +1437,8 @@
       !
       ! Now find global arrays
       !
-      CoherencyError=0
       IF (IAPROC .eq. 1) THEN
+        CoherencyError=0
         allocate(Vcoll(NX), Status(NX))
         Vcoll=0
         Status=0
@@ -1450,7 +1454,7 @@
           NSEAL_dist = singV(1)
           maxidx_dist = singV(2)
           allocate(ListVal(NSEAL_dist), ListIdx(NSEAL_dist))
-          CALL MPI_RECV(ListVal, NSEAL_dist, MPI_REAL8, iProc-1, 370, MPI_COMM_WCMP, istatus, ierr)
+          CALL MPI_RECV(ListVal, NSEAL_dist, MPI_REAL8,   iProc-1, 370, MPI_COMM_WCMP, istatus, ierr)
           CALL MPI_RECV(ListIdx, NSEAL_dist, MPI_INTEGER, iProc-1, 430, MPI_COMM_WCMP, istatus, ierr)
           DO idx=1,maxidx_dist
             IP_glob = ListIdx(idx)
@@ -1465,7 +1469,7 @@
           END DO
           deallocate(ListVal, ListIdx)
         END DO
-        WRITE(740+IAPROC,*) 'VA_INTEGRAL sum,coh=', sum(Vcoll), CoherencyError, TRIM(string)
+        WRITE(740+IAPROC,'(a,f14.7,f14.7,a,a)') 'sum,coh=', sum(Vcoll), CoherencyError, ' ', TRIM(string)
         nbIncorr=0
         DO IX=1,NX
           ISEA=MAPFS(1,IX)
@@ -1475,12 +1479,14 @@
             END IF
           END IF
         END DO
-        IF (nbIncorr .gt. 0) THEN
-          WRITE(*,*) '    nbIncorr=', nbIncorr
-          WRITE(*,*) '          NX=', NX
-          WRITE(*,*) '       NSEAL=', NSEAL
-          WRITE(*,*) '         npa=', npa
-          STOP
+        IF (CheckUncovered) THEN
+          IF (nbIncorr .gt. 0) THEN
+            WRITE(*,*) '    nbIncorr=', nbIncorr
+            WRITE(*,*) '          NX=', NX
+            WRITE(*,*) '       NSEAL=', NSEAL
+            WRITE(*,*) '         npa=', npa
+            STOP
+          END IF
         END IF
         IF (PrintFullValue) THEN
           WRITE(740+IAPROC,*) 'Value of V at nodes'
@@ -1498,7 +1504,7 @@
           IP      = JSEA
           IP_glob = iplg(IP)
           ISEA=MAPFS(1,IP_glob)
-          ListVal(IP_glob) = V(JSEA)
+          ListVal(JSEA) = V(JSEA)
           ListIdx(JSEA) = IP_glob
         END DO
         CALL MPI_SEND(ListVal, NSEAL, MPI_REAL8,   0, 370, MPI_COMM_WCMP, ierr)
@@ -1512,10 +1518,11 @@
       IMPLICIT NONE
       REAL*8, INTENT(in) :: V(NSEAL)
       CHARACTER(*), INTENT(in) :: string
-      REAL*8 :: V8(NSEAL)
+      REAL*8 :: V8(NSEAL) 
+      LOGICAL :: CheckUncovered = .FALSE.
       LOGICAL :: PrintFullValue = .FALSE.
       V8 = V
-      CALL SCAL_INTEGRAL_PRINT_GENERAL(V8, string, NSEAL, PrintFullValue)
+      CALL SCAL_INTEGRAL_PRINT_GENERAL(V8, string, NSEAL, CheckUncovered, PrintFullValue)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
       SUBROUTINE SCAL_INTEGRAL_PRINT_R4(V, string)
@@ -1523,10 +1530,11 @@
       IMPLICIT NONE
       REAL, INTENT(in) :: V(NSEAL)
       CHARACTER(*), INTENT(in) :: string
+      LOGICAL :: CheckUncovered = .FALSE.
       LOGICAL :: PrintFullValue = .FALSE.
       REAL*8 V8(NSEAL)
       V8 = DBLE(V)
-      CALL SCAL_INTEGRAL_PRINT_GENERAL(V8, string, NSEAL, PrintFullValue)
+      CALL SCAL_INTEGRAL_PRINT_GENERAL(V8, string, NSEAL, CheckUncovered, PrintFullValue)
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
 !/ ------- FIELD(NSPEC,NSEAL) printint-------------------------------- /
@@ -1938,6 +1946,7 @@
       LOGICAL :: FULL_NSPEC = .FALSE.
       LOGICAL :: PrintMinISP = .FALSE.
       LOGICAL :: LocalizeMaximum = .FALSE.
+      LOGICAL :: CheckUncovered = .FALSE.
       LOGICAL :: PrintFullValue = .FALSE.
       
 
@@ -1947,7 +1956,7 @@
         DO IP=1,npa
           TheARR_red(IP) = SUM(ABS(TheArr(:,IP)))
         END DO
-        CALL SCAL_INTEGRAL_PRINT_GENERAL(TheARR_red, string, maxidx, PrintFullValue)
+        CALL SCAL_INTEGRAL_PRINT_GENERAL(TheARR_red, string, maxidx, CheckUncovered, PrintFullValue)
       END IF
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
@@ -2638,8 +2647,7 @@
           END IF
         END DO
       END DO
-      WRITE(740+IAPROC,*) 'string=', string
-      WRITE(740+IAPROC,*) 'TheSum12=', TheSum1, TheSum2
+      WRITE(740+IAPROC,'(a,f14.7,f14.7,a,a)') 'TheSum12=', TheSum1, TheSum2, ' ', string
       FLUSH(740+IAPROC)
 !/
 !/ End of W3XYPFSN --------------------------------------------------- /
@@ -4888,7 +4896,7 @@
 !
 !/ ------------------------------------------------------------------- /
 !/S      USE W3SERVMD, ONLY: STRACE
-      USE YOWNODEPOOL, ONLY: npa
+      USE YOWNODEPOOL, ONLY: npa, np
       USE yowRankModule, ONLY : IPGL_npa
       USE W3GDATMD, ONLY: NSEAL, CLATS, MAPSF
       USE W3WDATMD, ONLY: TIME
@@ -4919,6 +4927,8 @@
       INTEGER :: IK, ITH, ISEA
       INTEGER :: IBI, IP_glob, ISP, JX
 !/S      CALL STRACE (IENT, 'APPLY_BOUNDARY_CONDITION')
+!/DEBUGSOLVERCOH      CALL CHECK_ARRAY_INTEGRAL_NX_R8(VA, "VA(np) before boundary", np)
+!/DEBUGSOLVERCOH      CALL CHECK_ARRAY_INTEGRAL_NX_R8(VA, "VA(npa) before boundary", npa)
       IF ( FLBPI ) THEN
         RD10    = DSEC21 ( TBPI0, TIME )
         RD20    = DSEC21 ( TBPI0, TBPIN )
@@ -4953,7 +4963,7 @@
               DO IK=1,NK
                 ISP=ITH + (IK-1)*NTH
                 VA(ISP,JX) = (( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )  &
-                             / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))) * IOBDP_LOC(ISEA) 
+                             / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))) * IOBDP_LOC(JX) 
               END DO
             END DO
 !/DEBUGIOBC       ETOT=0
@@ -4987,6 +4997,7 @@
 !/DEBUGSOLVERALL     END DO
 !/DEBUGSOLVER     WRITE(740+IAPROC,*) 'Begin of APPLY_BOUNDARY_CONDITION'
 !/DEBUGSOLVER     FLUSH(740+IAPROC)
+!/DEBUGSOLVERCOH      CALL CHECK_ARRAY_INTEGRAL_NX_R8(VA, "VA(np) after boundary", np)
 !/DEBUGSOLVERCOH      CALL CHECK_ARRAY_INTEGRAL_NX_R8(VA, "VA(npa) after boundary", npa)
       END IF
       END SUBROUTINE
@@ -5687,7 +5698,6 @@
 !/MEMCHECK      call getMallocInfo(mallinfos)
 !/MEMCHECK      call printMallInfo(IAPROC+50000,mallInfos)
 
-!/DEBUGSOLVERCOH        WRITE(740+IAPROC,*) 'sum(OffDiag)=', sum(OffDiag)
 !/DEBUGSOLVERCOH        WRITE (eFile,40) nbIter
 !/DEBUGSOLVERCOH  40    FORMAT ('PRE_VA_',i4.4,'.txt')
 !/DEBUGSOLVERCOH      CALL CHECK_ARRAY_INTEGRAL_NX_R8(OffDiag, "OffDiag(np) just check", np)
@@ -5696,9 +5706,6 @@
 !/DEBUGSOLVERCOH      CALL CHECK_ARRAY_INTEGRAL_NX_R8(VA, "VA(np) before exchanges", np)
         IF (B_JGS_BLOCK_GAUSS_SEIDEL) THEN
           CALL PDLIB_exchange2DREAL_zero(VA)
-          !extmp = VA(:,1:NPA)
-          !CALL PDLIB_exchange2DREAL(extmp)
-          !VA(:,1:NPA) = extmp
         ELSE
           CALL PDLIB_exchange2DREAL(U_JAC)
           VA(:,1:NPA) = U_JAC
@@ -7068,7 +7075,6 @@
 !/DEBUGINIT    FLUSH(740+IAPROC)
       IF (.NOT. B_JGS_BLOCK_GAUSS_SEIDEL) THEN
         ALLOCATE(U_JAC(NSPEC,npa), stat=istat)
-        !U_JAC = 0.
         if(istat /= 0) CALL PDLIB_ABORT(12)
       END IF
 !/DEBUGINIT    WRITE(740+IAPROC,*) 'JACOBI_INIT, step 7'
