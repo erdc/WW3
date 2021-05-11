@@ -34,7 +34,8 @@
 # Compiler option. Choose appropriate compiler and set cmplOption to
 # y if using for the first time or using a different compiler
 
-  cmplr=Gnu_matrix
+#  cmplr=Gnu_matrix
+  cmplr=gnu
   export cmplOption='y'
 
 # Set batchq queue, choose modules and other custom variables to fit system and 
@@ -49,7 +50,7 @@
 
 # Netcdf and Parmetis modules & variables
 
-  echo "  source $main_dir/bin/setpaths.milhydro2 "    >> matrix.head
+  echo "  source $main_dir/bin/setpaths_milhydro3 "    >> matrix.head
   echo ' ' 
 
   if [ "$batchq" = 'slurm' ]
@@ -58,7 +59,7 @@
   else
     export  mpi='mpirun'
   fi
-    export   np='12'
+    export   np='24'
     export   nr='0'
     export  nth='0'
 # Compile option
@@ -106,7 +107,6 @@
   export   calendar='y'
   export   confignc='y'
   export   oasis='n'
-
   export  multi01='y' # mww3_test_01 (wetting and drying)
   export  multi02='y' # mww3_test_02 (basic two-way nesting test))
   export  multi03='y' # mww3_test_03 (three high and three low res grids).
