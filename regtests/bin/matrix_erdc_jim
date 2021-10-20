@@ -1,0 +1,155 @@
+#!/bin/bash
+# --------------------------------------------------------------------------- #
+# matrix.go: Run matrix of regression tests on target machine.                #
+#                                                                             #
+# Remarks:                                                                    #
+# - This version is set up for automatic w3_setenv script and for the         #
+#   NOAA RDHPC 'zeus' system. When using this for your own setup and          #
+#   computer, please copy rather than modify.                                 #
+#                                                                             #
+#                                                      Hendrik L. Tolman      #
+#                                                      August 2013            #
+#                                                      December 2013          #
+#                                                      April 2018             #
+#                                                                             #
+#    Copyright 2013 National Weather Service (NWS),                           #
+#       National Oceanic and Atmospheric Administration.  All rights          #
+#       reserved.  WAVEWATCH III is a trademark of the NWS.                   #
+#       No unauthorized use without permission.                               #
+#                                                                             #
+# --------------------------------------------------------------------------- #
+# 0. Environment file
+
+  source $(dirname $0)/../../model/bin/w3_setenv
+  main_dir=$WWATCH3_DIR
+  temp_dir=$WWATCH3_TMP
+  source=$WWATCH3_SOURCE
+  list=$WWATCH3_LIST
+
+  echo "Main directory    : $main_dir"
+  echo "Scratch directory : $temp_dir"
+  echo "Save source codes : $source"
+  echo "Save listings     : $list"
+
+# Compiler option. Choose appropriate compiler and set cmplOption to
+# y if using for the first time or using a different compiler
+
+#  cmplr=Gnu_matrix
+  cmplr=cheyenne.intel
+  export cmplOption='y'
+
+# Set batchq queue, choose modules and other custom variables to fit system and 
+# to define headers etc (default to original version if empty)
+# 1. Set up
+# 1.a Computer/ user dependent set up
+
+  echo '#!/bin/bash '                                       > matrix.head
+  echo ' '                                                 >> matrix.head
+  echo '#PBS -N ww3_reg '                                   >> matrix.head
+  echo '#PBS -q ww3 '                                       >> matrix.head
+  echo '#PBS -A ERDCV81008WW3 '                            >> matrix.head
+  echo '#PBS -l select=1:ncpus=36:mpiprocs=36 '            >> matrix.head
+  echo '#PBS -l walltime=3:00:00 '                         >> matrix.head
+  echo '#PBS -j oe '                                       >> matrix.head
+  echo '#PBS -o matrix.out '                               >> matrix.head
+#
+  echo 'umask 007 '                                        >> matrix.head
+  echo 'ulimit -s unlimited '                              >> matrix.head
+  echo "cd $(dirname $main_dir)/regtests"                 >> matrix.head
+  echo ' '                                                  >> matrix.head
+
+# Netcdf and Parmetis modules & variables
+
+  echo "  source $main_dir/bin/setpaths.jim "    >> matrix.head
+  echo ' ' 
+
+  if [ "$batchq" = 'slurm' ]
+  then
+    export  mpi='mpiexec_mpt'
+  else
+    export  mpi='mpiexec_mpt'
+  fi
+    export   np='24'
+    export   nr='0'
+    export  nth='0'
+# Compile option
+  if [ "$cmplOption" = 'y' ]
+  then
+     opt="-c $cmplr -S -T"
+  else
+     opt="-S"
+  fi
+# Batch queue option
+  if [ "$batchq" = 'slurm' ]
+  then
+     opt="-b $batchq $opt"
+  fi
+
+# Base run_test command line
+  export rtst="./bin/run_test $opt"
+
+  export  ww3='../model'
+
+# 1.b Flags to do course selection - - - - - - - - - - - - - - - - - - - - - -
+#     Addition selection by commenting out lines as below
+  export     shrd='y' # Do shared architecture tests
+  export     dist='y' # Do distributed architecture (MPI) tests
+  export      omp='y' # Threaded (OpenMP) tests
+  export     hybd='y' # Hybrid options
+
+  export   prop1D='y' # 1-D propagation tests (ww3_tp1.X)
+  export   prop2D='y' # 2-D propagation tests (ww3_tp2.X)
+  export     time='y' # time linmited growth
+  export    fetch='y' # fetch linmited growth
+  export   hur1mg='y' # Hurricane with one moving grid
+  export    shwtr='y' # shallow water tests
+  export    unstr='y' # unstructured grid tests
+  export    pdlib='y' # unstr with pdlib for domain decomposition and implicit solver
+  export    smcgr='y' # SMC grid test
+  export      rtd='y' # Rotated pole test
+  export   mudice='y' # Mud/Ice and wave interaction tests 
+  export   infgrv='y' # Second harmonic generation tests
+  export     uost='y' # ww3_ts4 Unresolved Obstacles Source Term (UOST)
+  export    assim='y' # Restart spectra update
+  export    oasis='y' # Atmosphere, ocean, and ice coupling using OASIS
+  export calendar='y' # Calendar type
+  export confignc='y' # Configurable netCDF meta data (ww3_ounf)
+
+  export  multi01='y' # mww3_test_01 (wetting and drying)
+  export  multi02='y' # mww3_test_02 (basic two-way nesting test))
+  export  multi03='y' # mww3_test_03 (three high and three low res grids).
+  export  multi04='y' # mww3_test_04 (swell on sea mount and/or current)
+  export  multi05='y' # mww3_test_05 (three-grid moving hurricane)
+  export  multi06='y' # mww3_test_06 (curvilinear grid tests)
+  export  multi07='y' # mww3_test_07 (unstructured grid tests)
+  export  multi08='y' # mww3_test_08 (wind and ice tests)
+  export      ufs='n' # The Unified Forecast System
+  export     grib='n' # grib file field output
+  export rstrt_b4b='n' # Restart Reproducibility
+  export  npl_b4b='n' # MPI task Reproducibility
+  export  nth_b4b='n' # Thread Reproducibility
+  export     esmf='n' # ESMF coupling
+# export   filter='PR3 ST2 UQ'
+                      # The filter does a set of consecutinve greps on the 
+                      # command lines generated by filter.base with the above
+                      # selected options.
+
+# --------------------------------------------------------------------------- #
+# 2.  Execute matrix.base ...                                                 #
+# --------------------------------------------------------------------------- #
+             
+  $main_dir/../regtests/bin/matrix.base
+
+  $main_dir/../regtests/bin/matrix_divider_p.sh
+
+
+  echo "#submit all of the diveded matrix files" > msuball.sh
+    files=`ls matrix? matrix??`
+    for file in $files
+    do
+      echo "qsub $file"  >> msuball.sh
+    done
+
+# --------------------------------------------------------------------------- #
+# End to the matrix                                                           #
+# --------------------------------------------------------------------------- #
