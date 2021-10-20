@@ -7,7 +7,7 @@
 !/                  |           M. Accensi              |
 !/                  |                                   |
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         22-Mar-2021 |
+!/                  | Last update :         15-May-2018 |
 !/                  +-----------------------------------+
 !/
 !/    For updates see subroutines.
@@ -28,7 +28,6 @@
     INTEGER                     :: IOSTYP
     CHARACTER(15)               :: START
     CHARACTER(15)               :: STOP
-    CHARACTER(1)                :: OUTFFILE
   END TYPE NML_DOMAIN_T
 
 
@@ -38,8 +37,6 @@
     CHARACTER(13)               :: WATER_LEVELS
     CHARACTER(13)               :: CURRENTS
     CHARACTER(13)               :: WINDS
-    CHARACTER(13)               :: ATM_MOMENTUM
-    CHARACTER(13)               :: AIR_DENSITY
     CHARACTER(13)               :: ICE_CONC
     CHARACTER(13)               :: ICE_PARAM1
     CHARACTER(13)               :: ICE_PARAM2
@@ -49,6 +46,8 @@
     CHARACTER(13)               :: MUD_DENSITY
     CHARACTER(13)               :: MUD_THICKNESS
     CHARACTER(13)               :: MUD_VISCOSITY
+    CHARACTER(13)               :: VEG_PARAMS
+    CHARACTER(13)               :: VEG_CDRAG
   END TYPE NML_FORCING_T
 !
   TYPE NML_ASSIM_T
@@ -88,12 +87,7 @@
 !/COU  TYPE NML_COUPLING_T
 !/COU    CHARACTER(1024)             :: SENT
 !/COU    CHARACTER(1024)             :: RECEIVED
-!/COU    LOGICAL                     :: COUPLET0
 !/COU  END TYPE NML_COUPLING_T
-!
-  TYPE NML_RESTART_T
-    CHARACTER(1024)             :: EXTRA
-  END TYPE NML_RESTART_T
 !
   TYPE NML_OUTPUT_TYPE_T
     TYPE(NML_POINT_T)               :: POINT
@@ -101,7 +95,6 @@
     TYPE(NML_TRACK_T)               :: TRACK
     TYPE(NML_PARTITION_T)           :: PARTITION
 !/COU    TYPE(NML_COUPLING_T)           :: COUPLING
-    TYPE(NML_RESTART_T)             :: RESTART
   END TYPE NML_OUTPUT_TYPE_T
 
 
@@ -111,7 +104,6 @@
     CHARACTER(15)               :: START
     CHARACTER(15)               :: STRIDE
     CHARACTER(15)               :: STOP
-    CHARACTER(15)               :: OUTFFILE
   END TYPE NML_OUTPUT_TIME_T
 !
   TYPE NML_OUTPUT_DATE_T
@@ -119,7 +111,6 @@
     TYPE(NML_OUTPUT_TIME_T)         :: POINT
     TYPE(NML_OUTPUT_TIME_T)         :: TRACK
     TYPE(NML_OUTPUT_TIME_T)         :: RESTART
-    TYPE(NML_OUTPUT_TIME_T)         :: RESTART2
     TYPE(NML_OUTPUT_TIME_T)         :: BOUNDARY
     TYPE(NML_OUTPUT_TIME_T)         :: PARTITION
     TYPE(NML_OUTPUT_TIME_T)         :: COUPLING
@@ -140,9 +131,9 @@
     INTEGER                     :: N_CUR
     INTEGER                     :: N_WND
     INTEGER                     :: N_ICE
-    INTEGER                     :: N_TAU
-    INTEGER                     :: N_RHO
     INTEGER                     :: N_MOV
+    INTEGER                     :: N_VG1
+    INTEGER                     :: N_VG2
     INTEGER                     :: N_TOT
   END TYPE NML_HOMOG_COUNT_T
 !
@@ -439,7 +430,7 @@
 !/                  |           M. Accensi              |
 !/                  |                                   |
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         22-Mar-2021 |
+!/                  | Last update :         18-Apr-2018 |
 !/                  +-----------------------------------+
 !/
 !/
@@ -513,8 +504,6 @@
     INPUT%FORCING%WATER_LEVELS  = 'F'
     INPUT%FORCING%CURRENTS      = 'F'
     INPUT%FORCING%WINDS         = 'F'
-    INPUT%FORCING%ATM_MOMENTUM  = 'F'
-    INPUT%FORCING%AIR_DENSITY   = 'F'
     INPUT%FORCING%ICE_CONC      = 'F'
     INPUT%FORCING%ICE_PARAM1    = 'F'
     INPUT%FORCING%ICE_PARAM2    = 'F'
@@ -524,6 +513,8 @@
     INPUT%FORCING%MUD_DENSITY   = 'F'
     INPUT%FORCING%MUD_THICKNESS = 'F'
     INPUT%FORCING%MUD_VISCOSITY = 'F'
+    INPUT%FORCING%VEG_PARAMS    = 'F'
+    INPUT%FORCING%VEG_CDRAG     = 'F'
     INPUT%ASSIM%MEAN            = 'F'
     INPUT%ASSIM%SPEC1D          = 'F'
     INPUT%ASSIM%SPEC2D          = 'F'
@@ -559,7 +550,7 @@
 !/                  |           M. Accensi              |
 !/                  |                                   |
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         25-Sep-2020 |
+!/                  | Last update :         18-Apr-2018 |
 !/                  +-----------------------------------+
 !/
 !/
@@ -641,8 +632,6 @@
     TYPE%PARTITION%FORMAT = .TRUE.
 !/COU    TYPE%COUPLING%SENT      = 'unset'
 !/COU    TYPE%COUPLING%RECEIVED  = 'unset'
-!/COU    TYPE%COUPLING%COUPLET0  = .FALSE.
-    TYPE%RESTART%EXTRA = 'unset'
 
 
     ! read output type namelist
@@ -749,8 +738,6 @@
     DATE%FIELD%START = '19680606 000000'
     DATE%FIELD%STRIDE = '0'
     DATE%FIELD%STOP = '19680607 000000'
-    DATE%FIELD%OUTFFILE = '0'
-    DATE%POINT%OUTFFILE = '0'
     DATE%POINT%START = '19680606 000000'
     DATE%POINT%STRIDE = '0'
     DATE%POINT%STOP = '19680607 000000'
@@ -760,9 +747,6 @@
     DATE%RESTART%START = '19680606 000000'
     DATE%RESTART%STRIDE = '0'
     DATE%RESTART%STOP = '19680607 000000'
-    DATE%RESTART2%START = '19680606 000000'
-    DATE%RESTART2%STRIDE = '0'
-    DATE%RESTART2%STOP = '19680607 000000'
     DATE%BOUNDARY%START = '19680606 000000'
     DATE%BOUNDARY%STRIDE = '0'
     DATE%BOUNDARY%STOP = '19680607 000000'
@@ -805,7 +789,7 @@
 !/                  |           M. Accensi              |
 !/                  |                                   |
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         22-Mar-2021 |
+!/                  | Last update :         18-Apr-2018 |
 !/                  +-----------------------------------+
 !/
 !/
@@ -891,9 +875,9 @@
     HOMOG_COUNT%N_CUR   = 0
     HOMOG_COUNT%N_WND   = 0
     HOMOG_COUNT%N_ICE   = 0
-    HOMOG_COUNT%N_TAU   = 0
-    HOMOG_COUNT%N_RHO   = 0
     HOMOG_COUNT%N_MOV   = 0
+    HOMOG_COUNT%N_VG1   = 0
+    HOMOG_COUNT%N_VG2   = 0
     HOMOG_COUNT%N_TOT   = 0
 
 
@@ -910,7 +894,7 @@
     ! allocate the total count of homogeneous input
     HOMOG_COUNT%N_TOT = HOMOG_COUNT%N_IC1 + HOMOG_COUNT%N_IC2 + HOMOG_COUNT%N_IC3 + HOMOG_COUNT%N_IC4 + HOMOG_COUNT%N_IC5 + &
                         HOMOG_COUNT%N_MDN + HOMOG_COUNT%N_MTH + HOMOG_COUNT%N_MVS + HOMOG_COUNT%N_LEV + HOMOG_COUNT%N_CUR + &
-                        HOMOG_COUNT%N_WND + HOMOG_COUNT%N_ICE + HOMOG_COUNT%N_TAU + HOMOG_COUNT%N_RHO + HOMOG_COUNT%N_MOV
+                        HOMOG_COUNT%N_WND + HOMOG_COUNT%N_ICE + HOMOG_COUNT%N_MOV + HOMOG_COUNT%N_VG1 + HOMOG_COUNT%N_VG2
     ALLOCATE(HOMOG_INPUT(HOMOG_COUNT%N_TOT))
     ALLOCATE(NML_HOMOG_INPUT(HOMOG_COUNT%N_TOT))
 
@@ -1047,7 +1031,7 @@
 !/                  |           M. Accensi              |
 !/                  |                                   |
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         22-Mar-2021 |
+!/                  | Last update :         18-Apr-2018 |
 !/                  +-----------------------------------+
 !/
 !/
@@ -1113,8 +1097,6 @@
     WRITE (NDSN,10) TRIM(MSG),'FORCING % WATER_LEVELS   = ', NML_INPUT%FORCING%WATER_LEVELS
     WRITE (NDSN,10) TRIM(MSG),'FORCING % CURRENTS       = ', NML_INPUT%FORCING%CURRENTS
     WRITE (NDSN,10) TRIM(MSG),'FORCING % WINDS          = ', NML_INPUT%FORCING%WINDS
-    WRITE (NDSN,10) TRIM(MSG),'FORCING % ATM_MOMENTUM   = ', NML_INPUT%FORCING%ATM_MOMENTUM
-    WRITE (NDSN,10) TRIM(MSG),'FORCING % AIR_DENSITY    = ', NML_INPUT%FORCING%AIR_DENSITY
     WRITE (NDSN,10) TRIM(MSG),'FORCING % ICE_CONC       = ', NML_INPUT%FORCING%ICE_CONC
     WRITE (NDSN,10) TRIM(MSG),'FORCING % ICE_PARAM1     = ', NML_INPUT%FORCING%ICE_PARAM1
     WRITE (NDSN,10) TRIM(MSG),'FORCING % ICE_PARAM2     = ', NML_INPUT%FORCING%ICE_PARAM2
@@ -1124,6 +1106,8 @@
     WRITE (NDSN,10) TRIM(MSG),'FORCING % MUD_DENSITY    = ', NML_INPUT%FORCING%MUD_DENSITY
     WRITE (NDSN,10) TRIM(MSG),'FORCING % MUD_THICKNESS  = ', NML_INPUT%FORCING%MUD_THICKNESS
     WRITE (NDSN,10) TRIM(MSG),'FORCING % MUD_VISCOSITY  = ', NML_INPUT%FORCING%MUD_VISCOSITY
+    WRITE (NDSN,10) TRIM(MSG),'FORCING % VEG_PARAMS     = ', NML_INPUT%FORCING%VEG_PARAMS
+    WRITE (NDSN,10) TRIM(MSG),'FORCING % VEG_CDRAG      = ', NML_INPUT%FORCING%VEG_CDRAG
     WRITE (NDSN,10) TRIM(MSG),'ASSIM % MEAN             = ', NML_INPUT%ASSIM%MEAN
     WRITE (NDSN,10) TRIM(MSG),'ASSIM % SPEC1D           = ', NML_INPUT%ASSIM%SPEC1D
     WRITE (NDSN,10) TRIM(MSG),'ASSIM % SPEC2D           = ', NML_INPUT%ASSIM%SPEC2D
@@ -1150,7 +1134,7 @@
 !/                  |           M. Accensi              |
 !/                  |                                   |
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         25-Sep-2020 |
+!/                  | Last update :         18-Apr-2018 |
 !/                  +-----------------------------------+
 !/
 !/
@@ -1225,8 +1209,6 @@
     WRITE (NDSN,13) TRIM(MSG),'PARTITION % FORMAT   = ', NML_OUTPUT_TYPE%PARTITION%FORMAT
 !/COU    WRITE (NDSN,10) TRIM(MSG),'COUPLING % SENT         = ', TRIM(NML_OUTPUT_TYPE%COUPLING%SENT)
 !/COU    WRITE (NDSN,10) TRIM(MSG),'COUPLING % RECEIVED     = ', TRIM(NML_OUTPUT_TYPE%COUPLING%RECEIVED)
-!/COU    WRITE (NDSN,13) TRIM(MSG),'COUPLING % COUPLET0     = ', NML_OUTPUT_TYPE%COUPLING%COUPLET0
-    WRITE (NDSN,10) TRIM(MSG),'RESTART % EXTRA      = ', TRIM(NML_OUTPUT_TYPE%RESTART%EXTRA)
 
 10  FORMAT (A,2X,A,A)
 11  FORMAT (A,2X,A,I8)
@@ -1325,9 +1307,6 @@
     WRITE (NDSN,10) TRIM(MSG),'RESTART % START      = ', TRIM(NML_OUTPUT_DATE%RESTART%START)
     WRITE (NDSN,10) TRIM(MSG),'RESTART % STRIDE     = ', TRIM(NML_OUTPUT_DATE%RESTART%STRIDE)
     WRITE (NDSN,10) TRIM(MSG),'RESTART % STOP       = ', TRIM(NML_OUTPUT_DATE%RESTART%STOP)
-    WRITE (NDSN,10) TRIM(MSG),'RESTART2 % START      = ', TRIM(NML_OUTPUT_DATE%RESTART2%START)
-    WRITE (NDSN,10) TRIM(MSG),'RESTART2 % STRIDE     = ', TRIM(NML_OUTPUT_DATE%RESTART2%STRIDE)
-    WRITE (NDSN,10) TRIM(MSG),'RESTART2 % STOP       = ', TRIM(NML_OUTPUT_DATE%RESTART2%STOP)
     WRITE (NDSN,10) TRIM(MSG),'BOUNDARY % START     = ', TRIM(NML_OUTPUT_DATE%BOUNDARY%START)
     WRITE (NDSN,10) TRIM(MSG),'BOUNDARY % STRIDE    = ', TRIM(NML_OUTPUT_DATE%BOUNDARY%STRIDE)
     WRITE (NDSN,10) TRIM(MSG),'BOUNDARY % STOP      = ', TRIM(NML_OUTPUT_DATE%BOUNDARY%STOP)
@@ -1359,7 +1338,7 @@
 !/                  |           M. Accensi              |
 !/                  |                                   |
 !/                  |                        FORTRAN 90 |
-!/                  | Last update :         22-Mar-2021 |
+!/                  | Last update :         18-Apr-2018 |
 !/                  +-----------------------------------+
 !/
 !/
@@ -1437,9 +1416,9 @@
     WRITE (NDSN,11) TRIM(MSG),'N_CUR       = ', NML_HOMOG_COUNT%N_CUR
     WRITE (NDSN,11) TRIM(MSG),'N_WND       = ', NML_HOMOG_COUNT%N_WND
     WRITE (NDSN,11) TRIM(MSG),'N_ICE       = ', NML_HOMOG_COUNT%N_ICE
-    WRITE (NDSN,11) TRIM(MSG),'N_TAU       = ', NML_HOMOG_COUNT%N_TAU
-    WRITE (NDSN,11) TRIM(MSG),'N_RHO       = ', NML_HOMOG_COUNT%N_RHO
     WRITE (NDSN,11) TRIM(MSG),'N_MOV       = ', NML_HOMOG_COUNT%N_MOV
+    WRITE (NDSN,11) TRIM(MSG),'N_VG1       = ', NML_HOMOG_COUNT%N_VG1
+    WRITE (NDSN,11) TRIM(MSG),'N_VG2       = ', NML_HOMOG_COUNT%N_VG2
 
     IF (NML_HOMOG_COUNT%N_TOT .NE. 0) THEN
       DO I=1,NML_HOMOG_COUNT%N_TOT
