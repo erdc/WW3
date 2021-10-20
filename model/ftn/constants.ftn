@@ -98,10 +98,8 @@
       INTEGER, PARAMETER       :: srce_imp_pre = 2
       INTEGER, PARAMETER       :: DEBUG_NODE = 1014
       INTEGER, PARAMETER       :: DEBUG_ELEMENT = 50
-
-!AR: Will be removed from here need to see with H and A
-      LOGICAL                  :: LPDLIB      = .FALSE. 
-      LOGICAL                  :: LSETUP      = .FALSE. 
+      LOGICAL                  :: LPDLIB = .FALSE. 
+      LOGICAL                  :: LSETUP
 !
 ! Parameters in support of running as ESMF component
 !
