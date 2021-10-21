@@ -2037,7 +2037,7 @@
                              IERR, FLAGSC(J) )
               END IF
 ! IC1 : (in context of IC3 & IC2, this is ice thickness)
-            IF ( J .EQ. -7 ) THEN
+            ELSE IF ( J .EQ. -7 ) THEN
               IF ( FLH(J) ) THEN
                 CALL W3FLDH (J, NDST, NDSEN, NX, NY, NX, NY,    &
                              TIME0, TIMEN, NH(J), NHMAX, THO, HA, HD, HS,&

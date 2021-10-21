@@ -572,7 +572,8 @@
                                  IFL, NBOTOT, NPO, IP, IX1, IX2, IY1, &
                                  IY2, J, JJ, IXR(4), IYR(4), ISEAI(4),&
                                  IST, NKI, NTHI, NRIC, NRIS, I, IDFT, &
-                                 NSTAT, NBT, NLAND, NOSW, NMAPB, IMAPB
+                                 NSTAT, NBT, NLAND, NOSW, NMAPB, IMAPB,&
+                                 NRVG
 !/NL2      INTEGER            :: IDEPTH
 !/O1      INTEGER             :: IBI, IP0, IPN, IPH, IPI
       INTEGER                 :: NCOL =  78
@@ -657,7 +658,7 @@
       LOGICAL                 :: FLLIN, FLINDS, FLNL, FLBT, FLDB,     &
                                  FLTR, FLBS, FLPROP, FLREF,     &
                                  FIRST, CONNCT, FLNEW, INGRID,FLIC,   &
-                                 FLIS, FLGNML
+                                 FLIS, FLGNML, FLVG
       LOGICAL                 :: FLTC96 = .FALSE.
       LOGICAL                 :: FLNMLO = .FALSE.
       LOGICAL                 :: FLSTB2 = .FALSE.

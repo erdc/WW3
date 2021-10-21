@@ -270,7 +270,7 @@
       CHARACTER               :: COMSTR*1, IDFLD*3, IDTYPE*2,         &
                                  IDTIME*23, FROMLL*4, FORMLL*16,      &
                                  NAMELL*80, NAMEF*80, IDTIME2*23
-      CHARACTER*14            :: IDSTR1(-7:7)
+      CHARACTER*14            :: IDSTR1(-9:7)
       CHARACTER*15            :: IDSTR3(3)
       CHARACTER*32            :: FORMT(2), FORMF(2)
       CHARACTER*20            :: IDSTR2(6)
@@ -427,7 +427,7 @@
            IDFLD = 'VG2'
            IFLD = -8
            NFIELDS = 1
-         IF      (NML_FORCING%FIELD%ICE_PARAM1) THEN
+         ELSE IF (NML_FORCING%FIELD%ICE_PARAM1) THEN
            IDFLD = 'IC1'
            IFLD = -7
            NFIELDS = 1
@@ -1867,8 +1867,7 @@
 ! ... One-component fields
 !
 !/O3           IF ( IAPROC .EQ. NAPOUT )  WRITE (NDSO,976) ' '
-            IF (( IFLD.GT.-9 .AND. IFLD.LE.2 .OR. IFLD.EQ.7).AND.( .NOT. FLBERG ))
-THEN
+            IF (( IFLD.GT.-9 .AND. IFLD.LE.2 .OR. IFLD.EQ.7).AND.( .NOT. FLBERG )) THEN
 !
                 CALL INTERP(MXM, MYM, XC, IX21, IX22, IY21, IY22,      &
                                RD11, RD12, RD21, RD22, FILLVALUE, FA)
