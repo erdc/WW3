@@ -470,7 +470,6 @@
 !     !/MLIM  Mich-style limiter.
 !
 !     !/VEG0   No dissipation by vegetation included.
-!     !/VEGX   Open slot.
 !
 !     !/TR0   No triad interactions included.
 !
@@ -1256,7 +1255,6 @@
 !/VEG0      NRVG   = NRVG + 1
 !/VEG0      FLVG   = .FALSE.
 !/VEG1      NRVG   = NRVG + 1
-!/VEGX      NRVG   = NRVG + 1
 !
 !/TR0      NRTR   = NRTR + 1
 !/TR0      FLTR   = .FALSE.
@@ -1979,7 +1977,6 @@
 !
 ! 6.k Define Sveg.
 !/VEG0      WRITE (NDSO,933)
-!/VEGX      WRITE (NDSO,933)
 !
 ! 6.l Define Sxx and Sic.
 !
@@ -5772,7 +5769,6 @@
 !/DB1               ', BJFLAG = ',A,' /')
 !
 !/VEG0  933 FORMAT (/'  dissipation by vegetation not defined.'/)
-!/VEGX  933 FORMAT (/'  Experimental dissipation by vegetation.'/)
 !
 !/TR0  930 FORMAT (/'  Triad interactions not defined.'/)
 !
