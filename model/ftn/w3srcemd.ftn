@@ -333,6 +333,9 @@
 !     !/DB0   No depth-limited breaking.                 ( Choose one )
 !     !/DB1   Battjes-Janssen depth-limited breaking.
 !
+!     !/VEG0  No vegetation dissipation                  ( Choose one )
+!     !/VEG1  Dissipation due to vegetation
+!
 !     !/TR0   No triad interactions.                     ( Choose one )
 !     !/TR1   Lumped Triad Approximation (LTA).
 !
@@ -408,6 +411,7 @@
 !/IS2      USE W3SIS2MD
 !/IS2      USE W3GDATMD, ONLY : IS2PARS
 !/DB1      USE W3SDB1MD
+!/VEG1     USE W3SVEG1MD
 !/TR1      USE W3STR1MD
 !/BS1      USE W3SBS1MD
 !/REF1     USE W3REF1MD
@@ -496,6 +500,7 @@
 !/IC4                                 VSIC(NSPEC), VDIC(NSPEC),            &
 !/IC5                                 VSIC(NSPEC), VDIC(NSPEC),            &
 !/DB1                                 VSDB(NSPEC), VDDB(NSPEC),            &
+!/VEG1                                VSVG(NSPEC), VDVG(NSPEC),            &
 !/TR1                                 VSTR(NSPEC), VDTR(NSPEC),            &
 !/BS1                                 VSBS(NSPEC), VDBS(NSPEC),            &
 !/REF1                                VREF(NSPEC),                         &
@@ -559,6 +564,8 @@
       VDBT = 0.
 !/DB1      VSDB = 0.
 !/DB1      VDDB = 0.
+!/VEG1      VSVG = 0.
+!/VEG1      VDVG = 0.
 !/IC1      VSIC = 0.
 !/IC1      VDIC = 0.
 !/IC2      VSIC = 0.
@@ -864,6 +871,11 @@
 !/BS1                           TAUSCX, TAUSCY, VSBS, VDBS )
 !/PDLIB      ENDIF
 !
+!
+! 2.d2 Vegetation 
+!/VEG1     CALL W3SVEG1 ( IX, IY, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG )
+!
+!
 ! 2.e Unresolved Obstacles Source Term
 !
 !/UOST        ! UNRESOLVED OBSTACLES
@@ -932,12 +944,14 @@
 !/ST6          VS(IS) = VS(IS) + VSWL(IS)
 !/TR1          VS(IS) = VS(IS) + VSTR(IS)
 !/BS1          VS(IS) = VS(IS) + VSBS(IS)
+!/VEG1         VS(IS) = VS(IS) + VSVG(IS)
 !/UOST         VS(IS) = VS(IS) + VSUO(IS)
           VD(IS) =  VDIN(IS) + VDNL(IS)  &
                  + VDDS(IS) + VDBT(IS)
 !/ST6          VD(IS) = VD(IS) + VDWL(IS)
 !/TR1          VD(IS) = VD(IS) + VDTR(IS)
 !/BS1          VD(IS) = VD(IS) + VDBS(IS)
+!/VEG1         VD(IS) = VD(IS) + VDVG(IS)
 !/UOST         VD(IS) = VD(IS) + VDUO(IS)
           DAMAX  = MIN ( DAM(IS) , MAX ( XREL*SPECINIT(IS) , AFILT ) )
           AFAC   = 1. / MAX( 1.E-10 , ABS(VS(IS)/DAMAX) )
@@ -989,6 +1003,7 @@
 !/DEBUGSRC!/ST6          WRITE(740+IAPROC,*) 'min/max/sum(VDWL)=', minval(VDWL), maxval(VDWL), sum(VDWL)
 !/DEBUGSRC!/DB1          WRITE(740+IAPROC,*) 'min/max/sum(VSDB)=', minval(VSDB), maxval(VSDB), sum(VSDB)
 !/DEBUGSRC!/DB1          WRITE(740+IAPROC,*) 'min/max/sum(VDDB)=', minval(VDDB), maxval(VDDB), sum(VDDB)
+!/DEBUGSRC!/VEG1         WRITE(740+IAPROC,*) 'min/max/sum(VSVG)=', minval(VSVG), maxval(VSVG), sum(VSVG)
 !/DEBUGSRC!/TR1          WRITE(740+IAPROC,*) 'min/max/sum(VSTR)=', minval(VSTR), maxval(VSTR), sum(VSTR)
 !/DEBUGSRC!/TR1          WRITE(740+IAPROC,*) 'min/max/sum(VDTR)=', minval(VDTR), maxval(VDTR), sum(VDTR)
 !/DEBUGSRC!/BS1          WRITE(740+IAPROC,*) 'min/max/sum(VSBS)=', minval(VSBS), maxval(VSBS), sum(VSBS)
