@@ -8,7 +8,7 @@
 curr_dir=`pwd`
 
 # Set WW3 code version
-ww3ver=v7.12.6
+ww3ver=v7.13
 
 #Get top level directory of ww3 from user: 
 echo -e "\n\n This script will download data from the ftp for WAVEWATCH III "
@@ -52,6 +52,8 @@ cp -r data_regtests/ww3_tp2.14/input/toy/toy_coupled_field.nc.OASACM regtests/ww
 cp -r data_regtests/ww3_tp2.14/input/toy/toy_coupled_field.nc.OASACM regtests/ww3_tp2.14/input/toy/toy_coupled_field.nc.OASACM6
 cp -r data_regtests/ww3_tp2.14/input/toy/*.nc regtests/ww3_tp2.14/input/toy/
 cp -r data_regtests/ww3_tp2.17/input/*     regtests/ww3_tp2.17/input/
+cp -r data_regtests/ww3_tp2.20/input regtests/ww3_tp2.20/
+cp -r data_regtests/ww3_tp2.20/input_spatial regtests/ww3_tp2.20/
 cp -r data_regtests/ww3_tp2.21/input/*     regtests/ww3_tp2.21/input/
 cp -r data_regtests/mww3_test_09/input/*   regtests/mww3_test_09/input/
 cp -r data_regtests/ww3_ufs1.1/input/*     regtests/ww3_ufs1.1/input/
