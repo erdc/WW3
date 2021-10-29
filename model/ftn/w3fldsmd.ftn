@@ -250,7 +250,8 @@
         END IF
 
       IF (INXOUT.NE.'READ' .AND. INXOUT.NE.'WRITE') GOTO 801
-      IF ( IDFLD.NE.'IC1' .AND. IDFLD.NE.'IC2' .AND.                  &
+      IF ( IDFLD.NE.'VG1' .AND. IDFLD.NE.'VG2' .AND.                  &
+           IDFLD.NE.'IC1' .AND. IDFLD.NE.'IC2' .AND.                  &
            IDFLD.NE.'IC3' .AND. IDFLD.NE.'IC4' .AND.                  &
            IDFLD.NE.'IC5' .AND. IDFLD.NE.'MDN' .AND.                  &
            IDFLD.NE.'MTH' .AND. IDFLD.NE.'MVS' .AND.                  &
@@ -2142,9 +2143,9 @@
 !/
       INTEGER, INTENT(IN)     :: J, NDST, NDSE, MX, MY, NX, NY,       &
                                  T0(2), TN(2), NHM
-      INTEGER, INTENT(INOUT)  :: NH, THO(2,-7:10,NHM), TF0(2), TFN(2)
+      INTEGER, INTENT(INOUT)  :: NH, THO(2,-9:10,NHM), TF0(2), TFN(2)
       INTEGER, INTENT(OUT)    :: IERR
-      REAL, INTENT(INOUT)     :: HA(NHM,-7:10), HD(NHM,-7:10), HS(NHM,-7:10), &
+      REAL, INTENT(INOUT)     :: HA(NHM,-9:10), HD(NHM,-9:10), HS(NHM,-9:10), &
                                  FX0(MX,MY), FY0(MX,MY), FS0(MX,MY),  &
                                  FXN(MX,MY), FYN(MX,MY), FSN(MX,MY)
 !/
@@ -2170,7 +2171,7 @@
 !
 ! Test field ID number for validity
 !
-      IF ( J.LT.-7 .OR. J .GT.10 ) GOTO 801
+      IF ( J.LT.-9 .OR. J .GT.10 ) GOTO 801
       FLFRST = TFN(1) .EQ. -1
 !
 !/T      WRITE (NDST,9001) FLFRST
@@ -2247,6 +2248,16 @@
                   END DO
 !/T                WRITE (NDST,9050) X, Y, HS(1,J)
               END IF
+! veg
+            IF ( J .EQ. -9 ) THEN
+               DO IX = 1, NX
+                 DO IY = 1, NY
+                   FXN(IX,IY) = HA(1,J)
+                   FYN(IX,IY) = HD(1,J)
+                   FSN(IX,IY) = HS(1,J)
+                 END DO
+               END DO
+            END IF
 !
 ! Shift data arrays
 !
@@ -2435,9 +2446,9 @@
 !/ Parameter list
 !/
       INTEGER, INTENT(IN)     :: J, NDST, NDSE, T0(2), TN(2), NHM
-      INTEGER, INTENT(INOUT)  :: NH, THO(2,-7:10,NHM), TF0(2), TFN(2)
+      INTEGER, INTENT(INOUT)  :: NH, THO(2,-9:10,NHM), TF0(2), TFN(2)
       INTEGER, INTENT(OUT)    :: IERR
-      REAL, INTENT(INOUT)     :: HA(NHM,-7:10), HD(NHM,-7:10), A0, AN, D0, DN
+      REAL, INTENT(INOUT)     :: HA(NHM,-9:10), HD(NHM,-9:10), A0, AN, D0, DN
 !/
 !/ ------------------------------------------------------------------- /
 !/ Local parameters

@@ -1116,7 +1116,7 @@
 
 ! 2.1 forcing flags
 
-        FLH(-7:10) = .FALSE.
+        FLH(-9:10) = .FALSE.
         DO J=JFIRST, 9
           CALL NEXTLN ( COMSTR , NDSI , NDSEN )
           IF ( J .LE. 6 ) THEN
