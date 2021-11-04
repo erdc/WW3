@@ -1846,7 +1846,7 @@
               END DO
             END DO
 
-            IF (( IFLD.LE.2 .OR. IFLD.EQ.7 ).AND.( .NOT. FLBERG )) THEN
+            IF (( IFLD.GT.-9 .AND. IFLD.LE.2 .OR. IFLD.EQ.7 ).AND.( .NOT. FLBERG )) THEN
                 DO IY=1, NY
                   DO IX=1, NX
                     FA(IX,IY) = XC(IX,IY)

@@ -1093,7 +1093,8 @@
 ! test input parameters ---------------------------------------------- *
 !
       IF (INXOUT.NE.'READ' .AND. INXOUT.NE.'WRITE') GOTO 801
-      IF ( IDFLD.NE.'IC1' .AND. IDFLD.NE.'IC2' .AND.                  & 
+      IF ( IDFLD.NE.'VG1' .AND. IDFLD.NE.'VG2' .AND.                  &
+           IDFLD.NE.'IC1' .AND. IDFLD.NE.'IC2' .AND.                  & 
            IDFLD.NE.'IC3' .AND. IDFLD.NE.'IC4' .AND.                  &
            IDFLD.NE.'IC5' .AND. IDFLD.NE.'MDN' .AND.                  &
            IDFLD.NE.'MTH' .AND. IDFLD.NE.'MVS' .AND.                  &
