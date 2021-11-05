@@ -1189,6 +1189,7 @@
       NRDB   = 0
       NRTR   = 0
       NRBS   = 0
+      NRVG   = 0
 !
       FLLIN  = .TRUE.
       FLINDS = .TRUE.
@@ -1200,6 +1201,7 @@
       FLTR   = .TRUE.
       FLBS   = .TRUE.
       FLREF  = .FALSE.
+      FLVG   = .TRUE.
 !
 !/LN0      NRLIN  = NRLIN + 1
 !/LN0      FLLIN  = .FALSE.
@@ -1269,13 +1271,13 @@
       IF ( .NOT.FLLIN .AND.  .NOT.FLINDS .AND.  .NOT.FLNL .AND.        &
            .NOT.FLBT  .AND.  .NOT.FLIC   .AND.  .NOT.FLIS .AND.        &
            .NOT.FLDB  .AND.  .NOT.FLTR   .AND.  .NOT.FLBS .AND.        &
-           .NOT.FLREF .AND.  .NOT.FLSOU  .AND.  .NOT.FLVG) THEN
+           .NOT.FLREF .AND.  .NOT.FLVG  .AND.  FLSOU) THEN
           WRITE (NDSE,1020)
           CALL EXTCDE ( 10 )
         END IF
 !
       IF ( ( FLLIN .OR. FLINDS .OR. FLNL .OR. FLBT .OR. FLDB .OR.     &
-             FLTR .OR. FLBS .OR. FLREF .OR. FLIC )          &
+             FLTR .OR. FLBS .OR. FLREF .OR. FLIC .OR. FLVG )          &
              .AND. .NOT.FLSOU ) THEN
           WRITE (NDSE,1021)
         END IF
