@@ -2030,9 +2030,11 @@
    echo "$rtst -w work_veg0   -i input_Veg0   -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20"                     >> matrix.body
    echo "$rtst -w work_Medium -i input_Medium -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20"                     >> matrix.body
    echo "$rtst -w work_High   -i input_High   -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20"                     >> matrix.body
+   echo "$rtst -w work_High_multi -i input_High -m grdset_a -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20"       >> matrix.body
    echo "$rtst -w work_Spatial_veg0   -i input_Spatial_Veg0   -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20"     >> matrix.body
    echo "$rtst -w work_Spatial_Medium -i input_Spatial_Medium -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20"     >> matrix.body
    echo "$rtst -w work_Spatial_High   -i input_Spatial_High   -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20"     >> matrix.body
+   echo "$rtst -w work_Spatial_High_multi -i input_Spatial_High -m grdset_a -f -p $mpi -n $np -o netcdf $ww3 ww3_tp2.20"  >> matrix.body
  fi
 
 
