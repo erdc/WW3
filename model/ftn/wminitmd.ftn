@@ -419,13 +419,13 @@
 !/MPRF      REAL(KIND=8)            :: get_memory
       REAL, ALLOCATABLE       :: X(:), Y(:), AMOVE(:), DMOVE(:),      &
                                  RP1(:), RPN(:)
-      LOGICAL                 :: FLT, TFLAGI, TFLAGS(-7:14), PSHARE
+      LOGICAL                 :: FLT, TFLAGI, TFLAGS(-9:14), PSHARE
       LOGICAL, ALLOCATABLE    :: FLGRD(:,:,:), FLRBPI(:), BCDTMP(:),   &
                                  USEINP(:), LPRT(:), FLGR2(:,:,:),     &
                                  FLGD(:,:), FLG2(:,:), FLG2D(:,:),     &
                                  FLG1D(:), CPLINP(:)
       CHARACTER(LEN=1)        :: COMSTR
-      CHARACTER(LEN=3)        :: IDSTR(9), IDTST
+      CHARACTER(LEN=3)        :: IDSTR(10), IDTST
       CHARACTER(LEN=5)        :: STOUT, OUTSTR(6)
       CHARACTER(LEN=6)        :: ACTION(11), YESXX, XXXNO
       CHARACTER(LEN=8)        :: LFILE, STTIME
@@ -440,7 +440,7 @@
 !/DIST      CHARACTER(LEN=18)       :: TFILE
 !/MPRF      CHARACTER(LEN=18)       :: PFILE
 
-      CHARACTER(LEN=13)       :: IDFLDS(-7:9)
+      CHARACTER(LEN=13)       :: IDFLDS(-9:9)
       CHARACTER(LEN=23)       :: DTME21
       CHARACTER(LEN=30)       :: IDOTYP(8)
       CHARACTER(LEN=80)       :: TNAME
@@ -459,7 +459,8 @@
 !/ ------------------------------------------------------------------- /
 !/
 
-      DATA IDFLDS / 'ice param. 1 ' , 'ice param. 2 ' ,               &
+      DATA IDFLDS / 'veg param. 1 ' , 'veg param. 2 ' ,               &
+                    'ice param. 1 ' , 'ice param. 2 ' ,               &
                     'ice param. 3 ' , 'ice param. 4 ' ,               &
                     'ice param. 5 ' ,                                 &
                     'mud density  ' , 'mud thkness  ' ,               &
@@ -479,7 +480,7 @@
                     'Fields for coupling           ' ,                &
                     'Restart files second request  '/
 !
-      DATA IDSTR  / 'LEV', 'CUR', 'WND', 'ICE', 'TAU', 'RHO',         &
+      DATA IDSTR  / 'LEV', 'CUR', 'WND', 'ICE', 'VEG', 'TAU', 'RHO',  &
                     'DT0', 'DT1', 'DT2' /
 !
       DATA YESXX  / 'YES/--' /
@@ -2998,7 +2999,7 @@
  3923 FORMAT ( '  Grids share output procs : ',A)
 !
   924 FORMAT (/'  Input grid information : '/                         &
-               '  nr extension  lev.   cur.   wind   ice    tau',     &
+               '  nr extension  lev.   cur.   wind   ice  veg   tau', &
                '    rho    data'/    &
                ' ----------------------------------------------',     &
                '--------------')
@@ -3012,7 +3013,7 @@
   929 FORMAT ( ' ---------------')
 !
   930 FORMAT (/'  Wave grid information : '/                          &
-               '  nr extension  lev.   cur.   wind   ice    tau',     &
+               '  nr extension  lev.   cur.   wind   ice  veg   tau', &
                '    rho    data   move1 rnk grp dmp'/                 &
                ' ----------------------------------------------',     &
                '-----------------------------------')
@@ -3563,7 +3564,7 @@
       REAL, ALLOCATABLE       :: X(:), Y(:), AMOVE(:), DMOVE(:),       &
                                  RP1(:), RPN(:)
 !
-      LOGICAL                 :: FLT, TFLAGI, TFLAGS(-7:14), PSHARE
+      LOGICAL                 :: FLT, TFLAGI, TFLAGS(-9:14), PSHARE
       LOGICAL, ALLOCATABLE    :: FLGRD(:,:,:), FLRBPI(:), BCDTMP(:),   &
                                  USEINP(:), LPRT(:), FLGR2(:,:,:),     &
                                  FLGD(:,:), FLG2(:,:), FLG2D(:,:),     &
@@ -3571,7 +3572,7 @@
 !
       CHARACTER(LEN=1)        :: COMSTR
       CHARACTER(LEN=256)      :: TMPLINE, TEST
-      CHARACTER(LEN=3)        :: IDSTR(-7:9), IDTST
+      CHARACTER(LEN=3)        :: IDSTR(-9:9), IDTST
       CHARACTER(LEN=5)        :: STOUT, OUTSTR(6)
       CHARACTER(LEN=6)        :: YESXX, XXXNO
       CHARACTER(LEN=6),                                                &
@@ -3587,7 +3588,7 @@
       CHARACTER(LEN=12)       :: FORMAT
 !/DIST      CHARACTER(LEN=18)       :: TFILE
 !/MPRF      CHARACTER(LEN=18)       :: PFILE
-      CHARACTER(LEN=13)       :: IDFLDS(-7:9)
+      CHARACTER(LEN=13)       :: IDFLDS(-9:9)
       CHARACTER(LEN=23)       :: DTME21
       CHARACTER(LEN=30)       :: IDOTYP(8)
       CHARACTER(LEN=80)       :: TNAME, LINE
@@ -3598,7 +3599,8 @@
 !/ ------------------------------------------------------------------- /
 !/
 
-      DATA IDFLDS / 'ice param. 1 ' , 'ice param. 2 ' ,               &
+      DATA IDFLDS / 'veg param. 1 ' , 'veg param. 2 ' ,               &
+                    'ice param. 1 ' , 'ice param. 2 ' ,               &
                     'ice param. 3 ' , 'ice param. 4 ' ,               &
                     'ice param. 5 ' ,                                 &
                     'mud density  ' , 'mud thkness  ' ,               &
@@ -3618,7 +3620,8 @@
                     'Fields for coupling           ' ,                &
                     'Restart files second request  '/
 !
-      DATA IDSTR  / 'IC1', 'IC2', 'IC3', 'IC4', 'IC5',                &
+      DATA IDSTR  / 'VG1', 'VG2', 'IC1', 'IC2', 'IC3',                &
+                    'IC4', 'IC5',                                     &
                     'MDN', 'MTH', 'MVS', 'LEV', 'CUR',                &
                     'WND', 'ICE', 'TAU', 'RHO', 'DT0',                &
                     'DT1', 'DT2' /
@@ -3813,6 +3816,15 @@
       CALL WMNDAT (        MDSE2, MDST ) 
 !
 ! 2.c Set up I/O for individual models (initial)
+!!/IC1      JFIRST=-7
+!!/IC2      JFIRST=-7
+!!/IS2      JFIRST=-7
+!!/IC3      JFIRST=-7
+!!/BT8      JFIRST=-7
+!!/BT9      JFIRST=-7
+!!/IC4      JFIRST=-7
+!!/IC5      JFIRST=-7
+!!/VEG1     JFIRST=-9
 !
       ALLOCATE ( MDS(13,NRGRD), NTRACE(2,NRGRD), ODAT(40,0:NRGRD),    &
            FLGRD(NOGRP,NGRPP,NRGRD), OT2(0:NRGRD), FLGD(NOGRP,NRGRD), &
@@ -3865,7 +3877,7 @@
 !                   sources, and from communication rather than
 !                   files.
 !
-      ALLOCATE ( INAMES(2*NRGRD,-7:9), MNAMES(-NRINP:2*NRGRD),     &
+      ALLOCATE ( INAMES(2*NRGRD,-9:9), MNAMES(-NRINP:2*NRGRD),     &
                  TMPRNK(2*NRGRD), TMPGRP(2*NRGRD), NINGRP(2*NRGRD),    &
                  RP1(2*NRGRD), RPN(2*NRGRD), BCDTMP(NRGRD+1:2*NRGRD))
       ALLOCATE ( GRANK(NRGRD), GRGRP(NRGRD), USEINP(NRINP) )
@@ -3886,6 +3898,8 @@
         CALL W3SETI ( -I, MDSE, MDST )
         INFLAGS1 = .FALSE.
         MNAMES(-I) = NML_INPUT_GRID(I)%NAME 
+        INFLAGS1(-9) = NML_INPUT_GRID(I)%FORCING%VEG_PARAM1
+        INFLAGS1(-8) = NML_INPUT_GRID(I)%FORCING%VEG_PARAM2
         INFLAGS1(-7) = NML_INPUT_GRID(I)%FORCING%ICE_PARAM1
         INFLAGS1(-6) = NML_INPUT_GRID(I)%FORCING%ICE_PARAM2
         INFLAGS1(-5) = NML_INPUT_GRID(I)%FORCING%ICE_PARAM3
@@ -3929,6 +3943,8 @@
 !
       DO I=1,NRGRD
         MNAMES(NRGRD+I) = NML_MODEL_GRID(I)%NAME
+        INAMES(NRGRD+I,-9) = NML_MODEL_GRID(I)%FORCING%VEG_PARAM1
+        INAMES(NRGRD+I,-8) = NML_MODEL_GRID(I)%FORCING%VEG_PARAM2
         INAMES(NRGRD+I,-7) = NML_MODEL_GRID(I)%FORCING%ICE_PARAM1
         INAMES(NRGRD+I,-6) = NML_MODEL_GRID(I)%FORCING%ICE_PARAM2
         INAMES(NRGRD+I,-5) = NML_MODEL_GRID(I)%FORCING%ICE_PARAM3
@@ -5942,7 +5958,7 @@
  3923 FORMAT ( '  Grids share output procs : ',A)
 !
   924 FORMAT (/'  Input grid information : '/                         &
-               '  nr extension  lev.   cur.   wind   ice    tau',     &
+               '  nr extension  lev.   cur.   wind   ice  veg   tau', &
                '    rho    data'/    &
                ' ----------------------------------------------',     &
                '---------------')
@@ -5956,7 +5972,7 @@
   929 FORMAT ( ' ---------------')
 !
   930 FORMAT (/'  Wave grid information : '/                          &
-               '  nr extension  lev.   cur.   wind   ice    tau',     &
+               '  nr extension  lev.   cur.   wind   ice  veg  tau',  &
                '    rho    data   move1 rnk grp dmp'/                 &
                ' -----------------------------------------------',    &
                '-----------------------------------')

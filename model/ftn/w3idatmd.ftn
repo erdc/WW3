@@ -154,7 +154,7 @@
 !/ Data structure INPUT
 !/
       TYPE INPUT
-        INTEGER               :: TFN(2,-7:10), TC0(2), TW0(2),        &
+        INTEGER               :: TFN(2,-9:10), TC0(2), TW0(2),        &
                                  TU0(2), TR0(2), TDN(2), TG0(2)
         REAL                  :: GA0, GD0, GAN, GDN
 !/WRST        REAL, POINTER         :: WXNwrst(:,:),WYNwrst(:,:)
