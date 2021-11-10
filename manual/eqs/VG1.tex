@@ -1,0 +1,45 @@
+\vsssub
+\subsubsection{~$S_{vg}$: Wave-vegetation interaction} \label{sec:VG1}
+\vsssub
+
+\opthead{VEG1}{\ws}{A. Abdolali \& T. Hesser \& A. Roland}
+
+\cite{dalrymple1984wave} derived the dissipation through vegetation using the conservation of energy flux equation by approximating a vegetation field as an array of rigid, vertical cylinders. Assuming the dissipation is due only to the drag force, which is expressed as a Morison-type equation. Therefore, the horizontal wave-induced drag forces of a stem array using a bulk drag coefficient $C_d$ have been derived. Early formulations focused on monochromatic waves and approximated vegetation as an array of rigid, vertical cylinders \citep{dalrymple1984wave,kobayashi1993wave}. Models accounting for plant motion were later proposed by \cite{asano1993interaction} and \cite{mendez1999hydrodynamics}.\cite{mendez2004empirical} expanded upon \cite{dalrymple1984wave} to estimate random wave transformations over mildly sloped vegetation fields under breaking and nonbreaking conditions by assuming a Rayleigh distribution. 
+
+Following \cite{dalrymple1984wave}, \cite{kobayashi1993wave} and \cite{mendez2004empirical}, the mean rate of energy dissipation per unit horizontal area due to wave damping by vegetation is:
+\noindent
+\begin{equation}
+    \epsilon_{\nu}=\frac{1}{2\sqrt{\pi}}\rho C_db_{\nu} N \Big(\frac{kg}{2\sigma}\Big)^3\frac{\sinh^3(k\alpha h)+3\sinh(k\alpha h)}{3k \cosh^3(kh)}H_{rms}^3
+    \label{eq:2}
+\end{equation}
+\noindent
+where $N$ is vegetation density, $C_d$ is the drag coefficient, $b_{\nu}$ is stem width and $\alpha$ is vegetation height.
+\noindent
+A spectral version implemented in WW3 is divided by $-\rho g$ and written in spectral/directional form:
+\begin{equation}
+S_{vg}(\sigma,\theta)=\frac{D_{tot}}{E_{tot}}E(\sigma,\theta)
+\end{equation}
+\noindent
+\begin{equation}
+D_{tot}=-\frac{1}{2g\sqrt{\pi}} \bar{C}_d b_{\nu} N \Big(\frac{\bar{k}g}{2\bar{\sigma}}\Big)^3\frac{\sinh^3(\bar{k}\alpha h)+3\sinh(\bar{k}\alpha h)}{3\bar{k} \cosh^3(\bar{k}h)}H_{rms}^3
+\end{equation}
+\noindent
+where $H^2_{rms}=8E_{tot}$, the mean frequency $\bar{\sigma}$, mean wave number $\bar{k}$ and mean energy are given by:
+\begin{equation}
+\bar{\sigma}=\Big(\frac{1}{E_{tot}}\int_{0}^{2\pi} \int_{0}^{\infty} \frac{1}{\sigma}E(\sigma,\theta)d\sigma d\theta\Big)^{-1}
+\end{equation}
+\noindent
+\begin{equation}
+\bar{k}=\Big(\frac{1}{E_{tot}}\int_{0}^{2\pi} \int_{0}^{\infty} \frac{1}{\sqrt{k}}E(\sigma,\theta)d\sigma d\theta\Big)^{-2}
+\end{equation}
+\noindent
+\begin{equation}
+E_{tot}=\int_{0}^{2\pi} \int_{0}^{\infty} E(\sigma,\theta)d\sigma d\theta
+\end{equation}
+
+Finally,
+\noindent
+\begin{equation}
+S_{d,vg}=-\sqrt{\frac{2}{\pi}}g^2 \bar{C}_D b_{\nu} N \Big(\frac{\bar{k}}{\bar{\sigma}}\Big)^3\frac{\sinh^3(\bar{k}\alpha h)+3\sinh(\bar{k}\alpha h)}{3\bar{k} \cosh^3(\bar{k}h)}\sqrt{E_{tot}}E(\sigma,\theta)
+\end{equation}
+
