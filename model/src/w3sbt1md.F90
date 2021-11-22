@@ -128,10 +128,18 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, MAPWN, SBTC1
-!/T      USE W3ODATMD, ONLY: NDST
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T0      USE W3ARRYMD, ONLY: PRT2DS
-!/T1      USE W3ARRYMD, ONLY: OUTMAT
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T0
+      USE W3ARRYMD, ONLY: PRT2DS
+#endif
+#ifdef W3_T1
+      USE W3ARRYMD, ONLY: OUTMAT
+#endif
 !
       IMPLICIT NONE
 !/
@@ -145,14 +153,22 @@
 !/ Local parameters
 !/
       INTEGER                 :: IS, IK, NSCUT
-!/S      INTEGER, SAVE           :: IENT = 0
-!/T0      INTEGER                 :: ITH
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_T0
+      INTEGER                 :: ITH
+#endif
       REAL                    :: FACTOR, CBETA(NK)
-!/T0      REAL                    :: DOUT(NK,NTH)
+#ifdef W3_T0
+      REAL                    :: DOUT(NK,NTH)
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SBT1')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SBT1')
+#endif
 !
 ! 1.  Deep water ===================================================== *
 !
@@ -169,7 +185,9 @@
 !
           FACTOR = SBTC1 / DEPTH
 !
-!/T          WRITE (NDST,9000) FACTOR, DEPTH
+#ifdef W3_T
+          WRITE (NDST,9000) FACTOR, DEPTH
+#endif
 !
 ! 2.b Wavenumber dependent part.
 !
@@ -197,22 +215,30 @@
 !
 ! ... Test output of arrays
 !
-!/T0      DO IK=1, NK
-!/T0        DO ITH=1, NTH
-!/T0          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
-!/T0          END DO
-!/T0        END DO
+#ifdef W3_T0
+      DO IK=1, NK
+        DO ITH=1, NTH
+          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
+          END DO
+        END DO
+#endif
 !
-!/T0      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG(1:), '  ', 1.,    &
-!/T0                         0.0, 0.001, 'Diag Sbt', ' ', 'NONAME')
+#ifdef W3_T0
+      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG(1:), '  ', 1.,    &
+                         0.0, 0.001, 'Diag Sbt', ' ', 'NONAME')
+#endif
 !
-!/T1      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sbt')
+#ifdef W3_T1
+      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sbt')
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9000 FORMAT (' TEST W3SBT1 : FACTOR, DEPTH  : ',2E10.3)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SBT1 : FACTOR, DEPTH  : ',2E10.3)
+#endif
 !/
 !/ End of W3SBT1 ----------------------------------------------------- /
 !/

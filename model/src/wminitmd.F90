@@ -343,20 +343,28 @@
       USE WMIOPOMD, ONLY: WMIOPP
 !/
       USE W3SERVMD, ONLY: ITRACE, EXTCDE, WWDATE, WWTIME, NEXTLN
-!/S      USE W3SERVMD, ONLY: STRACE
-!/MPRF      USE W3TIMEMD, ONLY: PRINIT, PRTIME
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_MPRF
+      USE W3TIMEMD, ONLY: PRINIT, PRTIME
+#endif
       USE W3TIMEMD, ONLY: STME21, DSEC21, TICK21, TDIFF
       USE WMUNITMD, ONLY: WMUINI, WMUDMP, WMUSET, WMUGET, WMUINQ
 !/
       USE W3GDATMD, ONLY: GTYPE, NX, NY, FILEXT, NSEA, FLAGST, GRIDS
-!/SMC      USE W3GDATMD, ONLY: NCel, NUFc, NVFc, NRLv, NBSMC 
-!/SMC      USE W3GDATMD, ONLY: NARC, NBAC, NSPEC, SMCTYPE 
-!/MPI      USE W3GDATMD, ONLY: FLAGLL, ICLOSE, GSU, X0, Y0, SX, SY,   &
-!/MPI                          XGRD, YGRD, DXDP, DXDQ, DYDP, DYDQ,    &
-!/MPI                          HQFAC, HPFAC, MAPSTA, MAPST2,          &
-!/MPI                          GRIDSHIFT, NSEAL, NK, NTH, XFR, FR1,   &
-!/MPI                          TH, DTMAX, DTCFL
-!/MPI      USE W3GSRUMD
+#ifdef W3_SMC
+      USE W3GDATMD, ONLY: NCel, NUFc, NVFc, NRLv, NBSMC 
+      USE W3GDATMD, ONLY: NARC, NBAC, NSPEC, SMCTYPE 
+#endif
+#ifdef W3_MPI
+      USE W3GDATMD, ONLY: FLAGLL, ICLOSE, GSU, X0, Y0, SX, SY,   &
+                          XGRD, YGRD, DXDP, DXDQ, DYDP, DYDQ,    &
+                          HQFAC, HPFAC, MAPSTA, MAPST2,          &
+                          GRIDSHIFT, NSEAL, NK, NTH, XFR, FR1,   &
+                          TH, DTMAX, DTCFL
+      USE W3GSRUMD
+#endif
       USE W3WDATMD, ONLY: TIME
       USE W3ADATMD, ONLY: WADATS
       USE W3IDATMD, ONLY: INFLAGS1, INFLAGS2, INPUTS, IINIT,  &
@@ -376,16 +384,22 @@
                           GRSTAT, DTRES, BCDUMP, FLGHG1, FLGHG2,      &
                           INPMAP, IDINP, NGRPSMC
       USE WMMDATMD, ONLY: CLKDT1, CLKDT2, CLKFIN
-!/MPI      USE WMMDATMD, ONLY: MPI_COMM_MWAVE, MPI_COMM_GRD,          &
-!/MPI                          MPI_COMM_BCT, CROOT, FBCAST
-!/MPRF      USE WMMDATMD, ONLY: MDSP
+#ifdef W3_MPI
+      USE WMMDATMD, ONLY: MPI_COMM_MWAVE, MPI_COMM_GRD,          &
+                          MPI_COMM_BCT, CROOT, FBCAST
+#endif
+#ifdef W3_MPRF
+      USE WMMDATMD, ONLY: MDSP
+#endif
       USE W3INITMD, ONLY: WWVER
       USE W3ODATMD, ONLY:  OFILES
 ! 
 !/
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -407,16 +421,22 @@
                                  NAPRES, NAPADD, NAPBCT, IFI, IFJ, IW,&
                                  IFT
       INTEGER                 :: STMPT(2), ETMPT(2)
-!/MPI      INTEGER                 :: IERR_MPI, BGROUP, LGROUP, IROOT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                 :: IERR_MPI, BGROUP, LGROUP, IROOT
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       INTEGER, ALLOCATABLE    :: MDS(:,:), NTRACE(:,:), ODAT(:,:),    &
                                  TMPRNK(:), TMPGRP(:), NINGRP(:),     &
                                  TMOVE(:,:), LOADMP(:,:), IPRT(:,:),  &
                                  NDPOUT(:), OUTFF(:,:)
       REAL                    :: DTTST, XX, YY
 
-!/MPRF      REAL                    :: PRFT0, PRFTN
-!/MPRF      REAL(KIND=8)            :: get_memory
+#ifdef W3_MPRF
+      REAL                    :: PRFT0, PRFTN
+      REAL(KIND=8)            :: get_memory
+#endif
       REAL, ALLOCATABLE       :: X(:), Y(:), AMOVE(:), DMOVE(:),      &
                                  RP1(:), RPN(:)
       LOGICAL                 :: FLT, TFLAGI, TFLAGS(-9:14), PSHARE
@@ -429,7 +449,9 @@
       CHARACTER(LEN=5)        :: STOUT, OUTSTR(6)
       CHARACTER(LEN=6)        :: ACTION(11), YESXX, XXXNO
       CHARACTER(LEN=8)        :: LFILE, STTIME
-!/SHRD      CHARACTER(LEN=9)        :: TFILE
+#ifdef W3_SHRD
+      CHARACTER(LEN=9)        :: TFILE
+#endif
       CHARACTER(LEN=13)       :: STDATE, MN, TNAMES(9)
       CHARACTER(LEN=40)       :: PN
       CHARACTER(LEN=13),                                              &
@@ -437,8 +459,12 @@
       CHARACTER(LEN=40),                                              &
                   ALLOCATABLE :: PNAMES(:)
       CHARACTER(LEN=12)       :: FORMAT
-!/DIST      CHARACTER(LEN=18)       :: TFILE
-!/MPRF      CHARACTER(LEN=18)       :: PFILE
+#ifdef W3_DIST
+      CHARACTER(LEN=18)       :: TFILE
+#endif
+#ifdef W3_MPRF
+      CHARACTER(LEN=18)       :: PFILE
+#endif
 
       CHARACTER(LEN=13)       :: IDFLDS(-9:9)
       CHARACTER(LEN=23)       :: DTME21
@@ -486,16 +512,20 @@
       DATA YESXX  / 'YES/--' /
       DATA XXXNO  / '---/NO' /
 !
-!/MPRF      CALL PRINIT
-!/MPRF      CALL PRTIME ( PRFT0 )
+#ifdef W3_MPRF
+      CALL PRINIT
+      CALL PRTIME ( PRFT0 )
+#endif
 !
       CALL DATE_AND_TIME ( VALUES=CLKDT1 )
 !
       MPI_COMM_LOC   = MPI_COMM
-!/MPI      MPI_COMM_MWAVE = MPI_COMM
-!/MPI      CALL MPI_COMM_SIZE ( MPI_COMM_MWAVE, NMPROC, IERR_MPI )
-!/MPI      CALL MPI_COMM_RANK ( MPI_COMM_MWAVE, IMPROC, IERR_MPI )
-!/MPI      IMPROC = IMPROC + 1
+#ifdef W3_MPI
+      MPI_COMM_MWAVE = MPI_COMM
+      CALL MPI_COMM_SIZE ( MPI_COMM_MWAVE, NMPROC, IERR_MPI )
+      CALL MPI_COMM_RANK ( MPI_COMM_MWAVE, IMPROC, IERR_MPI )
+      IMPROC = IMPROC + 1
+#endif
 !
       IF ( PRESENT(PREAMB) ) FNMPRE = PREAMB
 !/
@@ -511,19 +541,21 @@
       CALL WMUSET ( 6,6,  5, .TRUE., 'SYS', 'stdin', 'Standart input' )
       CALL WMUSET ( 6,6,  6, .TRUE., 'SYS', 'stdout','Standart output')
 !
-!/NL2      CALL WMUSET (6,6,103, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,104, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,105, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,106, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,107, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,108, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,109, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,110, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,111, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,112, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,113, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,114, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,117, .TRUE., 'FIX', DESC='Reserved SNL2' )
+#ifdef W3_NL2
+      CALL WMUSET (6,6,103, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,104, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,105, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,106, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,107, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,108, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,109, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,110, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,111, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,112, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,113, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,114, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,117, .TRUE., 'FIX', DESC='Reserved SNL2' )
+#endif
 !
 ! ... Unit numbers from parameter list
 !     Dynamic scripture updated per file
@@ -544,7 +576,9 @@
 !
       CALL ITRACE ( MDST, NTRMAX )
 !
-!/O10      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,900)
+#ifdef W3_O10
+      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,900)
+#endif
 !
 ! 1.c Input file
 !
@@ -565,9 +599,15 @@
       IW     = 1 + INT ( LOG10 ( REAL(NMPROC) + 0.5 ) )
       IW     = MAX ( 3 , MIN ( 9 , IW ) ) 
       WRITE (FORMAT,'(A5,I1.1,A1,I1.1,A4)') '(A4,I',IW,'.',IW,',A5)'
-!/SHRD       TFILE  = 'test.mww3'
-!/DIST       WRITE (TFILE,FORMAT) 'test', IMPROC, '.mww3'
-!/MPRF       WRITE (PFILE,FORMAT) 'prf.', IMPROC, '.mww3'
+#ifdef W3_SHRD
+       TFILE  = 'test.mww3'
+#endif
+#ifdef W3_DIST
+       WRITE (TFILE,FORMAT) 'test', IMPROC, '.mww3'
+#endif
+#ifdef W3_MPRF
+       WRITE (PFILE,FORMAT) 'prf.', IMPROC, '.mww3'
+#endif
 !
       IF ( IMPROC .EQ. NMPLOG ) THEN
           OPEN (MDSO,FILE=TRIM(FNMPRE)//LFILE,ERR=2010,IOSTAT=IERR)
@@ -587,15 +627,19 @@
                         TRIM(FNMPRE)//TFILE(:IFT), 'Test output file')
         END IF
 !
-!/MPRF      IFT    = LEN_TRIM(PFILE)
-!/MPRF      CALL WMUGET ( MDSS, MDST, MDSP, 'OUT' )
-!/MPRF      CALL WMUSET ( MDSS, MDST, MDSP, .TRUE., 'OUT',            &
-!/MPRF                    TRIM(FNMPRE)//PFILE(:IFT), 'Profiling file')
-!/MPRF      OPEN (MDSP,FILE=TRIM(FNMPRE)//PFILE(:IFT),ERR=2011,IOSTAT=IERR)
+#ifdef W3_MPRF
+      IFT    = LEN_TRIM(PFILE)
+      CALL WMUGET ( MDSS, MDST, MDSP, 'OUT' )
+      CALL WMUSET ( MDSS, MDST, MDSP, .TRUE., 'OUT',            &
+                    TRIM(FNMPRE)//PFILE(:IFT), 'Profiling file')
+      OPEN (MDSP,FILE=TRIM(FNMPRE)//PFILE(:IFT),ERR=2011,IOSTAT=IERR)
+#endif
 !
 ! 1.e Initial and test output
 !
-!/S      CALL STRACE (IENT, 'WMINIT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMINIT')
+#endif
 !
       IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,912) COMSTR
 !
@@ -605,7 +649,9 @@
           WRITE (MDSO,901) WWVER, STDATE, STTIME
         END IF
 !
-!/T      WRITE(MDST,9000) IDSI, IDSO, IDSS, IDST, IDSE, IFNAME
+#ifdef W3_T
+      WRITE(MDST,9000) IDSI, IDSO, IDSS, IDST, IDSE, IFNAME
+#endif
 !
 ! 2.  Set-up of data structures and I/O  ----------------------------- /
 ! 2.a Get number of grids
@@ -698,10 +744,12 @@
         NTRACE( 2,I) = NTRMAX
         END DO
 !
-!/T      WRITE (MDST,9020) 'INITIAL'
-!/T      DO I=1, NRGRD
-!/T        WRITE (MDST,9021) I, MDS(:,I), NTRACE(:,I)
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,9020) 'INITIAL'
+      DO I=1, NRGRD
+        WRITE (MDST,9021) I, MDS(:,I), NTRACE(:,I)
+        END DO
+#endif
 !
 ! 3.  Get individual grid information -------------------------------- /
 !
@@ -723,7 +771,9 @@
 !
 ! 3.a Read data
 !
-!/T      WRITE (MDST,9030)
+#ifdef W3_T
+      WRITE (MDST,9030)
+#endif
 !
 ! 3.a.1 Input grids
 !
@@ -779,8 +829,12 @@
               I      = I + 1
               CALL W3SETI ( I, MDSE, MDST )
               INFLAGS1      = .FALSE.
-!/MGW              INFLAGS1(10)   = .TRUE.
-!/MGP              INFLAGS1(10)   = .TRUE.
+#ifdef W3_MGW
+              INFLAGS1(10)   = .TRUE.
+#endif
+#ifdef W3_MGP
+              INFLAGS1(10)   = .TRUE.
+#endif
               INAMES(I,:)= INAMES(J,:)
               MNAMES(I)  = MNAMES(J)
               TMPRNK(I)  = TMPRNK(J)
@@ -788,8 +842,10 @@
               RP1(I)     = RP1(J)
               RPN(I)     = RPN(J)
               BCDUMP(I)  = BCDTMP(J)
-!/T              WRITE (MDST,9031) I, MNAMES(I), INFLAGS1, TMPRNK(I),    &
-!/T                                   TMPGRP(I), RP1(I), RPN(I)
+#ifdef W3_T
+              WRITE (MDST,9031) I, MNAMES(I), INFLAGS1, TMPRNK(I),    &
+                                   TMPGRP(I), RP1(I), RPN(I)
+#endif
             END IF
           END DO
         IF ( I .EQ. NRGRD ) EXIT
@@ -874,15 +930,19 @@
           END DO
         END DO
 !
-!/T      WRITE (MDST,9022)
-!/T      DO I=-NRINP, NRGRD
-!/T        IF ( I .EQ. 0 ) CYCLE
-!/T        WRITE (MDST,9021) I, MDSF(I,JFIRST:9)
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,9022)
+      DO I=-NRINP, NRGRD
+        IF ( I .EQ. 0 ) CYCLE
+        WRITE (MDST,9021) I, MDSF(I,JFIRST:9)
+        END DO
+#endif
 !
 ! 3.c Set rank and group data
 !
-!/T      WRITE (MDST,9032)
+#ifdef W3_T
+      WRITE (MDST,9032)
+#endif
 !
       RNKMAX = MAXVAL ( TMPRNK(1:NRGRD) ) + 1
       RNKTMP = 0
@@ -899,9 +959,11 @@
           END DO
         END DO
 !
-!/T      DO I=1, NRGRD
-!/T        WRITE (MDST,9033) I, MNAMES(I), GRANK(I)
-!/T        END DO
+#ifdef W3_T
+      DO I=1, NRGRD
+        WRITE (MDST,9033) I, MNAMES(I), GRANK(I)
+        END DO
+#endif
 !
       RNKMAX = RNKTMP
       GRPMAX = MAXVAL ( TMPGRP(1:NRGRD) ) + 1
@@ -927,11 +989,13 @@
           END DO
         END DO
 !
-!/T      WRITE (MDST,9034) NRGRP
-!/T      DO I=1, NRGRD
-!/T        WRITE (MDST,9033) I, MNAMES(I), GRGRP(I)
-!/T        END DO
-!/T      WRITE (MDST,9035) NINGRP(1:NRGRP)
+#ifdef W3_T
+      WRITE (MDST,9034) NRGRP
+      DO I=1, NRGRD
+        WRITE (MDST,9033) I, MNAMES(I), GRGRP(I)
+        END DO
+      WRITE (MDST,9035) NINGRP(1:NRGRP)
+#endif
 !
       ALLOCATE ( INGRP(NRGRP,0:MAXVAL(NINGRP(:NRGRP))) )
       DEALLOCATE ( TMPRNK, TMPGRP, NINGRP, BCDTMP )
@@ -942,17 +1006,21 @@
         INGRP(GRGRP(I),INGRP(GRGRP(I),0)) = I
         END DO
 !
-!/T      WRITE (MDST,9036)
-!/T      DO J=1, NRGRP
-!/T        WRITE (MDST,9037) J, INGRP(J,:INGRP(J,0))
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,9036)
+      DO J=1, NRGRP
+        WRITE (MDST,9037) J, INGRP(J,:INGRP(J,0))
+        END DO
+#endif
 !
 !
 ! 3.d Unified point output
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.b'
-!/MPRF      PRFT0  = PRFTN
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.b'
+      PRFT0  = PRFTN
+#endif
 !
       IF ( UNIPTS ) THEN
 !
@@ -1231,7 +1299,9 @@
                          (SCRATCH,FILE=TRIM(FNMPRE)//'ww3_multi.scratch')
                     ELSE
                       MDSI2  = SCRATCH
-!/MPI                      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#ifdef W3_MPI
+                      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#endif
                       OPEN                                            &
                          (SCRATCH,FILE=TRIM(FNMPRE)//'ww3_multi.scratch')
                       REWIND (SCRATCH)
@@ -1277,11 +1347,15 @@
                 IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC .AND.        &
                      NPTS.EQ.0 ) WRITE (MDSS,959)
                 IF ( IMPROC .EQ. 1 ) THEN
-!/MPI                    CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+                    CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
                     CLOSE (SCRATCH,STATUS='DELETE')
                   ELSE
                     CLOSE (SCRATCH)
-!/MPI                    CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+                    CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
                   END IF
 !
               ELSE IF ( J .EQ. 3 ) THEN
@@ -1542,7 +1616,9 @@
                          (SCRATCH,FILE=TRIM(FNMPRE)//'ww3_multi.scratch')
                     ELSE
                       MDSI2  = SCRATCH
-!/MPI                      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#ifdef W3_MPI
+                      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#endif
                       OPEN                                            &
                          (SCRATCH,FILE=TRIM(FNMPRE)//'ww3_multi.scratch')
                       REWIND (SCRATCH)
@@ -1587,11 +1663,15 @@
                 IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC .AND.        &
                      OT2(I)%NPTS.EQ.0 ) WRITE (MDSS,959)
                 IF ( IMPROC .EQ. 1 ) THEN
-!/MPI                    CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+                    CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
                     CLOSE (SCRATCH,STATUS='DELETE')
                   ELSE
                     CLOSE (SCRATCH)
-!/MPI                    CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+                    CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
                   END IF
 !
               ELSE IF ( J .EQ. 3 ) THEN
@@ -1646,12 +1726,14 @@
 !
         END DO
 !
-!/T      DO I=1, NRGRD
-!/T          WRITE (MDST,9050) I
-!/T          WRITE (MDST,9051) ODAT(:,I)
-!/T          WRITE (MDST,9051) OUTFF(:,I)
-!/T          WRITE (MDST,9052) FLGRD(:,:,I)
-!/T        END DO
+#ifdef W3_T
+      DO I=1, NRGRD
+          WRITE (MDST,9050) I
+          WRITE (MDST,9051) ODAT(:,I)
+          WRITE (MDST,9051) OUTFF(:,I)
+          WRITE (MDST,9052) FLGRD(:,:,I)
+        END DO
+#endif
 !
 ! 6.  Read moving grid data ------------------------------------------ /
 !
@@ -1666,7 +1748,9 @@
               WRITE (MDSS,966) 'Continuous grid movement data'
             END IF
 !
-!/MPI          CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#ifdef W3_MPI
+          CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#endif
           DO ILOOP=1, 2
             IF ( ILOOP .EQ. 1 ) THEN
                 MDSI2  = MDSI
@@ -1674,7 +1758,9 @@
                     OPEN (SCRATCH,FILE=TRIM(FNMPRE)//'ww3_shel.scratch')
               ELSE
                 MDSI2  = SCRATCH
-!/MPI                CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#ifdef W3_MPI
+                CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#endif
                 OPEN (SCRATCH,FILE=TRIM(FNMPRE)//'ww3_shel.scratch')
                 REWIND (SCRATCH)
                 ALLOCATE ( TMOVE(2,NMOVE), AMOVE(NMOVE), DMOVE(NMOVE) )
@@ -1714,17 +1800,23 @@
             END DO
 !
           IF ( IMPROC .EQ. 1 ) THEN
-!/MPI              CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+              CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
               CLOSE (SCRATCH,STATUS='DELETE')
             ELSE
               CLOSE (SCRATCH)
-!/MPI              CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+              CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
             END IF
 !
-!/T          WRITE (MDST,9060)
-!/T          DO I=1, NMOVE
-!/T            WRITE (MDST,9061) I, TMOVE(:,I), AMOVE(I), DMOVE(I)
-!/T            END DO
+#ifdef W3_T
+          WRITE (MDST,9060)
+          DO I=1, NMOVE
+            WRITE (MDST,9061) I, TMOVE(:,I), AMOVE(I), DMOVE(I)
+            END DO
+#endif
 !
           IF ( NMOVE .EQ. 0 ) GOTO 2060
 !
@@ -1858,11 +1950,15 @@
 !
 ! 7.c Set communicators and ALLPRC array
 !
-!/T      WRITE (MDST,9070)
+#ifdef W3_T
+      WRITE (MDST,9070)
+#endif
       IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,974)
       IF ( NMPLOG.EQ.IMPROC ) WRITE (MDSO,1974)
 !
-!/MPI      CALL MPI_COMM_GROUP ( MPI_COMM_MWAVE, BGROUP, IERR_MPI )
+#ifdef W3_MPI
+      CALL MPI_COMM_GROUP ( MPI_COMM_MWAVE, BGROUP, IERR_MPI )
+#endif
       ALLOCATE ( TMPRNK(NMPROC) )
       NAPRES = NCPROC
 !
@@ -1875,10 +1971,12 @@
         CALL WMSETM ( I, MDSE, MDST )
         NAPLOC = 1 + IPN - IP1
         NAPADD = NAPLOC
-!/MPI        CROOT  = IP1
-!/MPI        FBCAST = NAPLOC .NE. NCPROC
-!/MPI        FBCAST = NAPLOC .NE. NCPROC .OR.                         &
-!/MPI                     ( IOSTYP.GT.1 .AND. .NOT.PSHARE )
+#ifdef W3_MPI
+        CROOT  = IP1
+        FBCAST = NAPLOC .NE. NCPROC
+        FBCAST = NAPLOC .NE. NCPROC .OR.                         &
+                     ( IOSTYP.GT.1 .AND. .NOT.PSHARE )
+#endif
         DO J=IP1, IPN
           TMPRNK(1+J-IP1) = J - 1
           END DO
@@ -1897,11 +1995,13 @@
             TMPRNK(NAPADD) = NMPROC - 1
           END IF
 !
-!/MPI        CALL MPI_GROUP_INCL ( BGROUP, NAPADD, TMPRNK, LGROUP,    &
-!/MPI                              IERR_MPI )
-!/MPI        CALL MPI_COMM_CREATE ( MPI_COMM_MWAVE, LGROUP,           &
-!/MPI                               MPI_COMM_GRD, IERR_MPI )
-!/MPI        CALL MPI_GROUP_FREE ( LGROUP, IERR_MPI )
+#ifdef W3_MPI
+        CALL MPI_GROUP_INCL ( BGROUP, NAPADD, TMPRNK, LGROUP,    &
+                              IERR_MPI )
+        CALL MPI_COMM_CREATE ( MPI_COMM_MWAVE, LGROUP,           &
+                               MPI_COMM_GRD, IERR_MPI )
+        CALL MPI_GROUP_FREE ( LGROUP, IERR_MPI )
+#endif
 !
         DO II=IP1, IPN
           ALLPRC(II,I) = 1 + II - IP1
@@ -1926,7 +2026,9 @@
             ALLPRC(NMPROC,I) = II
           END IF
 !
-!/T        WRITE (MDST,9071) I, ALLPRC(:,I)
+#ifdef W3_T
+        WRITE (MDST,9071) I, ALLPRC(:,I)
+#endif
 !
 ! ... output
 !
@@ -2009,21 +2111,23 @@
         IF ( NMPLOG .EQ. IMPROC )                                     &
             WRITE (MDSO,1975)MNAMES(I), IP1, IPN, OUTSTR
 !
-!/MPI        IF ( FBCAST ) THEN
-!/MPI            TMPRNK(1) = IP1 - 1
-!/MPI            NAPBCT    = 1
-!/MPI            DO J=1, NMPROC
-!/MPI              IF ( ALLPRC(J,I) .EQ. 0 ) THEN
-!/MPI                  NAPBCT = NAPBCT + 1
-!/MPI                  TMPRNK(NAPBCT) = J - 1
-!/MPI                END IF
-!/MPI              END DO
-!/MPI            CALL MPI_GROUP_INCL ( BGROUP, NAPBCT, TMPRNK,       &
-!/MPI                                  LGROUP, IERR_MPI )
-!/MPI            CALL MPI_COMM_CREATE ( MPI_COMM_MWAVE, LGROUP,      &
-!/MPI                                   MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_GROUP_FREE ( LGROUP, IERR_MPI )
-!/MPI         END IF
+#ifdef W3_MPI
+        IF ( FBCAST ) THEN
+            TMPRNK(1) = IP1 - 1
+            NAPBCT    = 1
+            DO J=1, NMPROC
+              IF ( ALLPRC(J,I) .EQ. 0 ) THEN
+                  NAPBCT = NAPBCT + 1
+                  TMPRNK(NAPBCT) = J - 1
+                END IF
+              END DO
+            CALL MPI_GROUP_INCL ( BGROUP, NAPBCT, TMPRNK,       &
+                                  LGROUP, IERR_MPI )
+            CALL MPI_COMM_CREATE ( MPI_COMM_MWAVE, LGROUP,      &
+                                   MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_GROUP_FREE ( LGROUP, IERR_MPI )
+         END IF
+#endif
 !
         END DO
 !
@@ -2059,14 +2163,16 @@
           END DO
         END DO
 !
-!/T      WRITE (MDST,8042)
-!/T      DO J=1, NRGRP
-!/T        WRITE (MDST,8044) J, MODMAP(:,J)
-!/T        END DO
-!/T      WRITE (MDST,8043)
-!/T      DO J=1, NRGRP
-!/T        WRITE (MDST,8044) J, LOADMP(:,J)
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,8042)
+      DO J=1, NRGRP
+        WRITE (MDST,8044) J, MODMAP(:,J)
+        END DO
+      WRITE (MDST,8043)
+      DO J=1, NRGRP
+        WRITE (MDST,8044) J, LOADMP(:,J)
+        END DO
+#endif
 !
 ! 7.e Warnings
 !
@@ -2083,16 +2189,22 @@
 !
 ! 7.f Reset NMPSCR to first processor of first rank 1 grid
 !
-!/MPI      CALL WMSETM ( INGRP(1,1), MDSE, MDST )
-!/MPI      NMPSCR = CROOT
+#ifdef W3_MPI
+      CALL WMSETM ( INGRP(1,1), MDSE, MDST )
+      NMPSCR = CROOT
+#endif
 !
-!/MPI      CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+      CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
 !
 ! 8.  Actual initializations ----------------------------------------- /
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8'
-!/MPRF      PRFT0  = PRFTN
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8'
+      PRFT0  = PRFTN
+#endif
 !
       IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,980)
       ALLOCATE ( TSYNC(2,0:NRGRD), TMAX(2,NRGRD), TOUTP(2,0:NRGRD),   &
@@ -2110,10 +2222,14 @@
 !
 ! 8.a Loop over models for per-model initialization
 !
-!/T      WRITE (MDST,9080)
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.a'
-!/MPRF      PRFT0  = PRFTN
+#ifdef W3_T
+      WRITE (MDST,9080)
+#endif
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.a'
+      PRFT0  = PRFTN
+#endif
 !
       DO I=1, NRGRD
         J      = LEN_TRIM(MNAMES(I))
@@ -2123,14 +2239,18 @@
         IF ( MDSS.NE.MDSO .AND. NMPSC2.EQ.IMPROC )                    &
              WRITE (MDSS,981) I, MNAMES(I)(1:J)
 !
-!/MPI        CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#ifdef W3_MPI
+        CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#endif
 !
 ! 8.a.1 Wave model initialization (NOTE: sets all grid pointers)
 ! ..... Initial output file hook up
 !
         CALL WMSETM ( I, MDSE, MDST )
-!/MPI        MPI_COMM_LOC = MPI_COMM_GRD
-!/MPI        IF ( MPI_COMM_LOC .EQ. MPI_COMM_NULL ) CYCLE
+#ifdef W3_MPI
+        MPI_COMM_LOC = MPI_COMM_GRD
+        IF ( MPI_COMM_LOC .EQ. MPI_COMM_NULL ) CYCLE
+#endif
 !
         CALL WMUGET ( MDSE, MDST, NDSFND, 'OUT' )
         CALL WMUSET ( MDSE, MDST, NDSFND, .TRUE., DESC='Log file' )
@@ -2270,7 +2390,9 @@
               END IF
           END IF
 !
-!/T        WRITE (MDST,9081) I, TIME
+#ifdef W3_T
+        WRITE (MDST,9081) I, TIME
+#endif
 !
 ! 8.a.2 Data file initialization (forcing)
 !
@@ -2395,123 +2517,145 @@
         GRSTAT(I) =  0
         TSYNC(:,I) = TIME(:)
 !
-!/SMC !!Li   Check GTYPE values after initialization.  JGLi08Apr2021
-!/SMC        IF( IMPROC .EQ. CROOT ) WRITE(MDSE,*) " GRID CROOT GTYPE", &
-!/SMC            I, CROOT, GRIDS(I)%GTYPE
+#ifdef W3_SMC
+ !!Li   Check GTYPE values after initialization.  JGLi08Apr2021
+        IF( IMPROC .EQ. CROOT ) WRITE(MDSE,*) " GRID CROOT GTYPE", &
+            I, CROOT, GRIDS(I)%GTYPE
+#endif
 !
-!/T        WRITE (MDST,9082) GRSTAT(I), TOUTP(:,I), TSYNC(:,I)
+#ifdef W3_T
+        WRITE (MDST,9082) GRSTAT(I), TOUTP(:,I), TSYNC(:,I)
+#endif
 !
         END DO   !! 8.a I-NRGRD loop
 !
-!/MPI      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
-!/MPI      DO I=1, NRGRD
-!/MPI        CALL WMSETM ( I, MDSE, MDST )
-!/MPI        CALL W3SETG ( I, MDSE, MDST )
-!/MPI        CALL W3SETO ( I, MDSE, MDST )
-!/MPI        IF ( FBCAST .AND. MPI_COMM_BCT.NE.MPI_COMM_NULL ) THEN
-!/MPI            CALL MPI_BCAST ( TOUTP(1,I), 2, MPI_INTEGER, 0,      &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( TSYNC(1,I), 2, MPI_INTEGER, 0,      &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( GRSTAT(I), 1, MPI_INTEGER, 0,       &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
+#ifdef W3_MPI
+      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+      DO I=1, NRGRD
+        CALL WMSETM ( I, MDSE, MDST )
+        CALL W3SETG ( I, MDSE, MDST )
+        CALL W3SETO ( I, MDSE, MDST )
+        IF ( FBCAST .AND. MPI_COMM_BCT.NE.MPI_COMM_NULL ) THEN
+            CALL MPI_BCAST ( TOUTP(1,I), 2, MPI_INTEGER, 0,      &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( TSYNC(1,I), 2, MPI_INTEGER, 0,      &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( GRSTAT(I), 1, MPI_INTEGER, 0,       &
+                             MPI_COMM_BCT, IERR_MPI )
+#endif
 !
 ! 8.a.4 Grid sizes etc. for processors that are not used.
 !
-!/MPI            CALL MPI_BCAST ( FLAGLL,1, MPI_LOGICAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( GTYPE, 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( ICLOSE,1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NX   , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NY   , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( X0   , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( SX   , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( Y0   , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( SY   , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NSEA , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NSEAL, 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DTMAX, 1, MPI_REAL, 0,              &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DTCFL, 1, MPI_REAL, 0,              &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( FILEXT, 10, MPI_CHARACTER, 0,       &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
-!/MPI                 CALL W3DIMX  ( I, NX, NY, NSEA, MDSE, MDST      &
-!/SMC !!  SMC grid related variables are not needed beyond MPI_COMM_GRD
-!/SMC !!  so all dimensions are minimised to 1.  JGLi29Mar2021
-!/MPI/!/SMC !!Li        , NCel, NUFc, NVFc, NRLv, NBSMC  &
-!/MPI/!/SMC !!Li        , NARC, NBAC, NSPEC              &
-!/MPI/!/SMC             , 1, 1, 1, 1, 1, 1, 1, 1         &
-!/MPI                )
-!/MPI            CALL MPI_BCAST ( HQFAC, NX*NY, MPI_REAL, 0,          &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( HPFAC, NX*NY, MPI_REAL, 0,          &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( XGRD, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( YGRD, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
-!/MPI                 GSU = W3GSUC( .FALSE., FLAGLL, ICLOSE,          &
-!/MPI                               XGRD, YGRD )
-!/MPI            CALL MPI_BCAST ( DXDP, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DXDQ, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DYDP, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DYDQ, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( MAPSTA, NX*NY, MPI_INTEGER, 0,      &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( MAPST2, NX*NY, MPI_INTEGER, 0,      &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( GRIDSHIFT, 1, MPI_DOUBLE_PRECISION, 0, &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
+#ifdef W3_MPI
+            CALL MPI_BCAST ( FLAGLL,1, MPI_LOGICAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( GTYPE, 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( ICLOSE,1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NX   , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NY   , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( X0   , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( SX   , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( Y0   , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( SY   , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NSEA , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NSEAL, 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DTMAX, 1, MPI_REAL, 0,              &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DTCFL, 1, MPI_REAL, 0,              &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( FILEXT, 10, MPI_CHARACTER, 0,       &
+                             MPI_COMM_BCT, IERR_MPI )
+            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
+                 CALL W3DIMX  ( I, NX, NY, NSEA, MDSE, MDST      &
+#endif
+#ifdef W3_SMC
+ !!  SMC grid related variables are not needed beyond MPI_COMM_GRD
+ !!  so all dimensions are minimised to 1.  JGLi29Mar2021
+#endif
+#ifdef W3_MPI
+#ifdef W3_SMC
+ !!Li        , NCel, NUFc, NVFc, NRLv, NBSMC  &
+ !!Li        , NARC, NBAC, NSPEC              &
+             , 1, 1, 1, 1, 1, 1, 1, 1         &
+#endif
+                )
+            CALL MPI_BCAST ( HQFAC, NX*NY, MPI_REAL, 0,          &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( HPFAC, NX*NY, MPI_REAL, 0,          &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( XGRD, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( YGRD, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
+                 GSU = W3GSUC( .FALSE., FLAGLL, ICLOSE,          &
+                               XGRD, YGRD )
+            CALL MPI_BCAST ( DXDP, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DXDQ, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DYDP, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DYDQ, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( MAPSTA, NX*NY, MPI_INTEGER, 0,      &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( MAPST2, NX*NY, MPI_INTEGER, 0,      &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( GRIDSHIFT, 1, MPI_DOUBLE_PRECISION, 0, &
+                             MPI_COMM_BCT, IERR_MPI )
+#endif
 !
-!/MPI            CALL MPI_BCAST ( NK   , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NTH  , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( XFR  , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( FR1  , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
-!/MPI                 CALL W3DIMS ( I, NK, NTH, MDSE, MDST )
-!/MPI            CALL MPI_BCAST ( TH , NTH, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
+#ifdef W3_MPI
+            CALL MPI_BCAST ( NK   , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NTH  , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( XFR  , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( FR1  , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
+                 CALL W3DIMS ( I, NK, NTH, MDSE, MDST )
+            CALL MPI_BCAST ( TH , NTH, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+#endif
 !
-!/MPI            CALL MPI_BCAST ( NAPROC,1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NAPPNT,1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NBI  , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
+#ifdef W3_MPI
+            CALL MPI_BCAST ( NAPROC,1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NAPPNT,1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NBI  , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+#endif
 !
-!/MPI            CALL MPI_BCAST ( FLOUT,  8, MPI_LOGICAL, 0,          &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DTOUT , 8, MPI_REAL, 0,             &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( TONEXT,16, MPI_INTEGER, 0,          &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( TOLAST,16, MPI_INTEGER, 0,          &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
+#ifdef W3_MPI
+            CALL MPI_BCAST ( FLOUT,  8, MPI_LOGICAL, 0,          &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DTOUT , 8, MPI_REAL, 0,             &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( TONEXT,16, MPI_INTEGER, 0,          &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( TOLAST,16, MPI_INTEGER, 0,          &
+                             MPI_COMM_BCT, IERR_MPI )
+#endif
 !
-!/MPI          END IF
-!/MPI        END DO
-!/MPI      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#ifdef W3_MPI
+          END IF
+        END DO
+      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#endif
 !
       DO I=1, NRGRD
         IF ( ALLPRC(IMPROC,I) .EQ. 0 ) THEN
@@ -2522,10 +2666,12 @@
 !
 ! 8.a.5 Test output
 !
-!/T      WRITE (MDST,9020) 'AFTER SETUP'
-!/T      DO I=1, NRGRD
-!/T        WRITE (MDST,9021) I, MDS(:,I), NTRACE(:,I)
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,9020) 'AFTER SETUP'
+      DO I=1, NRGRD
+        WRITE (MDST,9021) I, MDS(:,I), NTRACE(:,I)
+        END DO
+#endif
 !
 ! 8.a.6 Check for coordinate system
 !
@@ -2535,9 +2681,11 @@
 !
 ! 8.b Input files
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.c'
-!/MPRF      PRFT0  = PRFTN
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.c'
+      PRFT0  = PRFTN
+#endif
 !
       DO I=1, NRINP
 !
@@ -2591,9 +2739,11 @@
 !
 ! 8.c Inter model initialization
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.d'
-!/MPRF      PRFT0  = PRFTN
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.d'
+      PRFT0  = PRFTN
+#endif
 
 ! 8.c.1 Spectral conversion flags and source term flags
 !
@@ -2613,14 +2763,18 @@
 ! ..... At this point the grid-search-utility (GSU) object for grids
 !       that do not belong to this processor is no longer needed.
 !
-!/MPI      DO I=1, NRGRD
-!/MPI        CALL WMSETM ( I, MDSE, MDST )
-!/MPI        CALL W3SETG ( I, MDSE, MDST )
+#ifdef W3_MPI
+      DO I=1, NRGRD
+        CALL WMSETM ( I, MDSE, MDST )
+        CALL W3SETG ( I, MDSE, MDST )
+#endif
 ! the next line (with the W3GSUD call) removed Jan 8 2013. 
 ! ...ref: personal communication, 
 ! ...email from Rogers to Alves, Campbell, Tolman, Chawla Dec 13 2012.
 ! REMOVED  !/MPI        IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL ) CALL W3GSUD( GSU )
-!/MPI        END DO
+#ifdef W3_MPI
+        END DO
+#endif
 !
 ! ..... Unit numbers
 !
@@ -2642,9 +2796,13 @@
             BCDUMP(I) = .FALSE.
           END IF
 !
-!/SHRD        IF ( .NOT. FLRBPI(I) .AND. FLBPI ) THEN
-!/MPI        IF ( .NOT. FLRBPI(I) .AND. FLBPI .AND.                   &
-!/MPI              MPI_COMM_GRD .NE. MPI_COMM_NULL) THEN
+#ifdef W3_SHRD
+        IF ( .NOT. FLRBPI(I) .AND. FLBPI ) THEN
+#endif
+#ifdef W3_MPI
+        IF ( .NOT. FLRBPI(I) .AND. FLBPI .AND.                   &
+              MPI_COMM_GRD .NE. MPI_COMM_NULL) THEN
+#endif
             CALL WMUSET ( MDSE, MDST, NDS(9), .FALSE. )
             IF ( BCDUMP(I) .AND. IAPROC.EQ.NAPBPT ) THEN
                 J            = LEN_TRIM(FILEXT)
@@ -2666,44 +2824,58 @@
 ! ..... Data initialization
 !
       DO I=1, NRGRD
-!/MPI        CALL WMSETM ( I, MDSE, MDST )
-!/MPI        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBS ( I )
-!/SHRD        CALL WMIOBS ( I )
+#ifdef W3_MPI
+        CALL WMSETM ( I, MDSE, MDST )
+        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBS ( I )
+#endif
+#ifdef W3_SHRD
+        CALL WMIOBS ( I )
+#endif
         END DO
 !
       DO I=1, NRGRD
-!/MPI        CALL WMSETM ( I, MDSE, MDST )
-!/MPI        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBG ( I )
-!/SHRD        CALL WMIOBG ( I )
+#ifdef W3_MPI
+        CALL WMSETM ( I, MDSE, MDST )
+        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBG ( I )
+#endif
+#ifdef W3_SHRD
+        CALL WMIOBG ( I )
+#endif
         END DO
 !
-!/MPI      DO I=1, NRGRD
-!/MPI        CALL WMSETM ( I, MDSE, MDST )
-!/MPI        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBF ( I )
-!/MPI        END DO
+#ifdef W3_MPI
+      DO I=1, NRGRD
+        CALL WMSETM ( I, MDSE, MDST )
+        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBF ( I )
+        END DO
+#endif
 !
 ! 8.c.3 Relation to same ranked grids
 !
-!/SMC !!  Check whether there is a SMC grid group.   JGLi12Apr2021
-!/SMC      NGRPSMC = 0 
-!/SMC      DO JJ=1, NRGRP
-!/SMC         J = 0
-!/SMC         DO II=1, INGRP(JJ,0)
-!/SMC            I = INGRP(JJ,II)
-!/SMC            IF( GRIDS(I)%GTYPE .EQ. SMCTYPE ) J = J + 1 
-!/SMC         ENDDO
-!/SMC         IF( J .GT. 1 )  NGRPSMC = JJ 
-!/SMC      ENDDO
-!/SMC      IF( IMPROC.EQ.NMPERR )  WRITE (MDSE,*) " NGRPSMC =", NGRPSMC
-!/SMC 
-!/SMC !!  Equal ranked SMC grid group uses its own sub.   JGLi12Apr2021
-!/SMC      IF( NGRPSMC .GT. 0 ) THEN
-!/SMC          CALL WMSMCEQL
-!/SMC      ELSE
+#ifdef W3_SMC
+ !!  Check whether there is a SMC grid group.   JGLi12Apr2021
+      NGRPSMC = 0 
+      DO JJ=1, NRGRP
+         J = 0
+         DO II=1, INGRP(JJ,0)
+            I = INGRP(JJ,II)
+            IF( GRIDS(I)%GTYPE .EQ. SMCTYPE ) J = J + 1 
+         ENDDO
+         IF( J .GT. 1 )  NGRPSMC = JJ 
+      ENDDO
+      IF( IMPROC.EQ.NMPERR )  WRITE (MDSE,*) " NGRPSMC =", NGRPSMC
+ 
+ !!  Equal ranked SMC grid group uses its own sub.   JGLi12Apr2021
+      IF( NGRPSMC .GT. 0 ) THEN
+          CALL WMSMCEQL
+      ELSE
+#endif
 !
       CALL WMGEQL
 !
-!/SMC      ENDIF
+#ifdef W3_SMC
+      ENDIF
+#endif
 !
 ! 8.c.4 Relation to higher ranked grids
 !
@@ -2747,15 +2919,17 @@
                             OT2(0)%PNAMES )
             END IF
 !
-!/MPI          DO I=1, NRGRD
-!/MPI            CALL WMSETM ( I, MDSE, MDST )
-!/MPI            CALL W3SETG ( I, MDSE, MDST )
-!/MPI            CALL W3SETO ( I, MDSE, MDST )
-!/MPI            IF ( FBCAST .AND. MPI_COMM_BCT.NE.MPI_COMM_NULL ) THEN
-!/MPI                CALL MPI_BCAST ( NOPTS, 1, MPI_INTEGER, 0,       &
-!/MPI                                 MPI_COMM_BCT, IERR_MPI )
-!/MPI              END IF
-!/MPI            END DO
+#ifdef W3_MPI
+          DO I=1, NRGRD
+            CALL WMSETM ( I, MDSE, MDST )
+            CALL W3SETG ( I, MDSE, MDST )
+            CALL W3SETO ( I, MDSE, MDST )
+            IF ( FBCAST .AND. MPI_COMM_BCT.NE.MPI_COMM_NULL ) THEN
+                CALL MPI_BCAST ( NOPTS, 1, MPI_INTEGER, 0,       &
+                                 MPI_COMM_BCT, IERR_MPI )
+              END IF
+            END DO
+#endif
 !
         END IF
 !
@@ -2858,10 +3032,12 @@
               WRITE (MDSO,937) 'No higher rank grid dependencies'
         END IF
 !
-!/T      WRITE (MDST,9083)
-!/T      DO I=-NRINP, NRGRD
-!/T        WRITE (MDST,9084) I, IDINP(I,:)
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,9083)
+      DO I=-NRINP, NRGRD
+        WRITE (MDST,9084) I, IDINP(I,:)
+        END DO
+#endif
 !
 !    Test output of connected units (always)
 !
@@ -2872,16 +3048,22 @@
                    MNAMES                                              &
                    ,OUTFF )
 !
-!/MPI      CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+      CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
 !
       CALL DATE_AND_TIME ( VALUES=CLKDT2 )
       CLKFIN = TDIFF ( CLKDT1,CLKDT2 )
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'END'
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'END'
+#endif
 !
       IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,998)
-!/O10      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,999)
+#ifdef W3_O10
+      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,999)
+#endif
 !!!!!/MPI CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
 !!!!!/MPI CALL MPI_FINALIZE  ( IERR_MPI )
 !!!!!/MPI stop 'Ending in wminitmd, case 1'
@@ -3102,7 +3284,9 @@
   987 FORMAT ( '          Initializing grids ...')
   988 FORMAT ( '       Input data grid',I3,' [',A,']')
 !
-!/MPRF  990 FORMAT (1X,3F12.3,' WMINIT',1X,A)
+#ifdef W3_MPRF
+  990 FORMAT (1X,3F12.3,' WMINIT',1X,A)
+#endif
 !
   998 FORMAT ( '  Running the model :'/                               &
                ' --------------------------------------------------'/)
@@ -3164,45 +3348,57 @@
  1081 FORMAT (/' *** NO BOUNDARY DATA TO DUMP, GRID :',I4,' ***')
  1082 FORMAT ( '  No boundary data dump for grid',I3/)
 !
-!/T 9000 FORMAT ( ' TEST WMINIT : UNIT NUMBERS    : ',5I6/            &
-!/T               '               INPUT FILE NAME : ',A)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMINIT : UNIT NUMBERS    : ',5I6/            &
+               '               INPUT FILE NAME : ',A)
+#endif
 !
-!/T 9020 FORMAT ( ' TEST WMINIT : UNIT NUMBERS FOR GRIDS (',A,')'/    &
-!/T                               15X,'GRID MDS(1-13)',43X,'NTRACE')
-!/T 9021 FORMAT (14X,16I4)
-!/T 9022 FORMAT ( ' TEST WMINIT : UNIT NUMBERS FOR INTPUT FILES'/     &
-!/T                               15X,'GRID MDSF(JFIRST-9)')
-!/T 9030 FORMAT ( ' TEST WMINIT : FILE EXTENSIONS, INPUT FLAGS,',     &
-!/T               ' RANK AND GROUP, PROC RANGE')
-!/T 9031 FORMAT ( '            ',I3,1X,A,20L2,2I4,2F6.2)
-!/T 9032 FORMAT ( ' TEST WMINIT : PROCESSED RANK NUMBERS')
-!/T 9033 FORMAT ( '             ',I3,1X,A,1X,I4)
-!/T 9034 FORMAT ( ' TEST WMINIT : NUMBER OF GROUPS :',I4)
-!/T 9035 FORMAT ( ' TEST WMINIT : SIZE OF GROUPS :',20I3)
-!/T 9036 FORMAT ( ' TEST WMINIT : GROUP SIZE AND COMPONENTS :')
-!/T 9037 FORMAT ( '             ',2I3,':',20I3)
+#ifdef W3_T
+ 9020 FORMAT ( ' TEST WMINIT : UNIT NUMBERS FOR GRIDS (',A,')'/    &
+                               15X,'GRID MDS(1-13)',43X,'NTRACE')
+ 9021 FORMAT (14X,16I4)
+ 9022 FORMAT ( ' TEST WMINIT : UNIT NUMBERS FOR INTPUT FILES'/     &
+                               15X,'GRID MDSF(JFIRST-9)')
+ 9030 FORMAT ( ' TEST WMINIT : FILE EXTENSIONS, INPUT FLAGS,',     &
+               ' RANK AND GROUP, PROC RANGE')
+ 9031 FORMAT ( '            ',I3,1X,A,20L2,2I4,2F6.2)
+ 9032 FORMAT ( ' TEST WMINIT : PROCESSED RANK NUMBERS')
+ 9033 FORMAT ( '             ',I3,1X,A,1X,I4)
+ 9034 FORMAT ( ' TEST WMINIT : NUMBER OF GROUPS :',I4)
+ 9035 FORMAT ( ' TEST WMINIT : SIZE OF GROUPS :',20I3)
+ 9036 FORMAT ( ' TEST WMINIT : GROUP SIZE AND COMPONENTS :')
+ 9037 FORMAT ( '             ',2I3,':',20I3)
+#endif
 !
-!/T 9050 FORMAT ( ' TEST WMINIT : GRID NUMBER',I3,' =================')
-!/T 9051 FORMAT ( ' TEST WMINIT : ODAT   : ',I9.8,I7.6,I7,I9.8,I7.6,  &
-!/T                                  5(/24X,I9.8,I7.6,I7,I9.8,I7.6) )
-!/T 9053 FORMAT ( ' TEST WMINITNML : OUTFF   : ',I9.8 &
-!/T                                  5(/24X,I9.8) )
-!/T 9052 FORMAT ( ' TEST WMINIT : FLGRD  : ',5(5L2,1X)/24X,5(5L2,1X))
+#ifdef W3_T
+ 9050 FORMAT ( ' TEST WMINIT : GRID NUMBER',I3,' =================')
+ 9051 FORMAT ( ' TEST WMINIT : ODAT   : ',I9.8,I7.6,I7,I9.8,I7.6,  &
+                                  5(/24X,I9.8,I7.6,I7,I9.8,I7.6) )
+ 9053 FORMAT ( ' TEST WMINITNML : OUTFF   : ',I9.8 &
+                                  5(/24X,I9.8) )
+ 9052 FORMAT ( ' TEST WMINIT : FLGRD  : ',5(5L2,1X)/24X,5(5L2,1X))
+#endif
 !
-!/T 9060 FORMAT ( ' TEST WMINIT : GRID MOVEMENT DATA')
-!/T 9061 FORMAT ( '             ',I8.8,I7,1X,2F8.2)
+#ifdef W3_T
+ 9060 FORMAT ( ' TEST WMINIT : GRID MOVEMENT DATA')
+ 9061 FORMAT ( '             ',I8.8,I7,1X,2F8.2)
+#endif
 !
-!/T 9070 FORMAT ( ' TEST WMINIT : ALLPRC ')
-!/T 9071 FORMAT ( ' ',I3,'  : ',250I3)
-!/T 8042 FORMAT ( ' TEST WMINIT : MODMAP ')
-!/T 8043 FORMAT ( ' TEST WMINIT : LOADMP ')
-!/T 8044 FORMAT ( '        ',I3,'  : ',250I2)
+#ifdef W3_T
+ 9070 FORMAT ( ' TEST WMINIT : ALLPRC ')
+ 9071 FORMAT ( ' ',I3,'  : ',250I3)
+ 8042 FORMAT ( ' TEST WMINIT : MODMAP ')
+ 8043 FORMAT ( ' TEST WMINIT : LOADMP ')
+ 8044 FORMAT ( '        ',I3,'  : ',250I2)
+#endif
 !
-!/T 9080 FORMAT ( ' TEST WMINIT : MODEL INITIALIZATION')
-!/T 9081 FORMAT ( '               MODEL AND TIME   :',I4,I10.8,I8.6)
-!/T 9082 FORMAT ( '               STATUS AND TIMES :',I4,3(I10.8,I8.6))
-!/T 9083 FORMAT ( ' TEST WMINIT : IDINP AFTER INITIALIZATION :')
-!/T 9084 FORMAT ( '               ',I4,17(2X,A3))
+#ifdef W3_T
+ 9080 FORMAT ( ' TEST WMINIT : MODEL INITIALIZATION')
+ 9081 FORMAT ( '               MODEL AND TIME   :',I4,I10.8,I8.6)
+ 9082 FORMAT ( '               STATUS AND TIMES :',I4,3(I10.8,I8.6))
+ 9083 FORMAT ( ' TEST WMINIT : IDINP AFTER INITIALIZATION :')
+ 9084 FORMAT ( '               ',I4,17(2X,A3))
+#endif
 !/
 !/ End of WMINIT ----------------------------------------------------- /
 !/
@@ -3468,20 +3664,28 @@
       USE WMIOPOMD, ONLY: WMIOPP
 !/
       USE W3SERVMD, ONLY: ITRACE, EXTCDE, NEXTLN, WWDATE, WWTIME
-!/S      USE W3SERVMD, ONLY: STRACE
-!/MPRF      USE W3TIMEMD, ONLY: PRINIT, PRTIME
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_MPRF
+      USE W3TIMEMD, ONLY: PRINIT, PRTIME
+#endif
       USE W3TIMEMD, ONLY: STME21, DSEC21, TICK21, TDIFF
       USE WMUNITMD, ONLY: WMUINI, WMUDMP, WMUSET, WMUGET, WMUINQ
 !/
       USE W3GDATMD, ONLY: GTYPE, NX, NY, FILEXT, NSEA, FLAGST, GRIDS
-!/SMC      USE W3GDATMD, ONLY: NCel, NUFc, NVFc, NRLv, NBSMC 
-!/SMC      USE W3GDATMD, ONLY: NARC, NBAC, NSPEC, SMCTYPE 
-!/MPI      USE W3GDATMD, ONLY: FLAGLL, ICLOSE, GSU, X0, Y0, SX, SY,   &
-!/MPI                          XGRD, YGRD, DXDP, DXDQ, DYDP, DYDQ,    &
-!/MPI                          HQFAC, HPFAC, MAPSTA, MAPST2,          &
-!/MPI                          GRIDSHIFT, NSEAL, NK, NTH, XFR, FR1,   &
-!/MPI                          TH, DTMAX, DTCFL
-!/MPI      USE W3GSRUMD
+#ifdef W3_SMC
+      USE W3GDATMD, ONLY: NCel, NUFc, NVFc, NRLv, NBSMC 
+      USE W3GDATMD, ONLY: NARC, NBAC, NSPEC, SMCTYPE 
+#endif
+#ifdef W3_MPI
+      USE W3GDATMD, ONLY: FLAGLL, ICLOSE, GSU, X0, Y0, SX, SY,   &
+                          XGRD, YGRD, DXDP, DXDQ, DYDP, DYDQ,    &
+                          HQFAC, HPFAC, MAPSTA, MAPST2,          &
+                          GRIDSHIFT, NSEAL, NK, NTH, XFR, FR1,   &
+                          TH, DTMAX, DTCFL
+      USE W3GSRUMD
+#endif
       USE W3WDATMD, ONLY: TIME
       USE W3ADATMD, ONLY: WADATS
       USE W3IDATMD, ONLY: INFLAGS1, INPUTS, IINIT,      &
@@ -3501,15 +3705,21 @@
                           GRSTAT, DTRES, BCDUMP, FLGHG1, FLGHG2,      &
                           INPMAP, IDINP, NGRPSMC
       USE WMMDATMD, ONLY: CLKDT1, CLKDT2, CLKFIN
-!/MPI      USE WMMDATMD, ONLY: MPI_COMM_MWAVE, MPI_COMM_GRD,          &
-!/MPI                          MPI_COMM_BCT, CROOT, FBCAST
-!/MPRF      USE WMMDATMD, ONLY: MDSP
+#ifdef W3_MPI
+      USE WMMDATMD, ONLY: MPI_COMM_MWAVE, MPI_COMM_GRD,          &
+                          MPI_COMM_BCT, CROOT, FBCAST
+#endif
+#ifdef W3_MPRF
+      USE WMMDATMD, ONLY: MDSP
+#endif
       USE W3INITMD, ONLY: WWVER
       USE W3NMLMULTIMD
 !/
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -3548,8 +3758,12 @@
 !
       INTEGER                 :: TTIME(2), TOUT(2), STMPT(2), ETMPT(2),&
                                  TLST(2)
-!/MPI      INTEGER                 :: IERR_MPI, BGROUP, LGROUP, IROOT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                 :: IERR_MPI, BGROUP, LGROUP, IROOT
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !
       INTEGER, ALLOCATABLE    :: MDS(:,:), NTRACE(:,:), ODAT(:,:),     &
                                  TMPRNK(:), TMPGRP(:), NINGRP(:),      &
@@ -3558,8 +3772,10 @@
                                  ,OUTFF(:,:)
 !
       REAL                    :: DTTST, XX, YY
-!/MPRF      REAL                    :: PRFT0, PRFTN
-!/MPRF      REAL(KIND=8)            :: get_memory
+#ifdef W3_MPRF
+      REAL                    :: PRFT0, PRFTN
+      REAL(KIND=8)            :: get_memory
+#endif
 !
       REAL, ALLOCATABLE       :: X(:), Y(:), AMOVE(:), DMOVE(:),       &
                                  RP1(:), RPN(:)
@@ -3578,7 +3794,9 @@
       CHARACTER(LEN=6),                                                &
                   ALLOCATABLE :: ACTION(:)
       CHARACTER(LEN=8)        :: LFILE, STTIME
-!/SHRD      CHARACTER(LEN=9)        :: TFILE
+#ifdef W3_SHRD
+      CHARACTER(LEN=9)        :: TFILE
+#endif
       CHARACTER(LEN=13)       :: STDATE, MN, TNAMES(9)
       CHARACTER(LEN=40)       :: PN
       CHARACTER(LEN=13),                                               &
@@ -3586,8 +3804,12 @@
       CHARACTER(LEN=40),                                               &
                   ALLOCATABLE :: PNAMES(:)
       CHARACTER(LEN=12)       :: FORMAT
-!/DIST      CHARACTER(LEN=18)       :: TFILE
-!/MPRF      CHARACTER(LEN=18)       :: PFILE
+#ifdef W3_DIST
+      CHARACTER(LEN=18)       :: TFILE
+#endif
+#ifdef W3_MPRF
+      CHARACTER(LEN=18)       :: PFILE
+#endif
       CHARACTER(LEN=13)       :: IDFLDS(-9:9)
       CHARACTER(LEN=23)       :: DTME21
       CHARACTER(LEN=30)       :: IDOTYP(8)
@@ -3629,16 +3851,20 @@
       DATA YESXX  / 'YES/--' /
       DATA XXXNO  / '---/NO' /
 !
-!/MPRF      CALL PRINIT
-!/MPRF      CALL PRTIME ( PRFT0 )
+#ifdef W3_MPRF
+      CALL PRINIT
+      CALL PRTIME ( PRFT0 )
+#endif
 !
       CALL DATE_AND_TIME ( VALUES=CLKDT1 )
 !
       MPI_COMM_LOC   = MPI_COMM
-!/MPI      MPI_COMM_MWAVE = MPI_COMM
-!/MPI      CALL MPI_COMM_SIZE ( MPI_COMM_MWAVE, NMPROC, IERR_MPI )
-!/MPI      CALL MPI_COMM_RANK ( MPI_COMM_MWAVE, IMPROC, IERR_MPI )
-!/MPI      IMPROC = IMPROC + 1
+#ifdef W3_MPI
+      MPI_COMM_MWAVE = MPI_COMM
+      CALL MPI_COMM_SIZE ( MPI_COMM_MWAVE, NMPROC, IERR_MPI )
+      CALL MPI_COMM_RANK ( MPI_COMM_MWAVE, IMPROC, IERR_MPI )
+      IMPROC = IMPROC + 1
+#endif
 !
       IF ( PRESENT(PREAMB) ) FNMPRE = PREAMB
 !/
@@ -3654,19 +3880,21 @@
       CALL WMUSET ( 6,6,  5, .TRUE., 'SYS', 'stdin', 'Standart input' )
       CALL WMUSET ( 6,6,  6, .TRUE., 'SYS', 'stdout','Standart output')
 !
-!/NL2      CALL WMUSET (6,6,103, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,104, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,105, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,106, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,107, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,108, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,109, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,110, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,111, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,112, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,113, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,114, .TRUE., 'FIX', DESC='Reserved SNL2' )
-!/NL2      CALL WMUSET (6,6,117, .TRUE., 'FIX', DESC='Reserved SNL2' )
+#ifdef W3_NL2
+      CALL WMUSET (6,6,103, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,104, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,105, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,106, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,107, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,108, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,109, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,110, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,111, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,112, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,113, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,114, .TRUE., 'FIX', DESC='Reserved SNL2' )
+      CALL WMUSET (6,6,117, .TRUE., 'FIX', DESC='Reserved SNL2' )
+#endif
 !
 ! ... Unit numbers from parameter list
 !     Dynamic scripture updated per file
@@ -3689,7 +3917,9 @@
 !
       CALL ITRACE ( MDST, NTRMAX )
 !
-!/O10      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,900)
+#ifdef W3_O10
+      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,900)
+#endif
 !
 ! 1.c Input file
 !
@@ -3721,9 +3951,15 @@
       IW     = 1 + INT ( LOG10 ( REAL(NMPROC) + 0.5 ) )
       IW     = MAX ( 3 , MIN ( 9 , IW ) ) 
       WRITE (FORMAT,'(A5,I1.1,A1,I1.1,A4)') '(A4,I',IW,'.',IW,',A5)'
-!/SHRD       TFILE  = 'test.mww3'
-!/DIST       WRITE (TFILE,FORMAT) 'test', IMPROC, '.mww3'
-!/MPRF       WRITE (PFILE,FORMAT) 'prf.', IMPROC, '.mww3'
+#ifdef W3_SHRD
+       TFILE  = 'test.mww3'
+#endif
+#ifdef W3_DIST
+       WRITE (TFILE,FORMAT) 'test', IMPROC, '.mww3'
+#endif
+#ifdef W3_MPRF
+       WRITE (PFILE,FORMAT) 'prf.', IMPROC, '.mww3'
+#endif
 !
       IF ( IMPROC .EQ. NMPLOG ) THEN
           OPEN (MDSO,FILE=TRIM(FNMPRE)//LFILE,ERR=2010,IOSTAT=IERR)
@@ -3743,15 +3979,19 @@
                         TRIM(FNMPRE)//TFILE(:IFT), 'Test output file')
         END IF
 !
-!/MPRF      IFT    = LEN_TRIM(PFILE)
-!/MPRF      CALL WMUGET ( MDSS, MDST, MDSP, 'OUT' )
-!/MPRF      CALL WMUSET ( MDSS, MDST, MDSP, .TRUE., 'OUT',            &
-!/MPRF                    TRIM(FNMPRE)//PFILE(:IFT), 'Profiling file')
-!/MPRF      OPEN (MDSP,FILE=TRIM(FNMPRE)//PFILE(:IFT),ERR=2011,IOSTAT=IERR)
+#ifdef W3_MPRF
+      IFT    = LEN_TRIM(PFILE)
+      CALL WMUGET ( MDSS, MDST, MDSP, 'OUT' )
+      CALL WMUSET ( MDSS, MDST, MDSP, .TRUE., 'OUT',            &
+                    TRIM(FNMPRE)//PFILE(:IFT), 'Profiling file')
+      OPEN (MDSP,FILE=TRIM(FNMPRE)//PFILE(:IFT),ERR=2011,IOSTAT=IERR)
+#endif
 !
 ! 1.e Initial and test output
 !
-!/S      CALL STRACE (IENT, 'WMINITNML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMINITNML')
+#endif
 !
       IF ( IMPROC .EQ. NMPLOG ) THEN
           CALL WWDATE ( STDATE )
@@ -3759,7 +3999,9 @@
           WRITE (MDSO,901) WWVER, STDATE, STTIME
         END IF
 !
-!/T      WRITE(MDST,9000) IDSI, IDSO, IDSS, IDST, IDSE, IFNAME
+#ifdef W3_T
+      WRITE(MDST,9000) IDSI, IDSO, IDSS, IDST, IDSE, IFNAME
+#endif
 !
 ! 2.  Set-up of data structures and I/O  ----------------------------- /
 ! 2.a Get number of grids
@@ -3864,10 +4106,12 @@
         NTRACE( 2,I) = NTRMAX
         END DO
 !
-!/T      WRITE (MDST,9020) 'INITIAL'
-!/T      DO I=1, NRGRD
-!/T        WRITE (MDST,9021) I, MDS(:,I), NTRACE(:,I)
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,9020) 'INITIAL'
+      DO I=1, NRGRD
+        WRITE (MDST,9021) I, MDS(:,I), NTRACE(:,I)
+        END DO
+#endif
 !
 ! 3.  Get individual grid information -------------------------------- /
 !
@@ -3889,7 +4133,9 @@
 !
 ! 3.a Read data
 !
-!/T      WRITE (MDST,9030)
+#ifdef W3_T
+      WRITE (MDST,9030)
+#endif
 !
 ! 3.a.1 Input grids
 !
@@ -3983,8 +4229,12 @@
               I      = I + 1
               CALL W3SETI ( I, MDSE, MDST )
               INFLAGS1      = .FALSE.
-!/MGW              INFLAGS1(10)   = .TRUE.
-!/MGP              INFLAGS1(10)   = .TRUE.
+#ifdef W3_MGW
+              INFLAGS1(10)   = .TRUE.
+#endif
+#ifdef W3_MGP
+              INFLAGS1(10)   = .TRUE.
+#endif
               INAMES(I,:)= INAMES(J,:)
               MNAMES(I)  = MNAMES(J)
               TMPRNK(I)  = TMPRNK(J)
@@ -3992,8 +4242,10 @@
               RP1(I)     = RP1(J)
               RPN(I)     = RPN(J)
               BCDUMP(I)  = BCDTMP(J)
-!/T              WRITE (MDST,9031) I, MNAMES(I), INFLAGS1, TMPRNK(I),    &
-!/T                                   TMPGRP(I), RP1(I), RPN(I)
+#ifdef W3_T
+              WRITE (MDST,9031) I, MNAMES(I), INFLAGS1, TMPRNK(I),    &
+                                   TMPGRP(I), RP1(I), RPN(I)
+#endif
             END IF
           END DO
         IF ( I .EQ. NRGRD ) EXIT
@@ -4078,15 +4330,19 @@
           END DO
         END DO
 !
-!/T      WRITE (MDST,9022)
-!/T      DO I=-NRINP, NRGRD
-!/T        IF ( I .EQ. 0 ) CYCLE
-!/T        WRITE (MDST,9021) I, MDSF(I,JFIRST:9)
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,9022)
+      DO I=-NRINP, NRGRD
+        IF ( I .EQ. 0 ) CYCLE
+        WRITE (MDST,9021) I, MDSF(I,JFIRST:9)
+        END DO
+#endif
 !
 ! 3.c Set rank and group data
 !
-!/T      WRITE (MDST,9032)
+#ifdef W3_T
+      WRITE (MDST,9032)
+#endif
 !
       RNKMAX = MAXVAL ( TMPRNK(1:NRGRD) ) + 1
       RNKTMP = 0
@@ -4103,9 +4359,11 @@
           END DO
         END DO
 !
-!/T      DO I=1, NRGRD
-!/T        WRITE (MDST,9033) I, MNAMES(I), GRANK(I)
-!/T        END DO
+#ifdef W3_T
+      DO I=1, NRGRD
+        WRITE (MDST,9033) I, MNAMES(I), GRANK(I)
+        END DO
+#endif
 !
       RNKMAX = RNKTMP
       GRPMAX = MAXVAL ( TMPGRP(1:NRGRD) ) + 1
@@ -4131,11 +4389,13 @@
           END DO
         END DO
 !
-!/T      WRITE (MDST,9034) NRGRP
-!/T      DO I=1, NRGRD
-!/T        WRITE (MDST,9033) I, MNAMES(I), GRGRP(I)
-!/T        END DO
-!/T      WRITE (MDST,9035) NINGRP(1:NRGRP)
+#ifdef W3_T
+      WRITE (MDST,9034) NRGRP
+      DO I=1, NRGRD
+        WRITE (MDST,9033) I, MNAMES(I), GRGRP(I)
+        END DO
+      WRITE (MDST,9035) NINGRP(1:NRGRP)
+#endif
 !
       ALLOCATE ( ACTION(JFIRST:11) )
       ALLOCATE ( INGRP(NRGRP,0:MAXVAL(NINGRP(:NRGRP))) )
@@ -4147,17 +4407,21 @@
         INGRP(GRGRP(I),INGRP(GRGRP(I),0)) = I
         END DO
 !
-!/T      WRITE (MDST,9036)
-!/T      DO J=1, NRGRP
-!/T        WRITE (MDST,9037) J, INGRP(J,:INGRP(J,0))
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,9036)
+      DO J=1, NRGRP
+        WRITE (MDST,9037) J, INGRP(J,:INGRP(J,0))
+        END DO
+#endif
 !
 !
 ! 3.d Unified point output
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.b'
-!/MPRF      PRFT0  = PRFTN
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.b'
+      PRFT0  = PRFTN
+#endif
 !
       IF ( UNIPTS ) THEN
 !
@@ -4636,11 +4900,13 @@
 !
       END DO
 !
-!/T      DO I=1, NRGRD
-!/T          WRITE (MDST,9050) I
-!/T          WRITE (MDST,9053) ODAT(:,I)
-!/T          WRITE (MDST,9052) FLGRD(:,:,I)
-!/T        END DO
+#ifdef W3_T
+      DO I=1, NRGRD
+          WRITE (MDST,9050) I
+          WRITE (MDST,9053) ODAT(:,I)
+          WRITE (MDST,9052) FLGRD(:,:,I)
+        END DO
+#endif
 !
 ! 6.  Read moving grid data ------------------------------------------ /
 !
@@ -4812,11 +5078,15 @@
 !
 ! 7.c Set communicators and ALLPRC array
 !
-!/T      WRITE (MDST,9070)
+#ifdef W3_T
+      WRITE (MDST,9070)
+#endif
       IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,974)
       IF ( NMPLOG.EQ.IMPROC ) WRITE (MDSO,1974)
 !
-!/MPI      CALL MPI_COMM_GROUP ( MPI_COMM_MWAVE, BGROUP, IERR_MPI )
+#ifdef W3_MPI
+      CALL MPI_COMM_GROUP ( MPI_COMM_MWAVE, BGROUP, IERR_MPI )
+#endif
       ALLOCATE ( TMPRNK(NMPROC) )
       NAPRES = NCPROC
 !
@@ -4829,10 +5099,12 @@
         CALL WMSETM ( I, MDSE, MDST )
         NAPLOC = 1 + IPN - IP1
         NAPADD = NAPLOC
-!/MPI        CROOT  = IP1
-!/MPI        FBCAST = NAPLOC .NE. NCPROC
-!/MPI        FBCAST = NAPLOC .NE. NCPROC .OR.                         &
-!/MPI                     ( IOSTYP.GT.1 .AND. .NOT.PSHARE )
+#ifdef W3_MPI
+        CROOT  = IP1
+        FBCAST = NAPLOC .NE. NCPROC
+        FBCAST = NAPLOC .NE. NCPROC .OR.                         &
+                     ( IOSTYP.GT.1 .AND. .NOT.PSHARE )
+#endif
         DO J=IP1, IPN
           TMPRNK(1+J-IP1) = J - 1
           END DO
@@ -4851,11 +5123,13 @@
             TMPRNK(NAPADD) = NMPROC - 1
           END IF
 !
-!/MPI        CALL MPI_GROUP_INCL ( BGROUP, NAPADD, TMPRNK, LGROUP,    &
-!/MPI                              IERR_MPI )
-!/MPI        CALL MPI_COMM_CREATE ( MPI_COMM_MWAVE, LGROUP,           &
-!/MPI                               MPI_COMM_GRD, IERR_MPI )
-!/MPI        CALL MPI_GROUP_FREE ( LGROUP, IERR_MPI )
+#ifdef W3_MPI
+        CALL MPI_GROUP_INCL ( BGROUP, NAPADD, TMPRNK, LGROUP,    &
+                              IERR_MPI )
+        CALL MPI_COMM_CREATE ( MPI_COMM_MWAVE, LGROUP,           &
+                               MPI_COMM_GRD, IERR_MPI )
+        CALL MPI_GROUP_FREE ( LGROUP, IERR_MPI )
+#endif
 !
         DO II=IP1, IPN
           ALLPRC(II,I) = 1 + II - IP1
@@ -4880,7 +5154,9 @@
             ALLPRC(NMPROC,I) = II
           END IF
 !
-!/T        WRITE (MDST,9071) I, ALLPRC(:,I)
+#ifdef W3_T
+        WRITE (MDST,9071) I, ALLPRC(:,I)
+#endif
 !
 ! ... output
 !
@@ -4965,21 +5241,23 @@
         IF ( NMPLOG .EQ. IMPROC )                                     &
             WRITE (MDSO,1975)MNAMES(I), IP1, IPN, OUTSTR
 !
-!/MPI        IF ( FBCAST ) THEN
-!/MPI            TMPRNK(1) = IP1 - 1
-!/MPI            NAPBCT    = 1
-!/MPI            DO J=1, NMPROC
-!/MPI              IF ( ALLPRC(J,I) .EQ. 0 ) THEN
-!/MPI                  NAPBCT = NAPBCT + 1
-!/MPI                  TMPRNK(NAPBCT) = J - 1
-!/MPI                END IF
-!/MPI              END DO
-!/MPI            CALL MPI_GROUP_INCL ( BGROUP, NAPBCT, TMPRNK,       &
-!/MPI                                  LGROUP, IERR_MPI )
-!/MPI            CALL MPI_COMM_CREATE ( MPI_COMM_MWAVE, LGROUP,      &
-!/MPI                                   MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_GROUP_FREE ( LGROUP, IERR_MPI )
-!/MPI         END IF
+#ifdef W3_MPI
+        IF ( FBCAST ) THEN
+            TMPRNK(1) = IP1 - 1
+            NAPBCT    = 1
+            DO J=1, NMPROC
+              IF ( ALLPRC(J,I) .EQ. 0 ) THEN
+                  NAPBCT = NAPBCT + 1
+                  TMPRNK(NAPBCT) = J - 1
+                END IF
+              END DO
+            CALL MPI_GROUP_INCL ( BGROUP, NAPBCT, TMPRNK,       &
+                                  LGROUP, IERR_MPI )
+            CALL MPI_COMM_CREATE ( MPI_COMM_MWAVE, LGROUP,      &
+                                   MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_GROUP_FREE ( LGROUP, IERR_MPI )
+         END IF
+#endif
 !
         END DO
 !
@@ -5015,14 +5293,16 @@
           END DO
         END DO
 !
-!/T      WRITE (MDST,8042)
-!/T      DO J=1, NRGRP
-!/T        WRITE (MDST,8044) J, MODMAP(:,J)
-!/T        END DO
-!/T      WRITE (MDST,8043)
-!/T      DO J=1, NRGRP
-!/T        WRITE (MDST,8044) J, LOADMP(:,J)
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,8042)
+      DO J=1, NRGRP
+        WRITE (MDST,8044) J, MODMAP(:,J)
+        END DO
+      WRITE (MDST,8043)
+      DO J=1, NRGRP
+        WRITE (MDST,8044) J, LOADMP(:,J)
+        END DO
+#endif
 !
 ! 7.e Warnings
 !
@@ -5039,16 +5319,22 @@
 !
 ! 7.f Reset NMPSCR to first processor of first rank 1 grid
 !
-!/MPI      CALL WMSETM ( INGRP(1,1), MDSE, MDST )
-!/MPI      NMPSCR = CROOT
+#ifdef W3_MPI
+      CALL WMSETM ( INGRP(1,1), MDSE, MDST )
+      NMPSCR = CROOT
+#endif
 !
-!/MPI      CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+      CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
 !
 ! 8.  Actual initializations ----------------------------------------- /
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8'
-!/MPRF      PRFT0  = PRFTN
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8'
+      PRFT0  = PRFTN
+#endif
 !
       IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,980)
       ALLOCATE ( TSYNC(2,0:NRGRD), TMAX(2,NRGRD), TOUTP(2,0:NRGRD),   &
@@ -5066,10 +5352,14 @@
 !
 ! 8.a Loop over models for per-model initialization
 !
-!/T      WRITE (MDST,9080)
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.a'
-!/MPRF      PRFT0  = PRFTN
+#ifdef W3_T
+      WRITE (MDST,9080)
+#endif
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.a'
+      PRFT0  = PRFTN
+#endif
 !
       DO I=1, NRGRD
         J      = LEN_TRIM(MNAMES(I))
@@ -5079,14 +5369,18 @@
         IF ( MDSS.NE.MDSO .AND. NMPSC2.EQ.IMPROC )                    &
              WRITE (MDSS,981) I, MNAMES(I)(1:J)
 !
-!/MPI        CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#ifdef W3_MPI
+        CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#endif
 !
 ! 8.a.1 Wave model initialization (NOTE: sets all grid pointers)
 ! ..... Initial output file hook up
 !
         CALL WMSETM ( I, MDSE, MDST )
-!/MPI        MPI_COMM_LOC = MPI_COMM_GRD
-!/MPI        IF ( MPI_COMM_LOC .EQ. MPI_COMM_NULL ) CYCLE
+#ifdef W3_MPI
+        MPI_COMM_LOC = MPI_COMM_GRD
+        IF ( MPI_COMM_LOC .EQ. MPI_COMM_NULL ) CYCLE
+#endif
 !
         CALL WMUGET ( MDSE, MDST, NDSFND, 'OUT' )
         CALL WMUSET ( MDSE, MDST, NDSFND, .TRUE., DESC='Log file' )
@@ -5225,7 +5519,9 @@
               END IF
           END IF
 !
-!/T        WRITE (MDST,9081) I, TIME
+#ifdef W3_T
+        WRITE (MDST,9081) I, TIME
+#endif
 !
 ! 8.a.2 Data file initialization (forcing)
 !
@@ -5347,119 +5643,139 @@
         GRSTAT(I) =  0
         TSYNC(:,I) = TIME(:)
 !
-!/T        WRITE (MDST,9082) GRSTAT(I), TOUTP(:,I), TSYNC(:,I)
+#ifdef W3_T
+        WRITE (MDST,9082) GRSTAT(I), TOUTP(:,I), TSYNC(:,I)
+#endif
 !
         END DO
 !
-!/MPI      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
-!/MPI      DO I=1, NRGRD
-!/MPI        CALL WMSETM ( I, MDSE, MDST )
-!/MPI        CALL W3SETG ( I, MDSE, MDST )
-!/MPI        CALL W3SETO ( I, MDSE, MDST )
-!/MPI        IF ( FBCAST .AND. MPI_COMM_BCT.NE.MPI_COMM_NULL ) THEN
-!/MPI            CALL MPI_BCAST ( TOUTP(1,I), 2, MPI_INTEGER, 0,      &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( TSYNC(1,I), 2, MPI_INTEGER, 0,      &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( GRSTAT(I), 1, MPI_INTEGER, 0,       &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
+#ifdef W3_MPI
+      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+      DO I=1, NRGRD
+        CALL WMSETM ( I, MDSE, MDST )
+        CALL W3SETG ( I, MDSE, MDST )
+        CALL W3SETO ( I, MDSE, MDST )
+        IF ( FBCAST .AND. MPI_COMM_BCT.NE.MPI_COMM_NULL ) THEN
+            CALL MPI_BCAST ( TOUTP(1,I), 2, MPI_INTEGER, 0,      &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( TSYNC(1,I), 2, MPI_INTEGER, 0,      &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( GRSTAT(I), 1, MPI_INTEGER, 0,       &
+                             MPI_COMM_BCT, IERR_MPI )
+#endif
 !
 ! 8.a.4 Grid sizes etc. for processors that are not used.
 !
-!/MPI            CALL MPI_BCAST ( FLAGLL,1, MPI_LOGICAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( GTYPE, 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( ICLOSE,1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NX   , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NY   , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( X0   , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( SX   , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( Y0   , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( SY   , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NSEA , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NSEAL, 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DTMAX, 1, MPI_REAL, 0,              &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DTCFL, 1, MPI_REAL, 0,              &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( FILEXT, 10, MPI_CHARACTER, 0,       &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
-!/MPI                 CALL W3DIMX  ( I, NX, NY, NSEA, MDSE, MDST      &
-!/SMC !!  SMC grid related variables are not needed beyond MPI_COMM_GRD
-!/SMC !!  so all dimensions are minimised to 1.  JGLi29Mar2021
-!/MPI/!/SMC !!Li        , NCel, NUFc, NVFc, NRLv, NBSMC  &
-!/MPI/!/SMC !!Li        , NARC, NBAC, NSPEC              &
-!/MPI/!/SMC             , 1, 1, 1, 1, 1, 1, 1, 1         &
-!/MPI                )
-!/MPI            CALL MPI_BCAST ( HQFAC, NX*NY, MPI_REAL, 0,          &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( HPFAC, NX*NY, MPI_REAL, 0,          &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( XGRD, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( YGRD, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
-!/MPI                 GSU = W3GSUC( .FALSE., FLAGLL, ICLOSE,          &
-!/MPI                               XGRD, YGRD )
-!/MPI            CALL MPI_BCAST ( DXDP, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DXDQ, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DYDP, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DYDQ, NX*NY, MPI_REAL, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( MAPSTA, NX*NY, MPI_INTEGER, 0,      &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( MAPST2, NX*NY, MPI_INTEGER, 0,      &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( GRIDSHIFT, 1, MPI_DOUBLE_PRECISION, 0, &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
+#ifdef W3_MPI
+            CALL MPI_BCAST ( FLAGLL,1, MPI_LOGICAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( GTYPE, 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( ICLOSE,1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NX   , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NY   , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( X0   , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( SX   , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( Y0   , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( SY   , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NSEA , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NSEAL, 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DTMAX, 1, MPI_REAL, 0,              &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DTCFL, 1, MPI_REAL, 0,              &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( FILEXT, 10, MPI_CHARACTER, 0,       &
+                             MPI_COMM_BCT, IERR_MPI )
+            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
+                 CALL W3DIMX  ( I, NX, NY, NSEA, MDSE, MDST      &
+#endif
+#ifdef W3_SMC
+ !!  SMC grid related variables are not needed beyond MPI_COMM_GRD
+ !!  so all dimensions are minimised to 1.  JGLi29Mar2021
+#endif
+#ifdef W3_MPI
+#ifdef W3_SMC
+ !!Li        , NCel, NUFc, NVFc, NRLv, NBSMC  &
+ !!Li        , NARC, NBAC, NSPEC              &
+             , 1, 1, 1, 1, 1, 1, 1, 1         &
+#endif
+                )
+            CALL MPI_BCAST ( HQFAC, NX*NY, MPI_REAL, 0,          &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( HPFAC, NX*NY, MPI_REAL, 0,          &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( XGRD, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( YGRD, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
+                 GSU = W3GSUC( .FALSE., FLAGLL, ICLOSE,          &
+                               XGRD, YGRD )
+            CALL MPI_BCAST ( DXDP, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DXDQ, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DYDP, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DYDQ, NX*NY, MPI_REAL, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( MAPSTA, NX*NY, MPI_INTEGER, 0,      &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( MAPST2, NX*NY, MPI_INTEGER, 0,      &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( GRIDSHIFT, 1, MPI_DOUBLE_PRECISION, 0, &
+                             MPI_COMM_BCT, IERR_MPI )
+#endif
 !
-!/MPI            CALL MPI_BCAST ( NK   , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NTH  , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( XFR  , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( FR1  , 1, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
-!/MPI                 CALL W3DIMS ( I, NK, NTH, MDSE, MDST )
-!/MPI            CALL MPI_BCAST ( TH , NTH, MPI_REAL   , 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
+#ifdef W3_MPI
+            CALL MPI_BCAST ( NK   , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NTH  , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( XFR  , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( FR1  , 1, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL )               &
+                 CALL W3DIMS ( I, NK, NTH, MDSE, MDST )
+            CALL MPI_BCAST ( TH , NTH, MPI_REAL   , 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+#endif
 !
-!/MPI            CALL MPI_BCAST ( NAPROC,1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NAPPNT,1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( NBI  , 1, MPI_INTEGER, 0,           &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
+#ifdef W3_MPI
+            CALL MPI_BCAST ( NAPROC,1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NAPPNT,1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( NBI  , 1, MPI_INTEGER, 0,           &
+                             MPI_COMM_BCT, IERR_MPI )
+#endif
 !
-!/MPI            CALL MPI_BCAST ( FLOUT,  8, MPI_LOGICAL, 0,          &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( DTOUT , 8, MPI_REAL, 0,             &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( TONEXT,16, MPI_INTEGER, 0,          &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
-!/MPI            CALL MPI_BCAST ( TOLAST,16, MPI_INTEGER, 0,          &
-!/MPI                             MPI_COMM_BCT, IERR_MPI )
+#ifdef W3_MPI
+            CALL MPI_BCAST ( FLOUT,  8, MPI_LOGICAL, 0,          &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( DTOUT , 8, MPI_REAL, 0,             &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( TONEXT,16, MPI_INTEGER, 0,          &
+                             MPI_COMM_BCT, IERR_MPI )
+            CALL MPI_BCAST ( TOLAST,16, MPI_INTEGER, 0,          &
+                             MPI_COMM_BCT, IERR_MPI )
+#endif
 !
-!/MPI          END IF
-!/MPI        END DO
-!/MPI      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#ifdef W3_MPI
+          END IF
+        END DO
+      CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
+#endif
 !
       DO I=1, NRGRD
         IF ( ALLPRC(IMPROC,I) .EQ. 0 ) THEN
@@ -5470,10 +5786,12 @@
 !
 ! 8.a.5 Test output
 !
-!/T      WRITE (MDST,9020) 'AFTER SETUP'
-!/T      DO I=1, NRGRD
-!/T        WRITE (MDST,9021) I, MDS(:,I), NTRACE(:,I)
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,9020) 'AFTER SETUP'
+      DO I=1, NRGRD
+        WRITE (MDST,9021) I, MDS(:,I), NTRACE(:,I)
+        END DO
+#endif
 !
 ! 8.a.6 Check for coordinate system
 !
@@ -5483,9 +5801,11 @@
 !
 ! 8.b Input files
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.c'
-!/MPRF      PRFT0  = PRFTN
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.c'
+      PRFT0  = PRFTN
+#endif
 !
       DO I=1, NRINP
 !
@@ -5538,9 +5858,11 @@
 !
 ! 8.c Inter model initialization
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.d'
-!/MPRF      PRFT0  = PRFTN
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'START Sec. 8.d'
+      PRFT0  = PRFTN
+#endif
 
 ! 8.c.1 Spectral conversion flags and source term flags
 !
@@ -5560,14 +5882,18 @@
 ! ..... At this point the grid-search-utility (GSU) object for grids
 !       that do not belong to this processor is no longer needed.
 !
-!/MPI      DO I=1, NRGRD
-!/MPI        CALL WMSETM ( I, MDSE, MDST )
-!/MPI        CALL W3SETG ( I, MDSE, MDST )
+#ifdef W3_MPI
+      DO I=1, NRGRD
+        CALL WMSETM ( I, MDSE, MDST )
+        CALL W3SETG ( I, MDSE, MDST )
+#endif
 ! the next line (with the W3GSUD call) removed Jan 8 2013. 
 ! ...ref: personal communication, 
 ! ...email from Rogers to Alves, Campbell, Tolman, Chawla Dec 13 2012.
 ! REMOVED  !/MPI        IF ( MPI_COMM_GRD .EQ. MPI_COMM_NULL ) CALL W3GSUD( GSU )
-!/MPI        END DO
+#ifdef W3_MPI
+        END DO
+#endif
 !
 ! ..... Unit numbers
 !
@@ -5589,9 +5915,13 @@
             BCDUMP(I) = .FALSE.
           END IF
 !
-!/SHRD        IF ( .NOT. FLRBPI(I) .AND. FLBPI ) THEN
-!/MPI        IF ( .NOT. FLRBPI(I) .AND. FLBPI .AND.                   &
-!/MPI              MPI_COMM_GRD .NE. MPI_COMM_NULL) THEN
+#ifdef W3_SHRD
+        IF ( .NOT. FLRBPI(I) .AND. FLBPI ) THEN
+#endif
+#ifdef W3_MPI
+        IF ( .NOT. FLRBPI(I) .AND. FLBPI .AND.                   &
+              MPI_COMM_GRD .NE. MPI_COMM_NULL) THEN
+#endif
             CALL WMUSET ( MDSE, MDST, NDS(9), .FALSE. )
             IF ( BCDUMP(I) .AND. IAPROC.EQ.NAPBPT ) THEN
                 J            = LEN_TRIM(FILEXT)
@@ -5613,44 +5943,58 @@
 ! ..... Data initialization
 !
       DO I=1, NRGRD
-!/MPI        CALL WMSETM ( I, MDSE, MDST )
-!/MPI        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBS ( I )
-!/SHRD        CALL WMIOBS ( I )
+#ifdef W3_MPI
+        CALL WMSETM ( I, MDSE, MDST )
+        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBS ( I )
+#endif
+#ifdef W3_SHRD
+        CALL WMIOBS ( I )
+#endif
         END DO
 !
       DO I=1, NRGRD
-!/MPI        CALL WMSETM ( I, MDSE, MDST )
-!/MPI        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBG ( I )
-!/SHRD        CALL WMIOBG ( I )
+#ifdef W3_MPI
+        CALL WMSETM ( I, MDSE, MDST )
+        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBG ( I )
+#endif
+#ifdef W3_SHRD
+        CALL WMIOBG ( I )
+#endif
         END DO
 !
-!/MPI      DO I=1, NRGRD
-!/MPI        CALL WMSETM ( I, MDSE, MDST )
-!/MPI        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBF ( I )
-!/MPI        END DO
+#ifdef W3_MPI
+      DO I=1, NRGRD
+        CALL WMSETM ( I, MDSE, MDST )
+        IF ( MPI_COMM_GRD .NE. MPI_COMM_NULL ) CALL WMIOBF ( I )
+        END DO
+#endif
 !
 ! 8.c.3 Relation to same ranked grids
 !
-!/SMC !!  Check whether there is a SMC grid group.  JGLi12Apr2021
-!/SMC      NGRPSMC = 0 
-!/SMC      DO JJ=1, NRGRP
-!/SMC         J = 0
-!/SMC         DO II=1, INGRP(JJ,0)
-!/SMC            I = INGRP(JJ,II)
-!/SMC            IF( GRIDS(I)%GTYPE .EQ. SMCTYPE ) J = J + 1 
-!/SMC         ENDDO
-!/SMC         IF( J .GT. 1 )  NGRPSMC = JJ 
-!/SMC      ENDDO
-!/SMC      IF( IMPROC.EQ.NMPERR )  WRITE (MDSE,*) " NGRPSMC =", NGRPSMC
-!/SMC 
-!/SMC !!  Equal ranked SMC grid group uses its own sub.   JGLi12Apr2021
-!/SMC      IF( NGRPSMC .GT. 0 ) THEN
-!/SMC          CALL WMSMCEQL
-!/SMC      ELSE
+#ifdef W3_SMC
+ !!  Check whether there is a SMC grid group.  JGLi12Apr2021
+      NGRPSMC = 0 
+      DO JJ=1, NRGRP
+         J = 0
+         DO II=1, INGRP(JJ,0)
+            I = INGRP(JJ,II)
+            IF( GRIDS(I)%GTYPE .EQ. SMCTYPE ) J = J + 1 
+         ENDDO
+         IF( J .GT. 1 )  NGRPSMC = JJ 
+      ENDDO
+      IF( IMPROC.EQ.NMPERR )  WRITE (MDSE,*) " NGRPSMC =", NGRPSMC
+ 
+ !!  Equal ranked SMC grid group uses its own sub.   JGLi12Apr2021
+      IF( NGRPSMC .GT. 0 ) THEN
+          CALL WMSMCEQL
+      ELSE
+#endif
 !
       CALL WMGEQL
 !
-!/SMC      ENDIF
+#ifdef W3_SMC
+      ENDIF
+#endif
 !
 ! 8.c.4 Relation to higher ranked grids
 !
@@ -5692,15 +6036,17 @@
                             OT2(0)%PNAMES )
             END IF
 !
-!/MPI          DO I=1, NRGRD
-!/MPI            CALL WMSETM ( I, MDSE, MDST )
-!/MPI            CALL W3SETG ( I, MDSE, MDST )
-!/MPI            CALL W3SETO ( I, MDSE, MDST )
-!/MPI            IF ( FBCAST .AND. MPI_COMM_BCT.NE.MPI_COMM_NULL ) THEN
-!/MPI                CALL MPI_BCAST ( NOPTS, 1, MPI_INTEGER, 0,       &
-!/MPI                                 MPI_COMM_BCT, IERR_MPI )
-!/MPI              END IF
-!/MPI            END DO
+#ifdef W3_MPI
+          DO I=1, NRGRD
+            CALL WMSETM ( I, MDSE, MDST )
+            CALL W3SETG ( I, MDSE, MDST )
+            CALL W3SETO ( I, MDSE, MDST )
+            IF ( FBCAST .AND. MPI_COMM_BCT.NE.MPI_COMM_NULL ) THEN
+                CALL MPI_BCAST ( NOPTS, 1, MPI_INTEGER, 0,       &
+                                 MPI_COMM_BCT, IERR_MPI )
+              END IF
+            END DO
+#endif
 !
         END IF
 !
@@ -5803,10 +6149,12 @@
               WRITE (MDSO,937) 'No higher rank grid dependencies'
         END IF
 !
-!/T      WRITE (MDST,9083)
-!/T      DO I=-NRINP, NRGRD
-!/T        WRITE (MDST,9084) I, IDINP(I,:)
-!/T        END DO
+#ifdef W3_T
+      WRITE (MDST,9083)
+      DO I=-NRINP, NRGRD
+        WRITE (MDST,9084) I, IDINP(I,:)
+        END DO
+#endif
 !
 !    Test output of connected units (always)
 !
@@ -5816,16 +6164,22 @@
       DEALLOCATE ( MDS, NTRACE, ODAT, FLGRD, FLGR2, FLGD, FLG2, INAMES,&
                    MNAMES )
 !
-!/MPI      CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+      CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
 !
       CALL DATE_AND_TIME ( VALUES=CLKDT2 )
       CLKFIN = TDIFF ( CLKDT1,CLKDT2 )
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'END'
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory(), 'END'
+#endif
 !
       IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,998)
-!/O10      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,999)
+#ifdef W3_O10
+      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,999)
+#endif
 !!!!!/MPI CALL MPI_BARRIER (MPI_COMM_MWAVE,IERR_MPI)
 !!!!!/MPI CALL MPI_FINALIZE  ( IERR_MPI )
 !!!!!/MPI stop
@@ -6061,7 +6415,9 @@
   987 FORMAT ( '          Initializing grids ...')
   988 FORMAT ( '       Input data grid',I3,' [',A,']')
 !
-!/MPRF  990 FORMAT (1X,3F12.3,' WMINITNML',1X,A)
+#ifdef W3_MPRF
+  990 FORMAT (1X,3F12.3,' WMINITNML',1X,A)
+#endif
 !
   998 FORMAT ( '  Running the model :'/                               &
                ' --------------------------------------------------'/)
@@ -6129,43 +6485,55 @@
  1081 FORMAT (/' *** NO BOUNDARY DATA TO DUMP, GRID :',I4,' ***')
  1082 FORMAT ( '  No boundary data dump for grid',I3/)
 !
-!/T 9000 FORMAT ( ' TEST WMINITNML : UNIT NUMBERS    : ',5I6/          &
-!/T               '               INPUT FILE NAME : ',A)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMINITNML : UNIT NUMBERS    : ',5I6/          &
+               '               INPUT FILE NAME : ',A)
+#endif
 !
-!/T 9020 FORMAT ( ' TEST WMINITNML : UNIT NUMBERS FOR GRIDS (',A,')'/  &
-!/T                               15X,'GRID MDS(1-13)',43X,'NTRACE')
-!/T 9021 FORMAT (14X,16I4)
-!/T 9022 FORMAT ( ' TEST WMINITNML : UNIT NUMBERS FOR INTPUT FILES'/   &
-!/T                               15X,'GRID MDSF(JFIRST-9)')
-!/T 9030 FORMAT ( ' TEST WMINITNML : FILE EXTENSIONS, INPUT FLAGS,',   &
-!/T               ' RANK AND GROUP, PROC RANGE')
-!/T 9031 FORMAT ( '            ',I3,1X,A,20L2,2I4,2F6.2)
-!/T 9032 FORMAT ( ' TEST WMINITNML : PROCESSED RANK NUMBERS')
-!/T 9033 FORMAT ( '             ',I3,1X,A,1X,I4)
-!/T 9034 FORMAT ( ' TEST WMINITNML : NUMBER OF GROUPS :',I4)
-!/T 9035 FORMAT ( ' TEST WMINITNML : SIZE OF GROUPS :',20I3)
-!/T 9036 FORMAT ( ' TEST WMINITNML : GROUP SIZE AND COMPONENTS :')
-!/T 9037 FORMAT ( '             ',2I3,':',20I3)
+#ifdef W3_T
+ 9020 FORMAT ( ' TEST WMINITNML : UNIT NUMBERS FOR GRIDS (',A,')'/  &
+                               15X,'GRID MDS(1-13)',43X,'NTRACE')
+ 9021 FORMAT (14X,16I4)
+ 9022 FORMAT ( ' TEST WMINITNML : UNIT NUMBERS FOR INTPUT FILES'/   &
+                               15X,'GRID MDSF(JFIRST-9)')
+ 9030 FORMAT ( ' TEST WMINITNML : FILE EXTENSIONS, INPUT FLAGS,',   &
+               ' RANK AND GROUP, PROC RANGE')
+ 9031 FORMAT ( '            ',I3,1X,A,20L2,2I4,2F6.2)
+ 9032 FORMAT ( ' TEST WMINITNML : PROCESSED RANK NUMBERS')
+ 9033 FORMAT ( '             ',I3,1X,A,1X,I4)
+ 9034 FORMAT ( ' TEST WMINITNML : NUMBER OF GROUPS :',I4)
+ 9035 FORMAT ( ' TEST WMINITNML : SIZE OF GROUPS :',20I3)
+ 9036 FORMAT ( ' TEST WMINITNML : GROUP SIZE AND COMPONENTS :')
+ 9037 FORMAT ( '             ',2I3,':',20I3)
+#endif
 !
-!/T 9050 FORMAT ( ' TEST WMINITNML : GRID NUMBER',I3,' =================')
-!/T 9051 FORMAT ( ' TEST WMINITNML : ODAT   : ',I9.8,I7.6,I7,I9.8,I7.6,  &
-!/T                                  5(/24X,I9.8,I7.6,I7,I9.8,I7.6) )
-!/T 9052 FORMAT ( ' TEST WMINITNML : FLGRD  : ',5(5L2,1X)/24X,5(5L2,1X))
+#ifdef W3_T
+ 9050 FORMAT ( ' TEST WMINITNML : GRID NUMBER',I3,' =================')
+ 9051 FORMAT ( ' TEST WMINITNML : ODAT   : ',I9.8,I7.6,I7,I9.8,I7.6,  &
+                                  5(/24X,I9.8,I7.6,I7,I9.8,I7.6) )
+ 9052 FORMAT ( ' TEST WMINITNML : FLGRD  : ',5(5L2,1X)/24X,5(5L2,1X))
+#endif
 !
-!/T 9060 FORMAT ( ' TEST WMINITNML : GRID MOVEMENT DATA')
-!/T 9061 FORMAT ( '             ',I8.8,I7,1X,2F8.2)
+#ifdef W3_T
+ 9060 FORMAT ( ' TEST WMINITNML : GRID MOVEMENT DATA')
+ 9061 FORMAT ( '             ',I8.8,I7,1X,2F8.2)
+#endif
 !
-!/T 9070 FORMAT ( ' TEST WMINITNML : ALLPRC ')
-!/T 9071 FORMAT ( ' ',I3,'  : ',250I3)
-!/T 8042 FORMAT ( ' TEST WMINITNML : MODMAP ')
-!/T 8043 FORMAT ( ' TEST WMINITNML : LOADMP ')
-!/T 8044 FORMAT ( '        ',I3,'  : ',250I2)
+#ifdef W3_T
+ 9070 FORMAT ( ' TEST WMINITNML : ALLPRC ')
+ 9071 FORMAT ( ' ',I3,'  : ',250I3)
+ 8042 FORMAT ( ' TEST WMINITNML : MODMAP ')
+ 8043 FORMAT ( ' TEST WMINITNML : LOADMP ')
+ 8044 FORMAT ( '        ',I3,'  : ',250I2)
+#endif
 !
-!/T 9080 FORMAT ( ' TEST WMINITNML : MODEL INITIALIZATION')
-!/T 9081 FORMAT ( '               MODEL AND TIME   :',I4,I10.8,I8.6)
-!/T 9082 FORMAT ( '               STATUS AND TIMES :',I4,3(I10.8,I8.6))
-!/T 9083 FORMAT ( ' TEST WMINITNML : IDINP AFTER INITIALIZATION :')
-!/T 9084 FORMAT ( '               ',I4,17(2X,A3))
+#ifdef W3_T
+ 9080 FORMAT ( ' TEST WMINITNML : MODEL INITIALIZATION')
+ 9081 FORMAT ( '               MODEL AND TIME   :',I4,I10.8,I8.6)
+ 9082 FORMAT ( '               STATUS AND TIMES :',I4,3(I10.8,I8.6))
+ 9083 FORMAT ( ' TEST WMINITNML : IDINP AFTER INITIALIZATION :')
+ 9084 FORMAT ( '               ',I4,17(2X,A3))
+#endif
 !/
 !/ End of WMINITNML ----------------------------------------------------- /
 !/

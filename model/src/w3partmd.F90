@@ -161,7 +161,9 @@
 !/ ------------------------------------------------------------------- /
 !/
       USE CONSTANTS
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, TH
       USE W3ODATMD, ONLY: WSCUT, FLCOMB
@@ -185,7 +187,9 @@
                                  IP, IT(1), INDEX(DIMXP), NWS,        &
                                  IPW, IPT, ISP
       INTEGER                 :: PMAP(DIMXP)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: ZP(NSPEC), ZMIN, ZMAX, Z(NSPEC),     &
                                  FACT, WSMAX, HSMAX
       REAL                    :: TP(DIMP,DIMXP)
@@ -195,7 +199,9 @@
 !/ ------------------------------------------------------------------- /
 ! 0.  Initializations
 !
-!/S      CALL STRACE (IENT, 'W3PART')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3PART')
+#endif
 !
       NP     = 0
       XP     = 0.
@@ -467,7 +473,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       USE W3GDATMD, ONLY: NSPEC
 !
@@ -483,11 +491,15 @@
 !/ Local parameters
 !/
       INTEGER                 :: I, IN, IV
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       INTEGER                 :: NUMV(IHMAX), IADDR(IHMAX),           &
                                  IORDER(NSPEC)
 !/
-!/S      CALL STRACE (IENT, 'PTSORT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'PTSORT')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Occurences per height
@@ -566,7 +578,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       USE W3GDATMD, ONLY: NK, NTH, NSPEC
 !
@@ -582,9 +596,13 @@
 !/ Local parameters
 !/
       INTEGER                 :: N, J, I, K
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'PTNGHB')
+#ifdef W3_S
+      CALL STRACE (IENT, 'PTNGHB')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Check on need of processing
@@ -756,7 +774,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       USE W3GDATMD, ONLY: NSPEC
 !
@@ -777,10 +797,14 @@
                                  IP, I, IPP, IC_DIST, IEMPTY, IPPP,   &
                                  JL, JN, IPT, J
       INTEGER                 :: IQ(NSPEC), IQ_START, IQ_END
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: ZPMAX, EP1, DIFF
 !/
-!/S      CALL STRACE (IENT, 'PT_FLD')
+#ifdef W3_S
+      CALL STRACE (IENT, 'PT_FLD')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 0.  Initializations
@@ -1069,7 +1093,9 @@
 !/ ------------------------------------------------------------------- /
 !
       USE CONSTANTS
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3DISPMD, ONLY: WAVNU1
 !
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, DTH, SIG, DSII, DSIP,       &
@@ -1090,7 +1116,9 @@
 !/ Local parameters
 !/
       INTEGER                 :: IK, ITH, ISP, IP, IFPMAX(0:NPI)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: SUMF(0:NK+1,0:NPI), SUMFW(NK,0:NPI), &
                                  SUMFX(NK,0:NPI), SUMFY(NK,0:NPI),    &
                                  SUME(0:NPI), SUMEW(0:NPI),           &
@@ -1104,7 +1132,9 @@
                                  SUMY, SUMXXY, SUMXYLOGY, SUMEXP, SUMEYP
       REAL                    :: FTEII
 !/
-!/S      CALL STRACE (IENT, 'PTMEAN')
+#ifdef W3_S
+      CALL STRACE (IENT, 'PTMEAN')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Check on need of processing

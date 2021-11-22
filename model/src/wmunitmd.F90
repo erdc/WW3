@@ -149,7 +149,9 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -162,15 +164,21 @@
 !/ Local parameters
 !/
       INTEGER                 :: J, I1, IN, I
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       CHARACTER(LEN=3)        :: STRING
 !/
-!/S      CALL STRACE (IENT, 'WMUINI')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMUINI')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test parameter settings
 !
-!/T      WRITE (NDST,9000)
+#ifdef W3_T
+      WRITE (NDST,9000)
+#endif
 !
       IF ( UNITLW .GE. UNITHG ) THEN
           WRITE (NDSE,1000) UNITLW, UNITHG
@@ -199,7 +207,9 @@
 ! -------------------------------------------------------------------- /
 ! 1.  Allocate and initialize arrays
 !
-!/T      WRITE (NDST,9010) UNITLW, UNITHG
+#ifdef W3_T
+      WRITE (NDST,9010) UNITLW, UNITHG
+#endif
 !
       ALLOCATE ( U_USED(UNITLW:UNITHG) , U_TYPE(UNITLW:UNITHG) ,      &
                  U_NAME(UNITLW:UNITHG) , U_DESC(UNITLW:UNITHG) )
@@ -212,7 +222,9 @@
 ! -------------------------------------------------------------------- /
 ! 2.  Designate file types
 !
-!/T      WRITE (NDST,9020)
+#ifdef W3_T
+      WRITE (NDST,9020)
+#endif
 !
       DO J=1, 3
 !
@@ -242,17 +254,21 @@
 ! -------------------------------------------------------------------- /
 ! 3.  Set flags
 !
-!/T      WRITE (NDST,9030)
+#ifdef W3_T
+      WRITE (NDST,9030)
+#endif
 !
       FLINIT = .TRUE.
 !
 ! -------------------------------------------------------------------- /
 ! 4.  Test output
 !
-!/T      WRITE (NDST,9040)
-!/T      DO I=UNITLW, UNITHG
-!/T        WRITE (NDST,9041) I,U_USED(I),U_TYPE(I),U_NAME(I),U_DESC(I)
-!/T        END DO
+#ifdef W3_T
+      WRITE (NDST,9040)
+      DO I=UNITLW, UNITHG
+        WRITE (NDST,9041) I,U_USED(I),U_TYPE(I),U_NAME(I),U_DESC(I)
+        END DO
+#endif
 !
       RETURN
 !
@@ -268,12 +284,14 @@
  1020 FORMAT (/' *** WARNING WMUINI: UNIT',I4,' ALREADY ASSIGNED [',  &
                A,'] ***')
 !
-!/T 9000 FORMAT ( ' TEST WMUNINI: STARTING ROUTINE')
-!/T 9010 FORMAT ( ' TEST WMUNINI: ALLOCATING ARRAYS ',2I6)
-!/T 9020 FORMAT ( ' TEST WMUNINI: INITALIZING ARRAYS')
-!/T 9030 FORMAT ( ' TEST WMUNINI: SETTING FLAGS')
-!/T 9040 FORMAT ( ' TEST WMUNINI: DATA STRUCTURE AFTER INITIALIZATION')
-!/T 9041 FORMAT ( 5X,I4,L4,3(2X,A))
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMUNINI: STARTING ROUTINE')
+ 9010 FORMAT ( ' TEST WMUNINI: ALLOCATING ARRAYS ',2I6)
+ 9020 FORMAT ( ' TEST WMUNINI: INITALIZING ARRAYS')
+ 9030 FORMAT ( ' TEST WMUNINI: SETTING FLAGS')
+ 9040 FORMAT ( ' TEST WMUNINI: DATA STRUCTURE AFTER INITIALIZATION')
+ 9041 FORMAT ( 5X,I4,L4,3(2X,A))
+#endif
 !/
 !/ End of WMUINI ----------------------------------------------------- /
 !/
@@ -332,7 +350,9 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -345,9 +365,13 @@
 !/ Local parameters
 !/
       INTEGER                 :: I
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMUDMP')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMUDMP')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test request and intialization
@@ -473,7 +497,9 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -490,9 +516,13 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMUSET')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMUSET')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
@@ -507,8 +537,10 @@
           CALL EXTCDE ( 1001 )
         END IF
 !
-!/T      WRITE (NDST,9000) NDS, U_USED(NDS), U_TYPE(NDS),             &
-!/T                             U_NAME(NDS), U_DESC(NDS)
+#ifdef W3_T
+      WRITE (NDST,9000) NDS, U_USED(NDS), U_TYPE(NDS),             &
+                             U_NAME(NDS), U_DESC(NDS)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Set data
@@ -536,8 +568,10 @@
           U_DESC(NDS) = 'unknown'
         END IF
 !
-!/T      WRITE (NDST,9001) NDS, U_USED(NDS), U_TYPE(NDS),             &
-!/T                             U_NAME(NDS), U_DESC(NDS)
+#ifdef W3_T
+      WRITE (NDST,9001) NDS, U_USED(NDS), U_TYPE(NDS),             &
+                             U_NAME(NDS), U_DESC(NDS)
+#endif
 !
       RETURN
 !
@@ -547,16 +581,18 @@
  1001 FORMAT (/' *** ERROR WMUSET: UNIT NUMBER OUT OF RANGE ***'      &
               /'                   REQ/RANG :',3I6/)
 !
-!/T 9000 FORMAT ( ' TEST WMUSET: UNIT ',I4', ON SUBROUTINE ENTRY :'/  &
-!/T               '              FLAG : ',L4/                         &
-!/T               '              TYPE : ',A/                          &
-!/T               '              NAME : ',A/                          &
-!/T               '              DESC : ' A)
-!/T 9001 FORMAT ( ' TEST WMUSET: UNIT ',I4', ON SUBROUTINE EXIT :'/   &
-!/T               '              FLAG : ',L4/                         &
-!/T               '              TYPE : ',A/                          &
-!/T               '              NAME : ',A/                          &
-!/T               '              DESC : ' A)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMUSET: UNIT ',I4', ON SUBROUTINE ENTRY :'/  &
+               '              FLAG : ',L4/                         &
+               '              TYPE : ',A/                          &
+               '              NAME : ',A/                          &
+               '              DESC : ' A)
+ 9001 FORMAT ( ' TEST WMUSET: UNIT ',I4', ON SUBROUTINE EXIT :'/   &
+               '              FLAG : ',L4/                         &
+               '              TYPE : ',A/                          &
+               '              NAME : ',A/                          &
+               '              DESC : ' A)
+#endif
 !/
 !/ End of WMUSET ----------------------------------------------------- /
 !/
@@ -620,7 +656,9 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -636,11 +674,15 @@
 !/ Local parameters
 !/
       INTEGER                 :: NRC, I, J
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       LOGICAL                 :: OK
       LOGICAL                 :: OPND
 !/
-!/S      CALL STRACE (IENT, 'WMUGET')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMUGET')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input / output
@@ -656,7 +698,9 @@
           NRC    = 1
         END IF
 !
-!/T      WRITE (NDST,9010) TYPE, NRC
+#ifdef W3_T
+      WRITE (NDST,9010) TYPE, NRC
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Find first free unit number and reset flag
@@ -693,7 +737,9 @@
           CALL EXTCDE ( 1020 )
         END IF
 !
-!/T      WRITE (NDST,9020) NDS
+#ifdef W3_T
+      WRITE (NDST,9020) NDS
+#endif
 !
       RETURN
 !
@@ -703,9 +749,11 @@
  1020 FORMAT (/' *** ERROR WMUGET: CANNOT FIND FREE UNIT FOR TYPE ',  &
                A,' ***'/)
 !  
-!/T 9010 FORMAT ( ' TEST WMUGET: LOOKING FOR UNIT FOR TYPE ',A,' [',  &
-!/T                I2,']')
-!/T 9020 FORMAT ( ' TEST WMUGET: UNIT NUMBER SET TO',I4)
+#ifdef W3_T
+ 9010 FORMAT ( ' TEST WMUGET: LOOKING FOR UNIT FOR TYPE ',A,' [',  &
+                I2,']')
+ 9020 FORMAT ( ' TEST WMUGET: UNIT NUMBER SET TO',I4)
+#endif
 !/
 !/ End of WMUGET ----------------------------------------------------- /
 !/
@@ -764,7 +812,9 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -776,10 +826,14 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       LOGICAL                 :: CHECK
 !/
-!/S      CALL STRACE (IENT, 'WMUINQ')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMUINQ')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input / output
@@ -794,7 +848,9 @@
           CALL EXTCDE ( 1011 )
         END IF
 !
-!/T      WRITE (NDST,9010) NDS
+#ifdef W3_T
+      WRITE (NDST,9010) NDS
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Check out file
@@ -802,7 +858,9 @@
 !
       INQUIRE (NDS,OPENED=CHECK)
 !
-!/T      WRITE (NDST,9020) CHECK
+#ifdef W3_T
+      WRITE (NDST,9020) CHECK
+#endif
 !
 ! 2.b File not opened, release to pool
 !
@@ -814,7 +872,9 @@
 !
              INQUIRE (NDS,NAME=U_NAME(NDS))
 !
-!/T             WRITE (NDST,9021) U_NAME(NDS)
+#ifdef W3_T
+             WRITE (NDST,9021) U_NAME(NDS)
+#endif
 !
            END IF
 !
@@ -829,9 +889,11 @@
  1011 FORMAT (/' *** ERROR WMUINQ: UNIT NUMBER OUT OF RANGE ***'      &
               /'                   REQ/RANG :',3I6/)
 !
-!/T 9010 FORMAT ( ' TEST WMUINQ: TESTING UNIT NUMBER',I4)
-!/T 9020 FORMAT ( '              INQUIRE ON OPENED : ',L2)
-!/T 9021 FORMAT ( '              NAME OF FILE      : ',A)
+#ifdef W3_T
+ 9010 FORMAT ( ' TEST WMUINQ: TESTING UNIT NUMBER',I4)
+ 9020 FORMAT ( '              INQUIRE ON OPENED : ',L2)
+ 9021 FORMAT ( '              NAME OF FILE      : ',A)
+#endif
 !/
 !/ End of WMUINQ ----------------------------------------------------- /
 !/

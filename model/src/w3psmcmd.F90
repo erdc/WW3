@@ -235,7 +235,9 @@
       USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPI0, TBPIN,       &
                           ISBPI, BBPI0, BBPIN
 !
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -254,7 +256,9 @@
                                  IY, IY0, IP, IBI, LvR
       INTEGER                 :: i, j, k, L, M, N, LL, MM, NN, LMN,   &
                                  iuf, juf, ivf, jvf, icl, jcl
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: CG0, CGA, CGN, CGX, CGY, FMR, RD1,   &
                                  RD2, CXMIN, CXMAX, CYMIN, CYMAX,     &
                                  CXC, CYC, DTLDX, DTLDY 
@@ -273,7 +277,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3PSMC')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3PSMC')
+#endif
 !
 ! 1.  Preparations --------------------------------------------------- *
 
@@ -357,37 +363,51 @@
 !
 ! 1.b Initialize arrays
 !
-!/T      WRITE (NDST,9010)
+#ifdef W3_T
+      WRITE (NDST,9010)
+#endif
 !
       ULCFLX = 0.
       VLCFLY = 0.
 
 !Li    Pass spectral element VQ to CQ and define size-1 cell CFL
-!/OMPG/!$OMP Parallel DO Private(ISEA)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(ISEA)
+#endif
       DO ISEA=1, NSEA
 !Li  Transported variable is divided by CG as in WW3 (???)
            CQ(ISEA) = VQ(ISEA)/CG(IK,ISEA) 
 !Li  Resetting NaNQ VQ to zero if any.   JGLi18Mar2013
          IF( .NOT. (CQ(ISEA) .EQ. CQ(ISEA)) )  CQ(ISEA) = 0.0
       END DO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
 !Li  Add current components if any to wave velocity.
       IF ( FLCUR ) THEN
-!/OMPG/!$OMP Parallel DO Private(ISEA)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(ISEA)
+#endif
          DO ISEA=1, NSEA
             CXTOT(ISEA) = (CGCOS * CG(IK,ISEA) + CX(ISEA))
             CYTOT(ISEA) = (CGSIN * CG(IK,ISEA) + CY(ISEA))
          ENDDO 
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
       ELSE
 !Li   No current case use group speed only.
-!/OMPG/!$OMP Parallel DO Private(ISEA)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(ISEA)
+#endif
          DO ISEA=1, NSEA
             CXTOT(ISEA) =  CGCOS * CG(IK,ISEA) 
             CYTOT(ISEA) =  CGSIN * CG(IK,ISEA)
          END DO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 !Li   End of IF( FLCUR ) block.
       ENDIF
 
@@ -410,12 +430,16 @@
 
 
 !Li     Convert velocity components into CFL factors.
-!/OMPG/!$OMP Parallel DO Private(ISEA)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(ISEA)
+#endif
          DO ISEA=1, NSEA
             UCFL(ISEA) = DTLDX*CXTOT(ISEA)/CLATS(ISEA)
             VCFL(ISEA) = DTLDY*CYTOT(ISEA) 
          ENDDO 
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
 !Li  Initialise boundary cell CQ and Velocity values.
            CQ(-9:0)=0.0
@@ -443,7 +467,9 @@
            ENDIF
 
 !  Store conservative flux in FCNt advective one in AFCN
-!/OMPG/!$OMP Parallel DO Private(i, M, N, FUTRN)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(i, M, N, FUTRN)
+#endif
            DO i=1, NUFc
               M=IJKUFc(5,i)
               N=IJKUFc(6,i)
@@ -456,17 +482,25 @@
 !! Remove boundary cell flux update or M N > 0.  JGLi28Mar2019
            IF( M > 0 ) THEN
               IF( (CTRNX(M)+CTRNX(N)) .GE. 1.96 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(M) = FCNt(M) - FUTRN
               ELSE IF( ULCFLX(i) .GE. 0.0 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(M) = FCNt(M) - FUTRN*CTRNX(M)
               ELSE
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(M) = FCNt(M) - FUTRN*CTRNX(N)*CTRNX(M)
               ENDIF
 !  Also divided by another cell length as UCFL is in basic unit.
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               ! ChrisB: Re-arranged the RHS term below to make it
               ! valid for OMP ATMOIC directive.
               AFCN(M) = AFCN(M) - (FUMD(i)*UCFL(M) - FUDIFX(i))
@@ -474,33 +508,47 @@
 
            IF( N > 0 ) THEN
               IF( (CTRNX(M)+CTRNX(N)) .GE. 1.96 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(N) = FCNt(N) + FUTRN
               ELSE IF( ULCFLX(i) .GE. 0.0 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(N) = FCNt(N) + FUTRN*CTRNX(M)*CTRNX(N)
               ELSE
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(N) = FCNt(N) + FUTRN*CTRNX(N) 
               ENDIF
 !  Also divided by another cell length as UCFL is in basic unit.
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               AFCN(N) = AFCN(N) + (FUMD(i)*UCFL(N) - FUDIFX(i))
            ENDIF
 !! !$OMP END CRITICAL 
 
            ENDDO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
 !  Store conservative update in CQA and advective update in CQ
 !  The side length in MF value has to be cancelled with cell length
 !  Note ULCFLX has been divided by the cell size inside SMCxUNO2.
-!/OMPG/!$OMP Parallel DO Private(n)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(n)
+#endif
            DO n=1, NSEA
               CQA(n)=CQ(n) + FCNt(n)/FLOAT(IJKCel(3,n))
               CQ (n)=CQ(n) + AFCN(n)/FLOAT(IJKCel(3,n))
            ENDDO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
 !  Call advection subs.
            IF( FUNO3 ) THEN
@@ -511,7 +559,9 @@
            CALL SMCyUNO2r(1, NVFc, CQ, VCFL, VLCFLY, DSSD, FVMD, FVDIFY)
            ENDIF
 
-!/OMPG/!$OMP Parallel DO Private(j, M, N, FVTRN)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(j, M, N, FVTRN)
+#endif
            DO j=1, NVFc
               M=IJKVFc(5,j)
               N=IJKVFc(6,j)
@@ -524,40 +574,58 @@
 !! Remove boundary cell flux update or M N > 0.  JGLi28Mar2019
            IF( M > 0 ) THEN
               IF( (CTRNY(M)+CTRNY(N)) .GE. 1.96 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(M) = BCNt(M) - FVTRN
               ELSE IF( VLCFLY(j) .GE. 0.0 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(M) = BCNt(M) - FVTRN*CTRNY(M)
               ELSE
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(M) = BCNt(M) - FVTRN*CTRNY(N)*CTRNY(M) 
               ENDIF
            ENDIF
            IF( N > 0 ) THEN
               IF( (CTRNY(M)+CTRNY(N)) .GE. 1.96 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(N) = BCNt(N) + FVTRN
               ELSE IF( VLCFLY(j) .GE. 0.0 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(N) = BCNt(N) + FVTRN*CTRNY(M)*CTRNY(N) 
               ELSE
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(N) = BCNt(N) + FVTRN*CTRNY(N) 
               ENDIF
            ENDIF
 !! !$OMP END CRITICAL
            ENDDO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
 !  Store conservative update of CQA in CQ
 !  The v side length in MF value has to be cancelled with cell length
 !! One cosine factor is also needed to be divided for SMC grid
-!/OMPG/!$OMP Parallel DO Private(n)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(n)
+#endif
            DO n=1, NSEA
               CQ(n)=CQA(n) + BCNt(n)/( CLATS(n)*FLOAT(IJKCel(3,n)) )
            ENDDO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 !   Polar cell needs a special area factor, one-level case.
            IF( ARCTC ) CQ(NSEA) = CQA(NSEA) + BCNt(NSEA)*PCArea
 
@@ -597,7 +665,9 @@
            ENDIF
 
 !  Store fineset level conservative flux in FCNt advective one in AFCN
-!/OMPG/!$OMP Parallel DO Private(i, L, M, FUTRN)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(i, L, M, FUTRN)
+#endif
            DO i=iuf, juf 
               L=IJKUFc(5,i)
               M=IJKUFc(6,i)
@@ -608,16 +678,24 @@
            IF( L > 0 ) THEN
 !! Add sub-grid blocking for refined cells.   JGLi18Apr2018 
               IF( (CTRNX(M)+CTRNX(L)) .GE. 1.96 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(L) = FCNt(L) - FUTRN
               ELSE IF( ULCFLX(i) .GE. 0.0 ) THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(L) = FCNt(L) - FUTRN*CTRNX(L) 
               ELSE
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(L) = FCNt(L) - FUTRN*CTRNX(L)*CTRNX(M) 
               ENDIF 
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               ! ChrisB: Re-arranged the RHS term below to make it
               ! valid for OMP ATMOIC directive.
               AFCN(L) = AFCN(L) - (FUMD(i)*UCFL(L)*FMR - FUDIFX(i))
@@ -625,33 +703,47 @@
            IF( M > 0 ) THEN
 !! Add sub-grid blocking for refined cells.   JGLi18Apr2018 
               IF( (CTRNX(M)+CTRNX(L)) .GE. 1.96 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(M) = FCNt(M) + FUTRN
               ELSE IF( ULCFLX(i) .GE. 0.0 ) THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(M) = FCNt(M) + FUTRN*CTRNX(M)*CTRNX(L) 
               ELSE
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 FCNt(M) = FCNt(M) + FUTRN*CTRNX(M) 
               ENDIF 
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               AFCN(M) = AFCN(M) + (FUMD(i)*UCFL(M)*FMR - FUDIFX(i))
            ENDIF
 !! !$OMP END CRITICAL 
            ENDDO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
 !  Store conservative update in CQA and advective update in CQ
 !  The side length in MF value has to be cancelled with cell y-length.
 !  Also divided by another cell x-size as UCFL is in size-1 unit.
-!/OMPG/!$OMP Parallel DO Private(n)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(n)
+#endif
            DO n=icl, jcl 
               CQA(n)=CQ(n) + FCNt(n)/FLOAT( IJKCel(3, n)*IJKCel(4, n) )
               CQ (n)=CQ(n) + AFCN(n)/FLOAT( IJKCel(3, n)*IJKCel(4, n) )
               FCNt(n)=0.0
               AFCN(n)=0.0
            ENDDO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 !
 !  Use 3rd order UNO3 scheme.  JGLi03Sep2015
            IF( FUNO3 ) THEN
@@ -662,7 +754,9 @@
            ENDIF
 !
 !  Store conservative flux in BCNt
-!/OMPG/!$OMP Parallel DO Private(j, L, M, FVTRN)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(j, L, M, FVTRN)
+#endif
            DO j=ivf, jvf 
               L=IJKVFc(5,j)
               M=IJKVFc(6,j)
@@ -673,44 +767,62 @@
            IF( L > 0 ) THEN
 !! Add sub-grid blocking for refined cells.   JGLi18Apr2018 
               IF( (CTRNY(M)+CTRNY(L)) .GE. 1.96 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(L) = BCNt(L) - FVTRN
               ELSE IF( VLCFLY(j) .GE. 0.0 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(L) = BCNt(L) - FVTRN*CTRNY(L) 
               ELSE
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(L) = BCNt(L) - FVTRN*CTRNY(L)*CTRNY(M) 
               ENDIF
            ENDIF
            IF( M > 0 ) THEN
 !! Add sub-grid blocking for refined cells.   JGLi18Apr2018 
               IF( (CTRNY(M)+CTRNY(L)) .GE. 1.96 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(M) = BCNt(M) + FVTRN
               ELSE IF( VLCFLY(j) .GE. 0.0 )  THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(M) = BCNt(M) + FVTRN*CTRNY(M)*CTRNY(L) 
               ELSE
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
                 BCNt(M) = BCNt(M) + FVTRN*CTRNY(M) 
               ENDIF
            ENDIF
 !! !$OMP END CRITICAL 
            ENDDO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
 !  Store conservative update of CQA in CQ
 !  The v side length in MF value has to be cancelled with x-size. 
 !  Also divided by cell y-size as VCFL is in size-1 unit.
 !! One cosine factor is also needed to be divided for SMC grid.
-!/OMPG/!$OMP Parallel DO Private(n)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(n)
+#endif
            DO n=icl, jcl
               CQ(n)=CQA(n) + BCNt(n)/( CLATS(n)*            &
       &             FLOAT( IJKCel(3, n)*IJKCel(4, n) ) )
               BCNt(n)=0.0
            ENDDO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 !Li  Polar cell needs a special area factor, multi-level case.
            IF( ARCTC .AND. jcl .EQ. NSEA ) THEN
              CQ(NSEA) = CQA(NSEA) + BCNt(NSEA)*PCArea
@@ -756,28 +868,46 @@
 !
 ! 4.  Store results in VQ in proper format --------------------------- *
 !
-!/OMPG/!$OMP Parallel DO Private(ISEA)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(ISEA)
+#endif
       DO ISEA=1, NSEA
             VQ(ISEA) =  MAX ( 0. , CQ(ISEA)*CG(IK,ISEA) )
         END DO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9001 FORMAT (' TEST W3PSMC : ISP, ITH, IK, COS-SIN :',I8,2I4,2F7.3)
-!/T 9003 FORMAT (' TEST W3PSMC : NO DISPERSION CORRECTION ')
+#ifdef W3_T
+ 9001 FORMAT (' TEST W3PSMC : ISP, ITH, IK, COS-SIN :',I8,2I4,2F7.3)
+ 9003 FORMAT (' TEST W3PSMC : NO DISPERSION CORRECTION ')
+#endif
 !
-!/T 9010 FORMAT (' TEST W3PSMC : INITIALIZE ARRAYS')
+#ifdef W3_T
+ 9010 FORMAT (' TEST W3PSMC : INITIALIZE ARRAYS')
+#endif
 !
-!/T 9020 FORMAT (' TEST W3PSMC : CALCULATING LCFLX/Y AND DSS/NN (NSEA=', &
-!/T               I6,')')
-!/T1 9021 FORMAT (1X,I6,2I5,E12.4,2f7.3)
-!/T 9022 FORMAT (' TEST W3PSMC : CORRECTING FOR CURRENT')
+#ifdef W3_T
+ 9020 FORMAT (' TEST W3PSMC : CALCULATING LCFLX/Y AND DSS/NN (NSEA=', &
+               I6,')')
+#endif
+#ifdef W3_T1
+ 9021 FORMAT (1X,I6,2I5,E12.4,2f7.3)
+#endif
+#ifdef W3_T
+ 9022 FORMAT (' TEST W3PSMC : CORRECTING FOR CURRENT')
+#endif
 !
-!/T 9040 FORMAT (' TEST W3PSMC : FIELD AFTER PROP. (NSEA=',I6,')')
-!/T2 9041 FORMAT (1X,I6,2I5,E12.4)
+#ifdef W3_T
+ 9040 FORMAT (' TEST W3PSMC : FIELD AFTER PROP. (NSEA=',I6,')')
+#endif
+#ifdef W3_T2
+ 9041 FORMAT (1X,I6,2I5,E12.4)
+#endif
 !/
 !/ End of W3PSMC ----------------------------------------------------- /
 !/
@@ -900,7 +1030,9 @@
       USE W3ADATMD, ONLY: ITIME
       USE W3IDATMD, ONLY: FLCUR
       USE W3ODATMD, ONLY: NDSE, NDST
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -908,7 +1040,9 @@
 !/ Parameter list
 !/
       INTEGER, INTENT(IN) :: ISEA
-!/S      INTEGER, SAVE       :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE       :: IENT = 0
+#endif
       REAL, INTENT(IN)    :: FACTH, FACK, CTHG0, CG(0:NK+1),      &
                              WN(0:NK+1), DEPTH, DDDX, DDDY,       &
                              ALFLMT(NTH), CX, CY, DCXDX, DCXDY,   & 
@@ -929,7 +1063,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3KRTN')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3KRTN')
+#endif
 !
 ! 1.  Preparation for point ------------------------------------------ *
 !     Array with partial derivative of sigma versus depth
@@ -1113,14 +1249,18 @@
 !    Uniform diffusion coefficient for all sizes.  JGLi24Feb2012
 !        CNST0=AKDif*MRFct*FTS
 
-!/OMPG/!$OMP Parallel Default(Shared), Private(i, ij, K, L, M, N),  &
-!/OMPG/!$OMP& Private(CNST,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6,CNST8,CNST9)
+#ifdef W3_OMPG
+!$OMP Parallel Default(Shared), Private(i, ij, K, L, M, N),  &
+!$OMP& Private(CNST,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6,CNST8,CNST9)
+#endif
 
 !    Notice an extra side length L is multiplied to mid-flux to give correct
 !    proportion of flux into the cells.  This length will be removed by the
 !    cell length when the tracer concentration is updated.
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
       DO i=NUA, NUB
 
@@ -1188,9 +1328,13 @@
 
       END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP END Parallel 
+#ifdef W3_OMPG
+!$OMP END Parallel 
+#endif
 
 ! 999  PRINT*, ' Sub SMCxUNO2 ended.'
 
@@ -1225,10 +1369,14 @@
 !    Uniform diffusion coefficient for all sizes.  JGLi24Feb2012
 !        CNST0=AKDif*MRFct*FTS
 
-!/OMPG/!$OMP Parallel Default(Shared), Private(j, K, L, M, N),  &
-!/OMPG/!$OMP& Private(CNST,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6,CNST8)
+#ifdef W3_OMPG
+!$OMP Parallel Default(Shared), Private(j, K, L, M, N),  &
+!$OMP& Private(CNST,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6,CNST8)
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
       DO j=NVA, NVB
 
@@ -1303,9 +1451,13 @@
 
       END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP END Parallel 
+#ifdef W3_OMPG
+!$OMP END Parallel 
+#endif
 
 ! 999  PRINT*, ' Sub SMCyUNO2 ended.'
 
@@ -1336,10 +1488,14 @@
 !    proportion of flux into the cells.  This length will be removed by the
 !    cell length when the tracer concentration is updated.
 
-!/OMPG/!$OMP Parallel Default(Shared), Private(i, ij, K, L, M, N),  &
-!/OMPG/!$OMP& Private(CNST,CNST0,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6)
+#ifdef W3_OMPG
+!$OMP Parallel Default(Shared), Private(i, ij, K, L, M, N),  &
+!$OMP& Private(CNST,CNST0,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6)
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
       DO i=NUA, NUB
 
@@ -1400,9 +1556,13 @@
 
       END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP END Parallel 
+#ifdef W3_OMPG
+!$OMP END Parallel 
+#endif
 
 ! 999  PRINT*, ' Sub SMCxUNO2r ended.'
 
@@ -1429,10 +1589,14 @@
 !    proportion of flux into the cells.  This length will be removed by the
 !    cell length when the tracer concentration is updated.
 
-!/OMPG/!$OMP Parallel Default(Shared), Private(j, K, L, M, N),  &
-!/OMPG/!$OMP& Private(CNST,CNST4,CNST5,CNST6,CNST8)
+#ifdef W3_OMPG
+!$OMP Parallel Default(Shared), Private(j, K, L, M, N),  &
+!$OMP& Private(CNST,CNST4,CNST5,CNST6,CNST8)
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
       DO j=NVA, NVB
 
@@ -1490,9 +1654,13 @@
 
       END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP END Parallel 
+#ifdef W3_OMPG
+!$OMP END Parallel 
+#endif
 
 ! 999  PRINT*, ' Sub SMCyUNO2r ended.'
 
@@ -1530,10 +1698,14 @@
 !    proportion of flux into the cells.  This length will be removed by the
 !    cell length when the tracer concentration is updated.
 
-!/OMPG/!$OMP Parallel Default(Shared), Private(i, ij, K, L, M, N),  &
-!/OMPG/!$OMP& Private(CNST,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6,CNST7,CNST8,CNST9)
+#ifdef W3_OMPG
+!$OMP Parallel Default(Shared), Private(i, ij, K, L, M, N),  &
+!$OMP& Private(CNST,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6,CNST7,CNST8,CNST9)
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
       DO i=NUA, NUB
 
@@ -1630,9 +1802,13 @@
 
       END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP END Parallel 
+#ifdef W3_OMPG
+!$OMP END Parallel 
+#endif
 
 ! 999  PRINT*, ' Sub SMCxUNO3 ended.'
 
@@ -1668,10 +1844,14 @@
 !    Uniform diffusion coefficient for all sizes.  JGLi24Feb2012
 !        CNST0=AKDif*MRFct*FTS
 
-!/OMPG/!$OMP Parallel Default(Shared), Private(j, K, L, M, N),  &
-!/OMPG/!$OMP& Private(CNST,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6,CNST7,CNST8,CNST9)
+#ifdef W3_OMPG
+!$OMP Parallel Default(Shared), Private(j, K, L, M, N),  &
+!$OMP& Private(CNST,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6,CNST7,CNST8,CNST9)
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
       DO j=NVA, NVB
 
@@ -1778,9 +1958,13 @@
 
       END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP END Parallel 
+#ifdef W3_OMPG
+!$OMP END Parallel 
+#endif
 
 ! 999  PRINT*, ' Sub SMCyUNO3 ended.'
 
@@ -1811,10 +1995,14 @@
 !    proportion of flux into the cells.  This length will be removed by the
 !    cell length when the tracer concentration is updated.
 
-!/OMPG/!$OMP Parallel Default(Shared), Private(i, ij, K, L, M, N),  &
-!/OMPG/!$OMP& Private(CNST,CNST0,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6,CNST7,CNST8,CNST9)
+#ifdef W3_OMPG
+!$OMP Parallel Default(Shared), Private(i, ij, K, L, M, N),  &
+!$OMP& Private(CNST,CNST0,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6,CNST7,CNST8,CNST9)
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
       DO i=NUA, NUB
 
@@ -1894,9 +2082,13 @@
 
       END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP END Parallel 
+#ifdef W3_OMPG
+!$OMP END Parallel 
+#endif
 
 ! 999  PRINT*, ' Sub SMCxUNO3r ended.'
 
@@ -1924,10 +2116,14 @@
 !    proportion of flux into the cells.  This length will be removed by the
 !    cell length when the tracer concentration is updated.
 
-!/OMPG/!$OMP Parallel Default(Shared), Private(j, K, L, M, N),  &
-!/OMPG/!$OMP& Private(CNST,CNST4,CNST5,CNST6,CNST7,CNST8,CNST9)
+#ifdef W3_OMPG
+!$OMP Parallel Default(Shared), Private(j, K, L, M, N),  &
+!$OMP& Private(CNST,CNST4,CNST5,CNST6,CNST7,CNST8,CNST9)
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
       DO j=NVA, NVB
 
@@ -2008,9 +2204,13 @@
 
       END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP END Parallel 
+#ifdef W3_OMPG
+!$OMP END Parallel 
+#endif
 
 ! 999  PRINT*, ' Sub SMCyUNO3r ended.'
 
@@ -2063,10 +2263,14 @@
         DX0I   = MRFct/ ( SX * DERA * RADIUS )
         DY0I   = MRFct/ ( SY * DERA * RADIUS )
 
-!/OMPG/!$OMP Parallel Default(Shared), Private(i, j, K, L, M, N),  &
-!/OMPG/!$OMP& Private(CNST,CNST0,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6)
+#ifdef W3_OMPG
+!$OMP Parallel Default(Shared), Private(i, j, K, L, M, N),  &
+!$OMP& Private(CNST,CNST0,CNST1,CNST2,CNST3,CNST4,CNST5,CNST6)
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
 !!   Calculate x-gradient by averaging U-face gradients. 
         DO i=1, NUFc
@@ -2088,18 +2292,26 @@
 !    Side gradients over 2 cell lengths for central cell.
 !    Face size factor is also included for average.
            CNST5=CNST1*(CVF(M)-CVF(L))/(CNST2+CNST3)
-!/B4B!/OMPG           CNST5=INT(CNST5 * 1.0e6)   ! CB: B4B
+#ifdef W3_B4B
+#ifdef W3_OMPG
+           CNST5=INT(CNST5 * 1.0e6)   ! CB: B4B
+#endif
+#endif
 
 !! Replace CRITICAL with ATOMIC.  JGLi15Jan2019
 !! !$OMP CRITICAL
 !    Store side gradient in two neighbouring cells
 !! Remove boundary cell flux update or L M > 0.  JGLi28Mar2019
            IF( L > 0 ) THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               AUN(L) = AUN(L) + CNST5
            ENDIF
            IF( M > 0 ) THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               AUN(M) = AUN(M) + CNST5
            ENDIF
 !! !$OMP END CRITICAL
@@ -2107,17 +2319,25 @@
         ENDIF
         END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/B4B!/OMPG/!$OMP SINGLE 
-!/B4B!/OMPG        AUN = AUN / 1.0e6  ! CB B4B
-!/B4B!/OMPG/!$OMP END SINGLE 
+#ifdef W3_B4B
+#ifdef W3_OMPG
+!$OMP SINGLE 
+        AUN = AUN / 1.0e6  ! CB B4B
+!$OMP END SINGLE 
+#endif
+#endif
 
 !  Assign averaged side-gradient to GrdX, plus latitude factor
 !  Note averaging over 2 times of cell y-width factor but AUN
 !  has already been divied by two cell lengths. 
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
         DO n=1, NSEA
 !  Cell y-size IJKCel(4,i) is used to cancel the face size-factor in AUN. 
@@ -2127,9 +2347,13 @@
 
         ENDDO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
 !!   Calculate y-gradient by averaging V-face gradients. 
         DO j=1, NVFc
@@ -2151,18 +2375,26 @@
 !    Side gradients over 2 cell lengths for central cell.
 !    Face size factor is also included for average.
            CNST6=CNST1*(CVF(M)-CVF(L))/(CNST2+CNST3)
-!/B4B!/OMPG           CNST6 = int(CNST6 * 1.0e6) ! CB B4B
+#ifdef W3_B4B
+#ifdef W3_OMPG
+           CNST6 = int(CNST6 * 1.0e6) ! CB B4B
+#endif
+#endif
 
 !! Replace CRITICAL with ATOMIC.  JGLi15Jan2019
 !! !$OMP CRITICAL 
 !! Remove boundary cell flux update or L M > 0.  JGLi28Mar2019
            IF( L > 0 ) THEN
 !    Store side gradient in two neighbouring cells
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               AVN(L) = AVN(L) + CNST6 
            ENDIF
            IF( M > 0 ) THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               AVN(M) = AVN(M) + CNST6 
            ENDIF
 !! !$OMP END CRITICAL 
@@ -2170,13 +2402,21 @@
         ENDIF
         END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/B4B!/OMPG/!$OMP SINGLE 
-!/B4B!/OMPG        AVN = AVN / 1.0e6  !CB B4B
-!/B4B!/OMPG/!$OMP END SINGLE 
+#ifdef W3_B4B
+#ifdef W3_OMPG
+!$OMP SINGLE 
+        AVN = AVN / 1.0e6  !CB B4B
+!$OMP END SINGLE 
+#endif
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
 !  Assign averaged side-gradient to GrdY.
         DO n=1, NSEA 
@@ -2186,9 +2426,13 @@
 
         END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP END Parallel 
+#ifdef W3_OMPG
+!$OMP END Parallel 
+#endif
 
 !!Li  Y-gradient for polar cell in Arctic part is set to zero.
         IF( ARCTC ) GrdY(NSEA) = 0.0
@@ -2230,10 +2474,14 @@
 !!Li  Save polar cell value if any.
          CNST0 = CVQ(NSEA)
 
-!/OMPG/!$OMP Parallel Default(Shared), Private(i, j, L, M, n),  &
-!/OMPG/!$OMP& Private(CNST3,CNST4,CNST5,CNST6)
+#ifdef W3_OMPG
+!$OMP Parallel Default(Shared), Private(i, j, L, M, n),  &
+!$OMP& Private(CNST3,CNST4,CNST5,CNST6)
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
 !!   Calculate x-gradient by averaging U-face gradients. 
         DO i=1, NUFc
@@ -2244,31 +2492,45 @@
 
 !    Multi-resolution SMC grid requires flux multiplied by face factor.
            CNST5=Real( IJKUFc(3,i) )*(CVF(M)+CVF(L))
-!/B4B/!OMPG           CNST5=int(CNST5 * 1.0e6)
+#ifdef W3_B4B
+!OMPG           CNST5=int(CNST5 * 1.0e6)
+#endif
 
 !! Replace CRITICAL with ATOMIC.  JGLi15Jan2019
 !! !$OMP CRITICAL 
 !    Store side gradient in two neighbouring cells
 !! Remove boundary cell flux update or L M > 0.  JGLi28Mar2019
            IF( L > 0 ) THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               AUN(L) = AUN(L) + CNST5 
            ENDIF
            IF( M > 0 ) THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               AUN(M) = AUN(M) + CNST5 
            ENDIF
 !! !$OMP END CRITICAL 
 
         END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/B4B!/OMPG/!$OMP SINGLE 
-!/B4B!/OMPG        AUN = AUN / 1.0e6  !CB B4B
-!/B4B!/OMPG/!$OMP END SINGLE 
+#ifdef W3_B4B
+#ifdef W3_OMPG
+!$OMP SINGLE 
+        AUN = AUN / 1.0e6  !CB B4B
+!$OMP END SINGLE 
+#endif
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
 !!   Calculate y-gradient by averaging V-face gradients. 
         DO j=1, NVFc
@@ -2279,31 +2541,47 @@
 
 !    Face size is required for multi-resolution grid.
            CNST6=Real( IJKVfc(3,j) )*(CVF(M)+CVF(L))
-!/B4B!/OMPG           CNST6=INT(CNST6 * 1e6)
+#ifdef W3_B4B
+#ifdef W3_OMPG
+           CNST6=INT(CNST6 * 1e6)
+#endif
+#endif
 
 !! Replace CRITICAL with ATOMIC.  JGLi15Jan2019
 !! !$OMP CRITICAL 
 !    Store side gradient in two neighbouring cells
 !! Remove boundary cell flux update or L M > 0.  JGLi28Mar2019
            IF( L > 0 ) THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               AVN(L) = AVN(L) + CNST6 
            ENDIF
            IF( M > 0 ) THEN
-!/OMPG/!$OMP ATOMIC 
+#ifdef W3_OMPG
+!$OMP ATOMIC 
+#endif
               AVN(M) = AVN(M) + CNST6 
            ENDIF
 !! !$OMP END CRITICAL 
 
        END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/B4B!/OMPG/!$OMP SINGLE 
-!/B4B!/OMPG        AVN = AVN / 1.0e6  !CB B4B
-!/B4B!/OMPG/!$OMP END SINGLE 
+#ifdef W3_B4B
+#ifdef W3_OMPG
+!$OMP SINGLE 
+        AVN = AVN / 1.0e6  !CB B4B
+!$OMP END SINGLE 
+#endif
+#endif
 
-!/OMPG/!$OMP DO
+#ifdef W3_OMPG
+!$OMP DO
+#endif
 
 !  Assign averaged value back to CVQ.
        DO n=1, NSEA 
@@ -2316,9 +2594,13 @@
 
        END DO
 
-!/OMPG/!$OMP END DO
+#ifdef W3_OMPG
+!$OMP END DO
+#endif
 
-!/OMPG/!$OMP END Parallel 
+#ifdef W3_OMPG
+!$OMP END Parallel 
+#endif
 
 !!Li  Polar cell (if any) keep original value. 
        IF( ARCTC ) CVQ(NSEA) = CNST0
@@ -2526,11 +2808,15 @@
        HCel(1:NSEA)= DW(1:NSEA) 
 
 !!   Reset shallow water depth with minimum depth
-!/OMPG/!$OMP Parallel DO Private(k)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(k)
+#endif
        DO k=1, NSEA
           IF(DW(k) .LT. DMIN)  HCel(k)=DMIN
        ENDDO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
 !!   Initialize full grid gradient arrays
        DDDX = 0.
@@ -2547,7 +2833,9 @@
        DHDY(1:NSEA) = GrHy
 
 !!   Apply limiter to depth-gradient and copy to full grid.
-!/OMPG/!$OMP Parallel DO Private(i,j,k,m,n, CNST0, CNST1, CNST2)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(i,j,k,m,n, CNST0, CNST1, CNST2)
+#endif
        DO n=1,NSEA
 
 !  A limiter of gradient <= 0.1 is applied.
@@ -2573,12 +2861,18 @@
            ENDIF
 
        END DO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
 !! Calculate the depth gradient limiter for refraction.  
-!/T       L = 0 !CB - added T switch
+#ifdef W3_T
+       L = 0 !CB - added T switch
+#endif
 
-!/OMPG/!$OMP Parallel DO Private(i, n, CNST4, CNST6)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(i, n, CNST4, CNST6)
+#endif
        DO n=1,NSEA
 
 !Li   Work out magnitude of depth gradient
@@ -2587,9 +2881,15 @@
 !Li   Directional depedent depth gradient limiter.  JGLi16Jun2011
           IF ( CNST4 .GT. 1.0E-5 ) THEN
 
-!/T!/OMPG/!$OMP ATOMIC Update   !CB - added T switch
-!/T             L = L + 1       !CB - added T switch
-!/T!/OMPG/!$OMP END ATOMIC      !CB - added T switch
+#ifdef W3_T
+#ifdef W3_OMPG
+!$OMP ATOMIC Update   !CB - added T switch
+#endif
+             L = L + 1       !CB - added T switch
+#ifdef W3_OMPG
+!$OMP END ATOMIC      !CB - added T switch
+#endif
+#endif
 
              DO i=1, NTH
 !Li   Refraction is done only when depth gradient is non-zero.
@@ -2599,19 +2899,27 @@
                DHLMT(i,n)=MIN(Refran, 0.75*MIN(CNST6,ABS(PI-CNST6)))/DTH
              END DO
 !Li   Output some values for inspection.  JGLi22Jul2011
-!/T       IF( MOD(n, 1000) .EQ. 0 )   &
-!/T     &    WRITE(NDST,'(i8,18F5.1)' ) n, (DHLMT(i,n), i=1,18)
+#ifdef W3_T
+       IF( MOD(n, 1000) .EQ. 0 )   &
+     &    WRITE(NDST,'(i8,18F5.1)' ) n, (DHLMT(i,n), i=1,18)
+#endif
 
           ELSE
                DHLMT(:,n) = 0.0
           ENDIF
 
        ENDDO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
-!/T    WRITE(NDST,*) ' No. Refraction points =', L 
+#ifdef W3_T
+    WRITE(NDST,*) ' No. Refraction points =', L 
+#endif
 
-!/T 999  PRINT*, ' Sub SMCDHXY ended.'
+#ifdef W3_T
+ 999  PRINT*, ' Sub SMCDHXY ended.'
+#endif
 
        RETURN
        END SUBROUTINE SMCDHXY 
@@ -2643,7 +2951,9 @@
        CXCY(1:NSEA)= CX(1:NSEA) 
 
 !!   Initialize full grid gradient arrays
-!/DEBUGDCXDX        WRITE(740+IAPROC,*) 'Before assigning DCXDX to ZERO'
+#ifdef W3_DEBUGDCXDX
+        WRITE(740+IAPROC,*) 'Before assigning DCXDX to ZERO'
+#endif
        DCXDX = 0.0
        DCXDY = 0.0
 
@@ -2651,7 +2961,9 @@
        CALL SMCGradn(CXCY, GrHx, GrHy, L)
 
 !!   Apply limiter to CX-gradient and copy to full grid.
-!/OMPG/!$OMP Parallel DO Private(i, j, k, m, n, CNST0, CNST1, CNST2)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(i, j, k, m, n, CNST0, CNST1, CNST2)
+#endif
        DO n=1,NSEA
 
 !  A limiter of gradient <= 0.01 is applied.
@@ -2677,9 +2989,13 @@
            DCXDY(j:j+m-1,i:i+k-1)  = GrHy(n)
 
        END DO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
-!/DEBUGDCXDX        WRITE(740+IAPROC,*) 'After non-trivial assination to DCXDX array'
+#ifdef W3_DEBUGDCXDX
+        WRITE(740+IAPROC,*) 'After non-trivial assination to DCXDX array'
+#endif
 
 !!   Assign current CY speed to CXCY and set negative cells.
 !      CXCY(-9:0) = 0.0
@@ -2695,7 +3011,9 @@
        CALL SMCGradn(CXCY, GrHx, GrHy, L)
 
 !!   Apply limiter to CX-gradient and copy to full grid.
-!/OMPG/!$OMP Parallel DO Private(i, j, k, m, n, CNST0, CNST1, CNST2)
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(i, j, k, m, n, CNST0, CNST1, CNST2)
+#endif
        DO n=1,NSEA
 
 !!   A limiter of gradient <= 0.1 is applied.
@@ -2721,9 +3039,13 @@
            DCYDY(j:j+m-1,i:i+k-1)  = GrHy(n)
 
        END DO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
-!/T 999  PRINT*, ' Sub SMCDCXY ended.'
+#ifdef W3_T
+ 999  PRINT*, ' Sub SMCDCXY ended.'
+#endif
 
        RETURN
        END SUBROUTINE SMCDCXY 
@@ -2818,17 +3140,23 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       USE W3GDATMD, ONLY: NSPEC, NX, NY, NSEA, NSEAL, NCel, MAPSF
       USE W3WDATMD, ONLY: A => VA
-!/MPI      USE W3ADATMD, ONLY: MPIBUF, BSTAT, IBFLOC, ISPLOC, BISPL, &
-!/MPI                          NSPLOC, NRQSG2, IRQSG2, GSTORE
-!/MPI      USE W3ODATMD, ONLY: NDST, IAPROC, NAPROC
+#ifdef W3_MPI
+      USE W3ADATMD, ONLY: MPIBUF, BSTAT, IBFLOC, ISPLOC, BISPL, &
+                          NSPLOC, NRQSG2, IRQSG2, GSTORE
+      USE W3ODATMD, ONLY: NDST, IAPROC, NAPROC
+#endif
 !/
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -2839,94 +3167,124 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/SHRD      INTEGER                 :: ISEA, IXY
-!/MPI      INTEGER                 :: STATUS(MPI_STATUS_SIZE,NSPEC),  &
-!/MPI                                 IOFF, IERR_MPI, JSEA, ISEA,     &
-!/MPI                                 IXY, IS0, IB0, NPST, J
-!/S      INTEGER, SAVE           :: IENT
+#ifdef W3_SHRD
+      INTEGER                 :: ISEA, IXY
+#endif
+#ifdef W3_MPI
+      INTEGER                 :: STATUS(MPI_STATUS_SIZE,NSPEC),  &
+                                 IOFF, IERR_MPI, JSEA, ISEA,     &
+                                 IXY, IS0, IB0, NPST, J
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3GATH')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3GATH')
+#endif
 !
 !      FIELD  = 0.
 !
 ! 1.  Shared memory version ------------------------------------------ /
 !
-!/SHRD      DO ISEA=1, NSEA
-!/SHRD        FIELD(ISEA) = A(ISPEC,ISEA)
-!/SHRD        END DO
+#ifdef W3_SHRD
+      DO ISEA=1, NSEA
+        FIELD(ISEA) = A(ISPEC,ISEA)
+        END DO
+#endif
 !
-!/SHRD      RETURN
+#ifdef W3_SHRD
+      RETURN
+#endif
 !
 ! 2.  Distributed memory version ( MPI ) ----------------------------- /
 ! 2.a Update counters
 !
-!/MPI      ISPLOC = ISPLOC + 1
-!/MPI      IBFLOC = IBFLOC + 1
-!/MPI      IF ( IBFLOC .GT. MPIBUF ) IBFLOC = 1
+#ifdef W3_MPI
+      ISPLOC = ISPLOC + 1
+      IBFLOC = IBFLOC + 1
+      IF ( IBFLOC .GT. MPIBUF ) IBFLOC = 1
+#endif
 !
 ! 2.b Check status of present buffer
 ! 2.b.1 Scatter (send) still in progress, wait to end
 !
-!/MPI      IF ( BSTAT(IBFLOC) .EQ. 2 ) THEN
-!/MPI          IOFF =  1 + (BISPL(IBFLOC)-1)*NRQSG2
-!/MPI          IF ( NRQSG2 .GT. 0 ) CALL                              &
-!/MPI               MPI_WAITALL ( NRQSG2, IRQSG2(IOFF,2),             &
-!/MPI                             STATUS, IERR_MPI )
-!/MPI          BSTAT(IBFLOC) = 0
-!/MPI        END IF
+#ifdef W3_MPI
+      IF ( BSTAT(IBFLOC) .EQ. 2 ) THEN
+          IOFF =  1 + (BISPL(IBFLOC)-1)*NRQSG2
+          IF ( NRQSG2 .GT. 0 ) CALL                              &
+               MPI_WAITALL ( NRQSG2, IRQSG2(IOFF,2),             &
+                             STATUS, IERR_MPI )
+          BSTAT(IBFLOC) = 0
+        END IF
+#endif
 !
 ! 2.b.2 Gather (recv) not yet posted, post now
 !
-!/MPI      IF ( BSTAT(IBFLOC) .EQ. 0 ) THEN
-!/MPI          BSTAT(IBFLOC) = 1
-!/MPI          BISPL(IBFLOC) = ISPLOC
-!/MPI          IOFF =  1 + (ISPLOC-1)*NRQSG2
-!/MPI          IF ( NRQSG2 .GT. 0 ) CALL                              &
-!/MPI               MPI_STARTALL ( NRQSG2, IRQSG2(IOFF,1), IERR_MPI )
-!/MPI        END IF
+#ifdef W3_MPI
+      IF ( BSTAT(IBFLOC) .EQ. 0 ) THEN
+          BSTAT(IBFLOC) = 1
+          BISPL(IBFLOC) = ISPLOC
+          IOFF =  1 + (ISPLOC-1)*NRQSG2
+          IF ( NRQSG2 .GT. 0 ) CALL                              &
+               MPI_STARTALL ( NRQSG2, IRQSG2(IOFF,1), IERR_MPI )
+        END IF
+#endif
 !
 ! 2.c Put local spectral densities in store
 !
-!/MPI      DO JSEA=1, NSEAL
-!/MPI        GSTORE(IAPROC+(JSEA-1)*NAPROC,IBFLOC) = A(ISPEC,JSEA)
-!/MPI        END DO
+#ifdef W3_MPI
+      DO JSEA=1, NSEAL
+        GSTORE(IAPROC+(JSEA-1)*NAPROC,IBFLOC) = A(ISPEC,JSEA)
+        END DO
+#endif
 !
 ! 2.d Wait for remote spectral densities
 !
-!/MPI      IOFF =  1 + (BISPL(IBFLOC)-1)*NRQSG2
-!/MPI      IF ( NRQSG2 .GT. 0 ) CALL                                  &
-!/MPI           MPI_WAITALL ( NRQSG2, IRQSG2(IOFF,1), STATUS, IERR_MPI )
+#ifdef W3_MPI
+      IOFF =  1 + (BISPL(IBFLOC)-1)*NRQSG2
+      IF ( NRQSG2 .GT. 0 ) CALL                                  &
+           MPI_WAITALL ( NRQSG2, IRQSG2(IOFF,1), STATUS, IERR_MPI )
+#endif
 !
 ! 2.e Convert storage array to field.
 !
-!/MPI      DO ISEA=1, NSEA
-!/MPI        FIELD(ISEA) = GSTORE(ISEA,IBFLOC)
-!/MPI        END DO
+#ifdef W3_MPI
+      DO ISEA=1, NSEA
+        FIELD(ISEA) = GSTORE(ISEA,IBFLOC)
+        END DO
+#endif
 !
 ! 2.f Pre-fetch data in available buffers
 !
-!/MPI      IS0    = ISPLOC
-!/MPI      IB0    = IBFLOC
-!/MPI      NPST   = 0
+#ifdef W3_MPI
+      IS0    = ISPLOC
+      IB0    = IBFLOC
+      NPST   = 0
+#endif
 !
-!/MPI      DO J=1, MPIBUF-1
-!/MPI        IS0    = IS0 + 1
-!/MPI        IF ( IS0 .GT. NSPLOC ) EXIT
-!/MPI        IB0    = 1 + MOD(IB0,MPIBUF)
-!/MPI        IF ( BSTAT(IB0) .EQ. 0 ) THEN
-!/MPI            BSTAT(IB0) = 1
-!/MPI            BISPL(IB0) = IS0
-!/MPI            IOFF       = 1 + (IS0-1)*NRQSG2
-!/MPI            IF ( NRQSG2 .GT. 0 ) CALL                            &
-!/MPI                 MPI_STARTALL ( NRQSG2, IRQSG2(IOFF,1), IERR_MPI )
-!/MPI            NPST       = NPST + 1
-!/MPI          END IF
-!/MPI        IF ( NPST .GE. 2 ) EXIT
-!/MPI        END DO
+#ifdef W3_MPI
+      DO J=1, MPIBUF-1
+        IS0    = IS0 + 1
+        IF ( IS0 .GT. NSPLOC ) EXIT
+        IB0    = 1 + MOD(IB0,MPIBUF)
+        IF ( BSTAT(IB0) .EQ. 0 ) THEN
+            BSTAT(IB0) = 1
+            BISPL(IB0) = IS0
+            IOFF       = 1 + (IS0-1)*NRQSG2
+            IF ( NRQSG2 .GT. 0 ) CALL                            &
+                 MPI_STARTALL ( NRQSG2, IRQSG2(IOFF,1), IERR_MPI )
+            NPST       = NPST + 1
+          END IF
+        IF ( NPST .GE. 2 ) EXIT
+        END DO
+#endif
 ! 
-!/MPI      RETURN
+#ifdef W3_MPI
+      RETURN
+#endif
 ! 
 !/ End of W3GATHSMC ----------------------------------------------------- /
 !/
@@ -3012,18 +3370,26 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       USE W3GDATMD, ONLY: NSPEC, NX, NY, NSEA, NCel, NSEAL, MAPSF
       USE W3WDATMD, ONLY: A => VA
-!/MPI      USE W3ADATMD, ONLY: MPIBUF, BSTAT, IBFLOC, ISPLOC, BISPL, &
-!/MPI                          NSPLOC, NRQSG2, IRQSG2, SSTORE
+#ifdef W3_MPI
+      USE W3ADATMD, ONLY: MPIBUF, BSTAT, IBFLOC, ISPLOC, BISPL, &
+                          NSPLOC, NRQSG2, IRQSG2, SSTORE
+#endif
       USE W3ODATMD, ONLY: NDST
-!/MPI      USE W3ODATMD, ONLY: IAPROC, NAPROC
+#ifdef W3_MPI
+      USE W3ODATMD, ONLY: IAPROC, NAPROC
+#endif
 !/
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/ 
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -3034,94 +3400,128 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/SHRD      INTEGER                 :: ISEA, IXY
-!/MPI      INTEGER                 :: ISEA, IXY, IOFF, IERR_MPI, J,   &
-!/MPI                                 STATUS(MPI_STATUS_SIZE,NSPEC),  &
-!/MPI                                 JSEA, IB0
-!/S      INTEGER, SAVE           :: IENT
-!/MPI      LOGICAL                 :: DONE
+#ifdef W3_SHRD
+      INTEGER                 :: ISEA, IXY
+#endif
+#ifdef W3_MPI
+      INTEGER                 :: ISEA, IXY, IOFF, IERR_MPI, J,   &
+                                 STATUS(MPI_STATUS_SIZE,NSPEC),  &
+                                 JSEA, IB0
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT
+#endif
+#ifdef W3_MPI
+      LOGICAL                 :: DONE
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SCAT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SCAT')
+#endif
 !
 ! 1.  Shared memory version ------------------------------------------ *
 !
-!/SHRD      DO ISEA=1, NSEA
-!/SHRD        IXY           = MAPSF(ISEA,3)
-!/SHRD        IF ( MAPSTA(IXY) .GE. 1 ) A(ISPEC,ISEA) = FIELD(ISEA)
-!/SHRD        END DO
+#ifdef W3_SHRD
+      DO ISEA=1, NSEA
+        IXY           = MAPSF(ISEA,3)
+        IF ( MAPSTA(IXY) .GE. 1 ) A(ISPEC,ISEA) = FIELD(ISEA)
+        END DO
+#endif
 !
-!/SHRD      RETURN
+#ifdef W3_SHRD
+      RETURN
+#endif
 !
 ! 2.  Distributed memory version ( MPI ) ----------------------------- *
 ! 2.a Initializations
 !
 ! 2.b Convert full grid to sea grid, active points only
 !
-!/MPI      DO ISEA=1, NSEA
-!/MPI        IXY    = MAPSF(ISEA,3)
-!/MPI        IF ( MAPSTA(IXY) .GE. 1 ) SSTORE(ISEA,IBFLOC) = FIELD(ISEA)
-!/MPI        END DO
+#ifdef W3_MPI
+      DO ISEA=1, NSEA
+        IXY    = MAPSF(ISEA,3)
+        IF ( MAPSTA(IXY) .GE. 1 ) SSTORE(ISEA,IBFLOC) = FIELD(ISEA)
+        END DO
+#endif
 !
 ! 2.c Send spectral densities to appropriate remote
 !
-!/MPI      IOFF   = 1 + (ISPLOC-1)*NRQSG2
-!/MPI      IF ( NRQSG2 .GT. 0 ) CALL                                  &
-!/MPI           MPI_STARTALL ( NRQSG2, IRQSG2(IOFF,2), IERR_MPI )
-!/MPI      BSTAT(IBFLOC) = 2
+#ifdef W3_MPI
+      IOFF   = 1 + (ISPLOC-1)*NRQSG2
+      IF ( NRQSG2 .GT. 0 ) CALL                                  &
+           MPI_STARTALL ( NRQSG2, IRQSG2(IOFF,2), IERR_MPI )
+      BSTAT(IBFLOC) = 2
+#endif
 !
 ! 2.d Save locally stored results
 !
-!/MPI      DO JSEA=1, NSEAL
-!/MPI !!Li   ISEA   = IAPROC+(JSEA-1)*NAPROC
-!/MPI        ISEA   = MIN( IAPROC+(JSEA-1)*NAPROC, NSEA )
-!/MPI        A(ISPEC,JSEA) = SSTORE(ISEA,IBFLOC)
-!/MPI        END DO
+#ifdef W3_MPI
+      DO JSEA=1, NSEAL
+ !!Li   ISEA   = IAPROC+(JSEA-1)*NAPROC
+        ISEA   = MIN( IAPROC+(JSEA-1)*NAPROC, NSEA )
+        A(ISPEC,JSEA) = SSTORE(ISEA,IBFLOC)
+        END DO
+#endif
 !
 ! 2.e Check if any sends have finished
 !
-!/MPI      IB0    = IBFLOC
+#ifdef W3_MPI
+      IB0    = IBFLOC
+#endif
 !
-!/MPI      DO J=1, MPIBUF
-!/MPI        IB0    = 1 + MOD(IB0,MPIBUF)
-!/MPI        IF ( BSTAT(IB0) .EQ. 2 ) THEN
-!/MPI            IOFF   = 1 + (BISPL(IB0)-1)*NRQSG2
-!/MPI            IF ( NRQSG2 .GT. 0 ) THEN
-!/MPI               CALL MPI_TESTALL ( NRQSG2, IRQSG2(IOFF,2), DONE,  &
-!/MPI                                 STATUS, IERR_MPI )
-!/MPI              ELSE
-!/MPI                DONE   = .TRUE.
-!/MPI              END IF
-!/MPI            IF ( DONE .AND. NRQSG2.GT.0 ) CALL                   &
-!/MPI                     MPI_WAITALL ( NRQSG2, IRQSG2(IOFF,2),       &
-!/MPI                                   STATUS, IERR_MPI )
-!/MPI            IF ( DONE ) THEN
-!/MPI                BSTAT(IB0) = 0
-!/MPI              END IF
-!/MPI          END IF
-!/MPI        END DO
+#ifdef W3_MPI
+      DO J=1, MPIBUF
+        IB0    = 1 + MOD(IB0,MPIBUF)
+        IF ( BSTAT(IB0) .EQ. 2 ) THEN
+            IOFF   = 1 + (BISPL(IB0)-1)*NRQSG2
+            IF ( NRQSG2 .GT. 0 ) THEN
+               CALL MPI_TESTALL ( NRQSG2, IRQSG2(IOFF,2), DONE,  &
+                                 STATUS, IERR_MPI )
+              ELSE
+                DONE   = .TRUE.
+              END IF
+            IF ( DONE .AND. NRQSG2.GT.0 ) CALL                   &
+                     MPI_WAITALL ( NRQSG2, IRQSG2(IOFF,2),       &
+                                   STATUS, IERR_MPI )
+            IF ( DONE ) THEN
+                BSTAT(IB0) = 0
+              END IF
+          END IF
+        END DO
+#endif
 !
 ! 2.f Last component, finish message passing, reset buffer control
 !
-!/MPI      IF ( ISPLOC .EQ. NSPLOC ) THEN
+#ifdef W3_MPI
+      IF ( ISPLOC .EQ. NSPLOC ) THEN
+#endif
 !
-!/MPI          DO IB0=1, MPIBUF
-!/MPI            IF ( BSTAT(IB0) .EQ. 2 ) THEN
-!/MPI                IOFF   = 1 + (BISPL(IB0)-1)*NRQSG2
-!/MPI                IF ( NRQSG2 .GT. 0 ) CALL                        &
-!/MPI                     MPI_WAITALL ( NRQSG2, IRQSG2(IOFF,2),       &
-!/MPI                                   STATUS, IERR_MPI )
-!/MPI                BSTAT(IB0) = 0
-!/MPI              END IF
-!/MPI            END DO
+#ifdef W3_MPI
+          DO IB0=1, MPIBUF
+            IF ( BSTAT(IB0) .EQ. 2 ) THEN
+                IOFF   = 1 + (BISPL(IB0)-1)*NRQSG2
+                IF ( NRQSG2 .GT. 0 ) CALL                        &
+                     MPI_WAITALL ( NRQSG2, IRQSG2(IOFF,2),       &
+                                   STATUS, IERR_MPI )
+                BSTAT(IB0) = 0
+              END IF
+            END DO
+#endif
 !
-!/MPI          ISPLOC = 0
-!/MPI          IBFLOC = 0
+#ifdef W3_MPI
+          ISPLOC = 0
+          IBFLOC = 0
+#endif
 !
-!/MPI        END IF
+#ifdef W3_MPI
+        END IF
+#endif
 !
-!/MPI      RETURN
+#ifdef W3_MPI
+      RETURN
+#endif
 !
 ! Formats
 !
@@ -3190,7 +3590,9 @@
       USE W3GDATMD
       USE W3SERVMD, ONLY: EXTCDE
       USE W3ODATMD, ONLY: NDSE, NDST
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
       IMPLICIT NONE
 
@@ -3205,8 +3607,10 @@
 
       REAL       :: XI0, YJ0, DXG, DYG, DX1, DY1 
       INTEGER    :: I1, I3, J2, J4, MRF, ij, ijp, NSEM  
-!/S      INTEGER    ::  IENT = 0
-!/S      CALL STRACE (IENT, 'W3SMCELL')
+#ifdef W3_S
+      INTEGER    ::  IENT = 0
+      CALL STRACE (IENT, 'W3SMCELL')
+#endif
 
 !! 1. Convert regular grid parameters into SMC grid origin and increments.
       DXG = GRIDS(IMOD)%SX 
@@ -3220,7 +3624,9 @@
 
 !! 2. Loop over listed cells and work out their centre coordinates.
 
-!/OMPG/!$OMP Parallel DO Private(ij, ijp, I1, J2, I3, J4 )
+#ifdef W3_OMPG
+!$OMP Parallel DO Private(ij, ijp, I1, J2, I3, J4 )
+#endif
       DO ij = 1, NC 
          ijp = IDCL(ij)
 !!Li  Return South Pole lon-lat values for any ids < 1 or > NSEA 
@@ -3240,7 +3646,9 @@
            YLat(ij) = YJ0 + ( FLOAT(J2) + 0.5*FLOAT(J4) )*DY1
          ENDIF
       END DO
-!/OMPG/!$OMP END Parallel DO
+#ifdef W3_OMPG
+!$OMP END Parallel DO
+#endif
 
 !! 3. Wrap negative logitudes into [0, 360) range.
       WHERE( XLon < 0.0 ) XLon = XLon + 360.0
@@ -3304,7 +3712,9 @@
       USE W3GDATMD
       USE W3SERVMD, ONLY: EXTCDE
       USE W3ODATMD, ONLY: NDSE, NDST
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
       IMPLICIT NONE
 
@@ -3318,8 +3728,10 @@
       INTEGER, Dimension(NC) :: IX1, JY1 
       REAL       :: XI0, YJ0, DXG, DYG, DX1, DY1, XLow(NC) 
       INTEGER    :: I1, I3, J2, J4, ij, ijp, MRF, NSEM, NFund
-!/S      INTEGER    ::  IENT = 0
-!/S      CALL STRACE (IENT, 'W3SMCGMP')
+#ifdef W3_S
+      INTEGER    ::  IENT = 0
+      CALL STRACE (IENT, 'W3SMCGMP')
+#endif
 
 !! 1. Convert XLon YLat into SMC grid indexes in present SMC grid.
       DXG = GRIDS(IMOD)%SX 

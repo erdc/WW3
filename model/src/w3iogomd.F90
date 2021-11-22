@@ -131,7 +131,9 @@
 !  7. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY : STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY : STRACE
+#endif
 !/
       PUBLIC
       CHARACTER(LEN=1024)                   :: FLDOUT
@@ -202,7 +204,9 @@
       USE CONSTANTS
       USE W3GDATMD, ONLY: E3DF, P2MSF, US3DF, USSPF
       USE W3ODATMD, ONLY: NOGRP, NGRPP
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -218,11 +222,15 @@
 !/
       INTEGER             :: I
       CHARACTER(LEN=10)  :: VARNAME1(5),VARNAME2(5)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLGRDUPDT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLGRDUPDT')
+#endif
 !
       VARNAME1(1) = 'EF';    VARNAME2(1) = 'E3D'
       VARNAME1(2) = 'TH1M';  VARNAME2(2) = 'TH1MF'
@@ -350,7 +358,9 @@
       USE W3GDATMD, ONLY: US3DF, USSPF
       USE W3ODATMD, ONLY: NOGRP, NGRPP, NOGE, IDOUT
       USE W3SERVMD, ONLY: NEXTLN, STRSPLIT, STR_TO_UPPER
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -367,13 +377,17 @@
 !/ Local parameters
 !/
       INTEGER             :: IFI, IFJ, IOUT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       CHARACTER(LEN=1)    :: AFLG
       LOGICAL             :: FLT, NAMES
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3READFLGRD')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3READFLGRD')
+#endif
 !
 !
 ! 1.  Initialize flags -------------------------------------- *
@@ -579,7 +593,9 @@
       USE W3ODATMD, ONLY: NOGRP, NGRPP, IDOUT
       USE W3SERVMD, ONLY: STRSPLIT, STR_TO_UPPER
       USE W3GDATMD, ONLY: US3DF, USSPF
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -596,12 +612,16 @@
 !/ Local parameters
 !/
       INTEGER             :: I, IFI, IFJ, IOUT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       LOGICAL             :: FLT
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLGRDFLAG')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLGRDFLAG')
+#endif
 !
 !
 ! 1.  Initialize flags -------------------------------------- *
@@ -739,23 +759,31 @@
       CASE('RHO')
         I = 1
         J = 9
-!/BT4           CASE('D50')
-!/BT4             I = 1
-!/BT4             J = 10
-!/IS2           CASE('IC1')
-!/IS2             I = 1
-!/IS2             J = 11
-!/IS2           CASE('IC5')
-!/IS2             I = 1
-!/IS2             J = 12
+#ifdef W3_BT4
+           CASE('D50')
+             I = 1
+             J = 10
+#endif
+#ifdef W3_IS2
+           CASE('IC1')
+             I = 1
+             J = 11
+           CASE('IC5')
+             I = 1
+             J = 12
+#endif
 ! Group 2
 !
-!/OASACM         CASE('AHS')
-!/OASACM           I = 2
-!/OASACM           J = 1
-!/OASOCM         CASE('OHS')
-!/OASOCM           I = 2
-!/OASOCM           J = 1
+#ifdef W3_OASACM
+         CASE('AHS')
+           I = 2
+           J = 1
+#endif
+#ifdef W3_OASOCM
+         CASE('OHS')
+           I = 2
+           J = 1
+#endif
       CASE('HS')
         I = 2
         J = 1
@@ -813,9 +841,11 @@
       CASE('WNM')
         I = 2
         J = 19
-!/OASOCM      CASE('THM')
-!/OASOCM        I = 2
-!/OASOCM        J = 20
+#ifdef W3_OASOCM
+      CASE('THM')
+        I = 2
+        J = 20
+#endif
 !
 ! Group 3
 !
@@ -897,12 +927,16 @@
       CASE('UST')
         I = 5
         J = 1
-!/OASACM         CASE('ACHA')
-!/OASACM           I = 5
-!/OASACM           J = 2
-!/OASOCM         CASE('OCHA')
-!/OASOCM           I = 5
-!/OASOCM           J = 2
+#ifdef W3_OASACM
+         CASE('ACHA')
+           I = 5
+           J = 2
+#endif
+#ifdef W3_OASOCM
+         CASE('OCHA')
+           I = 5
+           J = 2
+#endif
       CASE('CHA')
         I = 5
         J = 2
@@ -1047,7 +1081,9 @@
         I = 10
         J = 1
 ! Not found:
-!/COU      CASE('DRY')
+#ifdef W3_COU
+      CASE('DRY')
+#endif
       CASE('UNSET')
       CASE DEFAULT
         I = -1
@@ -1183,7 +1219,9 @@
                           ICPRT, DTPRT, WSCUT, NOSWLL, FLOGRD, FLOGR2,&
                           NOGRP, NGRPP
       USE W3ADATMD, ONLY: NSEALM
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       USE W3PARALL, ONLY : INIT_GET_ISEA
       IMPLICIT NONE
@@ -1201,7 +1239,9 @@
                                  IKP0(NSEAL), IKP1(NSEAL), NKH(NSEAL),&
                                  ILOW, ICEN, IHGH, I, J, LKMS, HKMS,  &
                                  ITL
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: FXPMC, FACTOR, FACTOR2, EBAND, FKD,  &
                                  FP1STR, FP1TST, FPISTR, AABS, UABS,  &
                                  XL, XH, XL2, XH2, EL, EH, DENOM, KD, &
@@ -1241,17 +1281,21 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3OUTG')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3OUTG')
+#endif
 !
-!/DEBUGSTP    WRITE(740+IAPROC,*) 'NTH=', NTH
-!/DEBUGSTP    WRITE(740+IAPROC,*) 'NK=', NK
-!/DEBUGSTP    WRITE(740+IAPROC,*) 'NSPEC=', NSPEC
-!/DEBUGSTP    WRITE(740+IAPROC,*) 'NSEAL=', NSEAL
-!/DEBUGSTP    WRITE(740+IAPROC,*) 'W3OUTG, initial A printing'
-!/DEBUGSTP    WRITE(740+IAPROC,*) 'size(A,1)=', size(A,1)
-!/DEBUGSTP    WRITE(740+IAPROC,*) 'size(A,2)=', size(A,2)
-!/DEBUGSTP    WRITE(740+IAPROC,*) 'size(A,3)=', size(A,3)
-!/DEBUGSTP    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGSTP
+    WRITE(740+IAPROC,*) 'NTH=', NTH
+    WRITE(740+IAPROC,*) 'NK=', NK
+    WRITE(740+IAPROC,*) 'NSPEC=', NSPEC
+    WRITE(740+IAPROC,*) 'NSEAL=', NSEAL
+    WRITE(740+IAPROC,*) 'W3OUTG, initial A printing'
+    WRITE(740+IAPROC,*) 'size(A,1)=', size(A,1)
+    WRITE(740+IAPROC,*) 'size(A,2)=', size(A,2)
+    WRITE(740+IAPROC,*) 'size(A,3)=', size(A,3)
+    FLUSH(740+IAPROC)
+#endif
       DO I=1,NOGRP
         DO J=1,NGRPP
           FLOLOC(I,J) =   &
@@ -1378,7 +1422,9 @@
 !
         DO ITH=1, NTH
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,FACTOR)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,FACTOR)
+#endif
 !
           DO JSEA=1, NSEAL
             NKH(JSEA)  = MIN ( NK ,   &
@@ -1406,21 +1452,27 @@
             ABXY(JSEA) = ABXY(JSEA) + ESC(ITH)*FACTOR * A(ITH,IK,JSEA)
             END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
           END DO
 !
 ! 2.c Finalize integration over band and update mean arrays
 !
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,FACTOR,FACTOR2,MA,MC,MB,KD,FKD,USSCO,M1,M2)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,FACTOR,FACTOR2,MA,MC,MB,KD,FKD,USSCO,M1,M2)
+#endif
 !
         DO JSEA=1, NSEAL
           CALL INIT_GET_ISEA(ISEA, JSEA)
           FACTOR       = DDEN(IK) / CG(IK,ISEA)
           EBD(IK,JSEA) = AB(JSEA) * FACTOR
           ET (JSEA)    = ET (JSEA) + EBD(IK,JSEA)
-!/IG1     IF (IK.EQ.NINT(IGPARS(5))) HSIG(JSEA) = 4*SQRT(ET(JSEA))
+#ifdef W3_IG1
+     IF (IK.EQ.NINT(IGPARS(5))) HSIG(JSEA) = 4*SQRT(ET(JSEA))
+#endif
           ETF(JSEA)  = ETF(JSEA) + EBD(IK,JSEA) * CG(IK,ISEA)
           EWN(JSEA)  = EWN(JSEA) + EBD(IK,JSEA) / WN(IK,ISEA)
           ETR(JSEA)  = ETR(JSEA) + EBD(IK,JSEA) / SIG(IK)
@@ -1547,7 +1599,9 @@
              STH2M(JSEA,IK)= SQRT(ABS(0.5*(1-M2)))*RADE
           END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
         END DO
 !
@@ -1566,8 +1620,12 @@
 !  Compute spectral parameters wrt the mean wave direction
 !  (no tail contribution - Prognostic)
       DO JSEA=1, NSEAL
-!/DIST        ISEA   = IAPROC + (JSEA-1)*NAPROC
-!/SHRD        ISEA   = JSEA
+#ifdef W3_DIST
+        ISEA   = IAPROC + (JSEA-1)*NAPROC
+#endif
+#ifdef W3_SHRD
+        ISEA   = JSEA
+#endif
         IX     = MAPSF(ISEA,1)
         IY     = MAPSF(ISEA,2)
         IF ( MAPSTA(IY,IX) .GT. 0 ) THEN
@@ -1587,11 +1645,17 @@
 !
         DO ITH=1, NTH
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#endif
 !
           DO JSEA=1, NSEAL
-!/DIST        ISEA      = IAPROC + (JSEA-1)*NAPROC
-!/SHRD        ISEA      = JSEA
+#ifdef W3_DIST
+        ISEA      = IAPROC + (JSEA-1)*NAPROC
+#endif
+#ifdef W3_SHRD
+        ISEA      = JSEA
+#endif
             ABX2M(JSEA) = ABX2M(JSEA) + A(ITH,IK,JSEA)*                &
               (ECOS(ITH)*COS(THMP(JSEA))+ESIN(ITH)*SIN(THMP(JSEA)))**2
             ABY2M(JSEA) = ABY2M(JSEA) + A(ITH,IK,JSEA)*                &
@@ -1605,15 +1669,23 @@
               (ESIN(ITH)*COS(THMP(JSEA))-ECOS(ITH)*SIN(THMP(JSEA)))
             END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
           END DO
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,FACTOR)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,FACTOR)
+#endif
 !
         DO JSEA=1, NSEAL
-!/DIST          ISEA         = IAPROC + (JSEA-1)*NAPROC
-!/SHRD          ISEA         = JSEA
+#ifdef W3_DIST
+          ISEA         = IAPROC + (JSEA-1)*NAPROC
+#endif
+#ifdef W3_SHRD
+          ISEA         = JSEA
+#endif
           FACTOR       = DDEN(IK) / CG(IK,ISEA)
           MSSXM(JSEA)  = MSSXM(JSEA) + ABX2M(JSEA)*FACTOR*             &
             WN(IK,ISEA)**2
@@ -1627,15 +1699,23 @@
             WN(IK,ISEA)**2
           END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
         END DO
 
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,IX,IY,STEX,STEY,STED,ITL,IK)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,IX,IY,STEX,STEY,STED,ITL,IK)
+#endif
 !
         DO JSEA=1, NSEAL
-!/DIST        ISEA      = IAPROC + (JSEA-1)*NAPROC
-!/SHRD        ISEA      = JSEA
+#ifdef W3_DIST
+        ISEA      = IAPROC + (JSEA-1)*NAPROC
+#endif
+#ifdef W3_SHRD
+        ISEA      = JSEA
+#endif
         IX     = MAPSF(ISEA,1)
         IY     = MAPSF(ISEA,2)
 !
@@ -1780,7 +1860,9 @@
         HMAXD(JSEA) = STMAXDL(JSEA)*SQRT(2*(1+PHIST(JSEA)))
         ENDDO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
 
 ! End of Space-Time Extremes Section
@@ -1788,7 +1870,9 @@
 !
 ! 3.  Finalize computation of mean parameters ------------------------ *
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,EBAND)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,EBAND)
+#endif
 !
       DO JSEA=1, NSEAL
         CALL INIT_GET_ISEA(ISEA, JSEA)
@@ -1829,24 +1913,32 @@
         UBS(JSEA) = UBS(JSEA) + FTWL * EBAND/GRAV
         END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
       SXX    = SXX * DWAT * GRAV
       SYY    = SYY * DWAT * GRAV
       SXY    = SXY * DWAT * GRAV
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,IX,IY)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,IX,IY)
+#endif
 !
       DO JSEA=1, NSEAL
         CALL INIT_GET_ISEA(ISEA, JSEA)
         IX     = MAPSF(ISEA,1)
         IY     = MAPSF(ISEA,2)
         IF ( MAPSTA(IY,IX) .GT. 0 ) THEN
-!/O9            IF ( ET(JSEA) .GE. 0. ) THEN
+#ifdef W3_O9
+            IF ( ET(JSEA) .GE. 0. ) THEN
+#endif
             HS (JSEA) = 4. * SQRT ( ET(JSEA) )
-!/O9              ELSE
-!/O9                HS (JSEA) = - 4. * SQRT ( -ET(JSEA) )
-!/O9              END IF
+#ifdef W3_O9
+              ELSE
+                HS (JSEA) = - 4. * SQRT ( -ET(JSEA) )
+              END IF
+#endif
             IF ( ET(JSEA) .GT. 1.E-7 ) THEN
                 QP(JSEA) = ( 2. / ET(JSEA)**2 ) * EET1(JSEA) * TPIINV**2
                 WLM(JSEA) = EWN(JSEA) / ET(JSEA) * TPI
@@ -1892,24 +1984,30 @@
           END IF
         END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
 ! 3.b Clean-up small values if !/O8 switch selected
 !
-!/O8      DO JSEA=1, NSEAL
-!/O8        IF ( HS(JSEA).LE.HSMIN .AND. HS(JSEA).NE.UNDEF) THEN
-!/O8            WLM(JSEA) = UNDEF
-!/O8            T02(JSEA) = UNDEF
-!/O8            T0M1(JSEA) = UNDEF
-!/O8            THM(JSEA) = UNDEF
-!/O8            THS(JSEA) = UNDEF
-!/O8          END IF
-!/O8        END DO
+#ifdef W3_O8
+      DO JSEA=1, NSEAL
+        IF ( HS(JSEA).LE.HSMIN .AND. HS(JSEA).NE.UNDEF) THEN
+            WLM(JSEA) = UNDEF
+            T02(JSEA) = UNDEF
+            T0M1(JSEA) = UNDEF
+            THM(JSEA) = UNDEF
+            THS(JSEA) = UNDEF
+          END IF
+        END DO
+#endif
 !
 ! 4.  Peak frequencies and directions -------------------------------- *
 ! 4.a Initialize
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,FPISTR,FP1STR,FP1TST)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,FPISTR,FP1STR,FP1TST)
+#endif
 !
       DO JSEA=1, NSEAL
         CALL INIT_GET_ISEA(ISEA, JSEA)
@@ -1917,42 +2015,58 @@
         FP0 (JSEA) = UNDEF
         IKP0(JSEA) = 0
         THP0(JSEA) = UNDEF
-!/ST0        FP1 (JSEA) = UNDEF
-!/ST0        IKP1(JSEA) = NK
-!/ST1        FP1 (JSEA) = UNDEF
-!/ST1        IKP1(JSEA) = 0
-!/ST2        FP1 (JSEA) = UNDEF
-!/ST2        IKP1(JSEA) = NK
-!/ST2        FPISTR     = MAX ( 0.003 , FPIS(ISEA) * UST(ISEA) / GRAV )
-!/ST2        FP1STR     = 3.6E-4 + 0.92*FPISTR - 6.3E-10/FPISTR**3
-!/ST2        FP1TST     = MAX ( 0.003 , FP1STR * UST(ISEA) / GRAV )
-!/ST2        IF ( FP1TST.LE.SIG(NK) .AND. FP1TST.GT.SIG(1) ) THEN
-!/ST2            FP1 (JSEA) = TPIINV * FP1TST
-!/ST2            IKP1(JSEA) = MAX ( 1 , NINT(FACTI2+FACTI1*LOG(FP1TST)) )
-!/ST2          END IF
-!/ST3        FP1 (JSEA) = UNDEF
-!/ST3        IKP1(JSEA) = 0
-!/ST4        FP1 (JSEA) = UNDEF
-!/ST4        IKP1(JSEA) = 0
-!/ST6        FP1 (JSEA) = UNDEF
-!/ST6        IKP1(JSEA) = NK
-!/ST6        FPISTR     = MAX ( 0.003 , FPIS(ISEA) * UST(ISEA) / GRAV )
-!/ST6        FP1STR     = 3.6E-4 + 0.92*FPISTR - 6.3E-10/FPISTR**3
-!/ST6        FP1TST     = FP1STR / UST(ISEA) * GRAV
-!/ST6        IF ( FP1TST.LE.SIG(NK) .AND. FP1TST.GT.SIG(1) ) THEN
-!/ST6            FP1 (JSEA) = TPIINV * FP1TST
-!/ST6            IKP1(JSEA) = MAX ( 1 , NINT(FACTI2+FACTI1*LOG(FP1TST)) )
-!/ST6          END IF
+#ifdef W3_ST0
+        FP1 (JSEA) = UNDEF
+        IKP1(JSEA) = NK
+#endif
+#ifdef W3_ST1
+        FP1 (JSEA) = UNDEF
+        IKP1(JSEA) = 0
+#endif
+#ifdef W3_ST2
+        FP1 (JSEA) = UNDEF
+        IKP1(JSEA) = NK
+        FPISTR     = MAX ( 0.003 , FPIS(ISEA) * UST(ISEA) / GRAV )
+        FP1STR     = 3.6E-4 + 0.92*FPISTR - 6.3E-10/FPISTR**3
+        FP1TST     = MAX ( 0.003 , FP1STR * UST(ISEA) / GRAV )
+        IF ( FP1TST.LE.SIG(NK) .AND. FP1TST.GT.SIG(1) ) THEN
+            FP1 (JSEA) = TPIINV * FP1TST
+            IKP1(JSEA) = MAX ( 1 , NINT(FACTI2+FACTI1*LOG(FP1TST)) )
+          END IF
+#endif
+#ifdef W3_ST3
+        FP1 (JSEA) = UNDEF
+        IKP1(JSEA) = 0
+#endif
+#ifdef W3_ST4
+        FP1 (JSEA) = UNDEF
+        IKP1(JSEA) = 0
+#endif
+#ifdef W3_ST6
+        FP1 (JSEA) = UNDEF
+        IKP1(JSEA) = NK
+        FPISTR     = MAX ( 0.003 , FPIS(ISEA) * UST(ISEA) / GRAV )
+        FP1STR     = 3.6E-4 + 0.92*FPISTR - 6.3E-10/FPISTR**3
+        FP1TST     = FP1STR / UST(ISEA) * GRAV
+        IF ( FP1TST.LE.SIG(NK) .AND. FP1TST.GT.SIG(1) ) THEN
+            FP1 (JSEA) = TPIINV * FP1TST
+            IKP1(JSEA) = MAX ( 1 , NINT(FACTI2+FACTI1*LOG(FP1TST)) )
+          END IF
+#endif
         THP1(JSEA) = UNDEF
         END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
 ! 4.b Discrete peak frequencies
 !
       DO IK=NK-1, 2, -1
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#endif
 !
         DO JSEA=1, NSEAL
           CALL INIT_GET_ISEA(ISEA, JSEA)
@@ -1960,41 +2074,59 @@
               EC  (JSEA) = EBD(IK,JSEA)
               IKP0(JSEA) = IK
             END IF
-!/ST1          IF ( IKP1(JSEA).EQ.0                             &
-!/ST1                 .AND. EBD(IK-1,JSEA).LT.EBD(IK,JSEA)      &
-!/ST1                 .AND. EBD(IK-1,JSEA).LT.EBD(IK+1,JSEA)    &
-!/ST1                 .AND. SIG(IK).GT.FXPMC/UST(ISEA)          &
-!/ST1                 .AND. SIG(IK).LT.0.75*SIG(NK) )           &
-!/ST1              IKP1(JSEA) = IK
-!/ST3          IF ( IKP1(JSEA).EQ.0                             &
-!/ST3                 .AND. EBD(IK-1,JSEA).LT.EBD(IK,JSEA)      &
-!/ST3                 .AND. EBD(IK-1,JSEA).LT.EBD(IK+1,JSEA)    &
-!/ST3                 .AND. SIG(IK).GT.FXPMC/MAX(1.E-4,UST(ISEA)) &
-!/ST3                 .AND. SIG(IK).LT.0.75*SIG(NK) )           &
-!/ST3              IKP1(JSEA) = IK
-!/ST4          IF ( IKP1(JSEA).EQ.0                             &
-!/ST4                 .AND. EBD(IK-1,JSEA).LT.EBD(IK,JSEA)      &
-!/ST4                 .AND. EBD(IK-1,JSEA).LT.EBD(IK+1,JSEA)    &
-!/ST4                 .AND. SIG(IK).GT.FXPMC/MAX(1.E-4,UST(ISEA)) &
-!/ST4                 .AND. SIG(IK).LT.0.75*SIG(NK) )           &
-!/ST4              IKP1(JSEA) = IK
+#ifdef W3_ST1
+          IF ( IKP1(JSEA).EQ.0                             &
+                 .AND. EBD(IK-1,JSEA).LT.EBD(IK,JSEA)      &
+                 .AND. EBD(IK-1,JSEA).LT.EBD(IK+1,JSEA)    &
+                 .AND. SIG(IK).GT.FXPMC/UST(ISEA)          &
+                 .AND. SIG(IK).LT.0.75*SIG(NK) )           &
+              IKP1(JSEA) = IK
+#endif
+#ifdef W3_ST3
+          IF ( IKP1(JSEA).EQ.0                             &
+                 .AND. EBD(IK-1,JSEA).LT.EBD(IK,JSEA)      &
+                 .AND. EBD(IK-1,JSEA).LT.EBD(IK+1,JSEA)    &
+                 .AND. SIG(IK).GT.FXPMC/MAX(1.E-4,UST(ISEA)) &
+                 .AND. SIG(IK).LT.0.75*SIG(NK) )           &
+              IKP1(JSEA) = IK
+#endif
+#ifdef W3_ST4
+          IF ( IKP1(JSEA).EQ.0                             &
+                 .AND. EBD(IK-1,JSEA).LT.EBD(IK,JSEA)      &
+                 .AND. EBD(IK-1,JSEA).LT.EBD(IK+1,JSEA)    &
+                 .AND. SIG(IK).GT.FXPMC/MAX(1.E-4,UST(ISEA)) &
+                 .AND. SIG(IK).LT.0.75*SIG(NK) )           &
+              IKP1(JSEA) = IK
+#endif
           END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
         END DO
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#endif
 !
       DO JSEA=1, NSEAL
         CALL INIT_GET_ISEA(ISEA, JSEA)
         IF ( IKP0(JSEA) .NE. 0 ) FP0(JSEA) = SIG(IKP0(JSEA)) * TPIINV
-!/ST1        IF ( IKP1(JSEA) .NE. 0 ) FP1(JSEA) = SIG(IKP1(JSEA)) * TPIINV
-!/ST3        IF ( IKP1(JSEA) .NE. 0 ) FP1(JSEA) = SIG(IKP1(JSEA)) * TPIINV
-!/ST4        IF ( IKP1(JSEA) .NE. 0 ) FP1(JSEA) = SIG(IKP1(JSEA)) * TPIINV
+#ifdef W3_ST1
+        IF ( IKP1(JSEA) .NE. 0 ) FP1(JSEA) = SIG(IKP1(JSEA)) * TPIINV
+#endif
+#ifdef W3_ST3
+        IF ( IKP1(JSEA) .NE. 0 ) FP1(JSEA) = SIG(IKP1(JSEA)) * TPIINV
+#endif
+#ifdef W3_ST4
+        IF ( IKP1(JSEA) .NE. 0 ) FP1(JSEA) = SIG(IKP1(JSEA)) * TPIINV
+#endif
         END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
 ! 4.c Continuous peak frequencies
 !
@@ -2003,7 +2135,9 @@
       XL2    = XL**2
       XH2    = XH**2
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,ILOW,ICEN,IHGH,EL,EH,DENOM)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,ILOW,ICEN,IHGH,EL,EH,DENOM)
+#endif
 !
       DO JSEA=1, NSEAL
         CALL INIT_GET_ISEA(ISEA, JSEA)
@@ -2015,48 +2149,62 @@
         DENOM  = XL*EH - XH*EL
         FP0(JSEA) = FP0 (JSEA) * ( 1. + 0.5 * ( XL2*EH - XH2*EL )     &
                        / SIGN ( MAX(ABS(DENOM),1.E-15) , DENOM ) )
-!/ST1        ILOW   = MAX (  1 , IKP1(JSEA)-1 )
-!/ST1        ICEN   = MAX (  1 , IKP1(JSEA)   )
-!/ST1        IHGH   = MIN ( NK , IKP1(JSEA)+1 )
-!/ST1        EL     = EBD(ILOW,JSEA) - EBD(ICEN,JSEA)
-!/ST1        EH     = EBD(IHGH,JSEA) - EBD(ICEN,JSEA)
-!/ST1        DENOM  = XL*EH - XH*EL
-!/ST1        FP1(JSEA) = FP1(JSEA) * ( 1. + 0.5 * (XL2*EH - XH2*EL )  &
-!/ST1                       / SIGN ( MAX(ABS(DENOM),1.E-15) , DENOM ) )
-!/ST3        ILOW   = MAX (  1 , IKP1(JSEA)-1 )
-!/ST3        ICEN   = MAX (  1 , IKP1(JSEA)   )
-!/ST3        IHGH   = MIN ( NK , IKP1(JSEA)+1 )
-!/ST3        EL     = EBD(ILOW,JSEA) - EBD(ICEN,JSEA)
-!/ST3        EH     = EBD(IHGH,JSEA) - EBD(ICEN,JSEA)
-!/ST3        DENOM  = XL*EH - XH*EL
-!/ST3        FP1(JSEA) = FP1(JSEA) * ( 1. + 0.5 * (XL2*EH - XH2*EL )  &
-!/ST3                       / SIGN ( MAX(ABS(DENOM),1.E-15) , DENOM ) )
-!/ST4        ILOW   = MAX (  1 , IKP1(JSEA)-1 )
-!/ST4        ICEN   = MAX (  1 , IKP1(JSEA)   )
-!/ST4        IHGH   = MIN ( NK , IKP1(JSEA)+1 )
-!/ST4        EL     = EBD(ILOW,JSEA) - EBD(ICEN,JSEA)
-!/ST4        EH     = EBD(IHGH,JSEA) - EBD(ICEN,JSEA)
-!/ST4        DENOM  = XL*EH - XH*EL
-!/ST4        FP1(JSEA) = FP1(JSEA) * ( 1. + 0.5 * (XL2*EH - XH2*EL )  &
-!/ST4                       / SIGN ( MAX(ABS(DENOM),1.E-15) , DENOM ) )
+#ifdef W3_ST1
+        ILOW   = MAX (  1 , IKP1(JSEA)-1 )
+        ICEN   = MAX (  1 , IKP1(JSEA)   )
+        IHGH   = MIN ( NK , IKP1(JSEA)+1 )
+        EL     = EBD(ILOW,JSEA) - EBD(ICEN,JSEA)
+        EH     = EBD(IHGH,JSEA) - EBD(ICEN,JSEA)
+        DENOM  = XL*EH - XH*EL
+        FP1(JSEA) = FP1(JSEA) * ( 1. + 0.5 * (XL2*EH - XH2*EL )  &
+                       / SIGN ( MAX(ABS(DENOM),1.E-15) , DENOM ) )
+#endif
+#ifdef W3_ST3
+        ILOW   = MAX (  1 , IKP1(JSEA)-1 )
+        ICEN   = MAX (  1 , IKP1(JSEA)   )
+        IHGH   = MIN ( NK , IKP1(JSEA)+1 )
+        EL     = EBD(ILOW,JSEA) - EBD(ICEN,JSEA)
+        EH     = EBD(IHGH,JSEA) - EBD(ICEN,JSEA)
+        DENOM  = XL*EH - XH*EL
+        FP1(JSEA) = FP1(JSEA) * ( 1. + 0.5 * (XL2*EH - XH2*EL )  &
+                       / SIGN ( MAX(ABS(DENOM),1.E-15) , DENOM ) )
+#endif
+#ifdef W3_ST4
+        ILOW   = MAX (  1 , IKP1(JSEA)-1 )
+        ICEN   = MAX (  1 , IKP1(JSEA)   )
+        IHGH   = MIN ( NK , IKP1(JSEA)+1 )
+        EL     = EBD(ILOW,JSEA) - EBD(ICEN,JSEA)
+        EH     = EBD(IHGH,JSEA) - EBD(ICEN,JSEA)
+        DENOM  = XL*EH - XH*EL
+        FP1(JSEA) = FP1(JSEA) * ( 1. + 0.5 * (XL2*EH - XH2*EL )  &
+                       / SIGN ( MAX(ABS(DENOM),1.E-15) , DENOM ) )
+#endif
         END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
 ! 4.d Peak directions
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA)
+#endif
 !
       DO JSEA=1, NSEAL
         ETX(JSEA) = 0.
         ETY(JSEA) = 0.
         END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
       DO ITH=1, NTH
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#endif
 !
         DO JSEA=1, NSEAL
           CALL INIT_GET_ISEA(ISEA, JSEA)
@@ -2066,11 +2214,15 @@
             END IF
           END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
         END DO
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#endif
 !
       DO JSEA=1, NSEAL
         CALL INIT_GET_ISEA(ISEA, JSEA)
@@ -2082,11 +2234,15 @@
         IKP1(JSEA) = MAX ( 1 , IKP1(JSEA) )
         END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
       DO ITH=1, NTH
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#endif
 !
         DO JSEA=1, NSEAL
           CALL INIT_GET_ISEA(ISEA, JSEA)
@@ -2096,11 +2252,15 @@
             END IF
           END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
         END DO
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,IX,IY)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,IX,IY)
+#endif
 !
       DO JSEA =1, NSEAL
         CALL INIT_GET_ISEA(ISEA, JSEA)
@@ -2113,9 +2273,13 @@
           END IF
         END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(ISEA,JSEA)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(ISEA,JSEA)
+#endif
 !
       DO JSEA=1, NSEAL
         CALL INIT_GET_ISEA(ISEA, JSEA)
@@ -2124,32 +2288,36 @@
             THP1(JSEA) = ATAN2(ETY(JSEA),ETX(JSEA))
         END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
 ! 5.  Test output (local to MPP only)
 !
-!/T      WRITE (NDST,9050)
-!/T      DO JSEA =1, NSEAL
-!/T        CALL INIT_GET_ISEA(ISEA, JSEA)
-!/T        IX     = MAPSF(ISEA,1)
-!/T        IY     = MAPSF(ISEA,2)
-!/T        IF ( HS(JSEA) .EQ. UNDEF ) THEN
-!/T            WRITE (NDST,9051) ISEA, IX, IY
-!/T          ELSE IF ( WLM(JSEA) .EQ. UNDEF ) THEN
-!/T            WRITE (NDST,9052) ISEA, IX, IY, HS(JSEA)
-!/T          ELSE IF ( FP0(JSEA) .EQ. UNDEF ) THEN
-!/T            WRITE (NDST,9053) ISEA, IX, IY, HS(JSEA), WLM(JSEA),   &
-!/T                   T0M1(JSEA), RADE*THM(JSEA), THS(JSEA)
-!/T          ELSE IF ( FP1(JSEA) .EQ. UNDEF ) THEN
-!/T            WRITE (NDST,9054) ISEA, IX, IY, HS(JSEA), WLM(JSEA),   &
-!/T                   T0M1(JSEA), RADE*THM(JSEA), THS(JSEA), FP0(JSEA),&
-!/T                   THP0(JSEA)
-!/T          ELSE
-!/T            WRITE (NDST,9055) ISEA, IX, IY, HS(JSEA), WLM(JSEA),   &
-!/T                   T0M1(JSEA), RADE*THM(JSEA), THS(JSEA), FP0(JSEA),&
-!/T                   THP0(JSEA), FP1(JSEA), THP1(JSEA)
-!/T          END IF
-!/T        END DO
+#ifdef W3_T
+      WRITE (NDST,9050)
+      DO JSEA =1, NSEAL
+        CALL INIT_GET_ISEA(ISEA, JSEA)
+        IX     = MAPSF(ISEA,1)
+        IY     = MAPSF(ISEA,2)
+        IF ( HS(JSEA) .EQ. UNDEF ) THEN
+            WRITE (NDST,9051) ISEA, IX, IY
+          ELSE IF ( WLM(JSEA) .EQ. UNDEF ) THEN
+            WRITE (NDST,9052) ISEA, IX, IY, HS(JSEA)
+          ELSE IF ( FP0(JSEA) .EQ. UNDEF ) THEN
+            WRITE (NDST,9053) ISEA, IX, IY, HS(JSEA), WLM(JSEA),   &
+                   T0M1(JSEA), RADE*THM(JSEA), THS(JSEA)
+          ELSE IF ( FP1(JSEA) .EQ. UNDEF ) THEN
+            WRITE (NDST,9054) ISEA, IX, IY, HS(JSEA), WLM(JSEA),   &
+                   T0M1(JSEA), RADE*THM(JSEA), THS(JSEA), FP0(JSEA),&
+                   THP0(JSEA)
+          ELSE
+            WRITE (NDST,9055) ISEA, IX, IY, HS(JSEA), WLM(JSEA),   &
+                   T0M1(JSEA), RADE*THM(JSEA), THS(JSEA), FP0(JSEA),&
+                   THP0(JSEA), FP1(JSEA), THP1(JSEA)
+          END IF
+        END DO
+#endif
 !
 ! 6.  Fill arrays wth partitioned data
 !
@@ -2177,7 +2345,9 @@
 !
 ! 6.b Loop over local sea points
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(ISEA,JSEA,IX,IY,I,J)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(ISEA,JSEA,IX,IY,I,J)
+#endif
 !
           DO JSEA=1, NSEAL
             CALL INIT_GET_ISEA(ISEA, JSEA)
@@ -2249,7 +2419,9 @@
 !
             END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
 
         END IF
@@ -2270,13 +2442,15 @@
 !
 ! Formats
 !
-!/T 9050 FORMAT (' TEST W3OUTG : ISEA, IX, IY, HS, L, Tm, THm, THs',     &
-!/T              ', FP0, THP0, FP1, THP1')
-!/T 9051 FORMAT (2X,I8,2I8)
-!/T 9052 FORMAT (2X,I8,2I8,F6.2)
-!/T 9053 FORMAT (2X,I8,2I8,F6.2,F7.1,F6.2,2F6.1)
-!/T 9054 FORMAT (2X,I8,2I8,F6.2,F7.1,F6.2,2F6.1,F6.3,F6.0)
-!/T 9055 FORMAT (2X,I8,2I8,F6.2,F7.1,F6.2,2F6.1,2(F6.3,F6.0))
+#ifdef W3_T
+ 9050 FORMAT (' TEST W3OUTG : ISEA, IX, IY, HS, L, Tm, THm, THs',     &
+              ', FP0, THP0, FP1, THP1')
+ 9051 FORMAT (2X,I8,2I8)
+ 9052 FORMAT (2X,I8,2I8,F6.2)
+ 9053 FORMAT (2X,I8,2I8,F6.2,F7.1,F6.2,2F6.1)
+ 9054 FORMAT (2X,I8,2I8,F6.2,F7.1,F6.2,2F6.1,F6.3,F6.0)
+ 9055 FORMAT (2X,I8,2I8,F6.2,F7.1,F6.2,2F6.1,2(F6.3,F6.0))
+#endif
 
 !/
 !/ End of W3OUTG ----------------------------------------------------- /
@@ -2427,8 +2601,12 @@
       USE W3SERVMD, ONLY: EXTCDE
       USE W3ODATMD, only : IAPROC
       USE W3ODATMD, ONLY :  OFILES
-!/SETUP     USE W3WDATMD, ONLY: ZETA_SETUP
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_SETUP
+     USE W3WDATMD, ONLY: ZETA_SETUP
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -2448,16 +2626,22 @@
                                  MGRPP, ISEA, MOSWLL, IK, IFI, IFJ    &
                                  ,IFILOUT
       INTEGER, ALLOCATABLE    :: MAPTMP(:,:)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: AUX1(NSEA), AUX2(NSEA),              &
                                  AUX3(NSEA), AUX4(NSEA)
-!/SMC      REAL                    :: UDARC
+#ifdef W3_SMC
+      REAL                    :: UDARC
+#endif
       CHARACTER(LEN=30)       :: IDTST, TNAME
       CHARACTER(LEN=10)       :: VERTST
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3IOGO')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3IOGO')
+#endif
 !
 ! test input parameters ---------------------------------------------- *
 !
@@ -2470,7 +2654,9 @@
       CALL W3SETO ( IGRD, NDSE, NDST )
       CALL W3SETG ( IGRD, NDSE, NDST )
       CALL W3SETA ( IGRD, NDSE, NDST )
-!/MPI      CALL W3XETA ( IGRD, NDSE, NDST )
+#ifdef W3_MPI
+      CALL W3XETA ( IGRD, NDSE, NDST )
+#endif
       CALL W3SETW ( IGRD, NDSE, NDST )
 !
       IPASS  = IPASS + 1
@@ -2490,7 +2676,9 @@
             END IF
         END IF
 !
-!/T      WRITE (NDST,9000) IPASS, INXOUT, WRITE, NDSOG, IGRD, FILEXT
+#ifdef W3_T
+      WRITE (NDST,9000) IPASS, INXOUT, WRITE, NDSOG, IGRD, FILEXT
+#endif
 !
 !
 ! open file ---------------------------------------------------------- *
@@ -2500,7 +2688,9 @@
           I      = LEN_TRIM(FILEXT)
           J      = LEN_TRIM(FNMPRE)
 !
-!/T          WRITE (NDST,9001) FNMPRE(:J)//'out_grd.'//FILEXT(:I)
+#ifdef W3_T
+          WRITE (NDST,9001) FNMPRE(:J)//'out_grd.'//FILEXT(:I)
+#endif
           IF ( WRITE ) THEN
               OPEN (NDSOG,FILE=FNMPRE(:J)//'out_grd.'//FILEXT(:I),    &
                     FORM='UNFORMATTED',ERR=800,IOSTAT=IERR)
@@ -2545,8 +2735,10 @@
 !
             END IF
 !
-!/T          WRITE (NDST,9002) IDSTR, VEROGR, GNAME, NSEA, NX, NY,    &
-!/T                            UNDEF
+#ifdef W3_T
+          WRITE (NDST,9002) IDSTR, VEROGR, GNAME, NSEA, NX, NY,    &
+                            UNDEF
+#endif
 !
         END IF
 !
@@ -2570,7 +2762,9 @@
 !
 ! Create TIMETAG for file name using YYYYMMDD.HHMMS prefix
           WRITE(TIMETAG,"(i8.8,'.'i6.6)")TIME(1),TIME(2)
-!/T          WRITE (NDST,9001) FNMPRE(:J)//TIMETAG//'.out_grd.'//FILEXT(:I)
+#ifdef W3_T
+          WRITE (NDST,9001) FNMPRE(:J)//TIMETAG//'.out_grd.'//FILEXT(:I)
+#endif
           IF ( WRITE ) THEN
               OPEN (NDSOG,FILE=FNMPRE(:J)//TIMETAG//'.out_grd.'  &
                     //FILEXT(:I),FORM='UNFORMATTED',ERR=800,IOSTAT=IERR)
@@ -2615,8 +2809,10 @@
 !
             END IF
 !
-!/T          WRITE (NDST,9002) IDSTR, VEROGR, GNAME, NSEA, NX, NY,    &
-!/T                            UNDEF
+#ifdef W3_T
+          WRITE (NDST,9002) IDSTR, VEROGR, GNAME, NSEA, NX, NY,    &
+                            UNDEF
+#endif
 !
         END IF
 !
@@ -2628,7 +2824,9 @@
           READ (NDSOG,END=803,ERR=802,IOSTAT=IERR) TIME, FLOGRD
         END IF
 !
-!/T      WRITE (NDST,9003) TIME, FLOGRD
+#ifdef W3_T
+      WRITE (NDST,9003) TIME, FLOGRD
+#endif
 !
 ! MAPSTA ------------------------------------------------------------- *
 !
@@ -2820,7 +3018,9 @@
 
         IF ( FLOGRD(IFI,IFJ) ) THEN
 !
-!/T            WRITE (NDST,9010) FLOGRD(IFI,IFJ), IDOUT(IFI,IFJ)
+#ifdef W3_T
+            WRITE (NDST,9010) FLOGRD(IFI,IFJ), IDOUT(IFI,IFJ)
+#endif
 !
             IF ( WRITE ) THEN
 !
@@ -2833,11 +3033,13 @@
                     WRITE ( NDSOG ) CY(1:NSEA)
                   ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 3 ) THEN
                     DO ISEA=1, NSEA
-!/SMC  !!Li  Rotate map-east wind in Arctic part back to local east.  JGLi02Feb2016
-!/SMC                      IF( ARCTC .AND. (ISEA .GT. NGLO) ) THEN
-!/SMC                        UDARC = UD(ISEA) - ANGARC(ISEA - NGLO)*DERA
-!/SMC                        UD(ISEA) = MOD(TPI + UDARC, TPI)
-!/SMC                      ENDIF
+#ifdef W3_SMC
+  !!Li  Rotate map-east wind in Arctic part back to local east.  JGLi02Feb2016
+                      IF( ARCTC .AND. (ISEA .GT. NGLO) ) THEN
+                        UDARC = UD(ISEA) - ANGARC(ISEA - NGLO)*DERA
+                        UD(ISEA) = MOD(TPI + UDARC, TPI)
+                      ENDIF
+#endif
                       IF (UA(ISEA) .NE.UNDEF) THEN
                           AUX1(ISEA) = UA(ISEA)*COS(UD(ISEA))
                           AUX2(ISEA) = UA(ISEA)*SIN(UD(ISEA))
@@ -2858,11 +3060,13 @@
                     WRITE ( NDSOG ) BERG(1:NSEA)
                   ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 8 ) THEN
                     DO ISEA=1, NSEA
-!/SMC  !!Li  Rotate map-east momentum in Arctic part back to local east.  JGLi02Feb2016
-!/SMC                      IF( ARCTC .AND. (ISEA .GT. NGLO) ) THEN
-!/SMC                        UDARC = TAUADIR(ISEA) - ANGARC(ISEA - NGLO)*DERA
-!/SMC                        TAUADIR(ISEA) = MOD(TPI + UDARC, TPI)
-!/SMC                      ENDIF
+#ifdef W3_SMC
+  !!Li  Rotate map-east momentum in Arctic part back to local east.  JGLi02Feb2016
+                      IF( ARCTC .AND. (ISEA .GT. NGLO) ) THEN
+                        UDARC = TAUADIR(ISEA) - ANGARC(ISEA - NGLO)*DERA
+                        TAUADIR(ISEA) = MOD(TPI + UDARC, TPI)
+                      ENDIF
+#endif
                       IF (TAUA(ISEA) .NE.UNDEF) THEN
                           AUX1(ISEA) = TAUA(ISEA)*COS(TAUADIR(ISEA))
                           AUX2(ISEA) = TAUA(ISEA)*SIN(TAUADIR(ISEA))
@@ -2875,14 +3079,20 @@
                     WRITE ( NDSOG ) AUX2
                   ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 9 ) THEN
                     WRITE ( NDSOG ) RHOAIR(1:NSEA)
-!/BT4                  ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
-!/BT4                    WRITE ( NDSOG ) SED_D50(1:NSEA)
-!/IS2                  ELSE IF (IFI .EQ. 1 .AND. IFJ .EQ. 11 ) THEN
-!/IS2                    WRITE (NDSOG ) ICEH(1:NSEA)
-!/IS2                  ELSE IF (IFI .EQ. 1 .AND. IFJ .EQ. 12 ) THEN
-!/IS2                    WRITE (NDSOG ) ICEF(1:NSEA)
-!/SETUP                  ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 13 ) THEN
-!/SETUP                   WRITE ( NDSOG ) ZETA_SETUP(1:NSEA)
+#ifdef W3_BT4
+                  ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
+                    WRITE ( NDSOG ) SED_D50(1:NSEA)
+#endif
+#ifdef W3_IS2
+                  ELSE IF (IFI .EQ. 1 .AND. IFJ .EQ. 11 ) THEN
+                    WRITE (NDSOG ) ICEH(1:NSEA)
+                  ELSE IF (IFI .EQ. 1 .AND. IFJ .EQ. 12 ) THEN
+                    WRITE (NDSOG ) ICEF(1:NSEA)
+#endif
+#ifdef W3_SETUP
+                  ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 13 ) THEN
+                   WRITE ( NDSOG ) ZETA_SETUP(1:NSEA)
+#endif
 
 !
 !     Section 2)
@@ -3160,14 +3370,20 @@
                     READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) TAUADIR(1:NSEA)
                   ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 9 ) THEN
                     READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) RHOAIR(1:NSEA)
-!/BT4                   ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
-!/BT4                     READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) SED_D50(1:NSEA)
-!/IS2                   ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 11 ) THEN
-!/IS2                     READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) ICEH(1:NSEA)
-!/IS2                   ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 12 ) THEN
-!/IS2                     READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) ICEF(1:NSEA)
-!/SETUP                 ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 13 ) THEN
-!/SETUP                   READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) ZETA_SETUP(1:NSEA)
+#ifdef W3_BT4
+                   ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
+                     READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) SED_D50(1:NSEA)
+#endif
+#ifdef W3_IS2
+                   ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 11 ) THEN
+                     READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) ICEH(1:NSEA)
+                   ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 12 ) THEN
+                     READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) ICEF(1:NSEA)
+#endif
+#ifdef W3_SETUP
+                 ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 13 ) THEN
+                   READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) ZETA_SETUP(1:NSEA)
+#endif
 !
 !     Section 2)
 !
@@ -3483,7 +3699,9 @@
 !
       IF(OFILES(1) .EQ. 1) CLOSE(NDSOG)
 !
-!/MPI      CALL W3SETA ( IGRD, NDSE, NDST )
+#ifdef W3_MPI
+      CALL W3SETA ( IGRD, NDSE, NDST )
+#endif
 !
       RETURN
 !
@@ -3503,7 +3721,9 @@
 !
   803 CONTINUE
       IOTST  = -1
-!/T      WRITE (NDST,9020)
+#ifdef W3_T
+      WRITE (NDST,9020)
+#endif
       RETURN
 !
 ! Formats
@@ -3540,25 +3760,27 @@
                '     ERROR IN READING FROM FILE'/                     &
                '     IOSTAT =',I5/)
 !
-!/T 9000 FORMAT (' TEST W3IOGO : IPASS =',I4,' INXOUT = ',A,          &
-!/T              ' WRITE = ',L1,' UNIT =',I3/                         &
-!/T              '               IGRD =',I3,' FEXT = ',A)
-!/T 9001 FORMAT (' TEST W3IOGO : OPENING NEW FILE [',A,']')
-!/T 9002 FORMAT (' TEST W3IOGO : TEST PARAMETERS:'/                   &
-!/T              '       IDSTR :  ',A/                                &
-!/T              '      VEROGR :  ',A/                                &
-!/T              '       GNAME :  ',A/                                &
-!/T              '        NSEA :',I6/                                 &
-!/T              '       NX,NY : ',I9,I12/                            &
-!/T              '       UNDEF : ',F8.2)
-!/T 9003 FORMAT (' TEST W3IOGO : TIME  :',I9.8,I7.6/                  &
-!/T              '               FLAGS :',20L2,1X,20L2/               &
-!/T              '                      ',20L2,2X,20L2/               &
-!/T              '                      ',20L2,2X,20L2/               &
-!/T              '                      ',20L2,2X,20L2/               &
-!/T              '                      ',20L2,2X,20L2)
-!/T 9010 FORMAT (' TEST W3IOGO : PROC = ',L1,' FOR ',A)
-!/T 9020 FORMAT (' TEST W3IOGO : END OF FILE REACHED')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3IOGO : IPASS =',I4,' INXOUT = ',A,          &
+              ' WRITE = ',L1,' UNIT =',I3/                         &
+              '               IGRD =',I3,' FEXT = ',A)
+ 9001 FORMAT (' TEST W3IOGO : OPENING NEW FILE [',A,']')
+ 9002 FORMAT (' TEST W3IOGO : TEST PARAMETERS:'/                   &
+              '       IDSTR :  ',A/                                &
+              '      VEROGR :  ',A/                                &
+              '       GNAME :  ',A/                                &
+              '        NSEA :',I6/                                 &
+              '       NX,NY : ',I9,I12/                            &
+              '       UNDEF : ',F8.2)
+ 9003 FORMAT (' TEST W3IOGO : TIME  :',I9.8,I7.6/                  &
+              '               FLAGS :',20L2,1X,20L2/               &
+              '                      ',20L2,2X,20L2/               &
+              '                      ',20L2,2X,20L2/               &
+              '                      ',20L2,2X,20L2/               &
+              '                      ',20L2,2X,20L2)
+ 9010 FORMAT (' TEST W3IOGO : PROC = ',L1,' FOR ',A)
+ 9020 FORMAT (' TEST W3IOGO : END OF FILE REACHED')
+#endif
 !/
 !/ End of W3IOGO ----------------------------------------------------- /
 !/
@@ -3650,7 +3872,9 @@
       USE W3ADATMD,  ONLY: CG, WN, DW
       USE W3ADATMD,  ONLY: USSX, USSY,  US3D, USSP
       USE W3ODATMD, ONLY: IAPROC, NAPROC
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -3665,7 +3889,9 @@
 !/
       INTEGER                 :: IK, ITH, ISEA, JSEA
       INTEGER                 :: IKST, IKFI, IB
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: FACTOR, FKD,KD
       REAL                    :: ABX(NSEAL), ABY(NSEAL), USSCO
       REAL                    :: MINDIFF
@@ -3673,7 +3899,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'CALC_U3STOKES')
+#ifdef W3_S
+      CALL STRACE (IENT, 'CALC_U3STOKES')
+#endif
 !
 ! 1.  Initialize storage arrays -------------------------------------- *
 !
@@ -3714,27 +3942,41 @@
 !
          DO ITH=1, NTH
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA)
+#endif
 !
             DO JSEA=1, NSEAL
-!/DIST                ISEA         = IAPROC + (JSEA-1)*NAPROC
-!/SHRD                ISEA         = JSEA
+#ifdef W3_DIST
+                ISEA         = IAPROC + (JSEA-1)*NAPROC
+#endif
+#ifdef W3_SHRD
+                ISEA         = JSEA
+#endif
                ABX(JSEA)  = ABX(JSEA) + A(ITH,IK,JSEA)*ECOS(ITH)
                ABY(JSEA)  = ABY(JSEA) + A(ITH,IK,JSEA)*ESIN(ITH)
             END DO
 !
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
 !
          END DO
 !
 ! 2.c Finalize integration over band and update mean arrays
 !
 !
-!/OMPG/!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,FACTOR,KD,FKD,USSCO,MINDIFF,IB)
+#ifdef W3_OMPG
+!$OMP PARALLEL DO PRIVATE(JSEA,ISEA,FACTOR,KD,FKD,USSCO,MINDIFF,IB)
+#endif
 !
          DO JSEA=1, NSEAL
-!/DIST              ISEA         = IAPROC + (JSEA-1)*NAPROC
-!/SHRD              ISEA         = JSEA
+#ifdef W3_DIST
+              ISEA         = IAPROC + (JSEA-1)*NAPROC
+#endif
+#ifdef W3_SHRD
+              ISEA         = JSEA
+#endif
             FACTOR       = DDEN(IK) / CG(IK,ISEA)
 !
 ! Deep water limits
@@ -3775,7 +4017,9 @@
                USSP(JSEA,NK+Spc2BND(IK)) =  USSP(JSEA,NK+Spc2Bnd(IK)) + ABY(JSEA)*USSCO
             ENDIF
          END DO
-!/OMPG/!$OMP END PARALLEL DO
+#ifdef W3_OMPG
+!$OMP END PARALLEL DO
+#endif
       END DO
 !
       RETURN
@@ -3853,7 +4097,9 @@
                           FTE, XFR, MAPSF, MAPSTA, DMIN
       USE W3GDATMD, ONLY: BTBETA
       USE W3PARALL, ONLY: INIT_GET_ISEA
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
@@ -3865,7 +4111,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !
       INTEGER              :: FPOPT = 0
 !
@@ -3879,7 +4127,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'CALC_WBT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'CALC_WBT')
+#endif
 !
       DO JSEA = 1, NSEAL
 ! JSEA 2 ISEA

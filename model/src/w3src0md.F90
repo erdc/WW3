@@ -122,8 +122,12 @@
 !/ ------------------------------------------------------------------- /
       USE CONSTANTS
       USE W3GDATMD, ONLY: NK, NTH, SIG, DDEN, FTE, FTF, FTWN
-!/T      USE W3ODATMD, ONLY: NDST
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -137,12 +141,16 @@
 !/ Local parameters
 !/
       INTEGER                 :: IK, ITH
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: EB(NK), EBAND
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SPR0')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SPR0')
+#endif
 !
       EMEAN  = 0.
       FMEAN  = 0.
@@ -181,13 +189,17 @@
       FMEAN  = TPIINV * EMEAN / MAX ( 1.E-7 , FMEAN )
       WNMEAN = ( EMEAN / MAX ( 1.E-7 , WNMEAN ) )**2
 !
-!/T      WRITE (NDST,9000) EMEAN, FMEAN, WNMEAN
+#ifdef W3_T
+      WRITE (NDST,9000) EMEAN, FMEAN, WNMEAN
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9000 FORMAT (' TEST W3SPR0 : E,F,WN MEAN ',3E10.3)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SPR0 : E,F,WN MEAN ',3E10.3)
+#endif
 !/
 !/ End of W3SPR0 ----------------------------------------------------- /
 !/

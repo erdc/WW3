@@ -338,8 +338,10 @@
 !/
       TYPE OTYPE1
         INTEGER               :: IPASS1
-!/MPI        INTEGER               :: NRQGO, NRQGO2
-!/MPI        INTEGER, POINTER      :: IRQGO(:), IRQGO2(:)
+#ifdef W3_MPI
+        INTEGER               :: NRQGO, NRQGO2
+        INTEGER, POINTER      :: IRQGO(:), IRQGO2(:)
+#endif
         LOGICAL               :: FLOGRD(NOGRP,NGRPP), FLOGD(NOGRP),   &
                                  FLOGR2(NOGRP,NGRPP), FLOG2(NOGRP),   &
                                  FLOGRR(NOGRP,NGRPP), FLOGR(NOGRP),   &
@@ -348,12 +350,18 @@
 !/
       TYPE OTYPE2
         INTEGER               :: IPASS2, NOPTS
-!/MPI        INTEGER               :: NRQPO, NRQPO2
+#ifdef W3_MPI
+        INTEGER               :: NRQPO, NRQPO2
+#endif
         INTEGER, POINTER      :: IPTINT(:,:,:), IL(:), IW(:), II(:)
-!/MPI        INTEGER, POINTER      :: IRQPO1(:), IRQPO2(:)
+#ifdef W3_MPI
+        INTEGER, POINTER      :: IRQPO1(:), IRQPO2(:)
+#endif
         REAL, POINTER         :: PTLOC(:,:), PTIFAC(:,:),             &
                                  DPO(:), WAO(:), WDO(:), ASO(:),      &
-!/FLX5                                 TAUAO(:), TAUDO(:), DAIRO(:),        &
+#ifdef W3_FLX5
+                                 TAUAO(:), TAUDO(:), DAIRO(:),        &
+#endif
                                  CAO(:), CDO(:), ICEO(:), ICEHO(:),   &
                                  ICEFO(:), SPCO(:,:)
         REAL, POINTER         :: ZET_SETO(:)  ! For the wave setup.
@@ -361,13 +369,17 @@
         CHARACTER(LEN=40), POINTER :: PTNME(:)
         CHARACTER(LEN=13), POINTER :: GRDID(:)
         LOGICAL               :: O2INIT
-!/MPI        LOGICAL               :: O2IRQI
+#ifdef W3_MPI
+        LOGICAL               :: O2IRQI
+#endif
       END TYPE OTYPE2
 !/
       TYPE OTYPE3
         INTEGER               :: IPASS3
-!/MPI        INTEGER               :: IT0PNT, IT0TRK, IT0PRT, NRQTR
-!/MPI        INTEGER, POINTER      :: IRQTR(:)
+#ifdef W3_MPI
+        INTEGER               :: IT0PNT, IT0TRK, IT0PRT, NRQTR
+        INTEGER, POINTER      :: IRQTR(:)
+#endif
         LOGICAL               :: O3INIT, STOP
         LOGICAL, POINTER      :: MASK1(:,:), MASK2(:,:)
         CHARACTER(LEN=32), POINTER  :: TRCKID(:,:)
@@ -375,18 +387,24 @@
 !/
       TYPE OTYPE4
         INTEGER               :: IFILE4
-!/MPI        INTEGER               :: NRQRS, NBLKRS, RSBLKS
-!/MPI        INTEGER, POINTER      :: IRQRS(:), IRQRSS(:)
-!/MPI        REAL, POINTER         :: VAAUX(:,:,:)
+#ifdef W3_MPI
+        INTEGER               :: NRQRS, NBLKRS, RSBLKS
+        INTEGER, POINTER      :: IRQRS(:), IRQRSS(:)
+        REAL, POINTER         :: VAAUX(:,:,:)
+#endif
       END TYPE OTYPE4
 !/
       TYPE OTYPE5
         INTEGER               :: NBI, NBI2, NFBPO, NBO(0:9),          &
                                  NBO2(0:9), NDSL(9), NKI, NTHI
-!/MPI        INTEGER               :: NRQBP = 0, NRQBP2 = 0
+#ifdef W3_MPI
+        INTEGER               :: NRQBP = 0, NRQBP2 = 0
+#endif
         INTEGER, POINTER      :: IPBPI(:,:), ISBPI(:),                &
                                  IPBPO(:,:), ISBPO(:)
-!/MPI        INTEGER, POINTER      :: IRQBP1(:), IRQBP2(:)
+#ifdef W3_MPI
+        INTEGER, POINTER      :: IRQBP1(:), IRQBP2(:)
+#endif
         REAL                  :: XFRI, FR1I, TH1I
         REAL, POINTER         :: XBPI(:), YBPI(:), RDBPI(:,:),        &
                                  XBPO(:), YBPO(:), RDBPO(:,:),        &
@@ -414,7 +432,9 @@
                                  NAPOUT, NAPERR, NAPFLD, NAPPNT,      &
                                  NAPTRK, NAPRST, NAPBPT, NAPPRT
         INTEGER               :: NOSWLL
-!/NL5        INTEGER               :: TOSNL5(2)
+#ifdef W3_NL5
+        INTEGER               :: TOSNL5(2)
+#endif
         INTEGER               :: TOFRST(2), TONEXT(2,8), TOLAST(2,8), &
                                  TBPI0(2), TBPIN(2), NDS(13), OFILES(7)
         REAL                  :: DTOUT(8)
@@ -438,7 +458,9 @@
                                  NAPOUT, NAPERR, NAPFLD, NAPPNT,      &
                                  NAPTRK, NAPRST, NAPBPT, NAPPRT
       INTEGER, POINTER        :: NOSWLL
-!/NL5      INTEGER, POINTER        :: TOSNL5(:)
+#ifdef W3_NL5
+      INTEGER, POINTER        :: TOSNL5(:)
+#endif
       INTEGER, POINTER        :: TOFRST(:), TONEXT(:,:), TOLAST(:,:), &
                                  TBPI0(:), TBPIN(:), NDS(:)
       INTEGER, POINTER        :: OFILES(:)
@@ -449,8 +471,10 @@
 !/ Type 1 ...
 !/
       INTEGER, POINTER        :: IPASS1
-!/MPI      INTEGER, POINTER        :: NRQGO, NRQGO2
-!/MPI      INTEGER, POINTER        :: IRQGO(:), IRQGO2(:)
+#ifdef W3_MPI
+      INTEGER, POINTER        :: NRQGO, NRQGO2
+      INTEGER, POINTER        :: IRQGO(:), IRQGO2(:)
+#endif
       LOGICAL, POINTER        :: FLOGRD(:,:), FLOGR2(:,:),            &
                                  FLOGRR(:,:),FLOGD(:), FLOG2(:),      &
                                  FLOGR(:), WRITE1
@@ -458,12 +482,18 @@
 !/ Type 2 ...
 !/
       INTEGER, POINTER        :: IPASS2, NOPTS
-!/MPI      INTEGER, POINTER        :: NRQPO, NRQPO2
+#ifdef W3_MPI
+      INTEGER, POINTER        :: NRQPO, NRQPO2
+#endif
       INTEGER, POINTER        :: IPTINT(:,:,:), IL(:), IW(:), II(:)
-!/MPI      INTEGER, POINTER        :: IRQPO1(:), IRQPO2(:)
+#ifdef W3_MPI
+      INTEGER, POINTER        :: IRQPO1(:), IRQPO2(:)
+#endif
       REAL, POINTER           :: PTLOC(:,:), PTIFAC(:,:),             &
                                  DPO(:), WAO(:), WDO(:), ASO(:),      &
-!/FLX5                                 TAUAO(:), TAUDO(:), DAIRO(:),        &
+#ifdef W3_FLX5
+                                 TAUAO(:), TAUDO(:), DAIRO(:),        &
+#endif
                                  CAO(:), CDO(:), ICEO(:), ICEHO(:),   &
                                  ICEFO(:), SPCO(:,:)
       REAL, POINTER           :: ZET_SETO(:)
@@ -471,13 +501,17 @@
       CHARACTER(LEN=40), POINTER :: PTNME(:)
       CHARACTER(LEN=13), POINTER :: GRDID(:)
       LOGICAL, POINTER        :: O2INIT
-!/MPI        LOGICAL, POINTER      :: O2IRQI
+#ifdef W3_MPI
+        LOGICAL, POINTER      :: O2IRQI
+#endif
 !/
 !/ Type 3 ...
 !/
       INTEGER, POINTER        :: IPASS3
-!/MPI      INTEGER, POINTER        :: IT0PNT, IT0TRK, IT0PRT, NRQTR
-!/MPI      INTEGER, POINTER        :: IRQTR(:)
+#ifdef W3_MPI
+      INTEGER, POINTER        :: IT0PNT, IT0TRK, IT0PRT, NRQTR
+      INTEGER, POINTER        :: IRQTR(:)
+#endif
       LOGICAL, POINTER        :: O3INIT, STOP
       LOGICAL, POINTER        :: MASK1(:,:), MASK2(:,:)
       CHARACTER(LEN=32), POINTER   :: TRCKID(:,:)
@@ -485,18 +519,24 @@
 !/ Type 4 ...
 !/
       INTEGER, POINTER        :: IFILE4
-!/MPI      INTEGER, POINTER        :: NRQRS, NBLKRS, RSBLKS
-!/MPI      INTEGER, POINTER        :: IRQRS(:), IRQRSS(:)
-!/MPI      REAL, POINTER           :: VAAUX(:,:,:)
+#ifdef W3_MPI
+      INTEGER, POINTER        :: NRQRS, NBLKRS, RSBLKS
+      INTEGER, POINTER        :: IRQRS(:), IRQRSS(:)
+      REAL, POINTER           :: VAAUX(:,:,:)
+#endif
 !/
 !/ Type 5 ...
 !/
       INTEGER, POINTER        :: NBI, NBI2, NFBPO, NKI, NTHI
       INTEGER, POINTER        :: NBO(:), NBO2(:), NDSL(:)
-!/MPI      INTEGER, POINTER        :: NRQBP, NRQBP2
+#ifdef W3_MPI
+      INTEGER, POINTER        :: NRQBP, NRQBP2
+#endif
       INTEGER, POINTER        :: IPBPI(:,:), ISBPI(:),                &
                                  IPBPO(:,:), ISBPO(:)
-!/MPI      INTEGER, POINTER        :: IRQBP1(:), IRQBP2(:)
+#ifdef W3_MPI
+      INTEGER, POINTER        :: IRQBP1(:), IRQBP2(:)
+#endif
       REAL, POINTER           :: XFRI, FR1I, TH1I
       REAL, POINTER           :: XBPI(:), YBPI(:), RDBPI(:,:),        &
                                  XBPO(:), YBPO(:), RDBPO(:,:),        &
@@ -580,7 +620,9 @@
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: NGRIDS, NAUXGR
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -593,10 +635,14 @@
 !/ Local parameters
 !/
       INTEGER                 :: I, NLOW, J
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       CHARACTER(LEN=20)       :: STRING
 !/
-!/S      CALL STRACE (IENT, 'W3NOUT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3NOUT')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -643,21 +689,29 @@
         OUTPTS(I)%TBPIN = (-1,0)
 !
         OUTPTS(I)%OUT1%IPASS1 = 0
-!/MPI        OUTPTS(I)%OUT1%NRQGO  = 0
-!/MPI        OUTPTS(I)%OUT1%NRQGO2 = 0
+#ifdef W3_MPI
+        OUTPTS(I)%OUT1%NRQGO  = 0
+        OUTPTS(I)%OUT1%NRQGO2 = 0
+#endif
 !
         OUTPTS(I)%OUT2%IPASS2 = 0
         OUTPTS(I)%OUT2%NOPTS  = 0
         OUTPTS(I)%OUT2%O2INIT = .FALSE.
-!/MPI        OUTPTS(I)%OUT2%O2IRQI = .FALSE.
+#ifdef W3_MPI
+        OUTPTS(I)%OUT2%O2IRQI = .FALSE.
+#endif
 !
         OUTPTS(I)%OUT3%IPASS3 = 0
         OUTPTS(I)%OUT3%O3INIT = .FALSE.
         OUTPTS(I)%OUT3%STOP   = .FALSE.
-!/MPI        OUTPTS(I)%OUT3%NRQTR  = 0
+#ifdef W3_MPI
+        OUTPTS(I)%OUT3%NRQTR  = 0
+#endif
 !
         OUTPTS(I)%OUT4%IFILE4 = 0
-!/MPI        OUTPTS(I)%OUT4%NRQRS  = 0
+#ifdef W3_MPI
+        OUTPTS(I)%OUT4%NRQRS  = 0
+#endif
 !
         OUTPTS(I)%OUT5%O5INI1 = .FALSE.
         OUTPTS(I)%OUT5%O5INI2 = .FALSE.
@@ -684,9 +738,15 @@
 ! 1) Forcing fields
 !
       NOGE(1) = 9
-!/BT4      NOGE(1) = 10
-!/IS2      NOGE(1) = 12    ! CB
-!/SETUP    NOGE(1) = 13    ! CB
+#ifdef W3_BT4
+      NOGE(1) = 10
+#endif
+#ifdef W3_IS2
+      NOGE(1) = 12    ! CB
+#endif
+#ifdef W3_SETUP
+    NOGE(1) = 13    ! CB
+#endif
 !
       IDOUT( 1, 1)  = 'Water depth         '
       IDOUT( 1, 2)  = 'Current vel.        '
@@ -697,15 +757,23 @@
       IDOUT( 1, 7)  = 'Iceberg damp coeffic'
       IDOUT( 1, 8)  = 'Atmospheric momentum'
       IDOUT( 1, 9)  = 'Air density         '
-!/BT4      IDOUT( 1, 10)  = 'Sediment diam D50   '
-!/IS2      IDOUT( 1, 11)  = 'ice thickness   '
-!/IS2      IDOUT( 1, 12) = 'Avg. ice floe diam. '
-!/SETUP    IDOUT( 1, 13)  = 'wave induced setup'
+#ifdef W3_BT4
+      IDOUT( 1, 10)  = 'Sediment diam D50   '
+#endif
+#ifdef W3_IS2
+      IDOUT( 1, 11)  = 'ice thickness   '
+      IDOUT( 1, 12) = 'Avg. ice floe diam. '
+#endif
+#ifdef W3_SETUP
+    IDOUT( 1, 13)  = 'wave induced setup'
+#endif
 !
 ! 2) Standard mean wave parameters
 !
       NOGE(2) = 19
-!/OASOCM      NOGE(2) = 20
+#ifdef W3_OASOCM
+      NOGE(2) = 20
+#endif
 !
       IDOUT( 2, 1)  = 'Wave height         '
       IDOUT( 2, 2)  = 'Mean wave length    '
@@ -726,7 +794,9 @@
       IDOUT( 2, 17)  = 'Dominant wave bT   '
       IDOUT( 2, 18)  = 'Peak prd. (from fp)'
       IDOUT( 2, 19)  = 'Mean wave number   '
-!/OASOCM  IDOUT( 2, 20) = 'Mean wave dir. norot'
+#ifdef W3_OASOCM
+  IDOUT( 2, 20) = 'Mean wave dir. norot'
+#endif
 !      IDOUT( 2,10)  = 'Mean wave dir. a2b2'
 !      IDOUT( 2,11)  = 'Mean dir. spr. a2b2'
 !      IDOUT( 2,12)  = 'Windsea height(Sin)'
@@ -854,7 +924,9 @@
         IDOUT(10, I) = STRING
         END DO
 !
-!/T      WRITE (NDSTST,9000) NGRIDS
+#ifdef W3_T
+      WRITE (NDSTST,9000) NGRIDS
+#endif
 !
       RETURN
 !
@@ -864,7 +936,9 @@
                '                    NGRIDS = ',I10/                   &
                '                    RUN W3NMOD FIRST'/)
 !
-!/T 9000 FORMAT (' TEST W3NOUT : SETTING UP FOR ',I4,' GRIDS')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3NOUT : SETTING UP FOR ',I4,' GRIDS')
+#endif
 !/
 !/ End of W3NOUT ----------------------------------------------------- /
 !/
@@ -942,7 +1016,9 @@
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: W3SETG, NGRIDS, NAUXGR, IGRID, NSPEC
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -955,9 +1031,13 @@
 !/ Local parameters
 !/
       INTEGER                 :: JGRID, NLOW
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'W3DMO2')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3DMO2')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -978,7 +1058,9 @@
           CALL EXTCDE (3)
         END IF
 !
-!/T      WRITE (NDST,9000) IMOD
+#ifdef W3_T
+      WRITE (NDST,9000) IMOD
+#endif
 !
       JGRID  = IGRID
       IF ( JGRID .NE. IMOD ) CALL W3SETG ( IMOD, NDSE, NDST )
@@ -998,9 +1080,11 @@
                  OUTPTS(IMOD)%OUT2%ZET_SETO(NPT)   ,                  &
                  OUTPTS(IMOD)%OUT2%WDO(NPT)        ,                  &
                  OUTPTS(IMOD)%OUT2%ASO(NPT)        ,                  &
-!/FLX5                 OUTPTS(IMOD)%OUT2%TAUAO(NPT)      ,                  &
-!/FLX5                 OUTPTS(IMOD)%OUT2%TAUDO(NPT)      ,                  &
-!/FLX5                 OUTPTS(IMOD)%OUT2%DAIRO(NPT)      ,                  &
+#ifdef W3_FLX5
+                 OUTPTS(IMOD)%OUT2%TAUAO(NPT)      ,                  &
+                 OUTPTS(IMOD)%OUT2%TAUDO(NPT)      ,                  &
+                 OUTPTS(IMOD)%OUT2%DAIRO(NPT)      ,                  &
+#endif
                  OUTPTS(IMOD)%OUT2%CAO(NPT)        ,                  &
                  OUTPTS(IMOD)%OUT2%CDO(NPT)        ,                  &
                  OUTPTS(IMOD)%OUT2%ICEO(NPT)       ,                  &
@@ -1012,21 +1096,27 @@
 !
       OUTPTS(IMOD)%OUT2%O2INIT = .TRUE.
 !
-!/T      WRITE (NDST,9001)
+#ifdef W3_T
+      WRITE (NDST,9001)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 3.  Point to allocated arrays
 !
       CALL W3SETO ( IMOD, NDSE, NDST )
 !
-!/T      WRITE (NDST,9002)
+#ifdef W3_T
+      WRITE (NDST,9002)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 4.  Update counters in grid
 !
       NOPTS  = NPT
 !
-!/T      WRITE (NDST,9003)
+#ifdef W3_T
+      WRITE (NDST,9003)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 5.  Restore previous grid setting if necessary
@@ -1045,10 +1135,12 @@
                '                    NOUTP  = ',I10/)
  1003 FORMAT (/' *** ERROR W3DMO2 : ARRAY(S) ALREADY ALLOCATED *** ')
 !
-!/T 9000 FORMAT (' TEST W3DMO2 : MODEL ',I4)
-!/T 9001 FORMAT (' TEST W3DMO2 : ARRAYS ALLOCATED')
-!/T 9002 FORMAT (' TEST W3DMO2 : POINTERS RESET')
-!/T 9003 FORMAT (' TEST W3DMO2 : DIMENSIONS STORED')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3DMO2 : MODEL ',I4)
+ 9001 FORMAT (' TEST W3DMO2 : ARRAYS ALLOCATED')
+ 9002 FORMAT (' TEST W3DMO2 : POINTERS RESET')
+ 9003 FORMAT (' TEST W3DMO2 : DIMENSIONS STORED')
+#endif
 !/
 !/ End of W3DMO2 ----------------------------------------------------- /
 !/
@@ -1122,7 +1214,9 @@
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: W3SETG, NGRIDS, IGRID, NX, NY
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -1135,9 +1229,13 @@
 !/ Local parameters
 !/
       INTEGER                 :: JGRID
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'W3DMO3')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3DMO3')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -1157,7 +1255,9 @@
           CALL EXTCDE (3)
         END IF
 !
-!/T      WRITE (NDST,9000) IMOD
+#ifdef W3_T
+      WRITE (NDST,9000) IMOD
+#endif
 !
       JGRID  = IGRID
       IF ( JGRID .NE. IMOD ) CALL W3SETG ( IMOD, NDSE, NDST )
@@ -1172,19 +1272,25 @@
 !
       OUTPTS(IMOD)%OUT3%O3INIT = .TRUE.
 !
-!/T      WRITE (NDST,9001)
+#ifdef W3_T
+      WRITE (NDST,9001)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 3.  Point to allocated arrays
 !
       CALL W3SETO ( IMOD, NDSE, NDST )
 !
-!/T      WRITE (NDST,9002)
+#ifdef W3_T
+      WRITE (NDST,9002)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 4.  Update counters in grid
 !
-!/T      WRITE (NDST,9003)
+#ifdef W3_T
+      WRITE (NDST,9003)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 5.  Restore previous grid setting if necessary
@@ -1202,10 +1308,12 @@
                '                    NOUTP  = ',I10/)
  1003 FORMAT (/' *** ERROR W3DMO3 : ARRAY(S) ALREADY ALLOCATED *** ')
 !
-!/T 9000 FORMAT (' TEST W3DMO3 : MODEL ',I4)
-!/T 9001 FORMAT (' TEST W3DMO3 : ARRAYS ALLOCATED')
-!/T 9002 FORMAT (' TEST W3DMO3 : POINTERS RESET')
-!/T 9003 FORMAT (' TEST W3DMO3 : DIMENSIONS STORED')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3DMO3 : MODEL ',I4)
+ 9001 FORMAT (' TEST W3DMO3 : ARRAYS ALLOCATED')
+ 9002 FORMAT (' TEST W3DMO3 : POINTERS RESET')
+ 9003 FORMAT (' TEST W3DMO3 : DIMENSIONS STORED')
+#endif
 !/
 !/ End of W3DMO3 ----------------------------------------------------- /
 !/
@@ -1278,7 +1386,9 @@
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: W3SETG, NGRIDS, IGRID, NX, NY, NSPEC
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -1291,9 +1401,13 @@
 !/ Local parameters
 !/
       INTEGER                 :: JGRID
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'W3DMO5')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3DMO5')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -1308,7 +1422,9 @@
           CALL EXTCDE (2)
         END IF
 !
-!/T      WRITE (NDST,9000) IMOD, IBLOCK
+#ifdef W3_T
+      WRITE (NDST,9000) IMOD, IBLOCK
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Allocate arrays and reset pointers
@@ -1380,7 +1496,9 @@
 !
       END SELECT
 !
-!/T      WRITE (NDST,9001)
+#ifdef W3_T
+      WRITE (NDST,9001)
+#endif
 !
 ! -------------------------------------------------------------------- /
 !
@@ -1396,8 +1514,10 @@
  1010 FORMAT (/' *** ERROR W3DMO5 : ILLEGAL BLOCK NUMBER  *** '/      &
                '                    IBLOCK = ',I10/)
 !
-!/T 9000 FORMAT (' TEST W3DMO5 : MODEL AND BLOCK ',2I4)
-!/T 9001 FORMAT (' TEST W3DMO5 : ARRAYS ALLOCATED')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3DMO5 : MODEL AND BLOCK ',2I4)
+ 9001 FORMAT (' TEST W3DMO5 : ARRAYS ALLOCATED')
+#endif
 !/
 !/ End of W3DMO5 ----------------------------------------------------- /
 !/
@@ -1470,7 +1590,9 @@
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: NAUXGR
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
@@ -1485,9 +1607,13 @@
 !/
       INTEGER                 :: NLOW
       INTEGER                 :: J
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'W3SETO')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SETO')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -1503,7 +1629,9 @@
           CALL EXTCDE (2)
         END IF
 !
-!/T      WRITE (NDSTST,9000) IMOD
+#ifdef W3_T
+      WRITE (NDSTST,9000) IMOD
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Set model number
@@ -1533,7 +1661,9 @@
 !
       NOSWLL => OUTPTS(IMOD)%NOSWLL
 !
-!/NL5      TOSNL5 => OUTPTS(IMOD)%TOSNL5
+#ifdef W3_NL5
+      TOSNL5 => OUTPTS(IMOD)%TOSNL5
+#endif
       TOFRST => OUTPTS(IMOD)%TOFRST
       TONEXT => OUTPTS(IMOD)%TONEXT
       TOLAST => OUTPTS(IMOD)%TOLAST
@@ -1547,10 +1677,12 @@
 !
       IPASS1 => OUTPTS(IMOD)%OUT1%IPASS1
       WRITE1 => OUTPTS(IMOD)%OUT1%WRITE1
-!/MPI      NRQGO  => OUTPTS(IMOD)%OUT1%NRQGO
-!/MPI      NRQGO2 => OUTPTS(IMOD)%OUT1%NRQGO2
-!/MPI      IF ( NRQGO  .NE. 0 ) IRQGO  => OUTPTS(IMOD)%OUT1%IRQGO
-!/MPI      IF ( NRQGO2 .NE. 0 ) IRQGO2 => OUTPTS(IMOD)%OUT1%IRQGO2
+#ifdef W3_MPI
+      NRQGO  => OUTPTS(IMOD)%OUT1%NRQGO
+      NRQGO2 => OUTPTS(IMOD)%OUT1%NRQGO2
+      IF ( NRQGO  .NE. 0 ) IRQGO  => OUTPTS(IMOD)%OUT1%IRQGO
+      IF ( NRQGO2 .NE. 0 ) IRQGO2 => OUTPTS(IMOD)%OUT1%IRQGO2
+#endif
       FLOGRD => OUTPTS(IMOD)%OUT1%FLOGRD
       FLOGR2 => OUTPTS(IMOD)%OUT1%FLOGR2
       FLOGRR => OUTPTS(IMOD)%OUT1%FLOGRR
@@ -1560,10 +1692,14 @@
 !
       IPASS2 => OUTPTS(IMOD)%OUT2%IPASS2
       NOPTS  => OUTPTS(IMOD)%OUT2%NOPTS
-!/MPI      NRQPO  => OUTPTS(IMOD)%OUT2%NRQPO
-!/MPI      NRQPO2 => OUTPTS(IMOD)%OUT2%NRQPO2
+#ifdef W3_MPI
+      NRQPO  => OUTPTS(IMOD)%OUT2%NRQPO
+      NRQPO2 => OUTPTS(IMOD)%OUT2%NRQPO2
+#endif
       O2INIT => OUTPTS(IMOD)%OUT2%O2INIT
-!/MPI      O2IRQI => OUTPTS(IMOD)%OUT2%O2IRQI
+#ifdef W3_MPI
+      O2IRQI => OUTPTS(IMOD)%OUT2%O2IRQI
+#endif
 !
       IF ( O2INIT ) THEN
           IPTINT => OUTPTS(IMOD)%OUT2%IPTINT
@@ -1577,9 +1713,11 @@
           ZET_SETO => OUTPTS(IMOD)%OUT2%ZET_SETO
           WDO    => OUTPTS(IMOD)%OUT2%WDO
           ASO    => OUTPTS(IMOD)%OUT2%ASO
-!/FLX5          TAUAO  => OUTPTS(IMOD)%OUT2%TAUAO
-!/FLX5          TAUDO  => OUTPTS(IMOD)%OUT2%TAUDO
-!/FLX5          DAIRO  => OUTPTS(IMOD)%OUT2%DAIRO
+#ifdef W3_FLX5
+          TAUAO  => OUTPTS(IMOD)%OUT2%TAUAO
+          TAUDO  => OUTPTS(IMOD)%OUT2%TAUDO
+          DAIRO  => OUTPTS(IMOD)%OUT2%DAIRO
+#endif
           CAO    => OUTPTS(IMOD)%OUT2%CAO
           CDO    => OUTPTS(IMOD)%OUT2%CDO
           ICEO   => OUTPTS(IMOD)%OUT2%ICEO
@@ -1590,17 +1728,21 @@
           GRDID  => OUTPTS(IMOD)%OUT2%GRDID
         END IF
 !
-!/MPI      IF ( O2IRQI ) THEN
-!/MPI          IRQPO1 => OUTPTS(IMOD)%OUT2%IRQPO1
-!/MPI          IRQPO2 => OUTPTS(IMOD)%OUT2%IRQPO2
-!/MPI        END IF
+#ifdef W3_MPI
+      IF ( O2IRQI ) THEN
+          IRQPO1 => OUTPTS(IMOD)%OUT2%IRQPO1
+          IRQPO2 => OUTPTS(IMOD)%OUT2%IRQPO2
+        END IF
+#endif
 !
       IPASS3 => OUTPTS(IMOD)%OUT3%IPASS3
-!/MPI      IT0PNT => OUTPTS(IMOD)%OUT3%IT0PNT
-!/MPI      IT0TRK => OUTPTS(IMOD)%OUT3%IT0TRK
-!/MPI      IT0PRT => OUTPTS(IMOD)%OUT3%IT0PRT
-!/MPI      NRQTR  => OUTPTS(IMOD)%OUT3%NRQTR
-!/MPI      IF ( NRQTR .NE. 0 ) IRQTR  => OUTPTS(IMOD)%OUT3%IRQTR
+#ifdef W3_MPI
+      IT0PNT => OUTPTS(IMOD)%OUT3%IT0PNT
+      IT0TRK => OUTPTS(IMOD)%OUT3%IT0TRK
+      IT0PRT => OUTPTS(IMOD)%OUT3%IT0PRT
+      NRQTR  => OUTPTS(IMOD)%OUT3%NRQTR
+      IF ( NRQTR .NE. 0 ) IRQTR  => OUTPTS(IMOD)%OUT3%IRQTR
+#endif
       O3INIT => OUTPTS(IMOD)%OUT3%O3INIT
       STOP   => OUTPTS(IMOD)%OUT3%STOP
 !
@@ -1611,20 +1753,24 @@
         END IF
 !
       IFILE4 => OUTPTS(IMOD)%OUT4%IFILE4
-!/MPI      NRQRS  => OUTPTS(IMOD)%OUT4%NRQRS
-!/MPI      NBLKRS => OUTPTS(IMOD)%OUT4%NBLKRS
-!/MPI      RSBLKS => OUTPTS(IMOD)%OUT4%RSBLKS
-!/MPI      IF ( NRQRS .NE. 0 ) THEN
-!/MPI          IRQRS  => OUTPTS(IMOD)%OUT4%IRQRS
-!/MPI        END IF
-!/MPI      IRQRSS => OUTPTS(IMOD)%OUT4%IRQRSS
-!/MPI      VAAUX  => OUTPTS(IMOD)%OUT4%VAAUX
+#ifdef W3_MPI
+      NRQRS  => OUTPTS(IMOD)%OUT4%NRQRS
+      NBLKRS => OUTPTS(IMOD)%OUT4%NBLKRS
+      RSBLKS => OUTPTS(IMOD)%OUT4%RSBLKS
+      IF ( NRQRS .NE. 0 ) THEN
+          IRQRS  => OUTPTS(IMOD)%OUT4%IRQRS
+        END IF
+      IRQRSS => OUTPTS(IMOD)%OUT4%IRQRSS
+      VAAUX  => OUTPTS(IMOD)%OUT4%VAAUX
+#endif
 !
       NBI    => OUTPTS(IMOD)%OUT5%NBI
       NBI2   => OUTPTS(IMOD)%OUT5%NBI2
       NFBPO  => OUTPTS(IMOD)%OUT5%NFBPO
-!/MPI      NRQBP  => OUTPTS(IMOD)%OUT5%NRQBP
-!/MPI      NRQBP2 => OUTPTS(IMOD)%OUT5%NRQBP2
+#ifdef W3_MPI
+      NRQBP  => OUTPTS(IMOD)%OUT5%NRQBP
+      NRQBP2 => OUTPTS(IMOD)%OUT5%NRQBP2
+#endif
       NBO    => OUTPTS(IMOD)%OUT5%NBO
       NBO2   => OUTPTS(IMOD)%OUT5%NBO2
       NDSL   => OUTPTS(IMOD)%OUT5%NDSL
@@ -1671,8 +1817,10 @@
           ABPOS  => OUTPTS(IMOD)%OUT5%ABPOS
         END IF
 !
-!/MPI      IF ( NRQBP  .NE. 0 ) IRQBP1 => OUTPTS(IMOD)%OUT5%IRQBP1
-!/MPI      IF ( NRQBP2 .NE. 0 ) IRQBP2 => OUTPTS(IMOD)%OUT5%IRQBP2
+#ifdef W3_MPI
+      IF ( NRQBP  .NE. 0 ) IRQBP1 => OUTPTS(IMOD)%OUT5%IRQBP1
+      IF ( NRQBP2 .NE. 0 ) IRQBP2 => OUTPTS(IMOD)%OUT5%IRQBP2
+#endif
 !
       IPASS6 => OUTPTS(IMOD)%OUT6%IPASS6
       IHMAX  => OUTPTS(IMOD)%OUT6%IHMAX
@@ -1704,7 +1852,9 @@
                '                    NLOW   = ',I10/                   &
                '                    NOUTP  = ',I10/)
 !
-!/T 9000 FORMAT (' TEST W3SETO : MODEL ',I4,' SELECTED')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SETO : MODEL ',I4,' SELECTED')
+#endif
 !/
 !/ End of W3SETO ----------------------------------------------------- /
 !/

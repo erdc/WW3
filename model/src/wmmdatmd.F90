@@ -301,20 +301,26 @@
                                  STIME(2), ETIME(2), NRGRD, NRINP,    &
                                  NRGRP, NMVMAX, NGRPSMC
       INTEGER                 :: CLKDT1(8), CLKDT2(8), CLKDT3(8)
-!/MPRF      INTEGER                 :: MDSP
-!/MPI      INTEGER                 :: MPI_COMM_MWAVE
-!/MPI      INTEGER, PARAMETER      :: MTAGB = 0
-!/MPI      INTEGER, PARAMETER      :: MTAG0 = 1000
-!/MPI      INTEGER, PARAMETER      :: MTAG1 = 100000
-!/MPI      INTEGER, PARAMETER      :: MTAG2 = 1500000
-!/MPI      INTEGER, PARAMETER      :: MTAG_UB = 2**21-1 !MPI_TAG_UB on Cray XC40
+#ifdef W3_MPRF
+      INTEGER                 :: MDSP
+#endif
+#ifdef W3_MPI
+      INTEGER                 :: MPI_COMM_MWAVE
+      INTEGER, PARAMETER      :: MTAGB = 0
+      INTEGER, PARAMETER      :: MTAG0 = 1000
+      INTEGER, PARAMETER      :: MTAG1 = 100000
+      INTEGER, PARAMETER      :: MTAG2 = 1500000
+      INTEGER, PARAMETER      :: MTAG_UB = 2**21-1 !MPI_TAG_UB on Cray XC40
+#endif
       INTEGER, ALLOCATABLE    :: MDSF(:,:), GRANK(:), GRGRP(:),       &
                                  INGRP(:,:), GRDHGH(:,:), GRDEQL(:,:),&
                                  GRDLOW(:,:), ALLPRC(:,:),            &
                                  MODMAP(:,:), TSYNC(:,:), TMAX(:,:),  &
                                  TOUTP(:,:), TDATA(:,:), GRSTAT(:),   &
                                  NBI2G(:,:), INPMAP(:,:)
-!/MPI      INTEGER, ALLOCATABLE    :: NBISTA(:), HGHSTA(:), EQLSTA(:)
+#ifdef W3_MPI
+      INTEGER, ALLOCATABLE    :: NBISTA(:), HGHSTA(:), EQLSTA(:)
+#endif
       REAL                    :: CLKFIN
       REAL, ALLOCATABLE       :: DTRES(:)
       LOGICAL                 :: FLGBDI=.FALSE., FLGHG1, FLGHG2
@@ -326,50 +332,76 @@
 !/
       TYPE MDATA
         INTEGER               :: RCLD(3), NDT(3), NMV, NRUPTS
-!/MPI        INTEGER               :: MPI_COMM_GRD, MPI_COMM_BCT,     &
-!/MPI                                 CROOT, NRQBPG, NRQHGG, NRQEQG
+#ifdef W3_MPI
+        INTEGER               :: MPI_COMM_GRD, MPI_COMM_BCT,     &
+                                 CROOT, NRQBPG, NRQHGG, NRQEQG
+#endif
         INTEGER, POINTER      :: TMV(:,:,:), NBI2S(:,:), MAPMSK(:,:), &
                                  UPTMAP(:)
-!/MPI        INTEGER, POINTER      :: IRQBPG(:), IRQHGG(:), IRQEQG(:)
+#ifdef W3_MPI
+        INTEGER, POINTER      :: IRQBPG(:), IRQHGG(:), IRQEQG(:)
+#endif
         REAL, POINTER         :: DATA0(:,:), DATA1(:,:), DATA2(:,:),  &
                                  AMV(:,:), DMV(:,:)
         REAL, POINTER         :: MAPBDI(:,:), MAPODI(:,:)
-!/PDLIB     INTEGER, POINTER    :: SEA_IPGL(:), SEA_IPGL_TO_PROC(:)
+#ifdef W3_PDLIB
+     INTEGER, POINTER    :: SEA_IPGL(:), SEA_IPGL_TO_PROC(:)
+#endif
         LOGICAL               :: MINIT, MSKINI, FLLSTL, FLLSTR,       &
                                  FLLSTI, FLDAT0, FLDAT1, FLDAT2
-!/MPI        LOGICAL               :: FBCAST
+#ifdef W3_MPI
+        LOGICAL               :: FBCAST
+#endif
       END TYPE MDATA
 !
       TYPE BPST
-!/MPI        INTEGER               :: NRQBPS, STIME(2)
+#ifdef W3_MPI
+        INTEGER               :: NRQBPS, STIME(2)
+#endif
         INTEGER               :: VTIME(2)
-!/MPI        INTEGER, POINTER      :: IRQBPS(:)
+#ifdef W3_MPI
+        INTEGER, POINTER      :: IRQBPS(:)
+#endif
         REAL, POINTER         :: SBPI(:,:)
-!/MPI        REAL, POINTER         :: TSTORE(:,:)
+#ifdef W3_MPI
+        REAL, POINTER         :: TSTORE(:,:)
+#endif
         LOGICAL               :: INIT
       END TYPE BPST
 !
       TYPE HGST
         INTEGER               :: VTIME(2), NTOT, NREC, NRC1,          &
                                  NSND, NSN1, NSMX, XTIME(2)
-!/MPI        INTEGER               :: NRQHGS, NRQOUT
+#ifdef W3_MPI
+        INTEGER               :: NRQHGS, NRQOUT
+#endif
         INTEGER, POINTER      :: LJSEA(:), NRAVG(:), IMPSRC(:,:),     &
                                  ITAG(:,:), ISEND(:,:)
-!/MPI        INTEGER, POINTER      :: IRQHGS(:), OUTDAT(:,:)
+#ifdef W3_MPI
+        INTEGER, POINTER      :: IRQHGS(:), OUTDAT(:,:)
+#endif
         REAL, POINTER         :: WGTH(:,:), SHGH(:,:,:)
-!/MPI        REAL, POINTER         :: TSTORE(:,:)
+#ifdef W3_MPI
+        REAL, POINTER         :: TSTORE(:,:)
+#endif
         LOGICAL               :: INIT
       END TYPE HGST
 !
       TYPE EQST
         INTEGER               :: VTIME(2), NTOT, NREC, NSND, NAVMAX
-!/MPI        INTEGER               :: NRQEQS, NRQOUT
+#ifdef W3_MPI
+        INTEGER               :: NRQEQS, NRQOUT
+#endif
         INTEGER, POINTER      :: ISEA(:), JSEA(:), NAVG(:), RIP(:,:), &
                                  RTG(:,:), SIS(:), SJS(:), SI1(:),    &
                                  SI2(:), SIP(:), STG(:)
-!/MPI        INTEGER, POINTER      :: IRQEQS(:), OUTDAT(:,:)
+#ifdef W3_MPI
+        INTEGER, POINTER      :: IRQEQS(:), OUTDAT(:,:)
+#endif
         REAL, POINTER         :: SEQL(:,:,:), WGHT(:), WAVG(:,:)
-!/MPI        REAL, POINTER         :: TSTORE(:,:)
+#ifdef W3_MPI
+        REAL, POINTER         :: TSTORE(:,:)
+#endif
         LOGICAL               :: INIT
       END TYPE EQST
 !/
@@ -384,14 +416,20 @@
 !/
       INTEGER, POINTER        :: RCLD(:), NDT(:), NMV, TMV(:,:,:),    &
                                  NBI2S(:,:), MAPMSK(:,:), UPTMAP(:)
-!/MPI      INTEGER, POINTER        :: MPI_COMM_GRD, MPI_COMM_BCT, CROOT
+#ifdef W3_MPI
+      INTEGER, POINTER        :: MPI_COMM_GRD, MPI_COMM_BCT, CROOT
+#endif
       REAL, POINTER           :: DATA0(:,:), DATA1(:,:), DATA2(:,:),  &
                                  AMV(:,:), DMV(:,:)
       REAL, POINTER           :: MAPBDI(:,:), MAPODI(:,:)
-!/PDLIB      INTEGER, POINTER    :: SEA_IPGL(:), SEA_IPGL_TO_PROC(:)
+#ifdef W3_PDLIB
+      INTEGER, POINTER    :: SEA_IPGL(:), SEA_IPGL_TO_PROC(:)
+#endif
       LOGICAL, POINTER        :: MINIT, FLLSTL, FLLSTR, FLLSTI,       &
                                  FLDAT0, FLDAT1, FLDAT2
-!/MPI      LOGICAL, POINTER        :: FBCAST
+#ifdef W3_MPI
+      LOGICAL, POINTER        :: FBCAST
+#endif
 !/
       CONTAINS
 !/ ------------------------------------------------------------------- /
@@ -456,7 +494,9 @@
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: NGRIDS
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -469,9 +509,13 @@
 !/ Local parameters
 !/
       INTEGER                 :: I, J
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMNDAT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMNDAT')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -489,17 +533,21 @@
                  BCDUMP(NRGRD), IFLSTI(NRINP), IFLSTL(NRINP),         &
                  IFLSTR(NRINP), STAT=ISTAT )
       CHECK_ALLOC_STATUS ( ISTAT )
-!/MPI      ALLOCATE ( NBISTA(NGRIDS), HGHSTA(NGRIDS), EQLSTA(NGRIDS), &
-!/MPI                 STAT=ISTAT )
-!/MPI      CHECK_ALLOC_STATUS ( ISTAT )
+#ifdef W3_MPI
+      ALLOCATE ( NBISTA(NGRIDS), HGHSTA(NGRIDS), EQLSTA(NGRIDS), &
+                 STAT=ISTAT )
+      CHECK_ALLOC_STATUS ( ISTAT )
+#endif
       NMDATA = NGRIDS
 !
 ! -------------------------------------------------------------------- /
 ! 3.  Initialize parameters
 !
-!/MPI      NBISTA = 0
-!/MPI      HGHSTA = 0
-!/MPI      EQLSTA = 0
+#ifdef W3_MPI
+      NBISTA = 0
+      HGHSTA = 0
+      EQLSTA = 0
+#endif
 !
       IFLSTI = .FALSE.
       IFLSTL = .FALSE.
@@ -511,15 +559,21 @@
         MDATAS(I)%FLDAT0 = .FALSE.
         MDATAS(I)%FLDAT1 = .FALSE.
         MDATAS(I)%FLDAT2 = .FALSE.
-!/MPI        MDATAS(I)%MPI_COMM_GRD = -99
-!/MPI        MDATAS(I)%MPI_COMM_BCT = -99
+#ifdef W3_MPI
+        MDATAS(I)%MPI_COMM_GRD = -99
+        MDATAS(I)%MPI_COMM_BCT = -99
+#endif
         DO J=1, NGRIDS
           BPSTGE(I,J)%VTIME(1) = -1
           BPSTGE(I,J)%VTIME(2) =  0
-!/MPI          BPSTGE(I,J)%STIME(1) = -1
-!/MPI          BPSTGE(I,J)%STIME(2) =  0
+#ifdef W3_MPI
+          BPSTGE(I,J)%STIME(1) = -1
+          BPSTGE(I,J)%STIME(2) =  0
+#endif
           BPSTGE(I,J)%INIT     = .FALSE.
-!/MPI          BPSTGE(I,J)%NRQBPS   = 0
+#ifdef W3_MPI
+          BPSTGE(I,J)%NRQBPS   = 0
+#endif
           HGSTGE(I,J)%VTIME(1) = -1
           HGSTGE(I,J)%VTIME(2) =  0
           HGSTGE(I,J)%XTIME(1) = -1
@@ -530,8 +584,10 @@
           HGSTGE(I,J)%NSND     =  0
           HGSTGE(I,J)%NSN1     =  0
           HGSTGE(I,J)%NSMX     =  0
-!/MPI          HGSTGE(I,J)%NRQHGS   =  0
-!/MPI          HGSTGE(I,J)%NRQOUT   =  0
+#ifdef W3_MPI
+          HGSTGE(I,J)%NRQHGS   =  0
+          HGSTGE(I,J)%NRQOUT   =  0
+#endif
           HGSTGE(I,J)%INIT     = .FALSE.
           EQSTGE(I,J)%VTIME(1) = -1
           EQSTGE(I,J)%VTIME(2) =  0
@@ -539,13 +595,17 @@
           EQSTGE(I,J)%NREC     =  0
           EQSTGE(I,J)%NSND     =  0
           EQSTGE(I,J)%NAVMAX   =  1
-!/MPI          EQSTGE(I,J)%NRQEQS   =  0
-!/MPI          EQSTGE(I,J)%NRQOUT   =  0
+#ifdef W3_MPI
+          EQSTGE(I,J)%NRQEQS   =  0
+          EQSTGE(I,J)%NRQOUT   =  0
+#endif
           EQSTGE(I,J)%INIT     = .FALSE.
           END DO
         END DO
 !
-!/T      WRITE (NDST,9000) NGRIDS
+#ifdef W3_T
+      WRITE (NDST,9000) NGRIDS
+#endif
 !
       RETURN
 !
@@ -555,7 +615,9 @@
                '                    NGRIDS = ',I10/                   &
                '                    RUN W3NMOD FIRST'/)
 !
-!/T 9000 FORMAT (' TEST WMNDAT : SETTING UP FOR ',I4,' GRIDS')
+#ifdef W3_T
+ 9000 FORMAT (' TEST WMNDAT : SETTING UP FOR ',I4,' GRIDS')
+#endif
 !/
 !/ End of WMNDAT ----------------------------------------------------- /
 !/
@@ -627,7 +689,9 @@
       USE W3GDATMD, ONLY: NGRIDS, IGRID, W3SETG
       USE W3ODATMD, ONLY: NAPROC
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
@@ -641,9 +705,13 @@
 !/ Local parameters
 !/
       INTEGER                 :: JGRID
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMDIMD')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMDIMD')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -663,7 +731,9 @@
           CALL EXTCDE (3)
         END IF
 !
-!/T      WRITE (NDST,9000) IMOD
+#ifdef W3_T
+      WRITE (NDST,9000) IMOD
+#endif
 !
       JGRID  = IGRID
       IF ( JGRID .NE. IMOD ) CALL W3SETG ( IMOD, NDSE, NDST )
@@ -699,7 +769,9 @@
           FLDAT2 = .TRUE.
         END IF
 !
-!/T      WRITE (NDST,9001)
+#ifdef W3_T
+      WRITE (NDST,9001)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 3.  Point to allocated arrays
@@ -712,7 +784,9 @@
           DMV    = 0.
         END IF
 !
-!/T      WRITE (NDST,9002)
+#ifdef W3_T
+      WRITE (NDST,9002)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 5.  Restore previous grid setting if necessary
@@ -730,9 +804,11 @@
                '                    NMDATA = ',I10/)
  1003 FORMAT (/' *** ERROR WMDIMD : ARRAY(S) ALREADY ALLOCATED *** ')
 !
-!/T 9000 FORMAT (' TEST WMDIMD : MODEL ',I4,' DIM. AT ',2I5,I7)
-!/T 9001 FORMAT (' TEST WMDIMD : ARRAYS ALLOCATED')
-!/T 9002 FORMAT (' TEST WMDIMD : POINTERS RESET')
+#ifdef W3_T
+ 9000 FORMAT (' TEST WMDIMD : MODEL ',I4,' DIM. AT ',2I5,I7)
+ 9001 FORMAT (' TEST WMDIMD : ARRAYS ALLOCATED')
+ 9002 FORMAT (' TEST WMDIMD : POINTERS RESET')
+#endif
 !/
 !/ End of WMDIMD ----------------------------------------------------- /
 !/
@@ -802,7 +878,9 @@
       USE W3GDATMD, ONLY: NGRIDS, IGRID, W3SETG
       USE W3ODATMD, ONLY: NAPROC
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
@@ -816,9 +894,13 @@
 !/ Local parameters
 !/
       INTEGER                 :: JGRID
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMDIMM')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMDIMM')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -838,7 +920,9 @@
           CALL EXTCDE (3)
         END IF
 !
-!/T      WRITE (NDST,9000) IMOD
+#ifdef W3_T
+      WRITE (NDST,9000) IMOD
+#endif
 !
       JGRID  = IGRID
       IF ( JGRID .NE. IMOD ) CALL W3SETG ( IMOD, NDSE, NDST )
@@ -848,21 +932,27 @@
 !
 !     ALLOCATE ( MDATAS(IMOD)%...
 !
-!/T      WRITE (NDST,9001)
+#ifdef W3_T
+      WRITE (NDST,9001)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 3.  Point to allocated arrays
 !
       CALL WMSETM ( IMOD, NDSE, NDST )
 !
-!/T      WRITE (NDST,9002)
+#ifdef W3_T
+      WRITE (NDST,9002)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 4.  Update flag
 !
       MINIT  = .TRUE.
 !
-!/T      WRITE (NDST,9003)
+#ifdef W3_T
+      WRITE (NDST,9003)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 5.  Restore previous grid setting if necessary
@@ -880,10 +970,12 @@
                '                    NMDATA = ',I10/)
  1003 FORMAT (/' *** ERROR WMDIMM : ARRAY(S) ALREADY ALLOCATED *** ')
 !
-!/T 9000 FORMAT (' TEST WMDIMM : MODEL ',I4,' DIM. AT ',2I5,I7)
-!/T 9001 FORMAT (' TEST WMDIMM : ARRAYS ALLOCATED')
-!/T 9002 FORMAT (' TEST WMDIMM : POINTERS RESET')
-!/T 9003 FORMAT (' TEST WMDIMM : FLAGS SET')
+#ifdef W3_T
+ 9000 FORMAT (' TEST WMDIMM : MODEL ',I4,' DIM. AT ',2I5,I7)
+ 9001 FORMAT (' TEST WMDIMM : ARRAYS ALLOCATED')
+ 9002 FORMAT (' TEST WMDIMM : POINTERS RESET')
+ 9003 FORMAT (' TEST WMDIMM : FLAGS SET')
+#endif
 !/
 !/ End of WMDIMM ----------------------------------------------------- /
 !/
@@ -944,7 +1036,9 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -956,9 +1050,13 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMSETM')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMSETM')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -973,7 +1071,9 @@
           CALL EXTCDE (2)
         END IF
 !
-!/T      WRITE (NDST,9000) IMOD
+#ifdef W3_T
+      WRITE (NDST,9000) IMOD
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Set model numbers
@@ -988,10 +1088,12 @@
       TMV    => MDATAS(IMOD)%TMV
       AMV    => MDATAS(IMOD)%AMV
       DMV    => MDATAS(IMOD)%DMV
-!/MPI      MPI_COMM_GRD => MDATAS(IMOD)%MPI_COMM_GRD
-!/MPI      MPI_COMM_BCT => MDATAS(IMOD)%MPI_COMM_BCT
-!/MPI      CROOT  => MDATAS(IMOD)%CROOT
-!/MPI      FBCAST => MDATAS(IMOD)%FBCAST
+#ifdef W3_MPI
+      MPI_COMM_GRD => MDATAS(IMOD)%MPI_COMM_GRD
+      MPI_COMM_BCT => MDATAS(IMOD)%MPI_COMM_BCT
+      CROOT  => MDATAS(IMOD)%CROOT
+      FBCAST => MDATAS(IMOD)%FBCAST
+#endif
       RCLD   => MDATAS(IMOD)%RCLD
       NDT    => MDATAS(IMOD)%NDT
       DATA0  => MDATAS(IMOD)%DATA0
@@ -1005,8 +1107,10 @@
       FLLSTR => MDATAS(IMOD)%FLLSTR
       MAPBDI => MDATAS(IMOD)%MAPBDI
       MAPODI => MDATAS(IMOD)%MAPODI
-!/PDLIB      SEA_IPGL => MDATAS(IMOD)%SEA_IPGL
-!/PDLIB      SEA_IPGL_TO_PROC => MDATAS(IMOD)%SEA_IPGL_TO_PROC
+#ifdef W3_PDLIB
+      SEA_IPGL => MDATAS(IMOD)%SEA_IPGL
+      SEA_IPGL_TO_PROC => MDATAS(IMOD)%SEA_IPGL_TO_PROC
+#endif
       UPTMAP => MDATAS(IMOD)%UPTMAP
 !
       RETURN
@@ -1019,7 +1123,9 @@
                '                    IMOD   = ',I10/                   &
                '                    NMDATA = ',I10/)
 !
-!/T 9000 FORMAT (' TEST WMSETM : MODEL ',I4,' SELECTED')
+#ifdef W3_T
+ 9000 FORMAT (' TEST WMSETM : MODEL ',I4,' SELECTED')
+#endif
 !/
 !/ End of WMSETM ----------------------------------------------------- /
 !/
@@ -1074,7 +1180,9 @@
       USE CONSTANTS, ONLY: LPDLIB
       USE W3ODATMD, ONLY: OUTPTS
       USE W3GDATMD, ONLY: GTYPE, GRIDS, UNGTYPE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/ ------------------------------------------------------------------- /
@@ -1087,25 +1195,33 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'INIT_GET_JSEA_ISPROC_GLOB')
+#ifdef W3_S
+      CALL STRACE (IENT, 'INIT_GET_JSEA_ISPROC_GLOB')
+#endif
       IF (.NOT. LPDLIB) THEN
         nb=OUTPTS(J)%NAPROC
         JSEA   = 1 + (ISEA-1)/nb
         ISPROC=1
-!/DIST        ISPROC = MDATAS(J)%CROOT - 1 + ISEA - (JSEA-1)*nb
+#ifdef W3_DIST
+        ISPROC = MDATAS(J)%CROOT - 1 + ISEA - (JSEA-1)*nb
+#endif
       ELSE
-!/PDLIB      IF (GRIDS(J)%GTYPE .ne. UNGTYPE) THEN       
-!/PDLIB        nb=OUTPTS(J)%NAPROC
-!/PDLIB        JSEA   = 1 + (ISEA-1)/nb
-!/PDLIB        ISPROC = MDATAS(J)%CROOT - 1 + ISEA - (JSEA-1)*nb
-!/PDLIB      ELSE
-!/PDLIB        JSEA   = MDATAS(J)%SEA_IPGL(ISEA)
-!/PDLIB        ISPROC = MDATAS(J)%SEA_IPGL_TO_PROC(ISEA)
-!/PDLIB      ENDIF
+#ifdef W3_PDLIB
+      IF (GRIDS(J)%GTYPE .ne. UNGTYPE) THEN       
+        nb=OUTPTS(J)%NAPROC
+        JSEA   = 1 + (ISEA-1)/nb
+        ISPROC = MDATAS(J)%CROOT - 1 + ISEA - (JSEA-1)*nb
+      ELSE
+        JSEA   = MDATAS(J)%SEA_IPGL(ISEA)
+        ISPROC = MDATAS(J)%SEA_IPGL_TO_PROC(ISEA)
+      ENDIF
+#endif
       ENDIF
 !/
 !/ End of INIT_GET_JSEA_ISPROC_GLOB  ---------------------------------- /

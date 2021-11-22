@@ -142,7 +142,9 @@
       USE W3IDATMD, ONLY: FLCUR
 !      USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPI0, TBPIN,       &
 !                          ISBPI, BBPI0, BBPIN
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       
       IMPLICIT NONE
 !/ ------------------------------------------------------------------- /
@@ -158,7 +160,9 @@
 !/
       INTEGER                 :: ITH, IK, ISEA, IXY
       INTEGER                 :: IX
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: CCOS, CSIN, CCURX, CCURY
       REAL                    :: C(NX,2)
       REAL                    :: RD1, RD2
@@ -173,7 +177,9 @@
 ! 1.a Set constants
 !      
       
-!/S      CALL STRACE (IENT, 'W3XYPUG')      
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3XYPUG')      
+#endif
       ITH    = 1 + MOD(ISP-1,NTH)
       IK     = 1 + (ISP-1)/NTH     
    
@@ -199,8 +205,10 @@
         VQ(IXY)     = VQ(IXY) / CG(IK,ISEA) * CLATS(ISEA)
         VLCFLX(IXY) = CCOS * CG(IK,ISEA) / CLATS(ISEA)
         VLCFLY(IXY) = CSIN * CG(IK,ISEA)
-!/MGP        VLCFLX(IXY) = VLCFLX(IXY) - CCURX*VGX/CLATS(ISEA)
-!/MGP        VLCFLY(IXY) = VLCFLY(IXY) - CCURY*VGY
+#ifdef W3_MGP
+        VLCFLX(IXY) = VLCFLX(IXY) - CCURX*VGX/CLATS(ISEA)
+        VLCFLY(IXY) = VLCFLY(IXY) - CCURY*VGY
+#endif
       END DO  
 
       IF ( FLCUR ) THEN   
@@ -339,9 +347,13 @@
 
       USE W3ADATMD, ONLY: CG, CX, CY, ATRNX, ATRNY, ITIME, DW
       USE W3IDATMD, ONLY: FLCUR
-!/T      USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPI0, TBPIN,       &
-!/T                          ISBPI, BBPI0, BBPIN
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPI0, TBPIN,       &
+                          ISBPI, BBPI0, BBPIN
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       
       IMPLICIT NONE
 !/ ------------------------------------------------------------------- /
@@ -356,7 +368,9 @@
 !/
       INTEGER                 :: ITH, IK    
       INTEGER                 :: IP, IP2, ISEA2, I, J, IE, IV, I1, I2, I3
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: CCOS, CSIN, CCURX, CCURY
       REAL                    :: C(NX,2)
       REAL*8                  :: KELEM(3), KTMP(3), LAMBDA(2)
@@ -374,7 +388,9 @@
 ! 1.a Set constants
 !      
       
-!/S      CALL STRACE (IENT, 'W3CFLUG')      
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3CFLUG')      
+#endif
       CFLXYMAX=1E-10
       IP = MAPSF(ISEA,3)
 !
@@ -405,8 +421,10 @@
               ISEA2=MAPFS(IP2)
               C(IP2,1) = CCOS * CG(IK,ISEA2) / CLATS(ISEA2)
               C(IP2,2) = CSIN * CG(IK,ISEA2)
-!/MGP              C(IP2,1) = C(IP2,1) - CCURX*VGX/CLATS(ISEA2)
-!/MGP              C(IP2,2) = C(IP2,2) - CCURY*VGY
+#ifdef W3_MGP
+              C(IP2,1) = C(IP2,1) - CCURX*VGX/CLATS(ISEA2)
+              C(IP2,2) = C(IP2,2) - CCURY*VGY
+#endif
               IF ( FLCUR ) THEN   
                 IF (IOBP(IP2) .EQ. 1) THEN                                  
                   C(IP2,1) = C(IP2,1) + CCURX*CX(ISEA2)/CLATS(ISEA2)
@@ -508,12 +526,16 @@
        USE W3GDATMD, ONLY : NK, NTH, NTRI, NX, CCON, IE_CELL,POS_CELL, SI, &
                             IEN, TRIGP, CLATS, MAPSF, IOBPD, IOBP, IOBDP,  &
                             IOBPA, XYB, FSBCCFL
-!/REF1   USE W3GDATMD, ONLY : REFPARS
+#ifdef W3_REF1
+   USE W3GDATMD, ONLY : REFPARS
+#endif
        USE W3WDATMD, ONLY: TIME      
        USE W3ADATMD, ONLY: CG, ITER    
        USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPI0, TBPIN, ISBPI, BBPI0, BBPIN
        USE W3TIMEMD, ONLY: DSEC21
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
        IMPLICIT NONE  
      
        INTEGER, INTENT(IN)    :: ISP                   ! Actual Frequency/Wavenumber, actual Wave Direction
@@ -530,7 +552,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 
        REAL*8,  PARAMETER :: ONESIXTH  = 1.0d0/6.0d0
        REAL*8,  PARAMETER :: THR8      = TINY(1.0d0)
@@ -561,7 +585,9 @@
          REAL*8  :: KKSUM(NX), ST(NX)
          REAL*8  :: NM(NTRI) 
 
-!/S      CALL STRACE (IENT, 'W3XYPFSN')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3XYPFSN')
+#endif
 
 ! 1. initialisation
 
@@ -646,7 +672,9 @@
 ! Possibly set flux to zero by multiplying ST by IOBPD but also in UTILDE multiply U(NI) by IOBPD ...
 !
                U(IP) = MAX(0.d0,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP)))*DBLE(IOBPD(ITH,IP))
-!/REF1             IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP).EQ.0.AND.IOBPA(IP).EQ.0) U(IP)= AC(IP) ! restores reflected boundary values 
+#ifdef W3_REF1
+             IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP).EQ.0.AND.IOBPA(IP).EQ.0) U(IP)= AC(IP) ! restores reflected boundary values 
+#endif
                END DO
 ! update spectrum 
              AC = U
@@ -738,12 +766,16 @@
 !/
        USE W3GDATMD, ONLY : NK, NTH, NTRI, NX, CCON, IE_CELL,POS_CELL, SI, &
                             IEN, TRIGP, CLATS, MAPSF, IOBPA, IOBPD, IOBP, NNZ, IOBDP
-!/REF1   USE W3GDATMD, ONLY :  REFPARS
+#ifdef W3_REF1
+   USE W3GDATMD, ONLY :  REFPARS
+#endif
        USE W3WDATMD, ONLY: TIME     
        USE W3ADATMD, ONLY: CG, ITER    
        USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPI0, TBPIN, ISBPI, BBPI0, BBPIN
        USE W3TIMEMD, ONLY: DSEC21
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
        IMPLICIT NONE  
      
        INTEGER, INTENT(IN)    :: ISP                   ! Actual Frequency/Wavenumber, actual Wave Direction
@@ -760,7 +792,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 
        REAL*8,  PARAMETER :: ONESIXTH  = 1.0d0/6.0d0
        REAL*8,  PARAMETER :: THR8      = TINY(1.0d0)
@@ -792,7 +826,9 @@
          REAL*8  :: KKSUM(NX), ST(NX)
          REAL*8  :: NM(NTRI) 
 
-!/S      CALL STRACE (IENT, 'W3XYPFSN')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3XYPFSN')
+#endif
 
 ! 1. initialisation
 
@@ -887,7 +923,9 @@
 
              DO IP = 1, NX
                U(IP) = MAX(0.d0,U(IP)-DTSI(IP)*ST(IP)*(1-IOBPA(IP)))*DBLE(IOBPD(ITH,IP))
-!/REF1               IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP).EQ.0.AND.IOBPA(IP).EQ.0) U(IP)= AC(IP) ! restores reflected boundary values 
+#ifdef W3_REF1
+               IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP).EQ.0.AND.IOBPA(IP).EQ.0) U(IP)= AC(IP) ! restores reflected boundary values 
+#endif
                END DO
 
 ! update spectrum 
@@ -983,12 +1021,16 @@
        USE W3GDATMD, ONLY : NK, NTH, NTRI, NX, CCON, IE_CELL,POS_CELL, SI, &
                             IEN, TRIGP, CLATS, MAPSF, IOBPD, IOBPA, IOBP, IAA, JAA, POSI, &
                             TRIA, NNZ
-!/REF1  USE W3GDATMD, ONLY : REFPARS
+#ifdef W3_REF1
+  USE W3GDATMD, ONLY : REFPARS
+#endif
        USE W3WDATMD, ONLY: TIME      
        USE W3ADATMD, ONLY: CG, ITER    
        USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPI0, TBPIN, ISBPI, BBPI0, BBPIN
        USE W3TIMEMD, ONLY: DSEC21
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
        IMPLICIT NONE  
      
        INTEGER, INTENT(IN)    :: ISP                   ! Actual Frequency/Wavenumber, actual Wave Direction
@@ -1005,7 +1047,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 
        REAL*8,  PARAMETER :: ONESIXTH  = 1.0d0/6.0d0
        REAL*8,  PARAMETER :: ONETHIRD  = 1.0d0/3.0d0
@@ -1062,7 +1106,9 @@
          POS_TRICK(3,1) = 1
          POS_TRICK(3,2) = 2
 
-!/S      CALL STRACE (IENT, 'W3XYPFSN')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3XYPFSN')
+#endif
 
 ! 1. initialisation
 
@@ -1187,7 +1233,9 @@
 
           DO IP = 1,NX
             U(IP) = MAX(0.d0,X(IP)*DBLE(IOBPD(ITH,IP)))
-!/REF1      IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP).EQ.0.AND.IOBPA(IP).EQ.0) U(IP)= AC(IP) ! restores reflected boundary values 
+#ifdef W3_REF1
+      IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP).EQ.0.AND.IOBPA(IP).EQ.0) U(IP)= AC(IP) ! restores reflected boundary values 
+#endif
            END DO
 !
 ! update spectrum 
@@ -1274,12 +1322,16 @@
 !/
        USE W3GDATMD, ONLY : NK, NTH, NTRI, NX, CCON, IE_CELL,POS_CELL, SI, &
                             IEN, TRIGP, CLATS, MAPSF, IOBPD, IOBPA, TRIA, IOBDP
-!/REF1  USE W3GDATMD, ONLY : REFPARS
+#ifdef W3_REF1
+  USE W3GDATMD, ONLY : REFPARS
+#endif
        USE W3WDATMD, ONLY: TIME               
        USE W3ADATMD, ONLY: CG, ITER    
        USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPI0, TBPIN, ISBPI, BBPI0, BBPIN
        USE W3TIMEMD, ONLY: DSEC21
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
        IMPLICIT NONE  
      
        INTEGER, INTENT(IN)    :: ISP                   ! Actual Frequency/Wavenumber, actual Wave Direction
@@ -1296,7 +1348,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 
        REAL*8,  PARAMETER :: ONESIXTH  = 1.0d0/6.0d0
        REAL*8,  PARAMETER :: ONETHIRD  = 1.0d0/3.0d0
@@ -1334,7 +1388,9 @@
          REAL*8  :: KKSUM(NX), ST(NX), BETA
          REAL*8  :: NM(NTRI) 
 
-!/S      CALL STRACE (IENT, 'W3XYPFSFCT2')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3XYPFSFCT2')
+#endif
 
 ! 1. initialisation
 
@@ -1479,7 +1535,9 @@
 ! IOBPD is the switch for removing energy coming from the shoreline 
 !
               U(IP) = MAX(0.d0,UL(IP)-ST(IP))*DBLE(IOBPD(ITH,IP)) 
-!/REF1               IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP).EQ.0.AND.IOBPA(IP).EQ.0) U(IP)= AC(IP) ! restores reflected boundary values 
+#ifdef W3_REF1
+               IF (REFPARS(3).LT.0.5.AND.IOBPD(ITH,IP).EQ.0.AND.IOBPA(IP).EQ.0) U(IP)= AC(IP) ! restores reflected boundary values 
+#endif
                END DO
 !
 ! update spectrum 
@@ -1563,7 +1621,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       USE CONSTANTS, ONLY : LPDLIB
       USE W3GDATMD, ONLY: MAPSF, NSEAL, DMIN, IOBDP, MAPSTA, IOBP, MAPFS, NX
@@ -1577,13 +1637,17 @@
 !/ ------------------------------------------------------------------- /
 !/ Local PARAMETERs
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !
       INTEGER :: JSEA, ISEA, IX, IP
       REAL*8, PARAMETER :: DTHR = 10E-6
-!/S      CALL STRACE (IENT, 'SETDEPTH')
+#ifdef W3_S
+      CALL STRACE (IENT, 'SETDEPTH')
+#endif
       IOBDP = 1
       DO IP=1,NX
         IF (DW(IP) .LT. DMIN + DTHR) IOBDP(IP) = 0

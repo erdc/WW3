@@ -158,7 +158,9 @@
       USE W3IDATMD, ONLY: W3SETI
       USE WMMDATMD, ONLY: WMSETM
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3TIMEMD, ONLY: DSEC21, STME21, TICK21
 !/
       USE W3GDATMD, ONLY: NX, NY, FILEXT
@@ -185,7 +187,9 @@
 !/ Local parameters
 !/
       INTEGER                 :: MDSEN, J, DTIME(2), IERR, NDTNEW, JJ
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: DTTST
       LOGICAL                 :: FIRST
       CHARACTER(LEN=13)       :: IDFLDS(-7:10)
@@ -206,8 +210,12 @@
 ! 0.  Initialization
 ! 0.a Subroutine tracing and echo of input
 !
-!/S      CALL STRACE (IENT, 'WMUPDT')
-!/T      WRITE (MDST,9000) IMOD, TDATA
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMUPDT')
+#endif
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD, TDATA
+#endif
 !
       IF ( IMPROC .EQ. NMPERR ) THEN
           MDSEN  = MDSE
@@ -234,26 +242,28 @@
           WRITE (MDSS,900) IMOD, DTME21
         END IF
 !
-!/T      WRITE (MDST,9001) ' J', '0-N', TIME, ETIME
-!/T      IF (LBOUND(IDINP,2).LE.-7) WRITE (MDST,9002) -7, IDINP(IMOD,-7), INFLAGS1(-7), TI1
-!/T      IF (LBOUND(IDINP,2).LE.-6) WRITE (MDST,9002) -6, IDINP(IMOD,-6), INFLAGS1(-6), TI2
-!/T      IF (LBOUND(IDINP,2).LE.-5) WRITE (MDST,9002) -5, IDINP(IMOD,-5), INFLAGS1(-5), TI3
-!/T      IF (LBOUND(IDINP,2).LE.-4) WRITE (MDST,9002) -4, IDINP(IMOD,-4), INFLAGS1(-4), TI4
-!/T      IF (LBOUND(IDINP,2).LE.-3) WRITE (MDST,9002) -3, IDINP(IMOD,-3), INFLAGS1(-3), TI5
-!/T      IF (LBOUND(IDINP,2).LE.-2) WRITE (MDST,9002) -2, IDINP(IMOD,-2), INFLAGS1(-2), TZN
-!/T      IF (LBOUND(IDINP,2).LE.-1) WRITE (MDST,9002) -1, IDINP(IMOD,-1), INFLAGS1(-1), TTN
-!/T      IF (LBOUND(IDINP,2).LE. 0) WRITE (MDST,9002)  0, IDINP(IMOD, 0), INFLAGS1( 0), TVN
-!/T      WRITE (MDST,9002) 1, IDINP(IMOD,1), INFLAGS1(1), TLN
-!/T      WRITE (MDST,9003) 2, IDINP(IMOD,2), INFLAGS1(2), TC0, TCN
-!/T      WRITE (MDST,9003) 3, IDINP(IMOD,3), INFLAGS1(3), TW0, TWN
-!/T      WRITE (MDST,9002) 4, IDINP(IMOD,4), INFLAGS1(4), TIN
-!/T      WRITE (MDST,9003) 5, IDINP(IMOD,5), INFLAGS1(5), TU0, TUN
-!/T      WRITE (MDST,9003) 6, IDINP(IMOD,6), INFLAGS1(6), TR0, TRN
-!/T      WRITE (MDST,9002) 7, IDINP(IMOD,7), INFLAGS1(7), T0N
-!/T      WRITE (MDST,9002) 8, IDINP(IMOD,8), INFLAGS1(8), T1N
-!/T      WRITE (MDST,9002) 9, IDINP(IMOD,9), INFLAGS1(9), T2N
-!/T      WRITE (MDST,9003) 10, 'MOV'        , INFLAGS1(10), TG0, TGN
-!/T      WRITE (MDST,9004)    'GRD', NX, NY
+#ifdef W3_T
+      WRITE (MDST,9001) ' J', '0-N', TIME, ETIME
+      IF (LBOUND(IDINP,2).LE.-7) WRITE (MDST,9002) -7, IDINP(IMOD,-7), INFLAGS1(-7), TI1
+      IF (LBOUND(IDINP,2).LE.-6) WRITE (MDST,9002) -6, IDINP(IMOD,-6), INFLAGS1(-6), TI2
+      IF (LBOUND(IDINP,2).LE.-5) WRITE (MDST,9002) -5, IDINP(IMOD,-5), INFLAGS1(-5), TI3
+      IF (LBOUND(IDINP,2).LE.-4) WRITE (MDST,9002) -4, IDINP(IMOD,-4), INFLAGS1(-4), TI4
+      IF (LBOUND(IDINP,2).LE.-3) WRITE (MDST,9002) -3, IDINP(IMOD,-3), INFLAGS1(-3), TI5
+      IF (LBOUND(IDINP,2).LE.-2) WRITE (MDST,9002) -2, IDINP(IMOD,-2), INFLAGS1(-2), TZN
+      IF (LBOUND(IDINP,2).LE.-1) WRITE (MDST,9002) -1, IDINP(IMOD,-1), INFLAGS1(-1), TTN
+      IF (LBOUND(IDINP,2).LE. 0) WRITE (MDST,9002)  0, IDINP(IMOD, 0), INFLAGS1( 0), TVN
+      WRITE (MDST,9002) 1, IDINP(IMOD,1), INFLAGS1(1), TLN
+      WRITE (MDST,9003) 2, IDINP(IMOD,2), INFLAGS1(2), TC0, TCN
+      WRITE (MDST,9003) 3, IDINP(IMOD,3), INFLAGS1(3), TW0, TWN
+      WRITE (MDST,9002) 4, IDINP(IMOD,4), INFLAGS1(4), TIN
+      WRITE (MDST,9003) 5, IDINP(IMOD,5), INFLAGS1(5), TU0, TUN
+      WRITE (MDST,9003) 6, IDINP(IMOD,6), INFLAGS1(6), TR0, TRN
+      WRITE (MDST,9002) 7, IDINP(IMOD,7), INFLAGS1(7), T0N
+      WRITE (MDST,9002) 8, IDINP(IMOD,8), INFLAGS1(8), T1N
+      WRITE (MDST,9002) 9, IDINP(IMOD,9), INFLAGS1(9), T2N
+      WRITE (MDST,9003) 10, 'MOV'        , INFLAGS1(10), TG0, TGN
+      WRITE (MDST,9004)    'GRD', NX, NY
+#endif
 !
 ! 1.  Loop over input types ------------------------------------------ /
 !
@@ -263,7 +273,9 @@
 !
         IF ( .NOT. INFLAGS1(J) ) CYCLE
 !
-!/T        WRITE (MDST,9010) J, INFLAGS1(J), INPMAP(IMOD,J)
+#ifdef W3_T
+        WRITE (MDST,9010) J, INFLAGS1(J), INPMAP(IMOD,J)
+#endif
 !
 ! 1.b Test time
 !
@@ -275,7 +287,9 @@
             DTTST  = DSEC21 ( TIME , TFN(:,J) )
           END IF
 !
-!/T        WRITE (MDST,9011) IDINP(IMOD,J), DTTST, TFN(:,J)
+#ifdef W3_T
+        WRITE (MDST,9011) IDINP(IMOD,J), DTTST, TFN(:,J)
+#endif
 !
         IF ( DTTST .GT. 0. ) CYCLE
         IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC )                    &
@@ -285,7 +299,9 @@
 !
         IF ( INPMAP(IMOD,J) .EQ. 0 ) THEN
 !
-!/T            WRITE (MDST,9020)
+#ifdef W3_T
+            WRITE (MDST,9020)
+#endif
 !
             CALL WMUPD1 ( IMOD, IDINP(IMOD,J), J, IERR )
 !
@@ -293,7 +309,9 @@
 !
           ELSE IF ( INPMAP(IMOD,J) .GT. 0 ) THEN
 !
-!/T            WRITE (MDST,9030) INPMAP(IMOD,J)
+#ifdef W3_T
+            WRITE (MDST,9030) INPMAP(IMOD,J)
+#endif
 !
 ! 3.a Check if input grid is available
 !
@@ -317,7 +335,9 @@
             IF ( J .EQ. 4 ) FLLSTI = IFLSTI(-JJ)
             IF ( J .EQ. 6 ) FLLSTR = IFLSTR(-JJ)
 !
-!/T            WRITE (MDST,9031) J, IDINP(JJ,J), DTTST, TFN(:,J)
+#ifdef W3_T
+            WRITE (MDST,9031) J, IDINP(JJ,J), DTTST, TFN(:,J)
+#endif
 !
 ! 3.b If needed, update input grid
 !     Note: flags in WMMDATMD set for grid IMOD !
@@ -348,13 +368,15 @@
           ! Data input and time stamp settings for forcing input from
           ! CPL are handled in wmesmfmd.ftn:GetImport
 !
-!/T            IF ( INPMAP(IMOD,J) .EQ. -999 ) THEN
-!/T              ! *** Forcing input from CPL & defined on native grid ***
-!/T                WRITE (MDST,9040)
-!/T              ELSE
-!/T              ! *** Forcing input from CPL & defined on an input grid ***
-!/T                WRITE (MDST,9050) -INPMAP(IMOD,J)
-!/T              END IF
+#ifdef W3_T
+            IF ( INPMAP(IMOD,J) .EQ. -999 ) THEN
+              ! *** Forcing input from CPL & defined on native grid ***
+                WRITE (MDST,9040)
+              ELSE
+              ! *** Forcing input from CPL & defined on an input grid ***
+                WRITE (MDST,9050) -INPMAP(IMOD,J)
+              END IF
+#endif
 !
           END IF
 !
@@ -396,25 +418,27 @@
 !
 ! 7.  Final test output ---------------------------------------------- /
 !
-!/T      WRITE (MDST,9070) ' J', '0-N', TIME, ETIME, TDATA
-!/T      IF (LBOUND(IDINP,2).LE.-7) WRITE (MDST,9071) -7, IDINP(IMOD,-7), INFLAGS1(-7), TI1
-!/T      IF (LBOUND(IDINP,2).LE.-6) WRITE (MDST,9071) -6, IDINP(IMOD,-6), INFLAGS1(-6), TI2
-!/T      IF (LBOUND(IDINP,2).LE.-5) WRITE (MDST,9071) -5, IDINP(IMOD,-5), INFLAGS1(-5), TI3
-!/T      IF (LBOUND(IDINP,2).LE.-4) WRITE (MDST,9071) -4, IDINP(IMOD,-4), INFLAGS1(-4), TI4
-!/T      IF (LBOUND(IDINP,2).LE.-3) WRITE (MDST,9071) -3, IDINP(IMOD,-3), INFLAGS1(-3), TI5
-!/T      IF (LBOUND(IDINP,2).LE.-2) WRITE (MDST,9071) -2, IDINP(IMOD,-2), INFLAGS1(-2), TZN
-!/T      IF (LBOUND(IDINP,2).LE.-1) WRITE (MDST,9071) -1, IDINP(IMOD,-1), INFLAGS1(-1), TTN
-!/T      IF (LBOUND(IDINP,2).LE. 0) WRITE (MDST,9071)  0, IDINP(IMOD, 0), INFLAGS1( 0), TVN
-!/T      WRITE (MDST,9071) 1, IDINP(IMOD,1), INFLAGS1(1), TLN
-!/T      WRITE (MDST,9072) 2, IDINP(IMOD,2), INFLAGS1(2), TC0, TCN
-!/T      WRITE (MDST,9072) 3, IDINP(IMOD,3), INFLAGS1(3), TW0, TWN
-!/T      WRITE (MDST,9071) 4, IDINP(IMOD,4), INFLAGS1(4), TIN
-!/T      WRITE (MDST,9072) 5, IDINP(IMOD,5), INFLAGS1(5), TU0, TUN
-!/T      WRITE (MDST,9072) 6, IDINP(IMOD,6), INFLAGS1(6), TR0, TRN
-!/T      WRITE (MDST,9071) 7, IDINP(IMOD,7), INFLAGS1(7), T0N
-!/T      WRITE (MDST,9071) 8, IDINP(IMOD,8), INFLAGS1(8), T1N
-!/T      WRITE (MDST,9073) 9, IDINP(IMOD,9), INFLAGS1(9), T2N, TDN
-!/T      WRITE (MDST,9072) 10, 'MOV'        , INFLAGS1(10), TG0, TGN
+#ifdef W3_T
+      WRITE (MDST,9070) ' J', '0-N', TIME, ETIME, TDATA
+      IF (LBOUND(IDINP,2).LE.-7) WRITE (MDST,9071) -7, IDINP(IMOD,-7), INFLAGS1(-7), TI1
+      IF (LBOUND(IDINP,2).LE.-6) WRITE (MDST,9071) -6, IDINP(IMOD,-6), INFLAGS1(-6), TI2
+      IF (LBOUND(IDINP,2).LE.-5) WRITE (MDST,9071) -5, IDINP(IMOD,-5), INFLAGS1(-5), TI3
+      IF (LBOUND(IDINP,2).LE.-4) WRITE (MDST,9071) -4, IDINP(IMOD,-4), INFLAGS1(-4), TI4
+      IF (LBOUND(IDINP,2).LE.-3) WRITE (MDST,9071) -3, IDINP(IMOD,-3), INFLAGS1(-3), TI5
+      IF (LBOUND(IDINP,2).LE.-2) WRITE (MDST,9071) -2, IDINP(IMOD,-2), INFLAGS1(-2), TZN
+      IF (LBOUND(IDINP,2).LE.-1) WRITE (MDST,9071) -1, IDINP(IMOD,-1), INFLAGS1(-1), TTN
+      IF (LBOUND(IDINP,2).LE. 0) WRITE (MDST,9071)  0, IDINP(IMOD, 0), INFLAGS1( 0), TVN
+      WRITE (MDST,9071) 1, IDINP(IMOD,1), INFLAGS1(1), TLN
+      WRITE (MDST,9072) 2, IDINP(IMOD,2), INFLAGS1(2), TC0, TCN
+      WRITE (MDST,9072) 3, IDINP(IMOD,3), INFLAGS1(3), TW0, TWN
+      WRITE (MDST,9071) 4, IDINP(IMOD,4), INFLAGS1(4), TIN
+      WRITE (MDST,9072) 5, IDINP(IMOD,5), INFLAGS1(5), TU0, TUN
+      WRITE (MDST,9072) 6, IDINP(IMOD,6), INFLAGS1(6), TR0, TRN
+      WRITE (MDST,9071) 7, IDINP(IMOD,7), INFLAGS1(7), T0N
+      WRITE (MDST,9071) 8, IDINP(IMOD,8), INFLAGS1(8), T1N
+      WRITE (MDST,9073) 9, IDINP(IMOD,9), INFLAGS1(9), T2N, TDN
+      WRITE (MDST,9072) 10, 'MOV'        , INFLAGS1(10), TG0, TGN
+#endif
 !
       RETURN
 !       
@@ -431,24 +455,26 @@
   930 FORMAT ( '        First updating ',A)
   950 FORMAT ( '        Past last ',A)
 !
-!/T 9000 FORMAT ( ' TEST WMUPDT : INPUT : ',I4,I10.8,I7.6,            &
-!/T               '  <============================')
-!/T 9001 FORMAT ( ' TEST WMUPDT : ',A2,1X,A3,3X,    2(I10.8,I7.6))
-!/T 9002 FORMAT ( '               ',I2,1X,A3,L3,17X,1(I10.8,I7.6))
-!/T 9003 FORMAT ( '               ',I2,1X,A3,L3,    2(I10.8,I7.6))
-!/T 9004 FORMAT ( '               ',2X,1X,A3,3X,2I10             )
-!/T 9010 FORMAT ( ' TEST WMUPDT : J, FLAG, INPMAP : ',I2,L2,I4)
-!/T 9011 FORMAT ( ' TEST WMUPDT : ',A,', DTTST = ',E10.3,2X,I9.8,I7.6)
-!/T 9020 FORMAT ( ' TEST WMUPDT : FORCING INPUT FROM FILE & DEFINED ON THE NATIVE GRID')
-!/T 9030 FORMAT ( ' TEST WMUPDT : FORCING INPUT FROM FILE & DEFINED ON INPUT GRID',I4)
-!/T 9031 FORMAT ( ' TEST WMUPDT : J =',I4,3XA,', DTTST = ',           &
-!/T                               E10.3,2X,I9.8,I7.6)
-!/T 9040 FORMAT ( ' TEST WMUPDT : FORCING INPUT FROM CPL & DEFINED ON THE NATIVE GRID')
-!/T 9050 FORMAT ( ' TEST WMUPDT : FORCING INPUT FROM CPL & DEFINED ON INPUT GRID',I4)
-!/T 9070 FORMAT ( ' TEST WMUPDT : ',A2,1X,A3,3X,    3(I10.8,I7.6))
-!/T 9071 FORMAT ( '               ',I2,1X,A3,L3,17X,1(I10.8,I7.6))
-!/T 9072 FORMAT ( '               ',I2,1X,A3,L3,    2(I10.8,I7.6))
-!/T 9073 FORMAT ( '               ',I2,1X,A3,L3,17X,2(I10.8,I7.6))
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMUPDT : INPUT : ',I4,I10.8,I7.6,            &
+               '  <============================')
+ 9001 FORMAT ( ' TEST WMUPDT : ',A2,1X,A3,3X,    2(I10.8,I7.6))
+ 9002 FORMAT ( '               ',I2,1X,A3,L3,17X,1(I10.8,I7.6))
+ 9003 FORMAT ( '               ',I2,1X,A3,L3,    2(I10.8,I7.6))
+ 9004 FORMAT ( '               ',2X,1X,A3,3X,2I10             )
+ 9010 FORMAT ( ' TEST WMUPDT : J, FLAG, INPMAP : ',I2,L2,I4)
+ 9011 FORMAT ( ' TEST WMUPDT : ',A,', DTTST = ',E10.3,2X,I9.8,I7.6)
+ 9020 FORMAT ( ' TEST WMUPDT : FORCING INPUT FROM FILE & DEFINED ON THE NATIVE GRID')
+ 9030 FORMAT ( ' TEST WMUPDT : FORCING INPUT FROM FILE & DEFINED ON INPUT GRID',I4)
+ 9031 FORMAT ( ' TEST WMUPDT : J =',I4,3XA,', DTTST = ',           &
+                               E10.3,2X,I9.8,I7.6)
+ 9040 FORMAT ( ' TEST WMUPDT : FORCING INPUT FROM CPL & DEFINED ON THE NATIVE GRID')
+ 9050 FORMAT ( ' TEST WMUPDT : FORCING INPUT FROM CPL & DEFINED ON INPUT GRID',I4)
+ 9070 FORMAT ( ' TEST WMUPDT : ',A2,1X,A3,3X,    3(I10.8,I7.6))
+ 9071 FORMAT ( '               ',I2,1X,A3,L3,17X,1(I10.8,I7.6))
+ 9072 FORMAT ( '               ',I2,1X,A3,L3,    2(I10.8,I7.6))
+ 9073 FORMAT ( '               ',I2,1X,A3,L3,17X,2(I10.8,I7.6))
+#endif
 !/
 !/ End of WMUPDT ----------------------------------------------------- /
 !/
@@ -523,10 +549,14 @@
 !/
       USE WMMDATMD, ONLY: WMDIMD
       USE W3FLDSMD, ONLY: W3FLDG, W3FLDD, W3FLDM
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       USE W3GDATMD, ONLY: NX, NY
-!/SMC      USE W3GDATMD, ONLY: FSWND, NSEA
+#ifdef W3_SMC
+      USE W3GDATMD, ONLY: FSWND, NSEA
+#endif
       USE W3WDATMD, ONLY: TIME
       USE W3IDATMD, ONLY: TLN, WLEV, TC0, TCN, CX0, CXN, CY0, CYN,    &
                           TW0, TWN, TU0, TUN, TR0, TRN, WX0, WXN,     &
@@ -554,14 +584,20 @@
 !/
       INTEGER                 :: MDSEN, DTIME(2), NDTNEW
       REAL                    :: XXX(NY,NX)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 ! 0.  Initialization
 ! 0.a Subroutine tracing and echo of input
 !
-!/S      CALL STRACE (IENT, 'WMUPD1')
-!/T      WRITE (MDST,9000) IMOD, J
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMUPD1')
+#endif
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD, J
+#endif
 !
       IF ( IMPROC .EQ. NMPERR ) THEN
           MDSEN  = MDSE
@@ -640,30 +676,38 @@
 ! 2.  Currents ------------------------------------------------------- /
 !
         CASE (2)
-!/SMC !!Li  For sea point current option FSWND.   JGLi08Feb2021
-!/SMC       IF( FSWND ) THEN
-!/SMC          CALL W3FLDG ('READ', IDSTR, MDSF(IMOD,J), MDST, MDSEN,      &
-!/SMC                       NSEA, 1, NSEA, 1, TIME, ETIME, TC0,            &
-!/SMC                       CX0, CY0, XXX, TCN, CXN, CYN, XXX, IERR)
-!/SMC       ELSE
+#ifdef W3_SMC
+ !!Li  For sea point current option FSWND.   JGLi08Feb2021
+       IF( FSWND ) THEN
+          CALL W3FLDG ('READ', IDSTR, MDSF(IMOD,J), MDST, MDSEN,      &
+                       NSEA, 1, NSEA, 1, TIME, ETIME, TC0,            &
+                       CX0, CY0, XXX, TCN, CXN, CYN, XXX, IERR)
+       ELSE
+#endif
           CALL W3FLDG ('READ', IDSTR, MDSF(IMOD,J), MDST, MDSEN,      &
                        NX, NY, NX, NY, TIME, ETIME, TC0,              &
                        CX0, CY0, XXX, TCN, CXN, CYN, XXX, IERR)
-!/SMC       END IF
+#ifdef W3_SMC
+       END IF
+#endif
 !
 ! 3.  Winds ---------------------------------------------------------- /
 !
         CASE (3)
-!/SMC !!Li  For sea point wind option FSWND.   JGLi08Feb2021 
-!/SMC       IF( FSWND ) THEN
-!/SMC          CALL W3FLDG ('READ', IDSTR, MDSF(IMOD,J), MDST, MDSEN,      &
-!/SMC                       NSEA, 1, NSEA, 1, TIME, ETIME, TW0,            &
-!/SMC                       WX0, WY0, DT0, TWN, WXN, WYN, DTN, IERR)
-!/SMC       ELSE
+#ifdef W3_SMC
+ !!Li  For sea point wind option FSWND.   JGLi08Feb2021 
+       IF( FSWND ) THEN
+          CALL W3FLDG ('READ', IDSTR, MDSF(IMOD,J), MDST, MDSEN,      &
+                       NSEA, 1, NSEA, 1, TIME, ETIME, TW0,            &
+                       WX0, WY0, DT0, TWN, WXN, WYN, DTN, IERR)
+       ELSE
+#endif
           CALL W3FLDG ('READ', IDSTR, MDSF(IMOD,J), MDST, MDSEN,      &
                        NX, NY, NX, NY, TIME, ETIME, TW0,              &
                        WX0, WY0, DT0, TWN, WXN, WYN, DTN, IERR)
-!/SMC       END IF
+#ifdef W3_SMC
+       END IF
+#endif
 !
 ! 4.  Ice ------------------------------------------------------------ /
 !
@@ -770,7 +814,9 @@
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST WMUPD1 : INPUT : ',2I4)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMUPD1 : INPUT : ',2I4)
+#endif
 !/
 !/ End of WMUPD1 ----------------------------------------------------- /
 !/
@@ -850,7 +896,9 @@
 !/ ------------------------------------------------------------------- /
 !/
       USE W3SERVMD,  ONLY: EXTCDE
-!/S      USE W3SERVMD,  ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD,  ONLY: STRACE
+#endif
 !/
       USE W3WDATMD,  ONLY: TIME
       USE W3IDATMD,  ONLY: INPUTS
@@ -870,28 +918,52 @@
 !/ Local parameters
 !/
       INTEGER                 :: ICONSC, ICONSW, ICONSU
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 ! 0.  Initialization
 ! 0.a Subroutine tracing and echo of input
 !
-!/S      CALL STRACE (IENT, 'WMUPD2')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMUPD2')
+#endif
 !
-!/T      WRITE (MDST,9000) IMOD, J, JMOD
-!/T      WRITE (MDST,9001) INPUTS(IMOD)%TFN(:,J),                     &
-!/T                        INPUTS(JMOD)%TFN(:,J), ETIME
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD, J, JMOD
+      WRITE (MDST,9001) INPUTS(IMOD)%TFN(:,J),                     &
+                        INPUTS(JMOD)%TFN(:,J), ETIME
+#endif
 !
       IERR = 0
-!/CRX0      ICONSC = 0
-!/CRX1      ICONSC = 1
-!/CRX2      ICONSC = 2
-!/WNX0      ICONSW = 0
-!/WNX1      ICONSW = 1
-!/WNX2      ICONSW = 2
-!/WNX0      ICONSU = 0
-!/WNX1      ICONSU = 1
-!/WNX2      ICONSU = 2
+#ifdef W3_CRX0
+      ICONSC = 0
+#endif
+#ifdef W3_CRX1
+      ICONSC = 1
+#endif
+#ifdef W3_CRX2
+      ICONSC = 2
+#endif
+#ifdef W3_WNX0
+      ICONSW = 0
+#endif
+#ifdef W3_WNX1
+      ICONSW = 1
+#endif
+#ifdef W3_WNX2
+      ICONSW = 2
+#endif
+#ifdef W3_WNX0
+      ICONSU = 0
+#endif
+#ifdef W3_WNX1
+      ICONSU = 1
+#endif
+#ifdef W3_WNX2
+      ICONSU = 2
+#endif
 !
 ! 1. Shift fields ( currents and winds only ) ------------------------ /
 !
@@ -904,9 +976,11 @@
               INPUTS(IMOD)%TC0(:) = INPUTS(IMOD)%TFN(:,J)
               INPUTS(IMOD)%CX0    = INPUTS(IMOD)%CXN
               INPUTS(IMOD)%CY0    = INPUTS(IMOD)%CYN
-!/T              WRITE (MDST,9010) J, INPUTS(IMOD)%TFN(:,J)
-!/T            ELSE
-!/T              WRITE (MDST,9011) J
+#ifdef W3_T
+              WRITE (MDST,9010) J, INPUTS(IMOD)%TFN(:,J)
+            ELSE
+              WRITE (MDST,9011) J
+#endif
             END IF
 !
 ! 1.b Winds
@@ -917,9 +991,11 @@
               INPUTS(IMOD)%WX0    = INPUTS(IMOD)%WXN
               INPUTS(IMOD)%WY0    = INPUTS(IMOD)%WYN
               INPUTS(IMOD)%DT0    = INPUTS(IMOD)%DTN
-!/T              WRITE (MDST,9010) J, INPUTS(IMOD)%TFN(:,J)
-!/T            ELSE
-!/T              WRITE (MDST,9011) J
+#ifdef W3_T
+              WRITE (MDST,9010) J, INPUTS(IMOD)%TFN(:,J)
+            ELSE
+              WRITE (MDST,9011) J
+#endif
             END IF
 !
 ! 1.c Momentum
@@ -929,16 +1005,20 @@
               INPUTS(IMOD)%TU0(:) = INPUTS(IMOD)%TFN(:,J)
               INPUTS(IMOD)%UX0    = INPUTS(IMOD)%UXN
               INPUTS(IMOD)%UY0    = INPUTS(IMOD)%UYN
-!/T              WRITE (MDST,9010) J, INPUTS(IMOD)%TFN(:,J)
-!/T            ELSE
-!/T              WRITE (MDST,9011) J
+#ifdef W3_T
+              WRITE (MDST,9010) J, INPUTS(IMOD)%TFN(:,J)
+            ELSE
+              WRITE (MDST,9011) J
+#endif
             END IF
 !
       END SELECT
 !
 ! 2. Process fields at ending time ----------------------------------- /
 !
-!/T      WRITE (MDST,9020) J, INPUTS(JMOD)%TFN(:,J)
+#ifdef W3_T
+      WRITE (MDST,9020) J, INPUTS(JMOD)%TFN(:,J)
+#endif
       INPUTS(IMOD)%TFN(:,J) = INPUTS(JMOD)%TFN(:,J)
 !
       SELECT CASE (J)
@@ -1064,10 +1144,18 @@
         CASE (2)
           IF ( INPUTS(IMOD)%TC0(1) .LT. 0 ) THEN
               INPUTS(IMOD)%TC0(:) = INPUTS(JMOD)%TC0(:)
-!/T              WRITE (MDST,9030) J, INPUTS(IMOD)%TC0(:)
-!/CRX0              ICONSC = 0
-!/CRX1              ICONSC = 1
-!/CRX2              ICONSC = 2
+#ifdef W3_T
+              WRITE (MDST,9030) J, INPUTS(IMOD)%TC0(:)
+#endif
+#ifdef W3_CRX0
+              ICONSC = 0
+#endif
+#ifdef W3_CRX1
+              ICONSC = 1
+#endif
+#ifdef W3_CRX2
+              ICONSC = 2
+#endif
               CALL WMUPDV ( IMOD, INPUTS(IMOD)%CX0, INPUTS(IMOD)%CY0, &
                             JMOD, INPUTS(JMOD)%CX0, INPUTS(JMOD)%CY0, &
                             0., ICONSC )
@@ -1078,10 +1166,18 @@
         CASE (3)
           IF ( INPUTS(IMOD)%TW0(1) .LT. 0 ) THEN
               INPUTS(IMOD)%TW0(:) = INPUTS(JMOD)%TW0(:)
-!/T              WRITE (MDST,9030) J, INPUTS(IMOD)%TW0(:)
-!/WNX0              ICONSW = 0
-!/WNX1              ICONSW = 1
-!/WNX2              ICONSW = 2
+#ifdef W3_T
+              WRITE (MDST,9030) J, INPUTS(IMOD)%TW0(:)
+#endif
+#ifdef W3_WNX0
+              ICONSW = 0
+#endif
+#ifdef W3_WNX1
+              ICONSW = 1
+#endif
+#ifdef W3_WNX2
+              ICONSW = 2
+#endif
               CALL WMUPDV ( IMOD, INPUTS(IMOD)%WX0, INPUTS(IMOD)%WY0, &
                             JMOD, INPUTS(JMOD)%WX0, INPUTS(JMOD)%WY0, &
                             0., ICONSW )
@@ -1095,10 +1191,18 @@
         CASE (5)
           IF ( INPUTS(IMOD)%TU0(1) .LT. 0 ) THEN
               INPUTS(IMOD)%TU0(:) = INPUTS(JMOD)%TU0(:)
-!/T              WRITE (MDST,9030) J, INPUTS(IMOD)%TU0(:)
-!/WNX0              ICONSU = 0
-!/WNX1              ICONSU = 1
-!/WNX2              ICONSU = 2
+#ifdef W3_T
+              WRITE (MDST,9030) J, INPUTS(IMOD)%TU0(:)
+#endif
+#ifdef W3_WNX0
+              ICONSU = 0
+#endif
+#ifdef W3_WNX1
+              ICONSU = 1
+#endif
+#ifdef W3_WNX2
+              ICONSU = 2
+#endif
               CALL WMUPDV ( IMOD, INPUTS(IMOD)%UX0, INPUTS(IMOD)%UY0, &
                             JMOD, INPUTS(JMOD)%UX0, INPUTS(JMOD)%UY0, &
                             0., ICONSU )
@@ -1121,15 +1225,17 @@
 !
  1999 FORMAT (/' *** ERROR WMUPD2: OPTION NOT YET IMPLEMENTED ***'/)
 !
-!/T 9000 FORMAT ( ' TEST WMUPD2 : INPUT : ',3I4)
-!/T 9001 FORMAT ( ' TEST WMUPD2 : TIME OF IMOD : ',I9.8,1X,I6.6/      &
-!/T               '               TIME OF JMOD : ',I9.8,1X,I6.6/      &
-!/T               '               ENDING TIME  : ',I9.8,1X,I6.6)
-!/T 9010 FORMAT ( ' TEST WMUPD2 : SHIFTING ',I1,' TIME = ',I8.8,I7.6)
-!/T 9011 FORMAT ( ' TEST WMUPD2 : NO DATA FOR ',I1,' TO SHIFT')
-!/T 9020 FORMAT ( ' TEST WMUPD2 : PROCESSING ',I1,' TIME = ',I8.8,I7.6)
-!/T 9030 FORMAT ( ' TEST WMUPD2 : INITIAL FIELD FOR ',I1,             &
-!/T               ' TIME = ',I8.8,I7.6)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMUPD2 : INPUT : ',3I4)
+ 9001 FORMAT ( ' TEST WMUPD2 : TIME OF IMOD : ',I9.8,1X,I6.6/      &
+               '               TIME OF JMOD : ',I9.8,1X,I6.6/      &
+               '               ENDING TIME  : ',I9.8,1X,I6.6)
+ 9010 FORMAT ( ' TEST WMUPD2 : SHIFTING ',I1,' TIME = ',I8.8,I7.6)
+ 9011 FORMAT ( ' TEST WMUPD2 : NO DATA FOR ',I1,' TO SHIFT')
+ 9020 FORMAT ( ' TEST WMUPD2 : PROCESSING ',I1,' TIME = ',I8.8,I7.6)
+ 9030 FORMAT ( ' TEST WMUPD2 : INITIAL FIELD FOR ',I1,             &
+               ' TIME = ',I8.8,I7.6)
+#endif
 !/
 !/ End of WMUPD2 ----------------------------------------------------- /
 !/
@@ -1216,7 +1322,9 @@
 !/ ------------------------------------------------------------------- /
 !/
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       USE W3GDATMD, ONLY: NX, NY, X0, Y0, SX, SY, GRIDS, FLAGLL,      &
                           GTYPE, RLGTYPE, CLGTYPE, UNGTYPE,           &
@@ -1245,7 +1353,9 @@
                                  JX, JY
       INTEGER                 :: NPOIX, NPOIY, I,  IFIELDS,CURVI   !RP
 
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       INTEGER, ALLOCATABLE    :: NXA(:,:), NYA(:,:)
       REAL                    :: XR, YR, R1, R2, RT, XFL, XFR, XSL,   &
                                  XSR, YFL, YFR, YSL, YSR
@@ -1270,13 +1380,17 @@
 
       INTEGER, POINTER        :: ICLOSE
       REAL, ALLOCATABLE       :: XGRTMP(:),YGRTMP(:)
-!/T1      CHARACTER(LEN=17)       :: FORMAT1
+#ifdef W3_T1
+      CHARACTER(LEN=17)       :: FORMAT1
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 ! 0.  Initialization
 ! 0.a Subroutine tracing and test output
 !
-!/S      CALL STRACE (IENT, 'WMUPDV')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMUPDV')
+#endif
 !
       IF ( GRIDS(IMOD)%GTYPE .EQ. UNGTYPE .OR. &
                 GRIDS(JMOD)%GTYPE .EQ. UNGTYPE ) THEN
@@ -1304,8 +1418,10 @@
       END IF
 
 !
-!/T      WRITE (MDST,9000) IMOD, NX, NY, X0, Y0, SX, SY,              &
-!/T                        JMOD, NXI, NYI, X0I, Y0I, SXI, SYI, UNDEF
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD, NX, NY, X0, Y0, SX, SY,              &
+                        JMOD, NXI, NYI, X0I, Y0I, SXI, SYI, UNDEF
+#endif
 !
 ! 0.b Initialize fields
 !
@@ -1350,8 +1466,10 @@
           IYS0   = MAX (  1  , 1+IYO )
           IYSN   = IYS0 + IYFN - IYF0
 !
-!/T          WRITE (MDST,9010) IXO, IYO, IXF0, IXFN, IYF0, IYFN,      &
-!/T                                      IXS0, IXSN, IYS0, IYSN
+#ifdef W3_T
+          WRITE (MDST,9010) IXO, IYO, IXF0, IXFN, IYF0, IYFN,      &
+                                      IXS0, IXSN, IYS0, IYSN
+#endif
 !
 ! 1.b Fill arrays for sea points only
 !
@@ -1408,7 +1526,9 @@
         ALLOCATE (XGRTMP(NXI),YGRTMP(NYI))
         XGRTMP=XGRDI(1,:)
         YGRTMP=YGRDI(:,1)
-!/OMPH!$OMP PARALLEL DO PRIVATE(J,I,LONC,LATC,VALUEX,VALUEY)
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE(J,I,LONC,LATC,VALUEX,VALUEY)
+#endif
         DO J=1,NY
           DO I=1,NX
             LONC=XGRDC(J,I)   !LON FOR EVERY CURVL GRID POINT
@@ -1421,7 +1541,9 @@
 
           END DO  !END I
         END DO  !END J
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
         DEALLOCATE (XGRTMP, YGRTMP)
 
       ELSE
@@ -1436,9 +1558,13 @@
           MXA    = 2 + INT(SX/SXI)
         END IF
 !
-!/T      WRITE (MDST,9020) 'X'
-!/T1      WRITE (FORMAT1,'(A,I2,A,I2,A)') "'(10X,",MXA+1,'I5,',MXA+1,"F6.2)'"
-!/T1      WRITE (MDST,9021) NX, MXA
+#ifdef W3_T
+      WRITE (MDST,9020) 'X'
+#endif
+#ifdef W3_T1
+      WRITE (FORMAT1,'(A,I2,A,I2,A)') "'(10X,",MXA+1,'I5,',MXA+1,"F6.2)'"
+      WRITE (MDST,9021) NX, MXA
+#endif
 !
         ALLOCATE ( NXA(NX,0:MXA) , RXA(NX,MXA) )
         NXA    = 0
@@ -1531,10 +1657,12 @@
 !
         END IF
 !
-!/T1      DO, IX=1, NX
-!/T1        IF ( NXA(IX,0) .GT. 0 ) WRITE (MDST,FORMAT1)                &
-!/T1               IX, NXA(IX,1:MXA), RXA(IX,1:MXA), SUM(RXA(IX,1:MXA))
-!/T1        END DO
+#ifdef W3_T1
+      DO, IX=1, NX
+        IF ( NXA(IX,0) .GT. 0 ) WRITE (MDST,FORMAT1)                &
+               IX, NXA(IX,1:MXA), RXA(IX,1:MXA), SUM(RXA(IX,1:MXA))
+        END DO
+#endif
 !
 ! 2.b.2 Interpolation / averaging data for Y axis
 !
@@ -1544,10 +1672,14 @@
           MYA    = 2 + INT(SY/SYI)
         END IF
 !
-!/T      WRITE (MDST,9020) 'Y'
-!/T1      FORMAT1 = '(10X,  I5,  F6.2)'
-!/T1      WRITE (FORMAT1,'(A,I2,A,I2,A)') "'(10X,",MYA+1,'I5,',MYA+1,"F6.2)'"
-!/T1      WRITE (MDST,9021) NY, MYA
+#ifdef W3_T
+      WRITE (MDST,9020) 'Y'
+#endif
+#ifdef W3_T1
+      FORMAT1 = '(10X,  I5,  F6.2)'
+      WRITE (FORMAT1,'(A,I2,A,I2,A)') "'(10X,",MYA+1,'I5,',MYA+1,"F6.2)'"
+      WRITE (MDST,9021) NY, MYA
+#endif
 !
         ALLOCATE ( NYA(NY,0:MYA) , RYA(NY,MYA) )
         NYA    = 0
@@ -1614,10 +1746,12 @@
       END IF
 
 !
-!/T1      DO, IY=1, NY
-!/T1        IF ( NYA(IY,0) .GT. 0 ) WRITE (MDST,FORMAT1)                &
-!/T1               IY, NYA(IY,1:MYA), RYA(IY,1:MYA), SUM(RYA(IY,1:MYA))
-!/T1        END DO
+#ifdef W3_T1
+      DO, IY=1, NY
+        IF ( NYA(IY,0) .GT. 0 ) WRITE (MDST,FORMAT1)                &
+               IY, NYA(IY,1:MYA), RYA(IY,1:MYA), SUM(RYA(IY,1:MYA))
+        END DO
+#endif
 !
 ! 2.c Process grid
 !
@@ -1676,7 +1810,9 @@
 !
 ! 2.d Reconcile mask differences
 !
-!/T      WRITE (MDST,9022)
+#ifdef W3_T
+      WRITE (MDST,9022)
+#endif
 !
       JJ     = 0
       ICLOSE => GRIDS(IMOD)%ICLOSE
@@ -1686,7 +1822,9 @@
         FLAGUP = .FALSE.
         MAP3   = .FALSE.
         JJ     = JJ + 1
-!/T        WRITE (MDST,9023) JJ
+#ifdef W3_T
+        WRITE (MDST,9023) JJ
+#endif
         DO IX=1, NX
           DO IY=1, NY
             IF ( MAP1(IX,IY) ) THEN
@@ -1749,17 +1887,23 @@
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST WMUPDV : GRID INFORMATION : '/               &
-!/T               '             ',3I5,4E11.3/                         &
-!/T               '             ',3I5,4E11.3/                         &
-!/T               '               UNDEFINED = ',E10.3)
-!/T 9010 FORMAT ( ' TEST WMUPDV : COINCIDING GRIDS, OFFSETS :',2I6/   &
-!/T               '               TARGET GRID RANGES        :',4I6/   &
-!/T               '               SOURCE GRID RANGES        :',4I6)
-!/T 9020 FORMAT ( ' TEST WMUPDV : WEIGHTS FOR ',A,' INTERPOATION')
-!/T1 9021 FORMAT ( ' TEST WMUPDV : ARAY DIMENSIONED AS : ',2I6)
-!/T 9022 FORMAT ( ' TEST WMUPDV : RECONCILING MASKS')
-!/T 9023 FORMAT ( '               SWEEP NR ',I4)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMUPDV : GRID INFORMATION : '/               &
+               '             ',3I5,4E11.3/                         &
+               '             ',3I5,4E11.3/                         &
+               '               UNDEFINED = ',E10.3)
+ 9010 FORMAT ( ' TEST WMUPDV : COINCIDING GRIDS, OFFSETS :',2I6/   &
+               '               TARGET GRID RANGES        :',4I6/   &
+               '               SOURCE GRID RANGES        :',4I6)
+ 9020 FORMAT ( ' TEST WMUPDV : WEIGHTS FOR ',A,' INTERPOATION')
+#endif
+#ifdef W3_T1
+ 9021 FORMAT ( ' TEST WMUPDV : ARAY DIMENSIONED AS : ',2I6)
+#endif
+#ifdef W3_T
+ 9022 FORMAT ( ' TEST WMUPDV : RECONCILING MASKS')
+ 9023 FORMAT ( '               SWEEP NR ',I4)
+#endif
 !/
 !/ End of WMUPDV ----------------------------------------------------- /
 !/
@@ -1843,7 +1987,9 @@
 !/ ------------------------------------------------------------------- /
 !/
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       USE W3GDATMD, ONLY: NX, NY, X0, Y0, SX, SY, GRIDS, FLAGLL,      &
                           GTYPE, RLGTYPE, CLGTYPE, UNGTYPE,           &
@@ -1872,7 +2018,9 @@
 
       INTEGER                 :: NPOIX, NPOIY, I, CURVI               !RP
 
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       INTEGER, ALLOCATABLE    :: NXA(:,:), NYA(:,:)
       REAL                    :: XR, YR, R1, R2, RT, XFL, XFR, XSL,   &
                                  XSR, YFL, YFR, YSL, YSR
@@ -1894,13 +2042,17 @@
 
       REAL, POINTER           :: X0I, Y0I, SXI, SYI !RPXXX , HPFACI, HQFACI
       INTEGER, POINTER        :: ICLOSE
-!/T1      CHARACTER(LEN=17)       :: FORMAT1
+#ifdef W3_T1
+      CHARACTER(LEN=17)       :: FORMAT1
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 ! 0.  Initialization
 ! 0.a Subroutine tracing and test output
 !
-!/S      CALL STRACE (IENT, 'WMUPDS')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMUPDS')
+#endif
 !
       NXI    => GRIDS(JMOD)%NX
       NYI    => GRIDS(JMOD)%NY
@@ -1920,8 +2072,10 @@
          CALL EXTCDE ( 1 )
       END IF
 !
-!/T      WRITE (MDST,9000) IMOD, NX, NY, X0, Y0, SX, SY,              &
-!/T                        JMOD, NXI, NYI, X0I, Y0I, SXI, SYI, UNDEF
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD, NX, NY, X0, Y0, SX, SY,              &
+                        JMOD, NXI, NYI, X0I, Y0I, SXI, SYI, UNDEF
+#endif
 !
 ! 0.b Initialize fields
 !
@@ -1964,8 +2118,10 @@
         IYS0   = MAX (  1  , 1+IYO )
         IYSN   = IYS0 + IYFN - IYF0
 !
-!/T          WRITE (MDST,9010) IXO, IYO, IXF0, IXFN, IYF0, IYFN,      &
-!/T                                      IXS0, IXSN, IYS0, IYSN
+#ifdef W3_T
+          WRITE (MDST,9010) IXO, IYO, IXF0, IXFN, IYF0, IYFN,      &
+                                      IXS0, IXSN, IYS0, IYSN
+#endif
 !
 ! 1.b Fill arrays for sea points only
 !
@@ -2046,10 +2202,14 @@
           MXA    = 2 + INT(SX/SXI)
         END IF
 !
-!/T      WRITE (MDST,9020) 'X'
-!/T1      FORMAT1 = '(10X,  I5,  F6.2)'
-!/T1      WRITE (FORMAT1,'(A,I2,A,I2,A)') "'(10X,",MXA+1,'I5,',MXA+1,"F6.2)'"
-!/T1      WRITE (MDST,9021) NX, MXA
+#ifdef W3_T
+      WRITE (MDST,9020) 'X'
+#endif
+#ifdef W3_T1
+      FORMAT1 = '(10X,  I5,  F6.2)'
+      WRITE (FORMAT1,'(A,I2,A,I2,A)') "'(10X,",MXA+1,'I5,',MXA+1,"F6.2)'"
+      WRITE (MDST,9021) NX, MXA
+#endif
 !
         ALLOCATE ( NXA(NX,0:MXA) , RXA(NX,MXA) )
         NXA    = 0
@@ -2142,10 +2302,12 @@
 !
         END IF
 !
-!/T1      DO, IX=1, NX
-!/T1        IF ( NXA(IX,0) .GT. 0 ) WRITE (MDST,FORMAT1)                &
-!/T1               IX, NXA(IX,1:MXA), RXA(IX,1:MXA), SUM(RXA(IX,1:MXA))
-!/T1        END DO
+#ifdef W3_T1
+      DO, IX=1, NX
+        IF ( NXA(IX,0) .GT. 0 ) WRITE (MDST,FORMAT1)                &
+               IX, NXA(IX,1:MXA), RXA(IX,1:MXA), SUM(RXA(IX,1:MXA))
+        END DO
+#endif
 !
 ! 2.b.2 Interpolation / averaging data for Y axis
 !
@@ -2155,9 +2317,13 @@
           MYA    = 2 + INT(SY/SYI)
         END IF
 !
-!/T      WRITE (MDST,9020) 'Y'
-!/T1      WRITE (FORMAT1,'(A,I2,A,I2,A)') "'(10X,",MYA+1,'I5,',MYA+1,"F6.2)'"
-!/T1      WRITE (MDST,9021) NY, MYA
+#ifdef W3_T
+      WRITE (MDST,9020) 'Y'
+#endif
+#ifdef W3_T1
+      WRITE (FORMAT1,'(A,I2,A,I2,A)') "'(10X,",MYA+1,'I5,',MYA+1,"F6.2)'"
+      WRITE (MDST,9021) NY, MYA
+#endif
 !
         ALLOCATE ( NYA(NY,0:MYA) , RYA(NY,MYA) )
         NYA    = 0
@@ -2224,10 +2390,12 @@
 !
       END IF
 !
-!/T1      DO, IY=1, NY
-!/T1        IF ( NYA(IY,0) .GT. 0 ) WRITE (MDST,FORMAT1)                &
-!/T1               IY, NYA(IY,1:MYA), RYA(IY,1:MYA), SUM(RYA(IY,1:MYA))
-!/T1        END DO
+#ifdef W3_T1
+      DO, IY=1, NY
+        IF ( NYA(IY,0) .GT. 0 ) WRITE (MDST,FORMAT1)                &
+               IY, NYA(IY,1:MYA), RYA(IY,1:MYA), SUM(RYA(IY,1:MYA))
+        END DO
+#endif
 !
 ! 2.c Process grid
 !
@@ -2265,7 +2433,9 @@
 !
 ! 2.d Reconcile mask differences
 !
-!/T      WRITE (MDST,9022)
+#ifdef W3_T
+      WRITE (MDST,9022)
+#endif
 !
       JJ     = 0
       ICLOSE => GRIDS(IMOD)%ICLOSE
@@ -2275,7 +2445,9 @@
         FLAGUP = .FALSE.
         MAP3   = .FALSE.
         JJ     = JJ + 1
-!/T        WRITE (MDST,9023) JJ
+#ifdef W3_T
+        WRITE (MDST,9023) JJ
+#endif
         DO IX=1, NX
           DO IY=1, NY
             IF ( MAP1(IX,IY) ) THEN
@@ -2333,17 +2505,23 @@
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST WMUPDS : GRID INFORMATION : '/               &
-!/T               '             ',3I5,4E11.3/                         &
-!/T               '             ',3I5,4E11.3/                         &
-!/T               '               UNDEFINED = ',E10.3)
-!/T 9010 FORMAT ( ' TEST WMUPDS : COINCIDING GRIDS, OFFSETS :',2I6/   &
-!/T               '               TARGET GRID RANGES        :',4I6/   &
-!/T               '               SOURCE GRID RANGES        :',4I6)
-!/T 9020 FORMAT ( ' TEST WMUPDS : WEIGHTS FOR ',A,' INTERPOATION')
-!/T1 9021 FORMAT ( ' TEST WMUPDS : ARAY DIMENSIONED AS : ',2I6)
-!/T 9022 FORMAT ( ' TEST WMUPDS : RECONCILING MASKS')
-!/T 9023 FORMAT ( '               SWEEP NR ',I4)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMUPDS : GRID INFORMATION : '/               &
+               '             ',3I5,4E11.3/                         &
+               '             ',3I5,4E11.3/                         &
+               '               UNDEFINED = ',E10.3)
+ 9010 FORMAT ( ' TEST WMUPDS : COINCIDING GRIDS, OFFSETS :',2I6/   &
+               '               TARGET GRID RANGES        :',4I6/   &
+               '               SOURCE GRID RANGES        :',4I6)
+ 9020 FORMAT ( ' TEST WMUPDS : WEIGHTS FOR ',A,' INTERPOATION')
+#endif
+#ifdef W3_T1
+ 9021 FORMAT ( ' TEST WMUPDS : ARAY DIMENSIONED AS : ',2I6)
+#endif
+#ifdef W3_T
+ 9022 FORMAT ( ' TEST WMUPDS : RECONCILING MASKS')
+ 9023 FORMAT ( '               SWEEP NR ',I4)
+#endif
 !/
 !/ End of WMUPDS ----------------------------------------------------- /
 !/

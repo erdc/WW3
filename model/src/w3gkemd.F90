@@ -720,7 +720,9 @@ module w3gkemd
                     end if
                 end do
             end do
-!/TS        write(*, *) '→ nnz = ', nnz
+#ifdef W3_TS
+        write(*, *) '→ nnz = ', nnz
+#endif
         end do
 !/
     end subroutine FindQuartetNumber
@@ -1162,7 +1164,9 @@ module w3gkemd
                 call WAVNU1(sig(ik), dpt, k, cg)
             end if
             qr_wn1(ik) = k ! Store k in qr_wn1 ('ll used for interp.)
-!/TS        write(*, *) 'σ, k, cg: ', sig(ik), k, cg
+#ifdef W3_TS
+        write(*, *) 'σ, k, cg: ', sig(ik), k, cg
+#endif
 ! Calc Δσ
             if (ik .eq. 1) then
                 dsii = 0.5 * (sig(2) - sig(1))       ! first bin
@@ -1181,10 +1185,12 @@ module w3gkemd
                 qr_om(jkth) = sig(ik)
             end do
         end do
-!/TS    write(*, *) 'qr_kx: ', qr_kx
-!/TS    write(*, *) 'qr_ky: ', qr_ky
-!/TS    write(*, *) 'qr_dk: ', qr_dk
-!/TS    write(*, *) 'qr_om: ', qr_om
+#ifdef W3_TS
+    write(*, *) 'qr_kx: ', qr_kx
+    write(*, *) 'qr_ky: ', qr_ky
+    write(*, *) 'qr_dk: ', qr_dk
+    write(*, *) 'qr_om: ', qr_om
+#endif
 !
         return
 !/
@@ -1379,24 +1385,26 @@ module w3gkemd
                 write(51) qr_bdry
             close(51)
 ! Screen Test
-!/TS        write(*, *) "[W] qr_depth: ", qr_depth
-!/TS        write(*, *) "[W] qr_oml  : ", qr_oml
-!/TS        write(*, *) "[W] qi_disc : ", qi_disc
-!/TS        write(*, *) "[W] qi_kev  : ", qi_kev
-!/TS        write(*, *) "[W] qr_om   : ", qr_om
-!/TS        write(*, *) "[W] qr_dk   : ", qr_dk
-!/TS        write(*, *) "[W] The total number of quartets is ", qi_nnz
-!/TS        write(*, *) '[W] qi_NN   : ', qi_NN
-!/TS        write(*, *) '[W] qi_PP   : ', qi_PP
-!/TS        write(*, *) '[W] qi_QQ   : ', qi_QQ
-!/TS        write(*, *) '[W] qi_RR   : ', qi_RR
-!/TS        write(*, *) '[W] qr_TKern: ', qr_TKern
-!/TS        write(*, *) '[W] qr_TKurt: ', qr_TKurt
-!/TS        write(*, *) '[W] qr_dom  : ', qr_dom
-!/TS        write(*, *) '[W] qi_icCos: ', qi_icCos
-!/TS        write(*, *) '[W] qi_irCsr: ', qi_irCsr
-!/TS        write(*, *) '[W] Σ_QR    : ', qr_sumQR(1: qi_nrsm: ns+1)
-!/TS        write(*, *) '[W] Σ_P     : ', (qr_sumNP(iq, iq), iq = 1, ns)
+#ifdef W3_TS
+        write(*, *) "[W] qr_depth: ", qr_depth
+        write(*, *) "[W] qr_oml  : ", qr_oml
+        write(*, *) "[W] qi_disc : ", qi_disc
+        write(*, *) "[W] qi_kev  : ", qi_kev
+        write(*, *) "[W] qr_om   : ", qr_om
+        write(*, *) "[W] qr_dk   : ", qr_dk
+        write(*, *) "[W] The total number of quartets is ", qi_nnz
+        write(*, *) '[W] qi_NN   : ', qi_NN
+        write(*, *) '[W] qi_PP   : ', qi_PP
+        write(*, *) '[W] qi_QQ   : ', qi_QQ
+        write(*, *) '[W] qi_RR   : ', qi_RR
+        write(*, *) '[W] qr_TKern: ', qr_TKern
+        write(*, *) '[W] qr_TKurt: ', qr_TKurt
+        write(*, *) '[W] qr_dom  : ', qr_dom
+        write(*, *) '[W] qi_icCos: ', qi_icCos
+        write(*, *) '[W] qi_irCsr: ', qi_irCsr
+        write(*, *) '[W] Σ_QR    : ', qr_sumQR(1: qi_nrsm: ns+1)
+        write(*, *) '[W] Σ_P     : ', (qr_sumNP(iq, iq), iq = 1, ns)
+#endif
 !
         else if (trim(act) == 'READ') then
             write(*, *) '⊚ → [R] Reading |', trim(qs_cfg), '| ...'
@@ -1444,24 +1452,26 @@ module w3gkemd
 !
             close(51)
 ! Screen Test
-!/TS        write(*, *) "[R] qr_depth: ", qr_depth
-!/TS        write(*, *) "[R] qr_oml  : ", qr_oml
-!/TS        write(*, *) "[R] qi_disc : ", qi_disc
-!/TS        write(*, *) "[R] qi_kev  : ", qi_kev
-!/TS        write(*, *) "[R] qr_om   : ", qr_om
-!/TS        write(*, *) "[R] qr_dk   : ", qr_dk
-!/TS        write(*, *) "[R] The total number of quartets is ", qi_nnz
-!/TS        write(*, *) '[R] qi_NN   : ', qi_NN
-!/TS        write(*, *) '[R] qi_PP   : ', qi_PP
-!/TS        write(*, *) '[R] qi_QQ   : ', qi_QQ
-!/TS        write(*, *) '[R] qi_RR   : ', qi_RR
-!/TS        write(*, *) '[R] qr_TKern: ', qr_TKern
-!/TS        write(*, *) '[R] qr_TKurt: ', qr_TKurt
-!/TS        write(*, *) '[R] qr_dom  : ', qr_dom
-!/TS        write(*, *) '[R] qi_icCos: ', qi_icCos
-!/TS        write(*, *) '[R] qi_irCsr: ', qi_irCsr
-!/TS        write(*, *) '[R] Σ_QR    : ', qr_sumQR(1: qi_nrsm: ns+1)
-!/TS        write(*, *) '[R] Σ_P     : ', (qr_sumNP(iq, iq), iq = 1, ns)
+#ifdef W3_TS
+        write(*, *) "[R] qr_depth: ", qr_depth
+        write(*, *) "[R] qr_oml  : ", qr_oml
+        write(*, *) "[R] qi_disc : ", qi_disc
+        write(*, *) "[R] qi_kev  : ", qi_kev
+        write(*, *) "[R] qr_om   : ", qr_om
+        write(*, *) "[R] qr_dk   : ", qr_dk
+        write(*, *) "[R] The total number of quartets is ", qi_nnz
+        write(*, *) '[R] qi_NN   : ', qi_NN
+        write(*, *) '[R] qi_PP   : ', qi_PP
+        write(*, *) '[R] qi_QQ   : ', qi_QQ
+        write(*, *) '[R] qi_RR   : ', qi_RR
+        write(*, *) '[R] qr_TKern: ', qr_TKern
+        write(*, *) '[R] qr_TKurt: ', qr_TKurt
+        write(*, *) '[R] qr_dom  : ', qr_dom
+        write(*, *) '[R] qi_icCos: ', qi_icCos
+        write(*, *) '[R] qi_irCsr: ', qi_irCsr
+        write(*, *) '[R] Σ_QR    : ', qr_sumQR(1: qi_nrsm: ns+1)
+        write(*, *) '[R] Σ_P     : ', (qr_sumNP(iq, iq), iq = 1, ns)
+#endif
         end if
 !/
     end subroutine PrepKernelIO
@@ -1721,15 +1731,17 @@ module w3gkemd
         end if
 !
 ! Screen output (check whether the kernel data are stored in memory)
-!/TS    write(*, *) "◆ qr_depth      :", qr_depth
-!/TS    write(*, *) "◆ qr_oml        :", qr_oml
-!/TS    write(*, *) "◆ qi_disc       :", qi_disc
-!/TS    write(*, *) "◆ qi_kev        :", qi_kev
-!/TS    write(*, *) "◆ qi_nnz        :", qi_nnz
-!/TS    write(*, *) "◆ qi_NN(:10)    :", qi_NN(:10)
-!/TS    write(*, *) "◆ qr_TKern(:10) :", qr_TKern(:10)
-!/TS    write(*, *) "◆ qr_TKurt(:10) :", qr_TKurt(:10)
-!/TS    write(*, *) "◆ qr_sumQR(:10) :", qr_sumQR(:10)
+#ifdef W3_TS
+    write(*, *) "◆ qr_depth      :", qr_depth
+    write(*, *) "◆ qr_oml        :", qr_oml
+    write(*, *) "◆ qi_disc       :", qi_disc
+    write(*, *) "◆ qi_kev        :", qi_kev
+    write(*, *) "◆ qi_nnz        :", qi_nnz
+    write(*, *) "◆ qi_NN(:10)    :", qi_NN(:10)
+    write(*, *) "◆ qr_TKern(:10) :", qr_TKern(:10)
+    write(*, *) "◆ qr_TKurt(:10) :", qr_TKurt(:10)
+    write(*, *) "◆ qr_sumQR(:10) :", qr_sumQR(:10)
+#endif
 !
         num_I = size(Inpqr0)
         if (num_I .ne. qi_nnz) then
@@ -1862,7 +1874,9 @@ module w3gkemd
             Mnp2D  = reshape(Mnp1D, (/ns, ns/))
             Snl    = sum((Mnp2D + transpose(Mnp2D)) * qr_sumNP, 2) / qr_dk
 ! ◆ Conservation Check
-!/TS        write(*, '(A, E15.3)') '   ← {WW3 GKE } ΣSnl(k) * dk: ', sum(Snl * qr_dk)
+#ifdef W3_TS
+        write(*, '(A, E15.3)') '   ← {WW3 GKE } ΣSnl(k) * dk: ', sum(Snl * qr_dk)
+#endif
 !
 ! ◆ Dnl [Diagonal term]  <TODO>
 !   i) it is easy to calculate Dnl for Janssen's KE (but we may

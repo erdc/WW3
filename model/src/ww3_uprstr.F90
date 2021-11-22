@@ -322,12 +322,16 @@
       USE W3GDATMD, ONLY: GNAME, NX, NY, MAPSTA, SIG, NK, NTH, NSEA,  &
                           NSEAL, MAPSF, DMIN, ZB, DSIP, DTH, RSTYPE,  &
                           GTYPE, SMCTYPE
-!/SMC      USE W3GDATMD, ONLY: FSWND 
+#ifdef W3_SMC
+      USE W3GDATMD, ONLY: FSWND 
+#endif
       USE W3WDATMD, ONLY: VA, TIME
       USE W3ADATMD, ONLY: NSEALM
       USE W3ODATMD, ONLY: IAPROC, NAPERR, NAPLOG, NDS, NAPOUT
       USE W3ODATMD, ONLY: NDSE, NDSO, NDST, IDOUT, FNMPRE  
-!/WRST      USE W3IDATMD
+#ifdef W3_WRST
+      USE W3IDATMD
+#endif
 !
       USE W3NMLUPRSTRMD
 !
@@ -378,8 +382,10 @@
       CALL W3SETA ( 1, 6, 6 )
       CALL W3NOUT (    6, 6 )
       CALL W3SETO ( 1, 6, 6 )
-!/WRST      CALL W3NINP (    6, 6 )
-!/WRST      CALL W3SETI ( 1, 6, 6 )
+#ifdef W3_WRST
+      CALL W3NINP (    6, 6 )
+      CALL W3SETI ( 1, 6, 6 )
+#endif
 !
       NDSE   = 6
       NDSI   = 10
@@ -403,9 +409,11 @@
 !
       WRITE (NDSO,900)
 !
-!/WRST      !Compiling with WRST will allow access to options UPD5/6
-!/WRST      WRSTON = .TRUE.
-!/WRST      WRITE (NDSO,*) '*** UPRSTR will read wind from restart files'
+#ifdef W3_WRST
+      !Compiling with WRST will allow access to options UPD5/6
+      WRSTON = .TRUE.
+      WRITE (NDSO,*) '*** UPRSTR will read wind from restart files'
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !  2. Read the ww3_uprstr input data
@@ -445,8 +453,10 @@
              IF ((UPDPROC .EQ. 'UPD2') .OR. (UPDPROC .EQ. 'UPD3')) THEN
 !         CALL NEXTLN ( COMSTR , NDSI , NDSEN )
                  READ (NDSI,*,END=2001,ERR=2002) PRCNTG_CAP
-!/F                 CALL NEXTLN ( COMSTR , NDSI , NDSEN )
-!/F                 READ (NDSI,*,END=2001,ERR=2002) FLNMCOR
+#ifdef W3_F
+                 CALL NEXTLN ( COMSTR , NDSI , NDSEN )
+                 READ (NDSI,*,END=2001,ERR=2002) FLNMCOR
+#endif
              ELSE
                  READ (NDSI,*,END=2001,ERR=2002) PRCNTG_CAP, THRWSEA
              END IF
@@ -454,7 +464,9 @@
              READ (NDSI,*,END=2001,ERR=2002) FLNMANL
          END IF
       ENDIF
-!/T      WRITE (NDSO,*)' TIME: ',TIME
+#ifdef W3_T
+      WRITE (NDSO,*)' TIME: ',TIME
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !  3.  Read model definition file.
@@ -463,21 +475,29 @@
       NSEAL  = NSEA
       WRITE (NDSO,920) GNAME
 !/
-!/SMC !! SMC grid option is activated if GTYPE .EQ. SMCTYPE.  JGLi06May2021
-!/SMC      IF( GTYPE .EQ. SMCTYPE ) SMCGRD = .TRUE.
-!/SMC !! SMC sea-point wind option is activated if FSWND=.TRUE.  JGLi06May2021
-!/SMC      IF( FSWND )              SMCWND = .TRUE.
-!/WRST      ! Override SMCWND - at present restarts only store wind on
-!/WRST      ! a regular grid
-!/WRST      SMCWND = .FALSE.
-!/SMC      WRITE (NDSO,*) '*** UPRSTR set to work with SMC grid model'
+#ifdef W3_SMC
+ !! SMC grid option is activated if GTYPE .EQ. SMCTYPE.  JGLi06May2021
+      IF( GTYPE .EQ. SMCTYPE ) SMCGRD = .TRUE.
+ !! SMC sea-point wind option is activated if FSWND=.TRUE.  JGLi06May2021
+      IF( FSWND )              SMCWND = .TRUE.
+#endif
+#ifdef W3_WRST
+      ! Override SMCWND - at present restarts only store wind on
+      ! a regular grid
+      SMCWND = .FALSE.
+#endif
+#ifdef W3_SMC
+      WRITE (NDSO,*) '*** UPRSTR set to work with SMC grid model'
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !  4. Read restart file
 !/
-!/WRST      ! Set the wind flag to true when reading restart wind
-!/WRST      INFLAGS1(3) = .TRUE.
-!/WRST      CALL W3DIMI ( 1, 6, 6 ) !Needs to be called after w3iogr to have correct dimensions?
+#ifdef W3_WRST
+      ! Set the wind flag to true when reading restart wind
+      INFLAGS1(3) = .TRUE.
+      CALL W3DIMI ( 1, 6, 6 ) !Needs to be called after w3iogr to have correct dimensions?
+#endif
       CALL W3IORS ( 'READ', NDS(6), SIG(NK), IMOD )!
       IF ( IAPROC .EQ. NAPLOG ) THEN
          IF (RSTYPE.EQ.0.OR.RSTYPE.EQ.1.OR.RSTYPE.EQ.4) THEN
@@ -489,8 +509,10 @@
             WRITE (NDSO,*) ' TIME: ',TIME
          END IF
       END IF
-!/T      WRITE (NDST,*), MYNAME,' : Exporting VA as imported to VA01.txt'
-!/T      CALL writeMatrix('VA01.txt', REAL(VA))      
+#ifdef W3_T
+      WRITE (NDST,*), MYNAME,' : Exporting VA as imported to VA01.txt'
+      CALL writeMatrix('VA01.txt', REAL(VA))      
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 ! 5. Update restart spectra array according to the selected option
@@ -503,29 +525,37 @@
       CASE ('UPD0F')
          WRITE (NDSO,902) 'UPD0F'
          WRITE (NDSO,1005) ' PRCNTG = ',PRCNTG
-!/T         ALLOCATE( VATMP  (SIZE(VA    ,1)                ))
-!/T         ALLOCATE( SWHANL (SIZE(MAPSTA,1), SIZE(MAPSTA,2)))
-!/T         ALLOCATE( SWHBCKG(SIZE(MAPSTA,1), SIZE(MAPSTA,2)))
+#ifdef W3_T
+         ALLOCATE( VATMP  (SIZE(VA    ,1)                ))
+         ALLOCATE( SWHANL (SIZE(MAPSTA,1), SIZE(MAPSTA,2)))
+         ALLOCATE( SWHBCKG(SIZE(MAPSTA,1), SIZE(MAPSTA,2)))
+#endif
          DO ISEA=1, NSEA, 1
-!/T            IX = MAPSF(ISEA,1)
-!/T            IY = MAPSF(ISEA,2)
-!/T            VATMP = VA(:,ISEA)
-!/T            CALL SWH_RSRT_1p (VATMP, ISEA, SWHBCKG_1)
-!/T            SWHBCKG(IY,IX)=SWHBCKG_1
+#ifdef W3_T
+            IX = MAPSF(ISEA,1)
+            IY = MAPSF(ISEA,2)
+            VATMP = VA(:,ISEA)
+            CALL SWH_RSRT_1p (VATMP, ISEA, SWHBCKG_1)
+            SWHBCKG(IY,IX)=SWHBCKG_1
+#endif
             CALL UPDATE_VA(PRCNTG, VA(:,ISEA))
-!/T            VATMP = VA(:,ISEA)
-!/T            CALL SWH_RSRT_1p (VATMP, ISEA, SWHANL_1)
-!/T            SWHANL(IY,IX)=SWHANL_1
-!/T            WRITE (NDSO,*) ' =========== UPD0F Output ==========='
-!/T            WRITE (NDSO,*)'ISEA = ', ISEA,' PRCNTG = ',PRCNTG,    &
-!/T                          ' SWHBCKG = ',SWHBCKG(IY,IX),           &
-!/T                          ' SWHANL= ', SWHANL(IY,IX)
+#ifdef W3_T
+            VATMP = VA(:,ISEA)
+            CALL SWH_RSRT_1p (VATMP, ISEA, SWHANL_1)
+            SWHANL(IY,IX)=SWHANL_1
+            WRITE (NDSO,*) ' =========== UPD0F Output ==========='
+            WRITE (NDSO,*)'ISEA = ', ISEA,' PRCNTG = ',PRCNTG,    &
+                          ' SWHBCKG = ',SWHBCKG(IY,IX),           &
+                          ' SWHANL= ', SWHANL(IY,IX)
+#endif
          END DO
-!/T         CALL writeMatrix('SWHBCKG_UPD0F.txt', REAL(SWHBCKG))
-!/T         CALL writeMatrix('SWHANL_UPD0F.txt' , REAL(SWHANL ))
-!/T         CALL writeMatrix('SWHRSTR_UPD0F.txt', REAL(SWHANL )) 
-!/T
-!/T         DEALLOCATE ( VATMP, SWHBCKG, SWHANL )
+#ifdef W3_T
+         CALL writeMatrix('SWHBCKG_UPD0F.txt', REAL(SWHBCKG))
+         CALL writeMatrix('SWHANL_UPD0F.txt' , REAL(SWHANL ))
+         CALL writeMatrix('SWHRSTR_UPD0F.txt', REAL(SWHANL )) 
+
+         DEALLOCATE ( VATMP, SWHBCKG, SWHANL )
+#endif
 !/
 !/ ------------------------------------------------------------------- /     
 ! UPD2 
@@ -542,26 +572,36 @@
          IF (.NOT. SMCGRD) THEN
             ALLOCATE( SWHBCKG(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
             ALLOCATE( SWHANL(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
-!/SMC         ELSE
-!/SMC            ALLOCATE( SWHBCKG(NSEA,1) )
-!/SMC            ALLOCATE( SWHANL(NSEA,1) )
+#ifdef W3_SMC
+         ELSE
+            ALLOCATE( SWHBCKG(NSEA,1) )
+            ALLOCATE( SWHANL(NSEA,1) )
+#endif
          ENDIF
-!/T         IF (.NOT. SMCGRD) THEN
-!/T            ALLOCATE( SWHUPRSTR(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
-!/T         ELSE
-!/T            ALLOCATE( SWHUPRSTR(NSEA,1) )
-!/T         ENDIF
+#ifdef W3_T
+         IF (.NOT. SMCGRD) THEN
+            ALLOCATE( SWHUPRSTR(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
+         ELSE
+            ALLOCATE( SWHUPRSTR(NSEA,1) )
+         ENDIF
+#endif
 !
 !        Read additional Input: Analysis Field
          INQUIRE(FILE=FLNMANL, EXIST=anl_exists)
          IF (anl_exists) THEN
-!/T            WRITE (NDSO,*) 'shape(SWHANL)', shape(SWHANL)
+#ifdef W3_T
+            WRITE (NDSO,*) 'shape(SWHANL)', shape(SWHANL)
+#endif
             CALL READ_GRBTXT(SWHANL, FLNMANL, SMCGRD)
-!/T            CALL writeMatrix('SWHANL_IN.txt',SWHANL)
+#ifdef W3_T
+            CALL writeMatrix('SWHANL_IN.txt',SWHANL)
+#endif
          ELSE
             WRITE (NDSO,*) trim(FLNMANL), ' does not exist, stopping...'
             DEALLOCATE( SWHANL,VATMP,SWHBCKG )
-!/T            DEALLOCATE( SWHUPRSTR )
+#ifdef W3_T
+            DEALLOCATE( SWHUPRSTR )
+#endif
             STOP
          END IF
 !
@@ -570,9 +610,11 @@
             IF (.NOT. SMCGRD) THEN
                IX = MAPSF(ISEA,1)
                IY = MAPSF(ISEA,2)
-!/SMC            ELSE
-!/SMC               IX = 1
-!/SMC               IY = ISEA
+#ifdef W3_SMC
+            ELSE
+               IX = 1
+               IY = ISEA
+#endif
             ENDIF
             VATMP = VA(:,ISEA)
             CALL SWH_RSRT_1p (VATMP, ISEA, SWHBCKG_1)
@@ -580,26 +622,34 @@
 !
             IF ( SWHBCKG(IY,IX) > 0.01 .AND. SWHANL(IY,IX) > 0.01 ) THEN
                PRCNTG=(SWHANL(IY,IX)/SWHBCKG_1)
-!/T               WRITE (NDSO,*) 'ISEA = ', ISEA,' IX = ',IX,' IY = ', IY,         &
-!/T                              ' PRCNTG = ',PRCNTG,' SWHBCKG = ',SWHBCKG(IY,IX), &
-!/T                              ' SWHANL = ', SWHANL(IY,IX)
+#ifdef W3_T
+               WRITE (NDSO,*) 'ISEA = ', ISEA,' IX = ',IX,' IY = ', IY,         &
+                              ' PRCNTG = ',PRCNTG,' SWHBCKG = ',SWHBCKG(IY,IX), &
+                              ' SWHANL = ', SWHANL(IY,IX)
+#endif
                CALL CHECK_PRCNTG (PRCNTG,PRCNTG_CAP) 
                CALL UPDATE_VA(PRCNTG, VA(:,ISEA))
-!/T               CALL SWH_RSRT_1p (VA(:,ISEA), ISEA, SWHUPRSTR(IY,IX))
-!/T               WRITE (NDSO,*) ' =========== UPD2 Output ==========='
-!/T               WRITE (NDSO,*)'ISEA = ',ISEA,                            &
-!/T                             'SWH_BCKG = ', SWHBCKG(IY,IX),             &
-!/T                             'SWH_ANL = ', SWHANL(IY,IX),               &
-!/T                             'PRCNTG = ', PRCNTG,                       &
-!/T                             'SWH_RSTR = ',SWHUPRSTR(IY,IX)
+#ifdef W3_T
+               CALL SWH_RSRT_1p (VA(:,ISEA), ISEA, SWHUPRSTR(IY,IX))
+               WRITE (NDSO,*) ' =========== UPD2 Output ==========='
+               WRITE (NDSO,*)'ISEA = ',ISEA,                            &
+                             'SWH_BCKG = ', SWHBCKG(IY,IX),             &
+                             'SWH_ANL = ', SWHANL(IY,IX),               &
+                             'PRCNTG = ', PRCNTG,                       &
+                             'SWH_RSTR = ',SWHUPRSTR(IY,IX)
+#endif
             END IF
          END DO
-!/T         CALL writeMatrix('SWHBCKG_UPD2.txt', REAL(SWHBCKG  ))
-!/T         CALL writeMatrix('SWHANL_UPD2.txt' , REAL(SWHANL   ))
-!/T         CALL writeMatrix('SWHRSTR_UPD2.txt', REAL(SWHUPRSTR))
+#ifdef W3_T
+         CALL writeMatrix('SWHBCKG_UPD2.txt', REAL(SWHBCKG  ))
+         CALL writeMatrix('SWHANL_UPD2.txt' , REAL(SWHANL   ))
+         CALL writeMatrix('SWHRSTR_UPD2.txt', REAL(SWHUPRSTR))
+#endif
 !
          DEALLOCATE( SWHANL,VATMP,SWHBCKG )
-!/T         DEALLOCATE( SWHUPRSTR )
+#ifdef W3_T
+         DEALLOCATE( SWHUPRSTR )
+#endif
 !/
 !/ ------------------------------------------------------------------- /     
 ! UPD3 
@@ -618,26 +668,36 @@
          IF (.NOT. SMCGRD) THEN
             ALLOCATE( SWHBCKG(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
             ALLOCATE( SWHANL(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
-!/SMC         ELSE
-!/SMC            ALLOCATE( SWHBCKG(NSEA,1) )
-!/SMC            ALLOCATE( SWHANL(NSEA,1) )
+#ifdef W3_SMC
+         ELSE
+            ALLOCATE( SWHBCKG(NSEA,1) )
+            ALLOCATE( SWHANL(NSEA,1) )
+#endif
          ENDIF
-!/T         IF (.NOT. SMCGRD) THEN
-!/T            ALLOCATE( SWHUPRSTR(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
-!/T         ELSE
-!/T            ALLOCATE( SWHUPRSTR(NSEA,1) )
-!/T         ENDIF
+#ifdef W3_T
+         IF (.NOT. SMCGRD) THEN
+            ALLOCATE( SWHUPRSTR(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
+         ELSE
+            ALLOCATE( SWHUPRSTR(NSEA,1) )
+         ENDIF
+#endif
 !
 !        Read additional Input: Analysis Field
          INQUIRE(FILE=FLNMANL, EXIST=anl_exists)
          IF (anl_exists) THEN
-!/T            WRITE (NDSO,*) 'shape(SWHANL)', shape(SWHANL)
+#ifdef W3_T
+            WRITE (NDSO,*) 'shape(SWHANL)', shape(SWHANL)
+#endif
             CALL READ_GRBTXT(SWHANL, FLNMANL, SMCGRD)
-!/T            CALL writeMatrix('SWHANL_IN.txt',SWHANL)
+#ifdef W3_T
+            CALL writeMatrix('SWHANL_IN.txt',SWHANL)
+#endif
          ELSE
             WRITE (NDSO,*) trim(FLNMANL), ' does not exist, stopping...'
             DEALLOCATE( SWHANL,VATMP,SWHBCKG,VATMP_NORM,A )
-!/T            DEALLOCATE( SWHUPRSTR )
+#ifdef W3_T
+            DEALLOCATE( SWHUPRSTR )
+#endif
             STOP
          END IF
 !
@@ -646,9 +706,11 @@
             IF (.NOT. SMCGRD) THEN
                IX = MAPSF(ISEA,1)
                IY = MAPSF(ISEA,2)
-!/SMC            ELSE
-!/SMC               IX = 1
-!/SMC               IY = ISEA
+#ifdef W3_SMC
+            ELSE
+               IX = 1
+               IY = ISEA
+#endif
             ENDIF
             VATMP = VA(:,ISEA)
             CALL SWH_RSRT_1p (VATMP, ISEA, SWHBCKG_1)
@@ -657,15 +719,19 @@
             IF ( SWHBCKG(IY,IX) > 0.01 .AND. SWHANL(IY,IX) > 0.01 ) THEN
             !Step 1. 
                PRCNTG=(SWHANL(IY,IX)/SWHBCKG_1)
-!/T               WRITE (NDSO,*) ' =========== Step 1. ==========='
-!/T               WRITE (NDSO,*) ' ISEA = ', ISEA,' IX = ',IX,' IY = ', IY,         &
-!/T                              ' PRCNTG = ',PRCNTG,' SWHBCKG = ',SWHBCKG(IY,IX), &
-!/T                              ' SWHANL = ', SWHANL(IY,IX)
+#ifdef W3_T
+               WRITE (NDSO,*) ' =========== Step 1. ==========='
+               WRITE (NDSO,*) ' ISEA = ', ISEA,' IX = ',IX,' IY = ', IY,         &
+                              ' PRCNTG = ',PRCNTG,' SWHBCKG = ',SWHBCKG(IY,IX), &
+                              ' SWHANL = ', SWHANL(IY,IX)
+#endif
                CALL CHECK_PRCNTG(PRCNTG,PRCNTG_CAP) 
                VATMP_NORM=VATMP/SUM(VATMP)
-!/T               WRITE (NDSO,*)' ISEA =', ISEA,' IX = ',IX,' IY = ', IY, &
-!/T                             ' PRCNTG = ',PRCNTG,   &
-!/T                             ' SWHBCKG = ',SWHBCKG(IY,IX), ' SWHANL = ', SWHANL(IY,IX)
+#ifdef W3_T
+               WRITE (NDSO,*)' ISEA =', ISEA,' IX = ',IX,' IY = ', IY, &
+                             ' PRCNTG = ',PRCNTG,   &
+                             ' SWHBCKG = ',SWHBCKG(IY,IX), ' SWHANL = ', SWHANL(IY,IX)
+#endif
                IF (PRCNTG > 1.) THEN
                   A=PRCNTG**2*(1 + VATMP_NORM)
                ELSE
@@ -674,28 +740,36 @@
                VATMP=A*VATMP
                CALL SWH_RSRT_1p (VATMP, ISEA, SWHTMP)
                PRCNTG=(SWHANL(IY,IX)/SWHTMP)
-!/T               SWHUPRSTR(IY,IX)=SWHTMP
-!/T               WRITE (NDSO,*) ' =========== Step 2. ==========='
-!/T               WRITE (NDSO,*)'ISEA = ', ISEA, ' PRCNTG = ',PRCNTG,        &
-!/T                             ' SWHANL= ', SWHANL(IY,IX),                  &
-!/T                             ' SWHUPRSTR(IY,IX) = ', SWHUPRSTR(IY,IX)
+#ifdef W3_T
+               SWHUPRSTR(IY,IX)=SWHTMP
+               WRITE (NDSO,*) ' =========== Step 2. ==========='
+               WRITE (NDSO,*)'ISEA = ', ISEA, ' PRCNTG = ',PRCNTG,        &
+                             ' SWHANL= ', SWHANL(IY,IX),                  &
+                             ' SWHUPRSTR(IY,IX) = ', SWHUPRSTR(IY,IX)
+#endif
                CALL CHECK_PRCNTG (PRCNTG,PRCNTG_CAP) 
                CALL UPDATE_VA(PRCNTG, VATMP)
                VA(:,ISEA)=VATMP
-!/T               CALL SWH_RSRT_1p (VATMP, ISEA, SWHTMP)
-!/T               SWHUPRSTR(IY,IX)=SWHTMP
-!/T               WRITE (NDSO,*) ' =========== UPD3 Output ==========='
-!/T               WRITE (NDSO,*)'ISEA = ',ISEA,'SWH_BCKG = ', SWHBCKG(IY,IX), &
-!/T                             'SWH_ANL = ', SWHANL(IY,IX),                 &
-!/T                             'SWH_RSTR = ',SWHUPRSTR(IY,IX)
+#ifdef W3_T
+               CALL SWH_RSRT_1p (VATMP, ISEA, SWHTMP)
+               SWHUPRSTR(IY,IX)=SWHTMP
+               WRITE (NDSO,*) ' =========== UPD3 Output ==========='
+               WRITE (NDSO,*)'ISEA = ',ISEA,'SWH_BCKG = ', SWHBCKG(IY,IX), &
+                             'SWH_ANL = ', SWHANL(IY,IX),                 &
+                             'SWH_RSTR = ',SWHUPRSTR(IY,IX)
+#endif
             END IF
          END DO
-!/T         CALL writeMatrix('SWHBCKG_UPD3.txt', REAL(SWHBCKG))
-!/T         CALL writeMatrix('SWHANL_UPD3.txt' , REAL(SWHANL ))
-!/T         CALL writeMatrix('SWHRSTR_UPD3.txt', REAL(SWHUPRSTR))
+#ifdef W3_T
+         CALL writeMatrix('SWHBCKG_UPD3.txt', REAL(SWHBCKG))
+         CALL writeMatrix('SWHANL_UPD3.txt' , REAL(SWHANL ))
+         CALL writeMatrix('SWHRSTR_UPD3.txt', REAL(SWHUPRSTR))
+#endif
 !
          DEALLOCATE( SWHANL,VATMP,SWHBCKG,VATMP_NORM,A ) 
-!/T         DEALLOCATE( SWHUPRSTR ) 
+#ifdef W3_T
+         DEALLOCATE( SWHUPRSTR ) 
+#endif
 !/    
 !/ ------------------------------------------------------------------- /     
 ! UPD5 
@@ -722,47 +796,63 @@
             ! Wind arrays allocated using X,Y convention as in w3idatmd
             ALLOCATE( WSBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)) )
             ALLOCATE( WDRBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)) )
-!/SMC         ELSE
-!/SMC            ALLOCATE( SWHBCKG(NSEA,1) )
-!/SMC            ALLOCATE( SWHANL(NSEA,1) )
-!/SMC            ! Use SMCWND to determine if reading a seapoint aray for wind
-!/SMC            IF( SMCWND ) THEN
-!/SMC               ALLOCATE( WSBCKG(NSEA,1) )
-!/SMC               ALLOCATE( WDRBCKG(NSEA,1) )
-!/SMC            ELSE
-!/SMC               ALLOCATE(WSBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)))
-!/SMC               ALLOCATE(WDRBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)))
-!/SMC            ENDIF
+#ifdef W3_SMC
+         ELSE
+            ALLOCATE( SWHBCKG(NSEA,1) )
+            ALLOCATE( SWHANL(NSEA,1) )
+            ! Use SMCWND to determine if reading a seapoint aray for wind
+            IF( SMCWND ) THEN
+               ALLOCATE( WSBCKG(NSEA,1) )
+               ALLOCATE( WDRBCKG(NSEA,1) )
+            ELSE
+               ALLOCATE(WSBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)))
+               ALLOCATE(WDRBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)))
+            ENDIF
+#endif
          ENDIF
-!/T         IF (.NOT. SMCGRD) THEN
-!/T            ALLOCATE( SWHUPRSTR(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
-!/T         ELSE
-!/T            ALLOCATE( SWHUPRSTR(NSEA,1) )
-!/T         ENDIF
+#ifdef W3_T
+         IF (.NOT. SMCGRD) THEN
+            ALLOCATE( SWHUPRSTR(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
+         ELSE
+            ALLOCATE( SWHUPRSTR(NSEA,1) )
+         ENDIF
+#endif
 !
 !        Read additional Input: Analysis Field
          INQUIRE(FILE=FLNMANL, EXIST=anl_exists)
          IF (anl_exists) THEN
-!/T            WRITE (NDSO,*) 'shape(SWHANL)', shape(SWHANL)
-!/WRST            ! For WRST switch read only corrected SWH
-!/WRST            ! Wind will have been read from the restart
-!/WRST            IF (WRSTON) THEN
-!/WRST               CALL READ_GRBTXT(SWHANL, FLNMANL, SMCGRD)
-!/WRST            ELSE 
+#ifdef W3_T
+            WRITE (NDSO,*) 'shape(SWHANL)', shape(SWHANL)
+#endif
+#ifdef W3_WRST
+            ! For WRST switch read only corrected SWH
+            ! Wind will have been read from the restart
+            IF (WRSTON) THEN
+               CALL READ_GRBTXT(SWHANL, FLNMANL, SMCGRD)
+            ELSE 
+#endif
             CALL READ_GRBTXTWS(SWHANL,WSBCKG,WDRBCKG,FLNMANL,SMCGRD)
-!/WRST            ENDIF
-!/T            CALL writeMatrix('SWHANL_IN.txt',SWHANL)
+#ifdef W3_WRST
+            ENDIF
+#endif
+#ifdef W3_T
+            CALL writeMatrix('SWHANL_IN.txt',SWHANL)
+#endif
          ELSE
             WRITE (NDSO,*) trim(FLNMANL), ' does not exist, stopping...'
             DEALLOCATE( SWHANL,VATMP,SWHBCKG,VAMAPWS,WSBCKG,WDRBCKG )
-!/T            DEALLOCATE( SWHUPRSTR )
+#ifdef W3_T
+            DEALLOCATE( SWHUPRSTR )
+#endif
             STOP
          END IF
 !
-!/WRST         !Calculate wind speed and direction values from u,v..
-!/WRST         !..using cartesian direction convention
-!/WRST         !At present assume only needed for data read from restart
-!/WRST         CALL UVTOCART(WXNwrst,WYNwrst,WSBCKG,WDRBCKG,SMCWND)
+#ifdef W3_WRST
+         !Calculate wind speed and direction values from u,v..
+         !..using cartesian direction convention
+         !At present assume only needed for data read from restart
+         CALL UVTOCART(WXNwrst,WYNwrst,WSBCKG,WDRBCKG,SMCWND)
+#endif
 !
 !        Calculation
          DO ISEA=1, NSEA, 1
@@ -771,19 +861,21 @@
                IY = MAPSF(ISEA,2)
                IXW = IX
                IYW = IY
-!/SMC            ELSE
-!/SMC               IX = 1
-!/SMC               IY = ISEA
-!/SMC               IF( SMCWND ) THEN
-!/SMC                  ! Wind arrays allocated using (X,Y) convention for regular grids
-!/SMC                  ! but overriding here for the SMC grid which are always defined
-!/SMC                  ! as (NSEA,1) by switching the IY and IX dimension values around
-!/SMC                  IXW = IY
-!/SMC                  IYW = IX
-!/SMC               ELSE
-!/SMC                  IXW = MAPSF(ISEA,1)
-!/SMC                  IYW= MAPSF(ISEA,2)
-!/SMC               ENDIF
+#ifdef W3_SMC
+            ELSE
+               IX = 1
+               IY = ISEA
+               IF( SMCWND ) THEN
+                  ! Wind arrays allocated using (X,Y) convention for regular grids
+                  ! but overriding here for the SMC grid which are always defined
+                  ! as (NSEA,1) by switching the IY and IX dimension values around
+                  IXW = IY
+                  IYW = IX
+               ELSE
+                  IXW = MAPSF(ISEA,1)
+                  IYW= MAPSF(ISEA,2)
+               ENDIF
+#endif
             ENDIF
             VATMP = VA(:,ISEA)
             CALL SWH_RSRT_1pw (VATMP, WSBCKG(IXW,IYW), WDRBCKG(IXW,IYW), ISEA, &
@@ -804,24 +896,32 @@
                   CALL CHECK_PRCNTG(PRCNTG,PRCNTG_CAP) 
                   CALL UPDATE_VA(PRCNTG,VATMP)
                END IF
-!/T               WRITE (NDSO,*) 'ISEA = ', ISEA,' IX = ',IX,' IY = ', IY,         &
-!/T                              ' PRCNTG = ',PRCNTG,' SWHBCKG = ',SWHBCKG(IY,IX), &
-!/T                              ' SWHANL = ', SWHANL(IY,IX)
+#ifdef W3_T
+               WRITE (NDSO,*) 'ISEA = ', ISEA,' IX = ',IX,' IY = ', IY,         &
+                              ' PRCNTG = ',PRCNTG,' SWHBCKG = ',SWHBCKG(IY,IX), &
+                              ' SWHANL = ', SWHANL(IY,IX)
+#endif
                VA(:,ISEA)=VATMP
-!/T               CALL SWH_RSRT_1p (VATMP, ISEA, SWHTMP)
-!/T               SWHUPRSTR(IY,IX)=SWHTMP
-!/T               WRITE (NDSO,*) ' =========== UPD5 Output ==========='
-!/T               WRITE (NDSO,*)'ISEA = ',ISEA,'SWH_BCKG = ', SWHBCKG(IY,IX), &
-!/T                             'SWH_ANL = ', SWHANL(IY,IX),                 &
-!/T                             'SWH_RSTR = ',SWHUPRSTR(IY,IX)
+#ifdef W3_T
+               CALL SWH_RSRT_1p (VATMP, ISEA, SWHTMP)
+               SWHUPRSTR(IY,IX)=SWHTMP
+               WRITE (NDSO,*) ' =========== UPD5 Output ==========='
+               WRITE (NDSO,*)'ISEA = ',ISEA,'SWH_BCKG = ', SWHBCKG(IY,IX), &
+                             'SWH_ANL = ', SWHANL(IY,IX),                 &
+                             'SWH_RSTR = ',SWHUPRSTR(IY,IX)
+#endif
             END IF
          END DO
-!/T         CALL writeMatrix('SWHBCKG_UPD5.txt', REAL(SWHBCKG  ))
-!/T         CALL writeMatrix('SWHANL_UPD5.txt' , REAL(SWHANL   ))
-!/T         CALL writeMatrix('SWHRSTR_UPD5.txt', REAL(SWHUPRSTR))
+#ifdef W3_T
+         CALL writeMatrix('SWHBCKG_UPD5.txt', REAL(SWHBCKG  ))
+         CALL writeMatrix('SWHANL_UPD5.txt' , REAL(SWHANL   ))
+         CALL writeMatrix('SWHRSTR_UPD5.txt', REAL(SWHUPRSTR))
+#endif
 !
          DEALLOCATE( SWHANL,VATMP,SWHBCKG,VAMAPWS,WSBCKG,WDRBCKG )
-!/T         DEALLOCATE( SWHUPRSTR )
+#ifdef W3_T
+         DEALLOCATE( SWHUPRSTR )
+#endif
 !/
 !/ ------------------------------------------------------------------- /     
 ! UPD6 
@@ -850,47 +950,63 @@
             ! Wind arrays allocated using X,Y convention as in w3idatmd
             ALLOCATE( WSBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)) )
             ALLOCATE( WDRBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)) )
-!/SMC         ELSE
-!/SMC            ALLOCATE( SWHBCKG(NSEA,1) )
-!/SMC            ALLOCATE( SWHANL(NSEA,1) )
-!/SMC            ! Use SMCWND to determine if reading a seapoint aray for wind
-!/SMC            IF( SMCWND ) THEN
-!/SMC               ALLOCATE( WSBCKG(NSEA,1) )
-!/SMC               ALLOCATE( WDRBCKG(NSEA,1) )
-!/SMC            ELSE
-!/SMC               ALLOCATE(WSBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)))
-!/SMC               ALLOCATE(WDRBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)))
-!/SMC            ENDIF
+#ifdef W3_SMC
+         ELSE
+            ALLOCATE( SWHBCKG(NSEA,1) )
+            ALLOCATE( SWHANL(NSEA,1) )
+            ! Use SMCWND to determine if reading a seapoint aray for wind
+            IF( SMCWND ) THEN
+               ALLOCATE( WSBCKG(NSEA,1) )
+               ALLOCATE( WDRBCKG(NSEA,1) )
+            ELSE
+               ALLOCATE(WSBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)))
+               ALLOCATE(WDRBCKG(SIZE(MAPSTA,2), SIZE(MAPSTA,1)))
+            ENDIF
+#endif
          ENDIF
-!/T         IF (.NOT. SMCGRD) THEN
-!/T            ALLOCATE( SWHUPRSTR(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
-!/T         ELSE
-!/T            ALLOCATE( SWHUPRSTR(NSEA,1) )
-!/T         ENDIF
+#ifdef W3_T
+         IF (.NOT. SMCGRD) THEN
+            ALLOCATE( SWHUPRSTR(SIZE(MAPSTA,1), SIZE(MAPSTA,2)) )
+         ELSE
+            ALLOCATE( SWHUPRSTR(NSEA,1) )
+         ENDIF
+#endif
 !
 !        Read additional Input: Analysis Field
          INQUIRE(FILE=FLNMANL, EXIST=anl_exists)
          IF (anl_exists) THEN
-!/T            WRITE (NDSO,*) 'shape(SWHANL)', shape(SWHANL)
-!/WRST            ! For WRST switch read only corrected SWH
-!/WRST            ! Wind will have been read from the restart
-!/WRST            IF (WRSTON) THEN
-!/WRST               CALL READ_GRBTXT(SWHANL, FLNMANL, SMCGRD)
-!/WRST            ELSE 
+#ifdef W3_T
+            WRITE (NDSO,*) 'shape(SWHANL)', shape(SWHANL)
+#endif
+#ifdef W3_WRST
+            ! For WRST switch read only corrected SWH
+            ! Wind will have been read from the restart
+            IF (WRSTON) THEN
+               CALL READ_GRBTXT(SWHANL, FLNMANL, SMCGRD)
+            ELSE 
+#endif
             CALL READ_GRBTXTWS(SWHANL,WSBCKG,WDRBCKG,FLNMANL,SMCGRD)
-!/WRST            ENDIF
-!/T            CALL writeMatrix('SWHANL_IN.txt',SWHANL)
+#ifdef W3_WRST
+            ENDIF
+#endif
+#ifdef W3_T
+            CALL writeMatrix('SWHANL_IN.txt',SWHANL)
+#endif
          ELSE
             WRITE (NDSO,*) trim(FLNMANL), ' does not exist, stopping...'
             DEALLOCATE( SWHANL,VATMP,SWHBCKG,VAMAPWS,WSBCKG,WDRBCKG )
-!/T            DEALLOCATE( SWHUPRSTR )
+#ifdef W3_T
+            DEALLOCATE( SWHUPRSTR )
+#endif
             STOP
          END IF
 !
-!/WRST         !Calculate wind speed and direction values from u,v..
-!/WRST         !..using cartesian direction convention
-!/WRST         !At present assume only needed for data read from restart
-!/WRST         CALL UVTOCART(WXNwrst,WYNwrst,WSBCKG,WDRBCKG,SMCWND)
+#ifdef W3_WRST
+         !Calculate wind speed and direction values from u,v..
+         !..using cartesian direction convention
+         !At present assume only needed for data read from restart
+         CALL UVTOCART(WXNwrst,WYNwrst,WSBCKG,WDRBCKG,SMCWND)
+#endif
 !
 !        Calculation
          DO ISEA=1, NSEA, 1
@@ -899,19 +1015,21 @@
                IY = MAPSF(ISEA,2)
                IXW = IX
                IYW = IY
-!/SMC            ELSE
-!/SMC               IX = 1
-!/SMC               IY = ISEA
-!/SMC               IF( SMCWND ) THEN
-!/SMC                  ! Wind arrays allocated using (X,Y) convention for regular grids
-!/SMC                  ! but overriding here for the SMC grid which are always defined
-!/SMC                  ! as (NSEA,1) by switching the IY and IX dimension values around
-!/SMC                  IXW = IY
-!/SMC                  IYW = IX
-!/SMC               ELSE
-!/SMC                  IXW = MAPSF(ISEA,1)
-!/SMC                  IYW = MAPSF(ISEA,2)
-!/SMC               ENDIF
+#ifdef W3_SMC
+            ELSE
+               IX = 1
+               IY = ISEA
+               IF( SMCWND ) THEN
+                  ! Wind arrays allocated using (X,Y) convention for regular grids
+                  ! but overriding here for the SMC grid which are always defined
+                  ! as (NSEA,1) by switching the IY and IX dimension values around
+                  IXW = IY
+                  IYW = IX
+               ELSE
+                  IXW = MAPSF(ISEA,1)
+                  IYW = MAPSF(ISEA,2)
+               ENDIF
+#endif
             ENDIF
             VATMP = VA(:,ISEA)
             CALL SWH_RSRT_1pw (VATMP, WSBCKG(IXW,IYW), WDRBCKG(IXW,IYW), ISEA, &
@@ -938,24 +1056,32 @@
                       CALL UPDATE_VA(PRCNTG,VATMP)
                   END IF
                END IF
-!/T               WRITE (NDSO,*) 'ISEA = ', ISEA,' IX = ',IX,' IY = ', IY,         &
-!/T                              ' PRCNTG = ',PRCNTG,' SWHBCKG = ',SWHBCKG(IY,IX), &
-!/T                              ' SWHANL = ', SWHANL(IY,IX)
+#ifdef W3_T
+               WRITE (NDSO,*) 'ISEA = ', ISEA,' IX = ',IX,' IY = ', IY,         &
+                              ' PRCNTG = ',PRCNTG,' SWHBCKG = ',SWHBCKG(IY,IX), &
+                              ' SWHANL = ', SWHANL(IY,IX)
+#endif
                VA(:,ISEA)=VATMP
-!/T               CALL SWH_RSRT_1p (VATMP, ISEA, SWHTMP)
-!/T               SWHUPRSTR(IY,IX)=SWHTMP
-!/T               WRITE (NDSO,*) ' =========== UPD6 Output ==========='
-!/T               WRITE (NDSO,*)'ISEA = ',ISEA,'SWH_BCKG = ', SWHBCKG(IY,IX), &
-!/T                             'SWH_ANL = ', SWHANL(IY,IX),                 &
-!/T                             'SWH_RSTR = ',SWHUPRSTR(IY,IX)
+#ifdef W3_T
+               CALL SWH_RSRT_1p (VATMP, ISEA, SWHTMP)
+               SWHUPRSTR(IY,IX)=SWHTMP
+               WRITE (NDSO,*) ' =========== UPD6 Output ==========='
+               WRITE (NDSO,*)'ISEA = ',ISEA,'SWH_BCKG = ', SWHBCKG(IY,IX), &
+                             'SWH_ANL = ', SWHANL(IY,IX),                 &
+                             'SWH_RSTR = ',SWHUPRSTR(IY,IX)
+#endif
             END IF
          END DO
-!/T         CALL writeMatrix('SWHBCKG_UPD6.txt', REAL(SWHBCKG  ))
-!/T         CALL writeMatrix('SWHANL_UPD6.txt' , REAL(SWHANL   ))
-!/T         CALL writeMatrix('SWHRSTR_UPD6.txt', REAL(SWHUPRSTR))
+#ifdef W3_T
+         CALL writeMatrix('SWHBCKG_UPD6.txt', REAL(SWHBCKG  ))
+         CALL writeMatrix('SWHANL_UPD6.txt' , REAL(SWHANL   ))
+         CALL writeMatrix('SWHRSTR_UPD6.txt', REAL(SWHUPRSTR))
+#endif
 !
          DEALLOCATE( SWHANL,VATMP,SWHBCKG,VAMAPWS,WSBCKG,WDRBCKG )
-!/T         DEALLOCATE( SWHUPRSTR )
+#ifdef W3_T
+         DEALLOCATE( SWHUPRSTR )
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !     End of update options
@@ -965,14 +1091,18 @@
 !/ ------------------------------------------------------------------- /
 ! 6. Write updated restart file
 !/
-!/WRST      ! Copy read wind values from restart for write out
-!/WRST      WXN = WXNwrst
-!/WRST      WYN = WYNwrst
+#ifdef W3_WRST
+      ! Copy read wind values from restart for write out
+      WXN = WXNwrst
+      WYN = WYNwrst
+#endif
       WRITE (NDSO,903)
       RSTYPE = 3
       CALL W3IORS ( 'HOT', NDS(6), SIG(NK), 1 )   
-!/T      WRITE (NDST,*), MYNAME,' : Exporting VA at the end of the re-analysis'
-!/T      CALL writeMatrix('VA02.txt', REAL(VA))
+#ifdef W3_T
+      WRITE (NDST,*), MYNAME,' : Exporting VA at the end of the re-analysis'
+      CALL writeMatrix('VA02.txt', REAL(VA))
+#endif
 ! 
 !/
 !/ ------------------------------------------------------------------- /
@@ -1158,23 +1288,35 @@
       REAL, INTENT(IN   )  ::    PRCNTG_CAP
 ! local
       CHARACTER(12), PARAMETER :: MYNAME='CHECK_PRCNTG'
-!/T
-!/T      WRITE (NDSO,*) trim(MYNAME)," The original correction is ",PRCNTG 
-!/T      WRITE (NDSO,*) trim(MYNAME)," The cap is ",PRCNTG_CAP
+#ifdef W3_T
+
+      WRITE (NDSO,*) trim(MYNAME)," The original correction is ",PRCNTG 
+      WRITE (NDSO,*) trim(MYNAME)," The cap is ",PRCNTG_CAP
+#endif
       IF ( PRCNTG_CAP < 1. ) THEN
          WRITE (NDSO,*) trim(MYNAME)," WARNING: PRCNTG_CAP set < 1."
          WRITE (NDSO,*) trim(MYNAME),"          This may introduce spurious corrections"
       END IF
-!/T      WRITE (NDSO,*) trim(MYNAME)," The cap is ",PRCNTG_CAP
+#ifdef W3_T
+      WRITE (NDSO,*) trim(MYNAME)," The cap is ",PRCNTG_CAP
+#endif
       IF ( PRCNTG > 1. ) THEN
-!/T      WRITE (NDSO,*) trim(MYNAME)," PRCNTG > 1."
+#ifdef W3_T
+      WRITE (NDSO,*) trim(MYNAME)," PRCNTG > 1."
+#endif
          PRCNTG = MIN(PRCNTG, 1. * PRCNTG_CAP)
       ELSE IF ( PRCNTG < 1. ) THEN
-!/T      WRITE (NDSO,*) trim(MYNAME)," PRCNTG < 1."
+#ifdef W3_T
+      WRITE (NDSO,*) trim(MYNAME)," PRCNTG < 1."
+#endif
          PRCNTG = MAX(PRCNTG, 1. / PRCNTG_CAP)
-!/T  
+#ifdef W3_T
+  
+#endif
       END IF
-!/T      WRITE (NDSO,*) trim(MYNAME)," The updated correction is ",PRCNTG 
+#ifdef W3_T
+      WRITE (NDSO,*) trim(MYNAME)," The updated correction is ",PRCNTG 
+#endif
 !
    END SUBROUTINE CHECK_PRCNTG
 !/
@@ -1237,7 +1379,9 @@
          INTEGER, PARAMETER :: IP_FID = 123
          CHARACTER(25), PARAMETER::myname='read_grbtxt'
 !
-!/T         WRITE (NDSO,*) trim(myname), ' starts'         
+#ifdef W3_T
+         WRITE (NDSO,*) trim(myname), ' starts'         
+#endif
          J     = LEN_TRIM(FNMPRE)
          OPEN (IP_FID,FILE=FNMPRE(:J)//TRIM(FLNMCOR),STATUS='OLD' &
               ,ACTION='read',IOSTAT=IERR)
@@ -1250,13 +1394,15 @@
                                             'dimensions: M=',M,' N=',N
                STOP
             END IF
-!/SMC         ELSE
-!/SMC            READ( IP_FID, *) N
-!/SMC            IF ( SIZE(UPDPRCNT,1) /= N ) THEN
-!/SMC               WRITE (NDSO,*) trim(myname),': These are not the grid ' // &
-!/SMC                                            'dimensions: N=',N
-!/SMC               STOP
-!/SMC            END IF
+#ifdef W3_SMC
+         ELSE
+            READ( IP_FID, *) N
+            IF ( SIZE(UPDPRCNT,1) /= N ) THEN
+               WRITE (NDSO,*) trim(myname),': These are not the grid ' // &
+                                            'dimensions: N=',N
+               STOP
+            END IF
+#endif
          END IF
          UPDPRCNT=0
 !
@@ -1269,17 +1415,21 @@
                   UPDPRCNT(N+1-L,K)=A
                END DO
             END DO
-!/SMC         ELSE
-!/SMC            DO L=1,N
-!/SMC               A=0.
-!/SMC               READ(IP_FID,*)A 
-!/SMC               UPDPRCNT(L,1)=A
-!/SMC            END DO
+#ifdef W3_SMC
+         ELSE
+            DO L=1,N
+               A=0.
+               READ(IP_FID,*)A 
+               UPDPRCNT(L,1)=A
+            END DO
+#endif
          END IF
 !
          CLOSE(IP_FID)
 !         
-!/T         WRITE (NDSO,*) trim(myname), ' ends'         
+#ifdef W3_T
+         WRITE (NDSO,*) trim(myname), ' ends'         
+#endif
       END SUBROUTINE READ_GRBTXT
 !/
 !/ ------------------------------------------------------------------- /
@@ -1340,7 +1490,9 @@
          INTEGER, PARAMETER :: IP_FID = 123
          CHARACTER(25), PARAMETER::myname='read_grbtxt'
 !
-!/T         WRITE (NDSO,*) trim(myname), ' starts'         
+#ifdef W3_T
+         WRITE (NDSO,*) trim(myname), ' starts'         
+#endif
          J     = LEN_TRIM(FNMPRE)
          OPEN (IP_FID,FILE=FNMPRE(:J)//TRIM(FLNMCOR),STATUS='OLD' &
               ,ACTION='read',IOSTAT=IERR)
@@ -1353,13 +1505,15 @@
                                             'dimensions: M=',M,' N=',N
                STOP
             END IF
-!/SMC         ELSE
-!/SMC            READ( IP_FID, *) N
-!/SMC            IF ( SIZE(UPDPRCNT,1) /= N ) THEN
-!/SMC               WRITE (NDSO,*) trim(myname),': These are not the grid ' // &
-!/SMC                                            'dimensions: N=',N
-!/SMC               STOP
-!/SMC            END IF
+#ifdef W3_SMC
+         ELSE
+            READ( IP_FID, *) N
+            IF ( SIZE(UPDPRCNT,1) /= N ) THEN
+               WRITE (NDSO,*) trim(myname),': These are not the grid ' // &
+                                            'dimensions: N=',N
+               STOP
+            END IF
+#endif
          END IF
          UPDPRCNT=0
          WSPD=0.
@@ -1380,20 +1534,24 @@
                   WDIR(K,N+1-L)=WD
                END DO
             END DO
-!/SMC         ELSE
-!/SMC            DO L=1,N
-!/SMC               A=0.
-!/SMC               READ(IP_FID,*)A, WS, WD 
-!/SMC               UPDPRCNT(L,1)=A
-!/SMC               WSPD(L,1)=WS
-!/SMC               WDIR(L,1)=WD
-!/SMC            END DO
+#ifdef W3_SMC
+         ELSE
+            DO L=1,N
+               A=0.
+               READ(IP_FID,*)A, WS, WD 
+               UPDPRCNT(L,1)=A
+               WSPD(L,1)=WS
+               WDIR(L,1)=WD
+            END DO
+#endif
          ENDIF
 !
          CLOSE(IP_FID)
 !
 !         
-!/T         WRITE (NDSO,*) trim(myname), ' ends'         
+#ifdef W3_T
+         WRITE (NDSO,*) trim(myname), ' ends'         
+#endif
       END SUBROUTINE READ_GRBTXTWS
 !/
 !/ ------------------------------------------------------------------- /
@@ -1448,8 +1606,10 @@
          REAL, DIMENSION(:), INTENT(IN)  :: VA1p
          CHARACTER(25),PARAMETER :: myname='SWH_RSRT_1p'
 !
-!/FT         WRITE (NDSO,*)' '
-!/FT         WRITE (NDSO,*) trim(myname), ' starts'         
+#ifdef W3_FT
+         WRITE (NDSO,*)' '
+         WRITE (NDSO,*) trim(myname), ' starts'         
+#endif
          HSIG1p = 0.
          DEPTH  = MAX ( DMIN , -ZB(ISEA1p) )
          ETOT   = 0.
@@ -1465,8 +1625,10 @@
 !
          HSIG1p = 4. * SQRT ( ETOT * DTH )
 !
-!/FT       WRITE (NDSO,*) ' ', trim(myname), ' ends'
-!/FT       WRITE (NDSO,*)' '
+#ifdef W3_FT
+       WRITE (NDSO,*) ' ', trim(myname), ' ends'
+       WRITE (NDSO,*)' '
+#endif
       END SUBROUTINE SWH_RSRT_1p
 !/
 !/ ------------------------------------------------------------------- /
@@ -1529,7 +1691,9 @@
          REAL :: RELWS, ETOTw, ETOTs, EwI, EsI
          CHARACTER(25),PARAMETER :: myname='SWH_RSRT_1pw'
 !
-!/T         WRITE (NDSO,*) trim(myname), ' starts'         
+#ifdef W3_T
+         WRITE (NDSO,*) trim(myname), ' starts'         
+#endif
          HSIG1p = 0.
          HSIGwp = 0.
          HSIGsp = 0.
@@ -1565,7 +1729,9 @@
          HSIGwp = 4. * SQRT ( ETOTw * DTH )
          HSIGsp = 4. * SQRT ( ETOTs * DTH )
 !
-!/T       WRITE (NDSO,*) trim(myname), ' ends'         
+#ifdef W3_T
+       WRITE (NDSO,*) trim(myname), ' ends'         
+#endif
       END SUBROUTINE SWH_RSRT_1pw
 !/
 !/ ------------------------------------------------------------------- /
@@ -1622,15 +1788,19 @@
          REAL, DIMENSION(:,:), INTENT(IN) :: UVEC, VVEC
          LOGICAL, INTENT(IN) :: SMCGRD
 !
-!/T         WRITE (NDSO,*) trim(myname), ' starts'         
+#ifdef W3_T
+         WRITE (NDSO,*) trim(myname), ' starts'         
+#endif
 !
          DO ISEA=1, NSEA, 1
             IF (.NOT. SMCGRD) THEN
                IX = MAPSF(ISEA,1)
                IY = MAPSF(ISEA,2)
-!/SMC            ELSE
-!/SMC               IX = 1
-!/SMC               IY = ISEA
+#ifdef W3_SMC
+            ELSE
+               IX = 1
+               IY = ISEA
+#endif
             ENDIF
 !
             SPD(IY,IX) = SQRT( UVEC(IY,IX)**2 + VVEC(IY,IX)**2 )
@@ -1642,7 +1812,9 @@
             SPD(IY,IX) = MAX( SPD(IY,IX) , 0.001 )
          END DO
 !
-!/T       WRITE (NDSO,*) trim(myname), ' ends'         
+#ifdef W3_T
+       WRITE (NDSO,*) trim(myname), ' ends'         
+#endif
       END SUBROUTINE UVTOCART
 !/
 !/ ------------------------------------------------------------------- /
@@ -1698,7 +1870,9 @@
          REAL, INTENT(IN) :: PRCNTG
          CHARACTER(25),PARAMETER :: myname='UPDTWSPEC'
 !
-!/T         WRITE (NDSO,*) trim(myname), ' starts'         
+#ifdef W3_T
+         WRITE (NDSO,*) trim(myname), ' starts'         
+#endif
          DO IK=1, NK
             DO ITH=1, NTH
                IF ( VAMAPWS(ITH+(IK-1)*NTH) .EQ. 1 ) THEN
@@ -1707,7 +1881,9 @@
             END DO
          END DO
 !
-!/T       WRITE (NDSO,*) trim(myname), ' ends'         
+#ifdef W3_T
+       WRITE (NDSO,*) trim(myname), ' ends'         
+#endif
       END SUBROUTINE UPDTWSPEC
 !/
 !/ ------------------------------------------------------------------- /
@@ -1769,7 +1945,9 @@
          INTEGER :: LPF, M1, M2
          REAL, ALLOCATABLE :: VASHFT(:)
 !
-!/T         WRITE (NDSO,*) trim(myname), ' starts'         
+#ifdef W3_T
+         WRITE (NDSO,*) trim(myname), ' starts'         
+#endif
          DEPTH  = MAX( DMIN , -ZB(ISEA1p))
          ALLOCATE(VASHFT(SIZE(VATMP)))
          VASHFT(:) = 0.0
@@ -1853,7 +2031,9 @@
 !
          DEALLOCATE(VASHFT)
 !
-!/T         WRITE (NDSO,*) trim(myname), ' ends'         
+#ifdef W3_T
+         WRITE (NDSO,*) trim(myname), ' ends'         
+#endif
       END SUBROUTINE UPDTWSPECF
 !/
 !/ ------------------------------------------------------------------- /

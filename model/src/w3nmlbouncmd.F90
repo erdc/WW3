@@ -102,7 +102,9 @@
 !/ ------------------------------------------------------------------- /
 
     USE W3ODATMD, ONLY: NDSE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -110,10 +112,14 @@
     CHARACTER*(*), INTENT(IN)                   :: INFILE
     TYPE(NML_BOUND_T), INTENT(INOUT)            :: NML_BOUND
     INTEGER, INTENT(OUT)                        :: IERR
-!/S      INTEGER, SAVE                             :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                             :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'W3NMLBOUNC')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3NMLBOUNC')
+#endif
 
     ! open namelist log file
     NDSN = 3
@@ -207,7 +213,9 @@
 
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -218,10 +226,14 @@
     INTEGER                   :: IERR
     TYPE(NML_BOUND_T) :: BOUND
     NAMELIST /BOUND_NML/ BOUND
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_BOUND_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_BOUND_NML')
+#endif
 
     ! set default values for track structure
     BOUND%MODE       = 'WRITE'
@@ -309,14 +321,20 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
     TYPE(NML_BOUND_T), INTENT(IN) :: NML_BOUND
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_BOUND_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_BOUND_NML')
+#endif
 
       WRITE (MSG,'(A)') 'BOUND % '
       WRITE (NDSN,'(A)')

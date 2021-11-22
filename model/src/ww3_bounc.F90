@@ -112,21 +112,29 @@
                           GNAME, W3NMOD, W3SETG,&
                           NSEA, MAPSTA, XYB, GTYPE, XGRD, YGRD, X0, Y0, &
                           SX, SY, MAPSF, UNGTYPE, CLGTYPE, RLGTYPE, FLAGLL
-!/RTD      USE W3GDATMD, ONLY : POLAT, POLON
+#ifdef W3_RTD
+      USE W3GDATMD, ONLY : POLAT, POLON
+#endif
       USE W3ODATMD, ONLY: NDSO, NDSE
       USE W3IOBCMD, ONLY: VERBPTBC, IDSTRBC
       USE W3IOGRMD, ONLY: W3IOGR
       USE W3TIMEMD
       USE W3SERVMD, ONLY: ITRACE, NEXTLN, EXTCDE, DIST_SPHERE
-!/RTD      USE W3SERVMD, ONLY: W3EQTOLL
+#ifdef W3_RTD
+      USE W3SERVMD, ONLY: W3EQTOLL
+#endif
       USE W3NMLBOUNCMD
       USE NETCDF
-!/S      USE W3SERVMD, ONLY : STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY : STRACE
+#endif
 
 !/
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
@@ -142,7 +150,9 @@
                                  IRET, ICODE, NDSL
       INTEGER                 :: TIME(2), TIME2(2), VARID(12),         &
                                  REFDATE(8), CURDATE(8), VARTYPE
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !
       INTEGER, ALLOCATABLE    :: IPBPI(:,:), IPBPO(:,:), NCID(:),      &
                                  DIMID(:,:), DIMLN(:,:)
@@ -156,8 +166,10 @@
                                  XBPI(:), YBPI(:), RDBPI(:,:),         &
                                  XBPO(:), YBPO(:), RDBPO(:,:),         &
                                  ABPIN(:,:), ABPIN2(:,:,:)
-!/RTD      REAL, ALLOCATABLE     :: XTMP(:), YTMP(:), ANGTMP(:)
-!/RTD      LOGICAL               :: ISRTD
+#ifdef W3_RTD
+      REAL, ALLOCATABLE     :: XTMP(:), YTMP(:), ANGTMP(:)
+      LOGICAL               :: ISRTD
+#endif
 !
       REAL, ALLOCATABLE       :: TMPSPCI(:,:),TMPSPCO(:,:)
       
@@ -204,7 +216,9 @@
       NTRACE = 10
       CALL ITRACE ( NDSTRC, NTRACE )
 !
-!/S      CALL STRACE (IENT, 'W3BOUNC')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3BOUNC')
+#endif
 !
       WRITE (NDSO,900)
 !
@@ -215,9 +229,11 @@
 !
       CALL W3IOGR ( 'READ', NDSM )
       WRITE (NDSO,920) GNAME
-!/RTD!
-!/RTD      ISRTD = POLAT .LT. 90.0
-!/RTD!
+#ifdef W3_RTD
+!
+      ISRTD = POLAT .LT. 90.0
+!
+#endif
 !
 !--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! 3.  Read requests from input file.
@@ -373,7 +389,9 @@
           END IF
         END DO
         ALLOCATE(XBPO(NBO),YBPO(NBO))
-!/RTD       IF (ISRTD) ALLOCATE(XTMP(NBO), YTMP(NBO), ANGTMP(NBO))
+#ifdef W3_RTD
+       IF (ISRTD) ALLOCATE(XTMP(NBO), YTMP(NBO), ANGTMP(NBO))
+#endif
         ALLOCATE (IPBPO(NBO,4),RDBPO(NBO,4))
         IBO=0
         DO ISEA=1,NSEA
@@ -394,15 +412,17 @@
             END SELECT !GTYPE
           END IF
         END DO
-!/RTD!
-!/RTD        IF (ISRTD) THEN
-!/RTD          ! Convert grid boundary cell locations to standard pole
-!/RTD          XTMP = XBPO
-!/RTD          YTMP = YBPO
-!/RTD          CALL W3EQTOLL(YTMP, XTMP, YBPO, XBPO, ANGTMP, POLAT, POLON, NBO)
-!/RTD          DEALLOCATE(XTMP, YTMP, ANGTMP)
-!/RTD        ENDIF
-!/RTD!
+#ifdef W3_RTD
+!
+        IF (ISRTD) THEN
+          ! Convert grid boundary cell locations to standard pole
+          XTMP = XBPO
+          YTMP = YBPO
+          CALL W3EQTOLL(YTMP, XTMP, YBPO, XBPO, ANGTMP, POLAT, POLON, NBO)
+          DEALLOCATE(XTMP, YTMP, ANGTMP)
+        ENDIF
+!
+#endif
 !
         OPEN(NDSB,FILE='nest.ww3',FORM='UNFORMATTED',status='unknown')
         ALLOCATE(DIMID(NBO2,3),DIMLN(NBO2,3),NCID(NBO2))

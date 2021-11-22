@@ -65,7 +65,9 @@
 !  7. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       CONTAINS
 !/ ------------------------------------------------------------------- /
@@ -177,45 +179,65 @@
 !/
       INTEGER                 :: IXY, IP, IXYC, IXYU, IXYD, IY, IX,   &
                                  IAD00, IAD02, IADN0, IADN1, IADN2
-!/S      INTEGER, SAVE           :: IENT = 0
-!/T1      INTEGER                 :: IX2, IY2
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_T1
+      INTEGER                 :: IX2, IY2
+#endif
       REAL                    :: CFL, QB, DQ, DQNZ, QCN, QBN, QBR, CFAC
       REAL                    :: FLA(1-MY:MY*MX)
-!/T0      REAL                    :: QMAX
-!/T1      REAL                    :: QBO, QN
-!/T2      REAL                    :: QOLD
+#ifdef W3_T0
+      REAL                    :: QMAX
+#endif
+#ifdef W3_T1
+      REAL                    :: QBO, QN
+#endif
+#ifdef W3_T2
+      REAL                    :: QOLD
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3QCK1')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3QCK1')
+#endif
 !
-!/T      WRITE (NDST,9000) MX, MY, NX, NY, CLOSE, INC, NB0, NB1, NB2
+#ifdef W3_T
+      WRITE (NDST,9000) MX, MY, NX, NY, CLOSE, INC, NB0, NB1, NB2
+#endif
 !
-!/T0      QMAX   = 0.
-!/T0      DO IY=1, NY
-!/T0        DO IX=1, NX
-!/T0          QMAX   = MAX ( QMAX , Q(IY+(IX-1)*MY) )
-!/T0          END DO
-!/T0        END DO
-!/T0      QMAX   = MAX ( 0.01*QMAX , 1.E-10 )
+#ifdef W3_T0
+      QMAX   = 0.
+      DO IY=1, NY
+        DO IX=1, NX
+          QMAX   = MAX ( QMAX , Q(IY+(IX-1)*MY) )
+          END DO
+        END DO
+      QMAX   = MAX ( 0.01*QMAX , 1.E-10 )
+#endif
 !
-!/T0      WRITE (NDST,9001) 'CFLL'
-!/T0      DO IY=NY,1,-1
-!/T0        WRITE (NDST,9002) (NINT(100.*CFLL(IY+(IX-1)*MY)),IX=1,NX)
-!/T0        END DO
-!/T0      WRITE (NDST,9001) 'Q'
-!/T0      DO IY=NY,1,-1
-!/T0        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
-!/T0        END DO
-!/T0      WRITE (NDST,9001) 'MAPACT'
-!/T0      WRITE (NDST,9003) (MAPACT(IXY),IXY=1,NACT)
+#ifdef W3_T0
+      WRITE (NDST,9001) 'CFLL'
+      DO IY=NY,1,-1
+        WRITE (NDST,9002) (NINT(100.*CFLL(IY+(IX-1)*MY)),IX=1,NX)
+        END DO
+      WRITE (NDST,9001) 'Q'
+      DO IY=NY,1,-1
+        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
+        END DO
+      WRITE (NDST,9001) 'MAPACT'
+      WRITE (NDST,9003) (MAPACT(IXY),IXY=1,NACT)
+#endif
 !
 ! 1.  Initialize aux. array FLA and closure ------------------------- *
 !
       FLA = 0.
 !
       IF ( CLOSE ) THEN
-!/T          WRITE (NDST,9005)
+#ifdef W3_T
+          WRITE (NDST,9005)
+#endif
           IAD00  = -MY
           IAD02  =  MY
           IADN0  = IAD00 + MY*NX
@@ -232,8 +254,10 @@
 ! 2.  Fluxes for central points ------------------------------------- *
 !     ( 3rd order + limiter )
 !
-!/T1      WRITE (NDST,9010)
-!/T1      WRITE (NDST,9011) NB0, 'CENTRAL'
+#ifdef W3_T1
+      WRITE (NDST,9010)
+      WRITE (NDST,9011) NB0, 'CENTRAL'
+#endif
 !
       DO IP=1, NB0
 !
@@ -250,7 +274,9 @@
         QCN    = ( Q(IXYC) - Q(IXYU) ) / DQNZ
         QCN    = MIN ( 1.1, MAX ( -0.1 , QCN ) )
 !
-!/T1        QBO    = QB
+#ifdef W3_T1
+        QBO    = QB
+#endif
         QBN    = MAX ( (QB-Q(IXYU))/DQNZ , QCN )
         QBN    = MIN ( QBN , 1. , QCN/MAX(1.E-10,ABS(CFL)) )
         QBR    = Q(IXYU) + QBN*DQ
@@ -259,70 +285,82 @@
 !
         FLA(IXY) = CFL * QB
 !
-!/T1        IY     = MOD ( IXY , MY )
-!/T1        IX     = 1 + IXY/MY
-!/T1        IY2    = MOD ( IXY+INC , MY )
-!/T1        IX2    = 1 + (IXY+INC)/MY
-!/T1        QN     = MAX ( QB, QBO, Q(IXY-INC), Q(   IXY   ),         &
-!/T1                                Q(IXY+INC), Q(IXY+2*INC) )
-!/T1        IF ( QN .GT. 1.E-10 ) THEN
-!/T1            QN     = 1. /QN
-!/T1            WRITE (NDST,9012) IP, IX, IY, IX2, IY2,               &
-!/T1                              CFL, CFLL(IXY), CFLL(IXY+INC),      &
-!/T1                   QBO*QN, QB*QN, Q(IXY-INC)*QN, Q(   IXY   )*QN, &
-!/T1                                  Q(IXY+INC)*QN, Q(IXY+2*INC)*QN
-!/T1          END IF
+#ifdef W3_T1
+        IY     = MOD ( IXY , MY )
+        IX     = 1 + IXY/MY
+        IY2    = MOD ( IXY+INC , MY )
+        IX2    = 1 + (IXY+INC)/MY
+        QN     = MAX ( QB, QBO, Q(IXY-INC), Q(   IXY   ),         &
+                                Q(IXY+INC), Q(IXY+2*INC) )
+        IF ( QN .GT. 1.E-10 ) THEN
+            QN     = 1. /QN
+            WRITE (NDST,9012) IP, IX, IY, IX2, IY2,               &
+                              CFL, CFLL(IXY), CFLL(IXY+INC),      &
+                   QBO*QN, QB*QN, Q(IXY-INC)*QN, Q(   IXY   )*QN, &
+                                  Q(IXY+INC)*QN, Q(IXY+2*INC)*QN
+          END IF
+#endif
 !
         END DO
 !
 ! 3.  Fluxes for points with boundary above ------------------------- *
 !     ( 1st order without limiter )
 !
-!/T1      WRITE (NDST,9011) NB1-NB0, 'BOUNDARY ABOVE'
+#ifdef W3_T1
+      WRITE (NDST,9011) NB1-NB0, 'BOUNDARY ABOVE'
+#endif
 !
       DO IP=NB0+1, NB1
         IXY    = MAPBOU(IP)
         CFL    = CFLL(IXY)
         IXYC   = IXY - INC * INT( MIN ( 0. , SIGN(1.1,CFL) ) )
         FLA(IXY) = CFL * Q(IXYC)
-!/T1        IY     = MOD ( IXY , MY )
-!/T1        IX     = 1 + IXY/MY
-!/T1        IY2    = MOD ( IXY+INC , MY )
-!/T1        IX2    = 1 + (IXY+INC)/MY
-!/T1        QN     = MAX ( Q(IXY+INC), Q(IXY) )
-!/T1        IF ( QN .GT. 1.E-10 ) THEN
-!/T1            QN     = 1. /QN
-!/T1            WRITE (NDST,9013) IP, IX, IY, IX2, IY2, CFL,          &
-!/T1                   CFLL(IXY), Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
-!/T1          END IF
+#ifdef W3_T1
+        IY     = MOD ( IXY , MY )
+        IX     = 1 + IXY/MY
+        IY2    = MOD ( IXY+INC , MY )
+        IX2    = 1 + (IXY+INC)/MY
+        QN     = MAX ( Q(IXY+INC), Q(IXY) )
+        IF ( QN .GT. 1.E-10 ) THEN
+            QN     = 1. /QN
+            WRITE (NDST,9013) IP, IX, IY, IX2, IY2, CFL,          &
+                   CFLL(IXY), Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
+          END IF
+#endif
         END DO
 !
 ! 4.  Fluxes for points with boundary below ------------------------- *
 !     ( 1st order without limiter )
 !
-!/T1      WRITE (NDST,9011) NB2-NB1, 'BOUNDARY BELOW'
+#ifdef W3_T1
+      WRITE (NDST,9011) NB2-NB1, 'BOUNDARY BELOW'
+#endif
 !
       DO IP=NB1+1, NB2
         IXY    = MAPBOU(IP)
         CFL    = CFLL(IXY+INC)
         IXYC   = IXY - INC * INT( MIN ( 0. , SIGN(1.1,CFL) ) )
         FLA(IXY) = CFL * Q(IXYC)
-!/T1        IY     = MOD ( IXY , MY )
-!/T1        IX     = 1 + IXY/MY
-!/T1        IY2    = MOD ( IXY+INC , MY )
-!/T1        IX2    = 1 + (IXY+INC)/MY
-!/T1        QN     = MAX ( Q(IXY+INC), Q(IXY) )
-!/T1        IF ( QN .GT. 1.E-10 ) THEN
-!/T1            QN     = 1. /QN
-!/T1            WRITE (NDST,9014) IP, IX, IY, IX2, IY2, CFL,         &
-!/T1               CFLL(IXY+INC), Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
-!/T1          END IF
+#ifdef W3_T1
+        IY     = MOD ( IXY , MY )
+        IX     = 1 + IXY/MY
+        IY2    = MOD ( IXY+INC , MY )
+        IX2    = 1 + (IXY+INC)/MY
+        QN     = MAX ( Q(IXY+INC), Q(IXY) )
+        IF ( QN .GT. 1.E-10 ) THEN
+            QN     = 1. /QN
+            WRITE (NDST,9014) IP, IX, IY, IX2, IY2, CFL,         &
+               CFLL(IXY+INC), Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
+          END IF
+#endif
         END DO
 !
 ! 5.  Global closure ----------------------------------------------- *
 !
       IF ( CLOSE ) THEN
-!/T          WRITE (NDST,9015)
+#ifdef W3_T
+          WRITE (NDST,9015)
+#endif
           DO IY=1, NY
             FLA (IY+IAD00) = FLA (IY+IADN0)
             END DO
@@ -330,46 +368,66 @@
 !
 ! 6.  Propagation -------------------------------------------------- *
 !
-!/T2      WRITE (NDST,9020)
+#ifdef W3_T2
+      WRITE (NDST,9020)
+#endif
       DO IP=1, NACT
         IXY    = MAPACT(IP)
-!/T2        QOLD   = Q(IXY)
+#ifdef W3_T2
+        QOLD   = Q(IXY)
+#endif
         Q(IXY) = MAX ( 0. , Q(IXY) + FLA(IXY-INC) - FLA(IXY) )
-!/T2        IF ( QOLD + Q(IXY) .GT. 1.E-10 )                          &
-!/T2             WRITE (NDST,9021) IP, IXY, QOLD, Q(IXY),             &
-!/T2                               FLA(IXY-INC), FLA(IXY)
+#ifdef W3_T2
+        IF ( QOLD + Q(IXY) .GT. 1.E-10 )                          &
+             WRITE (NDST,9021) IP, IXY, QOLD, Q(IXY),             &
+                               FLA(IXY-INC), FLA(IXY)
+#endif
         END DO
 !
-!/T0      WRITE (NDST,9001) 'Q'
-!/T0      DO IY=NY,1,-1
-!/T0        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
-!/T0        END DO
+#ifdef W3_T0
+      WRITE (NDST,9001) 'Q'
+      DO IY=NY,1,-1
+        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
+        END DO
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST W3QCK1 : ARRAY DIMENSIONS  :',2I6/           &
-!/T               '               USED              :',2I6/           &
-!/T               '               CLOSE, INC        :',L6,I6/         &
-!/T               '               NB0, NB1, NB2     :',3I6)
-!/T0 9001 FORMAT ( ' TEST W3QCK1 : DUMP ARRAY ',A,' :')
-!/T0 9002 FORMAT ( 1X,43I3)
-!/T0 9003 FORMAT ( 1X,21I6)
-!/T 9005 FORMAT (' TEST W3QCK1 : GLOBAL CLOSURE (1)')
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST W3QCK1 : ARRAY DIMENSIONS  :',2I6/           &
+               '               USED              :',2I6/           &
+               '               CLOSE, INC        :',L6,I6/         &
+               '               NB0, NB1, NB2     :',3I6)
+#endif
+#ifdef W3_T0
+ 9001 FORMAT ( ' TEST W3QCK1 : DUMP ARRAY ',A,' :')
+ 9002 FORMAT ( 1X,43I3)
+ 9003 FORMAT ( 1X,21I6)
+#endif
+#ifdef W3_T
+ 9005 FORMAT (' TEST W3QCK1 : GLOBAL CLOSURE (1)')
+#endif
 !
-!/T1 9010 FORMAT (' TEST W3QCK1 : IP, 2x(IX,IY), CFL (b,i,i+1), ',    &
-!/T1              ' Q (b,b,i-1,i,i+1,i+2)')
-!/T1 9011 FORMAT (' TEST W3QCK1 :',I6,' POINTS OF TYPE ',A)
-!/T1 9012 FORMAT (10X,I6,4I4,1X,3F6.2,1X,F7.2,F6.2,1X,4F6.2)
-!/T1 9013 FORMAT (10X,I6,4I4,1X,F6.2,F6.2,'  --- ',1X,F7.2,1X,'  --- ',&
-!/T1              2F6.2,'  --- ')
-!/T1 9014 FORMAT (10X,I6,4I4,1X,F6.2,'  --- ',F6.2,1X,F7.2,1X,'  --- ',&
-!/T1              2F6.2,'  --- ')
-!/T 9015 FORMAT (' TEST W3QCK1 : GLOBAL CLOSURE (2)')
+#ifdef W3_T1
+ 9010 FORMAT (' TEST W3QCK1 : IP, 2x(IX,IY), CFL (b,i,i+1), ',    &
+              ' Q (b,b,i-1,i,i+1,i+2)')
+ 9011 FORMAT (' TEST W3QCK1 :',I6,' POINTS OF TYPE ',A)
+ 9012 FORMAT (10X,I6,4I4,1X,3F6.2,1X,F7.2,F6.2,1X,4F6.2)
+ 9013 FORMAT (10X,I6,4I4,1X,F6.2,F6.2,'  --- ',1X,F7.2,1X,'  --- ',&
+              2F6.2,'  --- ')
+ 9014 FORMAT (10X,I6,4I4,1X,F6.2,'  --- ',F6.2,1X,F7.2,1X,'  --- ',&
+              2F6.2,'  --- ')
+#endif
+#ifdef W3_T
+ 9015 FORMAT (' TEST W3QCK1 : GLOBAL CLOSURE (2)')
+#endif
 !
-!/T2 9020 FORMAT (' TEST W3QCK1 : IP, IXY, 2Q, 2FL')
-!/T2 9021 FORMAT ('            ',2I6,2(1X,2E11.3))
+#ifdef W3_T2
+ 9020 FORMAT (' TEST W3QCK1 : IP, IXY, 2Q, 2FL')
+ 9021 FORMAT ('            ',2I6,2(1X,2E11.3))
+#endif
 !/
 !/ End of W3QCK1 ----------------------------------------------------- /
 !/
@@ -481,46 +539,66 @@
 !/
       INTEGER                 :: IXY, IP, IXYC, IXYU, IXYD, IY, IX,   &
                                  IAD00, IAD02, IADN0, IADN1, IADN2
-!/S      INTEGER, SAVE           :: IENT
-!/T1      INTEGER                 :: IX2, IY2
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT
+#endif
+#ifdef W3_T1
+      INTEGER                 :: IX2, IY2
+#endif
       REAL                    :: CFL, VEL, QB, DQ, DQNZ, QCN, QBN,    &
                                  QBR, CFAC, FLA(1-MY:MY*MX)
-!/T0      REAL                    :: QMAX
-!/T1      REAL                    :: QBO, QN, XCFL
-!/T2      REAL                    :: QOLD
+#ifdef W3_T0
+      REAL                    :: QMAX
+#endif
+#ifdef W3_T1
+      REAL                    :: QBO, QN, XCFL
+#endif
+#ifdef W3_T2
+      REAL                    :: QOLD
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3QCK2')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3QCK2')
+#endif
 !
-!/T      WRITE (NDST,9000) MX, MY, NX, NY, DT, CLOSE, INC, NB0, NB1, NB2
+#ifdef W3_T
+      WRITE (NDST,9000) MX, MY, NX, NY, DT, CLOSE, INC, NB0, NB1, NB2
+#endif
 !
-!/T0      QMAX   = 0.
-!/T0      DO IY=1, NY
-!/T0        DO IX=1, NX
-!/T0          QMAX   = MAX ( QMAX , Q(IY+(IX-1)*MY) )
-!/T0          END DO
-!/T0        END DO
-!/T0      QMAX   = MAX ( 0.01*QMAX , 1.E-10 )
+#ifdef W3_T0
+      QMAX   = 0.
+      DO IY=1, NY
+        DO IX=1, NX
+          QMAX   = MAX ( QMAX , Q(IY+(IX-1)*MY) )
+          END DO
+        END DO
+      QMAX   = MAX ( 0.01*QMAX , 1.E-10 )
+#endif
 !
-!/T0      WRITE (NDST,9001) 'VELO'
-!/T0      DO IY=NY,1,-1
-!/T0        WRITE (NDST,9002) (NINT(100.*VELO(IY+(IX-1)*MY)           &
-!/T0                                  *DT/DX1(IY+(IX-1)*MY)),IX=1,NX)
-!/T0        END DO
-!/T0      WRITE (NDST,9001) 'Q'
-!/T0      DO IY=NY,1,-1
-!/T0        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
-!/T0        END DO
-!/T0      WRITE (NDST,9001) 'MAPACT'
-!/T0      WRITE (NDST,9003) (MAPACT(IXY),IXY=1,NACT)
+#ifdef W3_T0
+      WRITE (NDST,9001) 'VELO'
+      DO IY=NY,1,-1
+        WRITE (NDST,9002) (NINT(100.*VELO(IY+(IX-1)*MY)           &
+                                  *DT/DX1(IY+(IX-1)*MY)),IX=1,NX)
+        END DO
+      WRITE (NDST,9001) 'Q'
+      DO IY=NY,1,-1
+        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
+        END DO
+      WRITE (NDST,9001) 'MAPACT'
+      WRITE (NDST,9003) (MAPACT(IXY),IXY=1,NACT)
+#endif
 !
 ! 1.  Initialize aux. array FLA and closure ------------------------- *
 !
       FLA = 0.
 !
       IF ( CLOSE ) THEN
-!/T          WRITE (NDST,9005)
+#ifdef W3_T
+          WRITE (NDST,9005)
+#endif
           IAD00  = -MY
           IAD02  =  MY
           IADN0  = IAD00 + MY*NX
@@ -540,8 +618,10 @@
 ! 2.  Fluxes for central points ------------------------------------- *
 !     ( 3rd order + limiter )
 !
-!/T1      WRITE (NDST,9010)
-!/T1      WRITE (NDST,9011) NB0, 'CENTRAL'
+#ifdef W3_T1
+      WRITE (NDST,9010)
+      WRITE (NDST,9011) NB0, 'CENTRAL'
+#endif
 !
       DO IP=1, NB0
 !
@@ -561,7 +641,9 @@
         QCN    = ( Q(IXYC) - Q(IXYU) ) / DQNZ
         QCN    = MIN ( 1.1, MAX ( -0.1 , QCN ) )
 !
-!/T1        QBO    = QB
+#ifdef W3_T1
+        QBO    = QB
+#endif
         QBN    = MAX ( (QB-Q(IXYU))/DQNZ , QCN )
         QBN    = MIN ( QBN , 1. , QCN/MAX(1.E-10,ABS(CFL)) )
         QBR    = Q(IXYU) + QBN*DQ
@@ -570,73 +652,85 @@
 !
         FLA(IXY) = VEL * QB
 !
-!/T1        IY     = MOD ( IXY , MY )
-!/T1        IX     = 1 + IXY/MY
-!/T1        IY2    = MOD ( IXY+INC , MY )
-!/T1        IX2    = 1 + (IXY+INC)/MY
-!/T1        QN     = MAX ( QB, QBO, Q(IXY-INC), Q(   IXY   ),         &
-!/T1                                Q(IXY+INC), Q(IXY+2*INC) )
-!/T1        IF ( QN .GT. 1.E-10 ) THEN
-!/T1            QN     = 1. /QN
-!/T1            WRITE (NDST,9012) IP, IX, IY, IX2, IY2,               &
-!/T1                      CFL, DT*VELO(IXY)/DX1(IXY),                 &
-!/T1                           DT*VELO(IXY+INC)/DX1(IXY+INC),         &
-!/T1                  QBO*QN, QB*QN, Q(IXY-INC)*QN, Q(   IXY   )*QN,  &
-!/T1                                 Q(IXY+INC)*QN, Q(IXY+2*INC)*QN
-!/T1          END IF
+#ifdef W3_T1
+        IY     = MOD ( IXY , MY )
+        IX     = 1 + IXY/MY
+        IY2    = MOD ( IXY+INC , MY )
+        IX2    = 1 + (IXY+INC)/MY
+        QN     = MAX ( QB, QBO, Q(IXY-INC), Q(   IXY   ),         &
+                                Q(IXY+INC), Q(IXY+2*INC) )
+        IF ( QN .GT. 1.E-10 ) THEN
+            QN     = 1. /QN
+            WRITE (NDST,9012) IP, IX, IY, IX2, IY2,               &
+                      CFL, DT*VELO(IXY)/DX1(IXY),                 &
+                           DT*VELO(IXY+INC)/DX1(IXY+INC),         &
+                  QBO*QN, QB*QN, Q(IXY-INC)*QN, Q(   IXY   )*QN,  &
+                                 Q(IXY+INC)*QN, Q(IXY+2*INC)*QN
+          END IF
+#endif
 !
         END DO
 !
 ! 3.  Fluxes for points with boundary above ------------------------- *
 !     ( 1st order without limiter )
 !
-!/T1      WRITE (NDST,9011) NB1-NB0, 'BOUNDARY ABOVE'
+#ifdef W3_T1
+      WRITE (NDST,9011) NB1-NB0, 'BOUNDARY ABOVE'
+#endif
 !
       DO IP=NB0+1, NB1
         IXY    = MAPBOU(IP)
         VEL    = VELO(IXY)
         IXYC   = IXY - INC * INT( MIN ( 0. , SIGN(1.1,VEL) ) )
         FLA(IXY) = VEL * Q(IXYC)
-!/T1        IY     = MOD ( IXY , MY )
-!/T1        IX     = 1 + IXY/MY
-!/T1        IY2    = MOD ( IXY+INC , MY )
-!/T1        IX2    = 1 + (IXY+INC)/MY
-!/T1        QN     = MAX ( Q(IXY+INC), Q(IXY) )
-!/T1        IF ( QN .GT. 1.E-10 ) THEN
-!/T1            QN     = 1. /QN
-!/T1            WRITE (NDST,9013) IP, IX, IY, IX2, IY2, XCFL,             &
-!/T1                              DT*VELO(IXY)/DX2(IXY),                  &
-!/T1                              Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
-!/T1          END IF
+#ifdef W3_T1
+        IY     = MOD ( IXY , MY )
+        IX     = 1 + IXY/MY
+        IY2    = MOD ( IXY+INC , MY )
+        IX2    = 1 + (IXY+INC)/MY
+        QN     = MAX ( Q(IXY+INC), Q(IXY) )
+        IF ( QN .GT. 1.E-10 ) THEN
+            QN     = 1. /QN
+            WRITE (NDST,9013) IP, IX, IY, IX2, IY2, XCFL,             &
+                              DT*VELO(IXY)/DX2(IXY),                  &
+                              Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
+          END IF
+#endif
         END DO
 !
 ! 4.  Fluxes for points with boundary below ------------------------- *
 !     ( 1st order without limiter )
 !
-!/T1      WRITE (NDST,9011) NB2-NB1, 'BOUNDARY BELOW'
+#ifdef W3_T1
+      WRITE (NDST,9011) NB2-NB1, 'BOUNDARY BELOW'
+#endif
 !
       DO IP=NB1+1, NB2
         IXY    = MAPBOU(IP)
         VEL    = VELO(IXY+INC)
         IXYC   = IXY - INC * INT( MIN ( 0. , SIGN(1.1,VEL) ) )
         FLA(IXY) = VEL * Q(IXYC)
-!/T1        IY     = MOD ( IXY , MY )
-!/T1        IX     = 1 + IXY/MY
-!/T1        IY2    = MOD ( IXY+INC , MY )
-!/T1        IX2    = 1 + (IXY+INC)/MY
-!/T1        QN     = MAX ( Q(IXY+INC), Q(IXY) )
-!/T1        IF ( QN .GT. 1.E-10 ) THEN
-!/T1            QN     = 1. /QN
-!/T1            WRITE (NDST,9014) IP, IX, IY, IX2, IY2, XCFL,         &
-!/T1                              DT*VELO(IXY+INC)/DX2(IXY),          &
-!/T1                              Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
-!/T1          END IF
+#ifdef W3_T1
+        IY     = MOD ( IXY , MY )
+        IX     = 1 + IXY/MY
+        IY2    = MOD ( IXY+INC , MY )
+        IX2    = 1 + (IXY+INC)/MY
+        QN     = MAX ( Q(IXY+INC), Q(IXY) )
+        IF ( QN .GT. 1.E-10 ) THEN
+            QN     = 1. /QN
+            WRITE (NDST,9014) IP, IX, IY, IX2, IY2, XCFL,         &
+                              DT*VELO(IXY+INC)/DX2(IXY),          &
+                              Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
+          END IF
+#endif
         END DO
 !
 ! 5.  Global closure ----------------------------------------------- *
 !
       IF ( CLOSE ) THEN
-!/T          WRITE (NDST,9015)
+#ifdef W3_T
+          WRITE (NDST,9015)
+#endif
           DO IY=1, NY
             FLA (IY+IAD00) = FLA (IY+IADN0)
             END DO
@@ -644,49 +738,69 @@
 !
 ! 6.  Propagation -------------------------------------------------- *
 !
-!/T2      WRITE (NDST,9020)
+#ifdef W3_T2
+      WRITE (NDST,9020)
+#endif
       DO IP=1, NACT
         IXY    = MAPACT(IP)
-!/T2        QOLD   = Q(IXY)
+#ifdef W3_T2
+        QOLD   = Q(IXY)
+#endif
         Q(IXY) = MAX ( 0. , Q(IXY) + DT/DX1(IXY) *                    &
                               (FLA(IXY-INC)-FLA(IXY)) )
-!/T2        IF ( QOLD + Q(IXY) .GT. 1.E-10 )                          &
-!/T2             WRITE (NDST,9021) IP, IXY, QOLD, Q(IXY),             &
-!/T2                               DT*FLA(IXY-INC)/DX1(IXY),          &
-!/T2                               DT*FLA(IXY)/DX1(IXY)
+#ifdef W3_T2
+        IF ( QOLD + Q(IXY) .GT. 1.E-10 )                          &
+             WRITE (NDST,9021) IP, IXY, QOLD, Q(IXY),             &
+                               DT*FLA(IXY-INC)/DX1(IXY),          &
+                               DT*FLA(IXY)/DX1(IXY)
+#endif
         END DO
 !
-!/T0      WRITE (NDST,9001) 'Q'
-!/T0      DO IY=NY,1,-1
-!/T0        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
-!/T0        END DO
+#ifdef W3_T0
+      WRITE (NDST,9001) 'Q'
+      DO IY=NY,1,-1
+        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
+        END DO
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST W3QCK2 : ARRAY DIMENSIONS  :',2I6/           &
-!/T               '               USED              :',2I6/           &
-!/T               '               TIME STEP         :',F8.1/          &
-!/T               '               CLOSE, INC        :',L6,I6/         &
-!/T               '               NB0, NB1, NB2     :',3I6)
-!/T0 9001 FORMAT ( ' TEST W3QCK2 : DUMP ARRAY ',A,' :')
-!/T0 9002 FORMAT ( 1X,43I3)
-!/T0 9003 FORMAT ( 1X,21I6)
-!/T 9005 FORMAT (' TEST W3QCK2 : GLOBAL CLOSURE (1)')
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST W3QCK2 : ARRAY DIMENSIONS  :',2I6/           &
+               '               USED              :',2I6/           &
+               '               TIME STEP         :',F8.1/          &
+               '               CLOSE, INC        :',L6,I6/         &
+               '               NB0, NB1, NB2     :',3I6)
+#endif
+#ifdef W3_T0
+ 9001 FORMAT ( ' TEST W3QCK2 : DUMP ARRAY ',A,' :')
+ 9002 FORMAT ( 1X,43I3)
+ 9003 FORMAT ( 1X,21I6)
+#endif
+#ifdef W3_T
+ 9005 FORMAT (' TEST W3QCK2 : GLOBAL CLOSURE (1)')
+#endif
 !
-!/T1 9010 FORMAT (' TEST W3QCK2 : IP, 2x(IX,IY), CFL (b,i,i+1), ',    &
-!/T1              ' Q (b,b,i-1,i,i+1,i+2)')
-!/T1 9011 FORMAT (' TEST W3QCK2 :',I6,' POINTS OF TYPE ',A)
-!/T1 9012 FORMAT (10X,I6,4I4,1X,3F6.2,1X,F7.2,F6.2,1X,4F6.2)
-!/T1 9013 FORMAT (10X,I6,4I4,1X,F6.2,F6.2,'  --- ',1X,F7.2,1X,'  --- ',&
-!/T1              2F6.2,'  --- ')
-!/T1 9014 FORMAT (10X,I6,4I4,1X,F6.2,'  --- ',F6.2,1X,F7.2,1X,'  --- ',&
-!/T1              2F6.2,'  --- ')
-!/T 9015 FORMAT (' TEST W3QCK2 : GLOBAL CLOSURE (2)')
+#ifdef W3_T1
+ 9010 FORMAT (' TEST W3QCK2 : IP, 2x(IX,IY), CFL (b,i,i+1), ',    &
+              ' Q (b,b,i-1,i,i+1,i+2)')
+ 9011 FORMAT (' TEST W3QCK2 :',I6,' POINTS OF TYPE ',A)
+ 9012 FORMAT (10X,I6,4I4,1X,3F6.2,1X,F7.2,F6.2,1X,4F6.2)
+ 9013 FORMAT (10X,I6,4I4,1X,F6.2,F6.2,'  --- ',1X,F7.2,1X,'  --- ',&
+              2F6.2,'  --- ')
+ 9014 FORMAT (10X,I6,4I4,1X,F6.2,'  --- ',F6.2,1X,F7.2,1X,'  --- ',&
+              2F6.2,'  --- ')
+#endif
+#ifdef W3_T
+ 9015 FORMAT (' TEST W3QCK2 : GLOBAL CLOSURE (2)')
+#endif
 !
-!/T2 9020 FORMAT (' TEST W3QCK2 : IP, IXY, 2Q, 2FL')
-!/T2 9021 FORMAT ('            ',2I6,2(1X,2E11.3))
+#ifdef W3_T2
+ 9020 FORMAT (' TEST W3QCK2 : IP, IXY, 2Q, 2FL')
+ 9021 FORMAT ('            ',2I6,2(1X,2E11.3))
+#endif
 !/
 !/ End of W3QCK2 ----------------------------------------------------- /
 !/
@@ -796,52 +910,74 @@
       INTEGER                 :: IXY, IP, IXYC, IXYU, IXYD, IY, IX,   &
                                  IAD00, IAD02, IADN0, IADN1, IADN2,   &
                                  JN, JP
-!/S      INTEGER, SAVE           :: IENT = 0
-!/T1      INTEGER                 :: IX2, IY2
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_T1
+      INTEGER                 :: IX2, IY2
+#endif
       REAL                    :: CFL, QB, DQ, DQNZ, QCN, QBN, QBR, CFAC
       REAL                    :: FLA(1-MY:MY*MX)
-!/T0      REAL                    :: QMAX
-!/T1      REAL                    :: QBO, QN
-!/T2      REAL                    :: QOLD
+#ifdef W3_T0
+      REAL                    :: QMAX
+#endif
+#ifdef W3_T1
+      REAL                    :: QBO, QN
+#endif
+#ifdef W3_T2
+      REAL                    :: QOLD
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3QCK3')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3QCK3')
+#endif
 !
-!/T      WRITE (NDST,9000) MX, MY, NX, NY, CLOSE, INC, NB0, NB1, NB2
+#ifdef W3_T
+      WRITE (NDST,9000) MX, MY, NX, NY, CLOSE, INC, NB0, NB1, NB2
+#endif
 !
-!/T0      QMAX   = 0.
-!/T0      DO IY=1, NY
-!/T0        DO IX=1, NX
-!/T0          QMAX   = MAX ( QMAX , Q(IY+(IX-1)*MY) )
-!/T0          END DO
-!/T0        END DO
-!/T0      QMAX   = MAX ( 0.01*QMAX , 1.E-10 )
+#ifdef W3_T0
+      QMAX   = 0.
+      DO IY=1, NY
+        DO IX=1, NX
+          QMAX   = MAX ( QMAX , Q(IY+(IX-1)*MY) )
+          END DO
+        END DO
+      QMAX   = MAX ( 0.01*QMAX , 1.E-10 )
+#endif
 !
-!/T0      WRITE (NDST,9001) 'CFLL'
-!/T0      DO IY=NY,1,-1
-!/T0        WRITE (NDST,9002) (NINT(100.*CFLL(IY+(IX-1)*MY)),IX=1,NX)
-!/T0        END DO
-!/T0      WRITE (NDST,9001) 'Q'
-!/T0      DO IY=NY,1,-1
-!/T0        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
-!/T0        END DO
-!/T0      WRITE (NDST,9001) 'MAPACT'
-!/T0      WRITE (NDST,9003) (MAPACT(IXY),IXY=1,NACT)
+#ifdef W3_T0
+      WRITE (NDST,9001) 'CFLL'
+      DO IY=NY,1,-1
+        WRITE (NDST,9002) (NINT(100.*CFLL(IY+(IX-1)*MY)),IX=1,NX)
+        END DO
+      WRITE (NDST,9001) 'Q'
+      DO IY=NY,1,-1
+        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
+        END DO
+      WRITE (NDST,9001) 'MAPACT'
+      WRITE (NDST,9003) (MAPACT(IXY),IXY=1,NACT)
+#endif
 !
 ! 1.  Initialize aux. array FLA and closure ------------------------- *
 !
       FLA = 0.
 !
       IF ( CLOSE ) THEN
-!/T          WRITE (NDST,9005)
+#ifdef W3_T
+          WRITE (NDST,9005)
+#endif
           IAD00  = -MY
           IAD02  =  MY
           IADN0  = IAD00 + MY*NX
           IADN1  =         MY*NX
           IADN2  = IAD02 + MY*NX
 !
-!/OMPH/!$OMP PARALLEL DO PRIVATE (IY)
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE (IY)
+#endif
 !
           DO IY=1, NY
             Q   (IY+IAD00) = Q   (IY+IADN0) ! 1 ghost column to left
@@ -850,19 +986,27 @@
             CFLL(IY+IADN1) = CFLL(   IY   ) ! as for Q above, 1st to rt
             END DO
 !
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
 !
         END IF
 !
 ! 2.  Fluxes for central points ------------------------------------- *
 !     ( 3rd order + limiter )
 !
-!/T1      WRITE (NDST,9010)
-!/T1      WRITE (NDST,9011) NB0, 'CENTRAL'
+#ifdef W3_T1
+      WRITE (NDST,9010)
+      WRITE (NDST,9011) NB0, 'CENTRAL'
+#endif
 !
-!/OMPH/!$OMP PARALLEL DO PRIVATE (IP, IXY, CFL, IXYC, QB, IXYU, IXYD, &
-!/OMPH/!/T1!$OMP                      QBO, QN, IX, IY, IX2, IY2,              &
-!/OMPH/!$OMP&                     DQ, DQNZ, QCN, QBN, QBR, CFAC )
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE (IP, IXY, CFL, IXYC, QB, IXYU, IXYD, &
+#ifdef W3_T1
+!$OMP                      QBO, QN, IX, IY, IX2, IY2,              &
+#endif
+!$OMP&                     DQ, DQNZ, QCN, QBN, QBR, CFAC )
+#endif
 !
       DO IP=1, NB0
 !
@@ -879,7 +1023,9 @@
         QCN    = ( Q(IXYC) - Q(IXYU) ) / DQNZ
         QCN    = MIN ( 1.1, MAX ( -0.1 , QCN ) )
 !
-!/T1        QBO    = QB
+#ifdef W3_T1
+        QBO    = QB
+#endif
         QBN    = MAX ( (QB-Q(IXYU))/DQNZ , QCN )
         QBN    = MIN ( QBN , 1. , QCN/MAX(1.E-10,ABS(CFL)) )
         QBR    = Q(IXYU) + QBN*DQ
@@ -888,28 +1034,34 @@
 !
         FLA(IXY) = CFL * QB
 !
-!/T1        IY     = MOD ( IXY , MY )
-!/T1        IX     = 1 + IXY/MY
-!/T1        IY2    = MOD ( IXY+INC , MY )
-!/T1        IX2    = 1 + (IXY+INC)/MY
-!/T1        QN     = MAX ( QB, QBO, Q(IXY-INC), Q(   IXY   ),         &
-!/T1                                Q(IXY+INC), Q(IXY+2*INC) )
-!/T1        IF ( QN .GT. 1.E-10 ) THEN
-!/T1            QN     = 1. /QN
-!/T1            WRITE (NDST,9012) IP, IX, IY, IX2, IY2,               &
-!/T1                              CFL, CFLL(IXY), CFLL(IXY+INC),      &
-!/T1                  QBO*QN, QB*QN, Q(IXY-INC)*QN, Q(   IXY   )*QN,  &
-!/T1                                 Q(IXY+INC)*QN, Q(IXY+2*INC)*QN
-!/T1          END IF
+#ifdef W3_T1
+        IY     = MOD ( IXY , MY )
+        IX     = 1 + IXY/MY
+        IY2    = MOD ( IXY+INC , MY )
+        IX2    = 1 + (IXY+INC)/MY
+        QN     = MAX ( QB, QBO, Q(IXY-INC), Q(   IXY   ),         &
+                                Q(IXY+INC), Q(IXY+2*INC) )
+        IF ( QN .GT. 1.E-10 ) THEN
+            QN     = 1. /QN
+            WRITE (NDST,9012) IP, IX, IY, IX2, IY2,               &
+                              CFL, CFLL(IXY), CFLL(IXY+INC),      &
+                  QBO*QN, QB*QN, Q(IXY-INC)*QN, Q(   IXY   )*QN,  &
+                                 Q(IXY+INC)*QN, Q(IXY+2*INC)*QN
+          END IF
+#endif
 !
         END DO
 !
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
 !
 ! 3.  Fluxes for points with boundary above ------------------------- *
 !     ( 1st order without limiter )
 !
-!/T1      WRITE (NDST,9011) NB1-NB0, 'BOUNDARY ABOVE'
+#ifdef W3_T1
+      WRITE (NDST,9011) NB1-NB0, 'BOUNDARY ABOVE'
+#endif
 !
 !!!/OMPH/!$OMP PARALLEL DO PRIVATE (IP, IXY, CFL, IXYC)
 !!!
@@ -918,16 +1070,18 @@
         CFL    = CFLL(IXY)
         IXYC   = IXY - INC * INT( MIN ( 0. , SIGN(1.1,CFL) ) )
         FLA(IXY) = CFL * Q(IXYC)
-!/T1        IY     = MOD ( IXY , MY )
-!/T1        IX     = 1 + IXY/MY
-!/T1        IY2    = MOD ( IXY+INC , MY )
-!/T1        IX2    = 1 + (IXY+INC)/MY
-!/T1        QN     = MAX ( Q(IXY+INC), Q(IXY) )
-!/T1        IF ( QN .GT. 1.E-10 ) THEN
-!/T1            QN     = 1. /QN
-!/T1            WRITE (NDST,9013) IP, IX, IY, IX2, IY2, CFL,          &
-!/T1                   CFLL(IXY), Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
-!/T1          END IF
+#ifdef W3_T1
+        IY     = MOD ( IXY , MY )
+        IX     = 1 + IXY/MY
+        IY2    = MOD ( IXY+INC , MY )
+        IX2    = 1 + (IXY+INC)/MY
+        QN     = MAX ( Q(IXY+INC), Q(IXY) )
+        IF ( QN .GT. 1.E-10 ) THEN
+            QN     = 1. /QN
+            WRITE (NDST,9013) IP, IX, IY, IX2, IY2, CFL,          &
+                   CFLL(IXY), Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
+          END IF
+#endif
         END DO
 !!!
 !!!/OMPH/!$OMP END PARALLEL DO
@@ -935,7 +1089,9 @@
 ! 4.  Fluxes for points with boundary below ------------------------- *
 !     ( 1st order without limiter )
 !
-!/T1      WRITE (NDST,9011) NB2-NB1, 'BOUNDARY BELOW'
+#ifdef W3_T1
+      WRITE (NDST,9011) NB2-NB1, 'BOUNDARY BELOW'
+#endif
 !
 !!!/OMPH/!$OMP PARALLEL DO PRIVATE (IP, IXY, CFL, IXYC)
 !!!
@@ -944,16 +1100,18 @@
         CFL    = CFLL(IXY+INC)
         IXYC   = IXY - INC * INT( MIN ( 0. , SIGN(1.1,CFL) ) )
         FLA(IXY) = CFL * Q(IXYC)
-!/T1        IY     = MOD ( IXY , MY )
-!/T1        IX     = 1 + IXY/MY
-!/T1        IY2    = MOD ( IXY+INC , MY )
-!/T1        IX2    = 1 + (IXY+INC)/MY
-!/T1        QN     = MAX ( Q(IXY+INC), Q(IXY) )
-!/T1        IF ( QN .GT. 1.E-10 ) THEN
-!/T1            QN     = 1. /QN
-!/T1            WRITE (NDST,9014) IP, IX, IY, IX2, IY2, CFL, CFLL(IXY+INC), &
-!/T1                              Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
-!/T1          END IF
+#ifdef W3_T1
+        IY     = MOD ( IXY , MY )
+        IX     = 1 + IXY/MY
+        IY2    = MOD ( IXY+INC , MY )
+        IX2    = 1 + (IXY+INC)/MY
+        QN     = MAX ( Q(IXY+INC), Q(IXY) )
+        IF ( QN .GT. 1.E-10 ) THEN
+            QN     = 1. /QN
+            WRITE (NDST,9014) IP, IX, IY, IX2, IY2, CFL, CFLL(IXY+INC), &
+                              Q(IXYC)*QN, Q(IXY)*QN, Q(IXY+INC)*QN
+          END IF
+#endif
         END DO
 !
 !!!/OMPH/!$OMP END PARALLEL DO
@@ -961,7 +1119,9 @@
 ! 5.  Global closure ----------------------------------------------- *
 !
       IF ( CLOSE ) THEN
-!/T          WRITE (NDST,9015)
+#ifdef W3_T
+          WRITE (NDST,9015)
+#endif
           DO IY=1, NY
             FLA (IY+IAD00) = FLA (IY+IADN0)
             END DO
@@ -969,8 +1129,12 @@
 !
 ! 6.  Propagation -------------------------------------------------- *
 !
-!/T2      WRITE (NDST,9020)
-!/OMPH/!$OMP PARALLEL DO PRIVATE (IP, IXY, JN, JP )
+#ifdef W3_T2
+      WRITE (NDST,9020)
+#endif
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE (IP, IXY, JN, JP )
+#endif
 !
       DO IP=1, NACT
 !
@@ -986,47 +1150,67 @@
             JP    =  0
           END IF
 !
-!/T2        QOLD   = Q(IXY)
+#ifdef W3_T2
+        QOLD   = Q(IXY)
+#endif
         Q(IXY) = MAX ( 0. , Q(IXY) + TRANS(IXY,JN) * FLA(IXY-INC)     &
                                    - TRANS(IXY,JP) * FLA(IXY) )
 
-!/T2        IF ( QOLD + Q(IXY) .GT. 1.E-10 )                          &
-!/T2             WRITE (NDST,9021) IP, IXY, QOLD, Q(IXY),             &
-!/T2                               FLA(IXY-INC), FLA(IXY)
+#ifdef W3_T2
+        IF ( QOLD + Q(IXY) .GT. 1.E-10 )                          &
+             WRITE (NDST,9021) IP, IXY, QOLD, Q(IXY),             &
+                               FLA(IXY-INC), FLA(IXY)
+#endif
         END DO
 !
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
 !
-!/T0      WRITE (NDST,9001) 'Q'
-!/T0      DO IY=NY,1,-1
-!/T0        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
-!/T0        END DO
+#ifdef W3_T0
+      WRITE (NDST,9001) 'Q'
+      DO IY=NY,1,-1
+        WRITE (NDST,9002) (NINT(Q(IY+(IX-1)*MY)/QMAX),IX=1,NX)
+        END DO
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST W3QCK3 : ARRAY DIMENSIONS  :',2I6/           &
-!/T               '               USED              :',2I6/           &
-!/T               '               CLOSE, INC        :',L6,I6/         &
-!/T               '               NB0, NB1, NB2     :',3I6)
-!/T0 9001 FORMAT ( ' TEST W3QCK3 : DUMP ARRAY ',A,' :')
-!/T0 9002 FORMAT ( 1X,43I3)
-!/T0 9003 FORMAT ( 1X,21I6)
-!/T 9005 FORMAT (' TEST W3QCK3 : GLOBAL CLOSURE (1)')
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST W3QCK3 : ARRAY DIMENSIONS  :',2I6/           &
+               '               USED              :',2I6/           &
+               '               CLOSE, INC        :',L6,I6/         &
+               '               NB0, NB1, NB2     :',3I6)
+#endif
+#ifdef W3_T0
+ 9001 FORMAT ( ' TEST W3QCK3 : DUMP ARRAY ',A,' :')
+ 9002 FORMAT ( 1X,43I3)
+ 9003 FORMAT ( 1X,21I6)
+#endif
+#ifdef W3_T
+ 9005 FORMAT (' TEST W3QCK3 : GLOBAL CLOSURE (1)')
+#endif
 !
-!/T1 9010 FORMAT (' TEST W3QCK3 : IP, 2x(IX,IY), CFL (b,i,i+1), ',    &
-!/T1              ' Q (b,b,i-1,i,i+1,i+2)')
-!/T1 9011 FORMAT (' TEST W3QCK3 :',I6,' POINTS OF TYPE ',A)
-!/T1 9012 FORMAT (10X,I6,4I4,1X,3F6.2,1X,F7.2,F6.2,1X,4F6.2)
-!/T1 9013 FORMAT (10X,I6,4I4,1X,F6.2,F6.2,'  --- ',1X,F7.2,1X,'  --- ',&
-!/T1              2F6.2,'  --- ')
-!/T1 9014 FORMAT (10X,I6,4I4,1X,F6.2,'  --- ',F6.2,1X,F7.2,1X,'  --- ',&
-!/T1              2F6.2,'  --- ')
-!/T 9015 FORMAT (' TEST W3QCK3 : GLOBAL CLOSURE (2)')
+#ifdef W3_T1
+ 9010 FORMAT (' TEST W3QCK3 : IP, 2x(IX,IY), CFL (b,i,i+1), ',    &
+              ' Q (b,b,i-1,i,i+1,i+2)')
+ 9011 FORMAT (' TEST W3QCK3 :',I6,' POINTS OF TYPE ',A)
+ 9012 FORMAT (10X,I6,4I4,1X,3F6.2,1X,F7.2,F6.2,1X,4F6.2)
+ 9013 FORMAT (10X,I6,4I4,1X,F6.2,F6.2,'  --- ',1X,F7.2,1X,'  --- ',&
+              2F6.2,'  --- ')
+ 9014 FORMAT (10X,I6,4I4,1X,F6.2,'  --- ',F6.2,1X,F7.2,1X,'  --- ',&
+              2F6.2,'  --- ')
+#endif
+#ifdef W3_T
+ 9015 FORMAT (' TEST W3QCK3 : GLOBAL CLOSURE (2)')
+#endif
 !
-!/T2 9020 FORMAT (' TEST W3QCK3 : IP, IXY, 2Q, 2FL')
-!/T2 9021 FORMAT ('            ',2I6,2(1X,2E11.3))
+#ifdef W3_T2
+ 9020 FORMAT (' TEST W3QCK3 : IP, IXY, 2Q, 2FL')
+ 9021 FORMAT ('            ',2I6,2(1X,2E11.3))
+#endif
 !/
 !/ End of W3QCK3 ----------------------------------------------------- /
 !/

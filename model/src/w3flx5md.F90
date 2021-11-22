@@ -143,7 +143,9 @@
       USE W3ODATMD, ONLY: NDSE, IAPROC, NAPERR
 !     USE W3GDATMD, ONLY: FLX5A0
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -157,11 +159,15 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLX5')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLX5')
+#endif
 !
 ! 1.  Tests ---------------------------------------------------------- *
 !

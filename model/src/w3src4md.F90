@@ -84,7 +84,9 @@
 !/ ------------------------------------------------------------------- /
       SUBROUTINE W3SPR4 (A, CG, WN, EMEAN, FMEAN, FMEAN1, WNMEAN,     &
                     AMAX, U, UDIR,                                    &
-!/FLX5                    TAUA, TAUADIR, DAIR,                              &
+#ifdef W3_FLX5
+                    TAUA, TAUADIR, DAIR,                              &
+#endif
                     USTAR, USDIR,                                     &
                     TAUWX, TAUWY, CD, Z0, CHARN, LLWS, FMEANWS, DLWMEAN)
 !/
@@ -172,18 +174,26 @@
                           WWNMEANPTAIL, FTE, FTF, SSTXFTF, SSTXFTWN,&
                           SSTXFTFTAIL, SSWELLF, ESIN, ECOS, AAIRCMIN, &
                           AAIRGB, AALPHA, ZZWND
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T      USE W3ODATMD, ONLY: NDST
-!/T      USE W3ODATMD, ONLY: NDST
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+      USE W3ODATMD, ONLY: NDST
+#endif
 !
-!/FLX5      USE W3FLX5MD 
+#ifdef W3_FLX5
+      USE W3FLX5MD 
+#endif
       IMPLICIT NONE
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
 !/
       REAL, INTENT(IN)        :: A(NTH,NK), CG(NK), WN(NK), U, UDIR
-!/FLX5      REAL, INTENT(IN)        :: TAUA, TAUADIR, DAIR
+#ifdef W3_FLX5
+      REAL, INTENT(IN)        :: TAUA, TAUADIR, DAIR
+#endif
       REAL, INTENT(IN)        :: TAUWX, TAUWY
       LOGICAL, INTENT(IN)     :: LLWS(NSPEC)
       REAL, INTENT(INOUT)     :: USTAR ,USDIR
@@ -194,14 +204,18 @@
 !/ Local parameters
 !/
       INTEGER                 :: IS, IK, ITH
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 
       REAL                    :: TAUW, EBAND, EMEANWS,UNZ,            &
                                  EB(NK),EB2(NK),ELCS, ELSN 
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SPR4')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SPR4')
+#endif
 !
       UNZ    = MAX ( 0.01 , U )
       USTAR  = MAX ( 0.0001 , USTAR )
@@ -282,32 +296,40 @@
 !
       TAUW = SQRT(TAUWX**2+TAUWY**2)
 !
-!/FLX5      IF (.TRUE.) THEN
-!/FLX5        CALL W3FLX5 ( ZZWND, U, UDIR, TAUA, TAUADIR, DAIR,  & 
-!/FLX5                                          USTAR, USDIR, Z0, CD )
-!/FLX5        IF (USTAR.GT.0.001) THEN
-!/FLX5          CHARN = GRAV*Z0/USTAR**2 
-!/FLX5        ELSE
-!/FLX5          CHARN = AALPHA
-!/FLX5          END IF
-!/FLX5        ELSE
+#ifdef W3_FLX5
+      IF (.TRUE.) THEN
+        CALL W3FLX5 ( ZZWND, U, UDIR, TAUA, TAUADIR, DAIR,  & 
+                                          USTAR, USDIR, Z0, CD )
+        IF (USTAR.GT.0.001) THEN
+          CHARN = GRAV*Z0/USTAR**2 
+        ELSE
+          CHARN = AALPHA
+          END IF
+        ELSE
+#endif
         Z0=0.
         CALL CALC_USTAR(U,TAUW,USTAR,Z0,CHARN) 
         UNZ    = MAX ( 0.01 , U )
         CD     = (USTAR/UNZ)**2
         USDIR = UDIR
-!/FLX5        END IF
+#ifdef W3_FLX5
+        END IF
+#endif
 !
 ! 6.  Final test output ---------------------------------------------- *
 !
-!/T      WRITE (NDST,9060) EMEAN, WNMEAN, TPIINV, USTAR, CD, Z0
+#ifdef W3_T
+      WRITE (NDST,9060) EMEAN, WNMEAN, TPIINV, USTAR, CD, Z0
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9060 FORMAT (' TEST W3SPR4 : E,WN MN :',F8.3,F8.4/                   &
-!/T              ' TPIINV, USTAR, CD, Z0 :',F8.3,F7.2,1X,2F9.5)
+#ifdef W3_T
+ 9060 FORMAT (' TEST W3SPR4 : E,WN MN :',F8.3,F8.4/                   &
+              ' TPIINV, USTAR, CD, Z0 :',F8.3,F7.2,1X,2F9.5)
+#endif
 !/
 !/ End of W3SPR4 ----------------------------------------------------- /
 !/
@@ -395,18 +417,30 @@
 !
 !/ ------------------------------------------------------------------- /
       USE CONSTANTS, ONLY: GRAV,nu_air,KAPPA,TPI,FWTABLE,SIZEFWTABLE, & 
-!/T                        RADE,                                      & 
+#ifdef W3_T
+                        RADE,                                      & 
+#endif
                            DELAB,ABMIN
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, DDEN, SIG, SIG2, TH,         &
                           ESIN, ECOS, EC2, ZZWND, AALPHA, BBETA, ZZALP,&
                           TTAUWSHELTER, SSWELLF, DDEN2, DTH, SSINTHP,  &
                           ZZ0RAT, SSINBR
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T      USE W3ODATMD, ONLY: NDST
-!/T0      USE W3ODATMD, ONLY: NDST
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
+#ifdef W3_T0
+      USE W3ODATMD, ONLY: NDST
+#endif
       USE W3ODATMD, ONLY: IAPROC
-!/T0      USE W3ARRYMD, ONLY: PRT2DS
-!/T1      USE W3ARRYMD, ONLY: OUTMAT
+#ifdef W3_T0
+      USE W3ARRYMD, ONLY: PRT2DS
+#endif
+#ifdef W3_T1
+      USE W3ARRYMD, ONLY: OUTMAT
+#endif
 !
       IMPLICIT NONE
 !/
@@ -424,7 +458,9 @@
 !/ Local parameters
 !/
       INTEGER                 :: IS,IK,ITH
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: FACLN1, FACLN2, LAMBDA
       REAL                    :: COSU, SINU, TAUX, TAUY, USDIRP, USTP
       REAL                    :: TAUPX, TAUPY, UST2, TAUW, TAUWB
@@ -446,13 +482,19 @@
       INTEGER IND,J,I,ISTAB
       REAL DSTAB(3,NSPEC), DVISC, DTURB
       REAL STRESSSTAB(3,2),STRESSSTABN(3,2)
-!/T0      REAL                    :: DOUT(NK,NTH)
+#ifdef W3_T0
+      REAL                    :: DOUT(NK,NTH)
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SIN4')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SIN4')
+#endif
 !
-!/T      WRITE (NDST,9000) BBETA, USTAR, USDIR*RADE
+#ifdef W3_T
+      WRITE (NDST,9000) BBETA, USTAR, USDIR*RADE
+#endif
 !
 ! 1.  Preparations
 !
@@ -537,13 +579,17 @@
 ! Abdalla & Cavaleri, JGR 2002 for Usigma. For USTARsigma ... I do not see where 
 ! I got it from, maybe just made up from drag law ... 
 !
-!/STAB3      Usigma=MAX(0.,-0.025*AS)
-!/STAB3      USTARsigma=(1.0+U/(10.+U))*Usigma
+#ifdef W3_STAB3
+      Usigma=MAX(0.,-0.025*AS)
+      USTARsigma=(1.0+U/(10.+U))*Usigma
+#endif
       UST=USTAR
       ISTAB=3
-!/STAB3      DO ISTAB=1,2
-!/STAB3      IF (ISTAB.EQ.1) UST=USTAR*(1.-USTARsigma)
-!/STAB3      IF (ISTAB.EQ.2) UST=USTAR*(1.+USTARsigma)
+#ifdef W3_STAB3
+      DO ISTAB=1,2
+      IF (ISTAB.EQ.1) UST=USTAR*(1.-USTARsigma)
+      IF (ISTAB.EQ.2) UST=USTAR*(1.+USTARsigma)
+#endif
       TAUX = UST**2* COS(USDIR)
       TAUY = UST**2* SIN(USDIR)
 !
@@ -649,26 +695,34 @@
         YSTRESS=STRESSSTAB (3,2)
         TAUWNX =STRESSSTABN(3,1)
         TAUWNY =STRESSSTABN(3,2)
-!/STAB3        END DO 
-!/STAB3      D(:)=0.5*(DSTAB(1,:)+DSTAB(2,:))
-!/STAB3      XSTRESS=0.5*(STRESSSTAB(1,1)+STRESSSTAB(2,1))
-!/STAB3      YSTRESS=0.5*(STRESSSTAB(1,2)+STRESSSTAB(2,2))
-!/STAB3      TAUWNX=0.5*(STRESSSTABN(1,1)+STRESSSTABN(2,1))
-!/STAB3      TAUWNY=0.5*(STRESSSTABN(1,2)+STRESSSTABN(2,2))
+#ifdef W3_STAB3
+        END DO 
+      D(:)=0.5*(DSTAB(1,:)+DSTAB(2,:))
+      XSTRESS=0.5*(STRESSSTAB(1,1)+STRESSSTAB(2,1))
+      YSTRESS=0.5*(STRESSSTAB(1,2)+STRESSSTAB(2,2))
+      TAUWNX=0.5*(STRESSSTABN(1,1)+STRESSSTABN(2,1))
+      TAUWNY=0.5*(STRESSSTABN(1,2)+STRESSSTABN(2,2))
+#endif
       S = D * A
 !
 ! ... Test output of arrays
 !
-!/T0      DO IK=1, NK
-!/T0        DO ITH=1, NTH
-!/T0          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
-!/T0          END DO
-!/T0        END DO
+#ifdef W3_T0
+      DO IK=1, NK
+        DO ITH=1, NTH
+          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
+          END DO
+        END DO
+#endif
 !
-!/T0      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG(1), '  ', 1.,         &
-!/T0                         0.0, 0.001, 'Diag Sin', ' ', 'NONAME')
+#ifdef W3_T0
+      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG(1), '  ', 1.,         &
+                         0.0, 0.001, 'Diag Sin', ' ', 'NONAME')
+#endif
 !
-!/T1      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sin')
+#ifdef W3_T1
+      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sin')
+#endif
 !
       ! Computes the high-frequency contribution
       ! the difference in spectal density (kx,ky) to (f,theta)
@@ -729,7 +783,9 @@
 !
 ! Formats
 !
-!/T 9000 FORMAT (' TEST W3SIN4 : COMMON FACT.: ',3E10.3)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SIN4 : COMMON FACT.: ',3E10.3)
+#endif
 !/
 !/ End of W3SIN4 ----------------------------------------------------- /
 !/
@@ -799,7 +855,9 @@
                            SSDSC,  SSDSBRF1, SSDSBCK, SSDSBINT, SSDSPBK, &
                            SSDSABK, SSDSHCK, IKTAB, DCKI, SATINDICES,    &
                            SATWEIGHTS, CUMULW, NKHS, NKD, NDTAB, QBI
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -822,11 +880,15 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'INSIN4')
+#ifdef W3_S
+      CALL STRACE (IENT, 'INSIN4')
+#endif
 !
 ! 1.  Initializations ------------------------------------------------ *
 !
@@ -1172,9 +1234,13 @@
 !
 !/ ------------------------------------------------------------------- /
       USE CONSTANTS, ONLY: KAPPA, GRAV
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3GDATMD, ONLY: AALPHA, BBETA, ZZALP, FACHFE, ZZ0MAX
-!/T      USE W3ODATMD, ONLY: NDST
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
 !
       IMPLICIT NONE
 !/
@@ -1196,7 +1262,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: USTARM, ALPHAM
       REAL                    :: CONST1, OMEGA, OMEGAC 
       REAL                    :: UST, ZZ0,OMEGACC, CM
@@ -1207,7 +1275,9 @@
       INTEGER                 :: J,K,L
       REAL                    :: X0
 !
-!/S      CALL STRACE (IENT, 'TABU_HF')
+#ifdef W3_S
+      CALL STRACE (IENT, 'TABU_HF')
+#endif
 !
       USTARM = 5.
       ALPHAM = 20.*AALPHA
@@ -1250,12 +1320,16 @@
                ! Power of Y in denominator should be FACHFE-4  tail applied here
                TAUHFT(K,L)  = TAUHFT(K,L)+W(J)*ZBETA/Y*DELY
                END DO
-!/T      WRITE (NDST,9000) L,K,AALPHA+FLOAT(L)*DELALP,UST,TAUHFT(K,L)
+#ifdef W3_T
+      WRITE (NDST,9000) L,K,AALPHA+FLOAT(L)*DELALP,UST,TAUHFT(K,L)
+#endif
          END DO
       END DO
       DEALLOCATE(W)
       RETURN
-!/T 9000 FORMAT ('TABU_HF, L, K, ALPHA, UST, TAUHFT(K,L) :',(2I4,3F8.3))    
+#ifdef W3_T
+ 9000 FORMAT ('TABU_HF, L, K, ALPHA, UST, TAUHFT(K,L) :',(2I4,3F8.3))    
+#endif
       END SUBROUTINE TABU_TAUHF
 
 !/ ------------------------------------------------------------------- /
@@ -1315,11 +1389,15 @@
 !
 !/ ------------------------------------------------------------------- /
       USE CONSTANTS, ONLY: KAPPA, GRAV
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3GDATMD, ONLY: AALPHA, BBETA, ZZALP, FACHFE,  &
                           TTAUWSHELTER, ZZ0MAX
       USE W3ODATMD, ONLY: NDSE
-!/T      USE W3ODATMD, ONLY: NDST
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
 !
       IMPLICIT NONE
 !/
@@ -1341,7 +1419,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: USTARM, ALPHAM, LEVTAILM
       REAL                    :: CONST1, OMEGA, OMEGAC, LEVTAIL 
       REAL                    :: UST, UST0, ZZ0,OMEGACC, CM
@@ -1360,7 +1440,9 @@
       CHARACTER(LEN=10)       :: VERTST=' '
       CHARACTER(LEN=35)       :: IDTST=' '
 !
-!/S      CALL STRACE (IENT, 'TABU_HF')
+#ifdef W3_S
+      CALL STRACE (IENT, 'TABU_HF')
+#endif
 !
       FNAMETAB='ST4TABUHF2.bin'
       NOFILE=.TRUE.
@@ -1441,7 +1523,9 @@
                 TAUW=TAUW-W(J)*UST**2*ZBETA*LEVTAIL/Y*DELY
                 UST=SQRT(MAX(TAUW,0.))
                 END DO
-!/T      WRITE (NDST,9000) K,L,I,UST0,AALPHA+FLOAT(L)*DELALP,LEVTAIL,TAUHFT2(K,L,I)
+#ifdef W3_T
+      WRITE (NDST,9000) K,L,I,UST0,AALPHA+FLOAT(L)*DELALP,LEVTAIL,TAUHFT2(K,L,I)
+#endif
               END DO
             END DO
           END DO
@@ -1471,7 +1555,9 @@
       GOTO 800
 2001  CONTINUE 
       RETURN
-!/T 9000 FORMAT (' TEST TABU_HFT2, K, L, I, UST, ALPHA, LEVTAIL, TAUHFT2(K,L,I) :',(3I4,4F10.5))    
+#ifdef W3_T
+ 9000 FORMAT (' TEST TABU_HFT2, K, L, I, UST, ALPHA, LEVTAIL, TAUHFT2(K,L,I) :',(3I4,4F10.5))    
+#endif
       END SUBROUTINE TABU_TAUHF2
 
 !/ ------------------------------------------------------------------- /
@@ -1535,7 +1621,9 @@
 !-----------------------------------------------------------------------------!
       USE CONSTANTS, ONLY: GRAV, KAPPA
       USE W3GDATMD,  ONLY: ZZWND, AALPHA
-!/T      USE W3ODATMD, ONLY: NDST
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
       IMPLICIT NONE
       REAL, intent(in) :: WINDSPEED,TAUW
       REAL, intent(out) :: USTAR, Z0, CHARN
@@ -1654,13 +1742,23 @@
                           SSDSBRFDF, SSDSBCK, IKTAB, DCKI,           &
                           SATINDICES, SATWEIGHTS, CUMULW, NKHS, NKD, &
                           NDTAB, QBI
-!/IG1      USE W3GDATMD, ONLY: IGPARS
+#ifdef W3_IG1
+      USE W3GDATMD, ONLY: IGPARS
+#endif
       USE W3ODATMD, ONLY: FLOGRD
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T      USE W3ODATMD, ONLY: NDST
-!/T0      USE W3ODATMD, ONLY: NDST
-!/T0      USE W3ARRYMD, ONLY: PRT2DS
-!/T1      USE W3ARRYMD, ONLY: OUTMAT
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
+#ifdef W3_T0
+      USE W3ODATMD, ONLY: NDST
+      USE W3ARRYMD, ONLY: PRT2DS
+#endif
+#ifdef W3_T1
+      USE W3ARRYMD, ONLY: OUTMAT
+#endif
 !
       IMPLICIT NONE
 !/
@@ -1677,7 +1775,9 @@
 !/ Local parameters
 !/
       INTEGER                 :: IS, IS2, IS0, IKL, IKC, ID, NKL
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       INTEGER                 :: IK, IK1, ITH, IK2, JTH, ITH2,             & 
                                  IKHS, IKD, SDSNTH, IT, IKM, NKM
       INTEGER                 :: NSMOOTH(NK)
@@ -1704,7 +1804,9 @@
       REAL                    :: MSSLONG(NK,NTH)
       REAL                    :: MSSPCS, MSSPC2, MSSPS2, MSSP, MSSD, MSSTH
       REAL                    :: MICHE, X, KLOC
-!/T0    REAL                    :: DOUT(NK,NTH)
+#ifdef W3_T0
+    REAL                    :: DOUT(NK,NTH)
+#endif
       REAL                    :: QB(NK), S2(NK)
       REAL                    :: TSTR, TMAX, DT, T, MFT
       REAL                    :: PB(NSPEC), PB2(NSPEC), BRM12(NK), BTOVER
@@ -1712,7 +1814,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SDS4')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SDS4')
+#endif
 !
 !
 !---------------------------------------------------------------------- 
@@ -1726,7 +1830,9 @@
       DK=0.; HS=0.; KBAR=0.; DCK=0.; EFDF=0.
       BTH0=0.; BTH=0.; BTH0S=0.; DDIAG=0.; SRHS=0.; PB=0.
       BTHS=0.; MSSSUM(:,:)=0.
-!/T0  DOUT=0.
+#ifdef W3_T0
+  DOUT=0.
+#endif
       QB=0.; S2=0.;PB=0.; PB2=0.
       BRM12(:)=0.
 !
@@ -1736,7 +1842,9 @@
       BREAKFRACTION=0.
       RENEWALFREQ=0.
       IK1=1
-!/IG1      IK1=NINT(IGPARS(5))+1
+#ifdef W3_IG1
+      IK1=NINT(IGPARS(5))+1
+#endif
       NTHSUM=MIN(FLOOR(SSDSC(10)+0.5),NTH-1)  ! number of angular bins for enhanced modulation
       IF (NTHSUM.GT.0) THEN 
         WTHSUM(1:NTHSUM)=1

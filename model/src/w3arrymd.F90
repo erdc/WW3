@@ -144,7 +144,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3SERVMD, ONLY: EXTCDE
 !
       IMPLICIT NONE
@@ -162,14 +164,20 @@
 !/ Local parameters
 !/
       INTEGER                 :: IIDFM, IIDLA, IX, IY, ISTAT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'INA2R')
+#ifdef W3_S
+      CALL STRACE (IENT, 'INA2R')
+#endif
 !
-!/T      WRITE (NDST,9000) MX, MY, LX, HX, LY, HY, NDS, NDST, NDSE, &
-!/T                        IDFM, RFORM, IDLA, VSC, VOF
+#ifdef W3_T
+      WRITE (NDST,9000) MX, MY, LX, HX, LY, HY, NDS, NDST, NDSE, &
+                        IDFM, RFORM, IDLA, VSC, VOF
+#endif
 !
       IF (IDFM.LT.1 .OR. IDFM.GT.3) THEN
           IIDFM = 1
@@ -274,7 +282,9 @@
                '     ERROR IN READING FROM FILE'/               &
                '     IOSTAT =',I5/)
 !
-!/T 9000 FORMAT (' TEST INA2R  : INPUT :'/6X,8I4,2I3,1X,A,I3,2E12.4)
+#ifdef W3_T
+ 9000 FORMAT (' TEST INA2R  : INPUT :'/6X,8I4,2I3,1X,A,I3,2E12.4)
+#endif
 !/
 !/ End of INA2R  ----------------------------------------------------- /
 !/
@@ -305,7 +315,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3SERVMD, ONLY: EXTCDE
 !
       IMPLICIT NONE
@@ -322,14 +334,20 @@
 !/ Local parameters
 !/
       INTEGER                 :: IIDFM, IIDLA, IX, IY, ISTAT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'INA2I')
+#ifdef W3_S
+      CALL STRACE (IENT, 'INA2I')
+#endif
 !
-!/T      WRITE (NDST,9000) MX, MY, LX, HX, LY, HY, NDS, NDST, NDSE, &
-!/T                        IDFM, RFORM, IDLA, VSC, VOF
+#ifdef W3_T
+      WRITE (NDST,9000) MX, MY, LX, HX, LY, HY, NDS, NDST, NDSE, &
+                        IDFM, RFORM, IDLA, VSC, VOF
+#endif
 !
       IF (IDFM.LT.1 .OR. IDFM.GT.3) THEN
           IIDFM = 1
@@ -434,7 +452,9 @@
                '     ERROR IN READING FROM FILE'/               &
                '     IOSTAT =',I5/)
 !
-!/T 9000 FORMAT (' TEST INA2I  : INPUT :'/6X,8I4,2I3,1X,A,I3,2I5)
+#ifdef W3_T
+ 9000 FORMAT (' TEST INA2I  : INPUT :'/6X,8I4,2I3,1X,A,I3,2I5)
+#endif
 !/
 !/ End of INA2I  ----------------------------------------------------- /
 !/
@@ -471,7 +491,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3SERVMD, ONLY: EXTCDE
 !
       IMPLICIT NONE
@@ -488,14 +510,20 @@
 !/ Local parameters
 !/
       INTEGER                 :: IIDFM, IIDLA, IX, IY, ISTAT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'OUTA2R')
+#ifdef W3_S
+      CALL STRACE (IENT, 'OUTA2R')
+#endif
 !
-!/T      WRITE (NDST,9000) MX, MY, LX, HX, LY, HY, NDS, NDST, NDSE, &
-!/T                        IDFM, RFORM, IDLA, VSC, VOF
+#ifdef W3_T
+      WRITE (NDST,9000) MX, MY, LX, HX, LY, HY, NDS, NDST, NDSE, &
+                        IDFM, RFORM, IDLA, VSC, VOF
+#endif
 !
       IF (IDFM.LT.1 .OR. IDFM.GT.3) THEN
           IIDFM = 1
@@ -586,7 +614,9 @@
                '     ERROR IN WRITING TO FILE'/                 &
                '     IOSTAT =',I5/)
 !
-!/T 9000 FORMAT (' TEST OUTA2R : INPUT :'/6X,8I4,2I3,1X,A,I3,2E12.4)
+#ifdef W3_T
+ 9000 FORMAT (' TEST OUTA2R : INPUT :'/6X,8I4,2I3,1X,A,I3,2E12.4)
+#endif
 !/
 !/ End of OUTA2R ----------------------------------------------------- /
 !/
@@ -616,7 +646,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3SERVMD, ONLY: EXTCDE
 !
       IMPLICIT NONE
@@ -633,14 +665,20 @@
 !/ Local parameters
 !/
       INTEGER                 :: IIDFM, IIDLA, IX, IY, ISTAT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'OUTA2I')
+#ifdef W3_S
+      CALL STRACE (IENT, 'OUTA2I')
+#endif
 !
-!/T      WRITE (NDST,9000) MX, MY, LX, HX, LY, HY, NDS, NDST, NDSE, &
-!/T                        IDFM, RFORM, IDLA, VSC, VOF
+#ifdef W3_T
+      WRITE (NDST,9000) MX, MY, LX, HX, LY, HY, NDS, NDST, NDSE, &
+                        IDFM, RFORM, IDLA, VSC, VOF
+#endif
 !
       IF (IDFM.LT.1 .OR. IDFM.GT.3) THEN
           IIDFM = 1
@@ -731,7 +769,9 @@
                '     ERROR IN WRITING TO FILE'/                 &
                '     IOSTAT =',I5/)
 !
-!/T 9000 FORMAT (' TEST OUTA2I : INPUT :'/6X,8I4,2I3,1X,A,I3,2I5)
+#ifdef W3_T
+ 9000 FORMAT (' TEST OUTA2I : INPUT :'/6X,8I4,2I3,1X,A,I3,2I5)
+#endif
 !/
 !/ End of OUTA2I ----------------------------------------------------- /
 !/
@@ -757,7 +797,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -772,11 +814,15 @@
 !/ Local parameters
 !/
       INTEGER                 :: I, K
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'OUTREA')
+#ifdef W3_S
+      CALL STRACE (IENT, 'OUTREA')
+#endif
 !
       WRITE (NDS,8000) ANAME
 !
@@ -865,7 +911,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -879,11 +927,15 @@
 !/ Local parameters
 !/
       INTEGER                 :: I, K
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'OUTINT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'OUTINT')
+#endif
 !
       WRITE (NDS,8000) ANAME
 !
@@ -975,7 +1027,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -990,11 +1044,15 @@
 !/ Local parameters
 !/
       INTEGER                 :: LBLOK, NBLOK, IBLOK, IX, IX1, IX2, IY
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'OUTMAT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'OUTMAT')
+#endif
 !
       WRITE(NDS,8000) MNAME
 !
@@ -1117,7 +1175,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -1133,7 +1193,9 @@
 !/ Local parameters
 !/
       INTEGER                 :: IX, IY, JJ, JM, K1, LX, I
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: FMAX, RR
       LOGICAL                 :: FLSCLE
       CHARACTER               :: PNUM*5, STRA*5, PNUM2*2, STRA3*3
@@ -1141,7 +1203,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'PRTBLK')
+#ifdef W3_S
+      CALL STRACE (IENT, 'PRTBLK')
+#endif
 !
 ! Check scaling
 !
@@ -1370,7 +1434,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -1386,7 +1452,9 @@
 !/ Local parameters
 !/
       INTEGER                 :: NFRB, IFR, IL, IL0
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL, SAVE              :: TOPFAC = 1.1
       REAL                    :: FTOP, RLINES, FACFR, FSC, FLINE,    &
                                  EMAX, EMIN, EXTR, FLOC
@@ -1396,7 +1464,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'PRT1DS')
+#ifdef W3_S
+      CALL STRACE (IENT, 'PRT1DS')
+#endif
 !
       FTOP   = FTOPI
 !
@@ -1626,7 +1696,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -1645,7 +1717,9 @@
       INTEGER, PARAMETER      :: NFRMAX = 100
       INTEGER, PARAMETER      :: NFM2   = NFRMAX+1
       INTEGER                 :: NFRB, IFR, IE, IL
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL, SAVE              :: TOPFAC = 1.1
       REAL                    :: FTOP, RLINES, FACFR, FSC, FLINE,    &
                                  EMAX, EMIN, EXTR, FLOC
@@ -1655,35 +1729,39 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'PRT1DM')
+#ifdef W3_S
+      CALL STRACE (IENT, 'PRT1DM')
+#endif
 !
 ! Test output, echo input
 !
-!/T      WRITE (*,*)
-!/T      WRITE (*,*) 'TEST OUTPUT PRT1DM, ECHO OF INPUT'
-!/T      WRITE (*,*) '=======================================',    &
-!/T                  '======================================='
-!/T      WRITE (*,*) 'File unit number      : ', NDS
-!/T      WRITE (*,*) 'Number of frequencies : ', NFR
-!/T      WRITE (*,*) 'Number of spectra     : ', NE
-!/T      DO IE=1, NE
-!/T        WRITE (*,*) 'Spectral densities spectrum ', IE
-!/T        WRITE (*,'(6X,8E9.2)') (E(IFR,IE),IFR=1,NFR)
-!/T        END DO
-!/T      WRITE (*,*) 'Frequencies'
-!/T      WRITE (*,'(6X,8E9.2)') (FR(IFR),IFR=1,NFR)
-!/T      WRITE (*,*) 'Frequency type        : ', UFR
-!/T      WRITE (*,*) 'NLINES                : ', NLINES
-!/T      WRITE (*,*) 'FTOPI                 : ', FTOPI
-!/T      WRITE (*,*) 'Names of spectra      : ', PRVAR(1)
-!/T      DO IE=2, NE
-!/T        WRITE (*,*) '                        ', PRVAR(IE)
-!/T        END DO
-!/T      WRITE (*,*) 'Units of spectra      : ', PRUNIT
-!/T      WRITE (*,*) 'Name of location      : ', PNTNME
-!/T      WRITE (*,*) '=======================================',    &
-!/T                  '======================================='
-!/T      WRITE (*,*)
+#ifdef W3_T
+      WRITE (*,*)
+      WRITE (*,*) 'TEST OUTPUT PRT1DM, ECHO OF INPUT'
+      WRITE (*,*) '=======================================',    &
+                  '======================================='
+      WRITE (*,*) 'File unit number      : ', NDS
+      WRITE (*,*) 'Number of frequencies : ', NFR
+      WRITE (*,*) 'Number of spectra     : ', NE
+      DO IE=1, NE
+        WRITE (*,*) 'Spectral densities spectrum ', IE
+        WRITE (*,'(6X,8E9.2)') (E(IFR,IE),IFR=1,NFR)
+        END DO
+      WRITE (*,*) 'Frequencies'
+      WRITE (*,'(6X,8E9.2)') (FR(IFR),IFR=1,NFR)
+      WRITE (*,*) 'Frequency type        : ', UFR
+      WRITE (*,*) 'NLINES                : ', NLINES
+      WRITE (*,*) 'FTOPI                 : ', FTOPI
+      WRITE (*,*) 'Names of spectra      : ', PRVAR(1)
+      DO IE=2, NE
+        WRITE (*,*) '                        ', PRVAR(IE)
+        END DO
+      WRITE (*,*) 'Units of spectra      : ', PRUNIT
+      WRITE (*,*) 'Name of location      : ', PNTNME
+      WRITE (*,*) '=======================================',    &
+                  '======================================='
+      WRITE (*,*)
+#endif
 !
       FTOP   = FTOPI
       NFRB   = MIN (NFR,50)
@@ -1941,7 +2019,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -1957,7 +2037,9 @@
 !/ Local parameters
 !/
       INTEGER                 :: IFR, ITH, NFRB, INTANG, ITHSEC
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       LOGICAL                 :: FLSCLE
       REAL                    :: FACFR, EMAX, EMIN, DTHDEG, RR, RRC
       CHARACTER               :: PNUM*5, STRA*5, STRANG*5, PNUM2*2,  &
@@ -1966,10 +2048,14 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'PRT2DS')
+#ifdef W3_S
+      CALL STRACE (IENT, 'PRT2DS')
+#endif
 !
-!/T      WRITE (NDS,9000) NDS, NFR0, NFR, NTH, UFR, FACSP, FSC,    &
-!/T                       RRCUT, PRVAR, PRUNIT, PNTNME
+#ifdef W3_T
+      WRITE (NDS,9000) NDS, NFR0, NFR, NTH, UFR, FACSP, FSC,    &
+                       RRCUT, PRVAR, PRUNIT, PNTNME
+#endif
 !
 ! initialisations
 !
@@ -2181,17 +2267,19 @@
 !
   950 FORMAT (' ')
 !
-!/T 9000 FORMAT ( ' TEST PRT2DS : ECHO OF INPUT PARAMETERS'/       &
-!/T               '               NDS       :',I6/                 &
-!/T               '               NFR0, NFR :',2I6/                &
-!/T               '               NTH       :',I6/                 &
-!/T               '               UFR       : ',A/                 &
-!/T               '               FACSP     :',E10.3/              &
-!/T               '               FSC       :',E10.3/              &
-!/T               '               RRCUT     :',E10.3/              &
-!/T               '               PRVAR     : ',A/                 &
-!/T               '               PRUNIT    : ',A/                 &
-!/T               '               PNTNME    : ',A)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST PRT2DS : ECHO OF INPUT PARAMETERS'/       &
+               '               NDS       :',I6/                 &
+               '               NFR0, NFR :',2I6/                &
+               '               NTH       :',I6/                 &
+               '               UFR       : ',A/                 &
+               '               FACSP     :',E10.3/              &
+               '               FSC       :',E10.3/              &
+               '               RRCUT     :',E10.3/              &
+               '               PRVAR     : ',A/                 &
+               '               PRUNIT    : ',A/                 &
+               '               PNTNME    : ',A)
+#endif
 !/
 !/ Internal subroutine ANGSTR ---------------------------------------- /
 !/
@@ -2220,7 +2308,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/

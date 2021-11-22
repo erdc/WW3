@@ -115,7 +115,9 @@
                             EC2, ES2, ESC, ESIN, ECOS
       USE CONSTANTS,  ONLY: TPI, TPIINV
       USE W3SERVMD, ONLY: DIAGONALIZE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -126,11 +128,15 @@
       REAL                    :: SIS1HTABLE(20), SIS1FTABLE(25)
       REAL                    :: SIS1ALPHATABLE(NTHICK,25), X
       REAL                    :: SIS1ALPHATABLE2(NTHICK,25)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'SIS2ALPHATAB')
+#ifdef W3_S
+      CALL STRACE (IENT, 'SIS2ALPHATAB')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Fills array of reflection as a function of frequency and ice thickness 
@@ -669,9 +675,15 @@ ELSE
       USE W3SERVMD, ONLY: EXTCDE
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, SIG2, DDEN, IS2PARS, XFR, &
                           IICEHMIN,IICESMOOTH
-!/T      USE W3ODATMD, ONLY: NDST
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T      USE W3ARRYMD, ONLY: PRT2DS
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T
+      USE W3ARRYMD, ONLY: PRT2DS
+#endif
       USE W3DISPMD 
 !
       IMPLICIT NONE
@@ -688,7 +700,9 @@ ELSE
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       INTEGER                 :: IK, IKP1, IKM1, ITH, ITH2, IS, IS2, IND1, IND2
       REAL                    :: W
       INTEGER                 :: IKBREAK, NSUM
@@ -705,11 +719,15 @@ ELSE
       REAL                    :: GAMMA_TOY 
       REAL, DIMENSION(NK)        :: WN_I, WN_RP, WSQ, WLG, WLG_I, CG_I,   &
                                     CURV, CGRATIO, CG_EFF, DUMMY, ALPHA_DISP
-!/T      REAL                    :: SOUT(NK,NTH)
+#ifdef W3_T
+      REAL                    :: SOUT(NK,NTH)
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SIS1')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SIS1')
+#endif
 !
 ! 0.  Initializations ------------------------------------------------ *
 !
@@ -769,7 +787,9 @@ ELSE
           ENDIF
         ENDIF
 !
-!/T      SOUT  = 0.
+#ifdef W3_T
+      SOUT  = 0.
+#endif
 !
       IF (CICE .GT. 0) THEN
 !
@@ -978,15 +998,19 @@ ELSE
         ICEF = 0. 
         END IF   ! end of test  (CICE .GT. 0 .AND. ICEDAVE .GT. 0)  
 !
-!/T         DO IK = 1, NK
-!/T           DO ITH = 1, NTH
-!/T              IS  = ITH+(IK-1)*NTH
-!/T              SOUT(IK,ITH) = S(IS)
-!/T           END DO
-!/T         END DO
+#ifdef W3_T
+         DO IK = 1, NK
+           DO ITH = 1, NTH
+              IS  = ITH+(IK-1)*NTH
+              SOUT(IK,ITH) = S(IS)
+           END DO
+         END DO
+#endif
 !
-!/T            CALL PRT2DS (NDST, NK, NK, NTH, SOUT, SIG(1:NK), '  ', 1.,    &
-!/T                               0.0, 0.001, 'Diag Sir1', ' ', 'NONAME')
+#ifdef W3_T
+            CALL PRT2DS (NDST, NK, NK, NTH, SOUT, SIG(1:NK), '  ', 1.,    &
+                               0.0, 0.001, 'Diag Sir1', ' ', 'NONAME')
+#endif
 !
 ! Formats
       8000 FORMAT (' TEST W3SIS2 : ALPHA :',E10.3)

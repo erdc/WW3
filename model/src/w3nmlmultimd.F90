@@ -139,11 +139,13 @@
     LOGICAL                     :: FORMAT
   END TYPE NML_PARTITION_T
 !
-!/COU  TYPE NML_COUPLING_T
-!/COU    CHARACTER(1024)             :: SENT
-!/COU    CHARACTER(1024)             :: RECEIVED
-!/COU    LOGICAL                     :: COUPLET0
-!/COU  END TYPE NML_COUPLING_T
+#ifdef W3_COU
+  TYPE NML_COUPLING_T
+    CHARACTER(1024)             :: SENT
+    CHARACTER(1024)             :: RECEIVED
+    LOGICAL                     :: COUPLET0
+  END TYPE NML_COUPLING_T
+#endif
 !
   TYPE NML_RESTART_T
     CHARACTER(1024)             :: EXTRA
@@ -154,7 +156,9 @@
     TYPE(NML_FIELD_T)           :: FIELD
     TYPE(NML_TRACK_T)           :: TRACK
     TYPE(NML_PARTITION_T)       :: PARTITION
-!/COU    TYPE(NML_COUPLING_T)       :: COUPLING
+#ifdef W3_COU
+    TYPE(NML_COUPLING_T)       :: COUPLING
+#endif
     TYPE(NML_RESTART_T)         :: RESTART
   END TYPE NML_OUTPUT_TYPE_T
 
@@ -177,7 +181,9 @@
     TYPE(NML_OUTPUT_TIME_T)     :: RESTART2
     TYPE(NML_OUTPUT_TIME_T)     :: BOUNDARY
     TYPE(NML_OUTPUT_TIME_T)     :: PARTITION
-!/COU    TYPE(NML_OUTPUT_TIME_T)     :: COUPLING
+#ifdef W3_COU
+    TYPE(NML_OUTPUT_TIME_T)     :: COUPLING
+#endif
   END TYPE NML_OUTPUT_DATE_T
 
 
@@ -271,8 +277,12 @@
 !
 !/ ------------------------------------------------------------------- /
     USE WMMDATMD, ONLY: MDSE, IMPROC, NMPLOG
-!/MPI      USE WMMDATMD, ONLY: MPI_COMM_MWAVE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_MPI
+      USE WMMDATMD, ONLY: MPI_COMM_MWAVE
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -282,15 +292,23 @@
     INTEGER, INTENT(OUT)                      :: IERR
 
     ! locals
-!/MPI      INTEGER                                 :: IERR_MPI
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                                 :: IERR_MPI
+#endif
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'W3NMLMULTIDEF')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3NMLMULTIDEF')
+#endif
 
-!/MPI      MPI_COMM_MWAVE = MPI_COMM
-!/MPI      CALL MPI_COMM_RANK ( MPI_COMM_MWAVE, IMPROC, IERR_MPI )
-!/MPI      IMPROC = IMPROC + 1
+#ifdef W3_MPI
+      MPI_COMM_MWAVE = MPI_COMM
+      CALL MPI_COMM_RANK ( MPI_COMM_MWAVE, IMPROC, IERR_MPI )
+      IMPROC = IMPROC + 1
+#endif
 
     ! open namelist log file
     IF ( NMPLOG .EQ. IMPROC ) THEN
@@ -412,8 +430,12 @@
 !/ ------------------------------------------------------------------- /
 
     USE WMMDATMD, ONLY: MDSE, IMPROC, NMPLOG
-!/MPI      USE WMMDATMD, ONLY: MPI_COMM_MWAVE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_MPI
+      USE WMMDATMD, ONLY: MPI_COMM_MWAVE
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -429,15 +451,23 @@
     INTEGER, INTENT(OUT)                      :: IERR
 
     ! locals
-!/MPI      INTEGER                                 :: IERR_MPI
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                                 :: IERR_MPI
+#endif
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'W3NMLMULTICONF')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3NMLMULTICONF')
+#endif
 
-!/MPI      MPI_COMM_MWAVE = MPI_COMM
-!/MPI      CALL MPI_COMM_RANK ( MPI_COMM_MWAVE, IMPROC, IERR_MPI )
-!/MPI      IMPROC = IMPROC + 1
+#ifdef W3_MPI
+      MPI_COMM_MWAVE = MPI_COMM
+      CALL MPI_COMM_RANK ( MPI_COMM_MWAVE, IMPROC, IERR_MPI )
+      IMPROC = IMPROC + 1
+#endif
 
     ! open namelist log file
     IF ( NMPLOG .EQ. IMPROC ) THEN
@@ -554,7 +584,9 @@
 
     USE WMMDATMD, ONLY: MDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -565,10 +597,14 @@
     INTEGER                   :: IERR
     TYPE(NML_DOMAIN_T) :: DOMAIN
     NAMELIST /DOMAIN_NML/ DOMAIN
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_DOMAIN_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_DOMAIN_NML')
+#endif
 
     ! set default values for model definition data
     DOMAIN%NRINP  = 0
@@ -683,7 +719,9 @@
 
     USE WMMDATMD, ONLY: MDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -695,10 +733,14 @@
     INTEGER, PARAMETER :: MAX_NRINP = 99
     TYPE(NML_INPUT_GRID_T) :: INPUT(MAX_NRINP)
     NAMELIST /INPUT_GRID_NML/ INPUT
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_INPUT_GRID_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_INPUT_GRID_NML')
+#endif
 
     ! test NRINP
     IF (NRINP.GT.MAX_NRINP) THEN
@@ -833,7 +875,9 @@
 
     USE WMMDATMD, ONLY: MDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -845,10 +889,14 @@
     INTEGER, PARAMETER :: MAX_NRGRD = 99
     TYPE(NML_MODEL_GRID_T) :: MODEL(MAX_NRGRD)
     NAMELIST /MODEL_GRID_NML/ MODEL
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_MODEL_GRID_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_MODEL_GRID_NML')
+#endif
 
     ! test NRGRD
     IF (NRGRD.GT.MAX_NRGRD) THEN
@@ -987,7 +1035,9 @@
 
     USE WMMDATMD, ONLY: MDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -1000,10 +1050,14 @@
     TYPE(NML_OUTPUT_TYPE_T)   :: ALLTYPE
     TYPE(NML_OUTPUT_TYPE_T)   :: ITYPE(MAX_NRGRD)
     NAMELIST /OUTPUT_TYPE_NML/ ALLTYPE, ITYPE
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_OUTPUT_TYPE_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_OUTPUT_TYPE_NML')
+#endif
 
     ! if no model grids, then exit
     IF (NRGRD.EQ.0) RETURN
@@ -1021,9 +1075,11 @@
       ITYPE(I)%PARTITION%YN = 0
       ITYPE(I)%PARTITION%NY = 0
       ITYPE(I)%PARTITION%FORMAT = .TRUE.
-!/COU      ITYPE(I)%COUPLING%SENT      = 'unset'
-!/COU      ITYPE(I)%COUPLING%RECEIVED  = 'unset'
-!/COU      ITYPE(I)%COUPLING%COUPLET0  = .FALSE.
+#ifdef W3_COU
+      ITYPE(I)%COUPLING%SENT      = 'unset'
+      ITYPE(I)%COUPLING%RECEIVED  = 'unset'
+      ITYPE(I)%COUPLING%COUPLET0  = .FALSE.
+#endif
       ITYPE(I)%RESTART%EXTRA = 'unset'
     END DO
     ALLTYPE%FIELD%LIST   = 'unset'
@@ -1037,9 +1093,11 @@
     ALLTYPE%PARTITION%YN = 0
     ALLTYPE%PARTITION%NY = 0
     ALLTYPE%PARTITION%FORMAT = .TRUE.
-!/COU    ALLTYPE%COUPLING%SENT      = 'unset'
-!/COU    ALLTYPE%COUPLING%RECEIVED  = 'unset'
-!/COU    ALLTYPE%COUPLING%COUPLET0  = .FALSE.
+#ifdef W3_COU
+    ALLTYPE%COUPLING%SENT      = 'unset'
+    ALLTYPE%COUPLING%RECEIVED  = 'unset'
+    ALLTYPE%COUPLING%COUPLET0  = .FALSE.
+#endif
     ALLTYPE%RESTART%EXTRA = 'unset'
 
 
@@ -1145,7 +1203,9 @@
 
     USE WMMDATMD, ONLY: MDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -1158,10 +1218,14 @@
     TYPE(NML_OUTPUT_DATE_T)   :: ALLDATE
     TYPE(NML_OUTPUT_DATE_T)   :: IDATE(MAX_NRGRD)
     NAMELIST /OUTPUT_DATE_NML/ ALLDATE, IDATE
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_OUTPUT_DATE_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_OUTPUT_DATE_NML')
+#endif
 
     ! if no model grids, then exit
     IF (NRGRD.EQ.0) RETURN
@@ -1191,9 +1255,11 @@
       IDATE(I)%PARTITION%START = '19680606 000000'
       IDATE(I)%PARTITION%STRIDE = '0'
       IDATE(I)%PARTITION%STOP = '19680607 000000'
-!/COU      IDATE(I)%COUPLING%START = '19680606 000000'
-!/COU      IDATE(I)%COUPLING%STRIDE = '0'
-!/COU      IDATE(I)%COUPLING%STOP = '19680607 000000'
+#ifdef W3_COU
+      IDATE(I)%COUPLING%START = '19680606 000000'
+      IDATE(I)%COUPLING%STRIDE = '0'
+      IDATE(I)%COUPLING%STOP = '19680607 000000'
+#endif
     END DO
     ALLDATE%FIELD%START = '19680606 000000'
     ALLDATE%FIELD%STRIDE = '0'
@@ -1218,9 +1284,11 @@
     ALLDATE%PARTITION%START = '19680606 000000'
     ALLDATE%PARTITION%STRIDE = '0'
     ALLDATE%PARTITION%STOP = '19680607 000000'
-!/COU    ALLDATE%COUPLING%START = '19680606 000000'
-!/COU    ALLDATE%COUPLING%STRIDE = '0'
-!/COU    ALLDATE%COUPLING%STOP = '19680607 000000'
+#ifdef W3_COU
+    ALLDATE%COUPLING%START = '19680606 000000'
+    ALLDATE%COUPLING%STRIDE = '0'
+    ALLDATE%COUPLING%STOP = '19680607 000000'
+#endif
 
 
     ! read OUTPUT_DATE namelist
@@ -1325,7 +1393,9 @@
 
     USE WMMDATMD, ONLY: MDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -1339,10 +1409,14 @@
     NAMELIST /HOMOG_COUNT_NML/  HOMOG_COUNT
     TYPE(NML_HOMOG_INPUT_T), ALLOCATABLE   :: HOMOG_INPUT(:)
     NAMELIST /HOMOG_INPUT_NML/   HOMOG_INPUT
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_HOMOGENEOUS_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_HOMOGENEOUS_NML')
+#endif
 
 
     ! set default values for homogeneous number structure
@@ -1463,14 +1537,20 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
     TYPE(NML_DOMAIN_T), INTENT(IN) :: NML_DOMAIN
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_DOMAIN_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_DOMAIN_NML')
+#endif
 
       WRITE (MSG,'(A)') 'DOMAIN % '
       WRITE (NDSN,'(A)')
@@ -1560,7 +1640,9 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -1569,9 +1651,13 @@
 
     ! locals
     INTEGER              :: I
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_INPUT_GRID_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_INPUT_GRID_NML')
+#endif
 
     DO I = 1,NRINP
       WRITE (MSG,'(A,I0.2,A)') 'INPUT GRID ',I,' % '
@@ -1673,7 +1759,9 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -1682,9 +1770,13 @@
 
     ! locals
     INTEGER              :: I
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_MODEL_GRID_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_MODEL_GRID_NML')
+#endif
 
     DO I = 1,NRGRD
       WRITE (MSG,'(A,I0.4,A)') 'MODEL GRID ',I,' % '
@@ -1793,7 +1885,9 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -1802,9 +1896,13 @@
 
     ! locals
     INTEGER              :: I
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_OUTPUT_TYPE_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_OUTPUT_TYPE_NML')
+#endif
 
     DO I=1,NRGRD
       WRITE (MSG,'(A,I1,A)') 'OUTPUT TYPE MODEL GRID',I, ' % '
@@ -1820,9 +1918,11 @@
       WRITE (NDSN,11) TRIM(MSG),'PARTITION % YN       = ', NML_OUTPUT_TYPE(I)%PARTITION%YN
       WRITE (NDSN,11) TRIM(MSG),'PARTITION % NY       = ', NML_OUTPUT_TYPE(I)%PARTITION%NY
       WRITE (NDSN,13) TRIM(MSG),'PARTITION % FORMAT   = ', NML_OUTPUT_TYPE(I)%PARTITION%FORMAT
-!/COU      WRITE (NDSN,10) TRIM(MSG),'COUPLING % SENT         = ', TRIM(NML_OUTPUT_TYPE(I)%COUPLING%SENT)
-!/COU      WRITE (NDSN,10) TRIM(MSG),'COUPLING % RECEIVED     = ', TRIM(NML_OUTPUT_TYPE(I)%COUPLING%RECEIVED)
-!/COU      WRITE (NDSN,13) TRIM(MSG),'COUPLING % COUPLET0     = ', NML_OUTPUT_TYPE(I)%COUPLING%COUPLET0
+#ifdef W3_COU
+      WRITE (NDSN,10) TRIM(MSG),'COUPLING % SENT         = ', TRIM(NML_OUTPUT_TYPE(I)%COUPLING%SENT)
+      WRITE (NDSN,10) TRIM(MSG),'COUPLING % RECEIVED     = ', TRIM(NML_OUTPUT_TYPE(I)%COUPLING%RECEIVED)
+      WRITE (NDSN,13) TRIM(MSG),'COUPLING % COUPLET0     = ', NML_OUTPUT_TYPE(I)%COUPLING%COUPLET0
+#endif
       WRITE (NDSN,10) TRIM(MSG),'RESTART % EXTRA      = ', TRIM(NML_OUTPUT_TYPE(I)%RESTART%EXTRA)
     END DO
     WRITE (NDSN,'(A)')
@@ -1901,7 +2001,9 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -1910,9 +2012,13 @@
 
     ! locals
     INTEGER              :: I
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_OUTPUT_DATE_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_OUTPUT_DATE_NML')
+#endif
 
     DO I=1,NRGRD
       WRITE (MSG,'(A,I1,A)') 'OUTPUT DATE MODEL GRID',I, ' % '
@@ -1938,9 +2044,11 @@
       WRITE (NDSN,10) TRIM(MSG),'PARTITION % START    = ', TRIM(NML_OUTPUT_DATE(I)%PARTITION%START)
       WRITE (NDSN,10) TRIM(MSG),'PARTITION % STRIDE   = ', TRIM(NML_OUTPUT_DATE(I)%PARTITION%STRIDE)
       WRITE (NDSN,10) TRIM(MSG),'PARTITION % STOP     = ', TRIM(NML_OUTPUT_DATE(I)%PARTITION%STOP)
-!/COU      WRITE (NDSN,10) TRIM(MSG),'COUPLING % START    = ', TRIM(NML_OUTPUT_DATE(I)%COUPLING%START)
-!/COU      WRITE (NDSN,10) TRIM(MSG),'COUPLING % STRIDE   = ', TRIM(NML_OUTPUT_DATE(I)%COUPLING%STRIDE)
-!/COU      WRITE (NDSN,10) TRIM(MSG),'COUPLING % STOP     = ', TRIM(NML_OUTPUT_DATE(I)%COUPLING%STOP)
+#ifdef W3_COU
+      WRITE (NDSN,10) TRIM(MSG),'COUPLING % START    = ', TRIM(NML_OUTPUT_DATE(I)%COUPLING%START)
+      WRITE (NDSN,10) TRIM(MSG),'COUPLING % STRIDE   = ', TRIM(NML_OUTPUT_DATE(I)%COUPLING%STRIDE)
+      WRITE (NDSN,10) TRIM(MSG),'COUPLING % STOP     = ', TRIM(NML_OUTPUT_DATE(I)%COUPLING%STOP)
+#endif
     END DO
     WRITE (NDSN,'(A)')
 
@@ -2016,7 +2124,9 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -2025,9 +2135,13 @@
 
     ! locals
     INTEGER              :: I
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_HOMOGENEOUS_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_HOMOGENEOUS_NML')
+#endif
 
     WRITE (MSG,'(A)') 'HOMOG_COUNT % '
     WRITE (NDSN,'(A)')

@@ -215,14 +215,18 @@
                           ICLOSE,ICLOSE_NONE,ICLOSE_SMPL,ICLOSE_TRPL, &
                           MAPSTA, MAPFS, FILEXT, ZB, TRNX, TRNY
       USE W3GDATMD, ONLY: XYB, TRIGP,MAXX, MAXY, DXYMAX
-!/RTD  !!  Use rotated N-Pole lat/lon and conversion sub.  JGLi12Jun2012
-!/RTD      USE W3GDATMD, ONLY: PoLat, PoLon, FLAGUNR
-!/RTD      USE W3SERVMD, ONLY: W3LLTOEQ
+#ifdef W3_RTD
+  !!  Use rotated N-Pole lat/lon and conversion sub.  JGLi12Jun2012
+      USE W3GDATMD, ONLY: PoLat, PoLon, FLAGUNR
+      USE W3SERVMD, ONLY: W3LLTOEQ
+#endif
       USE W3ODATMD, ONLY: W3DMO2
       USE W3ODATMD, ONLY: NDSE, NDST, IAPROC, NAPERR, NAPOUT, SCREEN, &
                           NOPTS, PTLOC, PTNME, GRDID, IPTINT, PTIFAC
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3TRIAMD
 !
       IMPLICIT NONE
@@ -240,29 +244,43 @@
       LOGICAL                 :: INGRID
       INTEGER                 :: IPT, J, K
       INTEGER                 :: IX1, IY1, IXS, IYS
-!/S      INTEGER, SAVE           :: IENT = 0
-!/O7a      INTEGER                 :: IX0, IXN, IY0, IYN, NNX,         &
-!/O7a                                 KX, KY, JX, IIX, IX2, IY2, IS1
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_O7a
+      INTEGER                 :: IX0, IXN, IY0, IYN, NNX,         &
+                                 KX, KY, JX, IIX, IX2, IY2, IS1
+#endif
       INTEGER                 :: IX(4), IY(4)   ! Indices of points used in interp.
       REAL                    :: RD(4)          ! Interpolation coefficient
-!/O7a      REAL                    :: RD1, RD2, RDTOT, ZBOX(4), DEPTH
+#ifdef W3_O7a
+      REAL                    :: RD1, RD2, RDTOT, ZBOX(4), DEPTH
+#endif
       REAL, PARAMETER         :: ACC = 0.05
       REAL                    :: FACTOR
       INTEGER                 :: ITOUT          ! Triangle index in unstructured grids
-!/O7a       CHARACTER(LEN=1)         :: SEA(5), LND(5), OUT(5)
-!/O7a       CHARACTER(LEN=9)         :: PARTS
-!/O7a       CHARACTER(LEN=1), ALLOCATABLE :: STRING(:), LINE1(:), LINE2(:)
+#ifdef W3_O7a
+       CHARACTER(LEN=1)         :: SEA(5), LND(5), OUT(5)
+       CHARACTER(LEN=9)         :: PARTS
+       CHARACTER(LEN=1), ALLOCATABLE :: STRING(:), LINE1(:), LINE2(:)
+#endif
 !
-!/O7a       DATA SEA / ' ', 's', 'e', 'a', ' ' /
-!/O7a       DATA LND / ' ', 'l', 'n', 'd', ' ' /
-!/O7a       DATA OUT / ' ', 'x', 'x', 'x', ' ' /
+#ifdef W3_O7a
+       DATA SEA / ' ', 's', 'e', 'a', ' ' /
+       DATA LND / ' ', 'l', 'n', 'd', ' ' /
+       DATA OUT / ' ', 'x', 'x', 'x', ' ' /
+#endif
 !/
-!/RTD  !!  Declare a few temporary variables for rotated grid.  JGLi12Jun2012
-!/RTD       REAL, ALLOCATABLE :: EquLon(:),EquLat(:),StdLon(:),StdLat(:),AnglPT(:)
+#ifdef W3_RTD
+  !!  Declare a few temporary variables for rotated grid.  JGLi12Jun2012
+       REAL, ALLOCATABLE :: EquLon(:),EquLat(:),StdLon(:),StdLat(:),AnglPT(:)
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3IOPP')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3IOPP')
+#endif
 !
       IF ( FLAGLL ) THEN
           FACTOR = 1.
@@ -275,19 +293,21 @@
 !
       NOPTS  = 0
 !
-!/RTD !!   Convert standard lon/lat to rotated lon/lat  JGLi12Jun2012
-!/RTD       ALLOCATE( EquLon(NPT), EquLat(NPT),                 &
-!/RTD      &          StdLon(NPT), StdLat(NPT), AnglPT(NPT) )
-!/RTD
-!/RTD       StdLon = XPT
-!/RTD       StdLat = YPT
-!/RTD
-!/RTD       CALL W3LLTOEQ ( StdLat, StdLon, EquLat, EquLon,     &
-!/RTD      &                AnglPT, PoLat, PoLon, NPT )
-!/RTD
-!/RTD       XPT = EquLon
-!/RTD       YPT = EquLat
-!/RTD
+#ifdef W3_RTD
+ !!   Convert standard lon/lat to rotated lon/lat  JGLi12Jun2012
+       ALLOCATE( EquLon(NPT), EquLat(NPT),                 &
+      &          StdLon(NPT), StdLat(NPT), AnglPT(NPT) )
+
+       StdLon = XPT
+       StdLat = YPT
+
+       CALL W3LLTOEQ ( StdLat, StdLon, EquLat, EquLon,     &
+      &                AnglPT, PoLat, PoLon, NPT )
+
+       XPT = EquLon
+       YPT = EquLat
+
+#endif
 !
 !   Removed by F.A. 2011/04/04  /T      CALL W3GSUP( GSU, NDST )
 !
@@ -295,11 +315,15 @@
 !
       DO IPT=1, NPT
 !
-!/T        WRITE (NDST,9010) IPT, XPT(IPT), YPT(IPT), PNAMES(IPT)
+#ifdef W3_T
+        WRITE (NDST,9010) IPT, XPT(IPT), YPT(IPT), PNAMES(IPT)
+#endif
 !
-!/RTD !!   Need to wrap rotated Elon values greater than X0.  JGLi12Jun2012
-!/RTD          XPT(IPT) = MOD( EquLon(IPT)+360.0, 360.0 )
-!/RTD          IF( XPT(IPT) .LT. X0 )  XPT(IPT) = XPT(IPT) + 360.0
+#ifdef W3_RTD
+ !!   Need to wrap rotated Elon values greater than X0.  JGLi12Jun2012
+          XPT(IPT) = MOD( EquLon(IPT)+360.0, 360.0 )
+          IF( XPT(IPT) .LT. X0 )  XPT(IPT) = XPT(IPT) + 360.0
+#endif
 !
 !     Check if point within grid and compute interpolation weights
 !
@@ -321,9 +345,11 @@
           CYCLE
           END IF
 !
-!/T     DO K = 1,4
-!/T       WRITE (NDST,9012) IX(K), IY(K), RD(K)
-!/T       END DO
+#ifdef W3_T
+     DO K = 1,4
+       WRITE (NDST,9012) IX(K), IY(K), RD(K)
+       END DO
+#endif
 !
 !     Check if point not on land
 !
@@ -347,10 +373,12 @@
 !
         PTLOC (1,NOPTS) = XPT(IPT)
         PTLOC (2,NOPTS) = YPT(IPT)
-!/RTD !!   Store the standard lon/lat in PTLOC for output purpose, assuming
-!/RTD !!   they are not used for any inside calculation.  JGLi12Jun2012
-!/RTD        PTLOC (1,NOPTS) = StdLon(IPT)
-!/RTD        PTLOC (2,NOPTS) = StdLat(IPT)
+#ifdef W3_RTD
+ !!   Store the standard lon/lat in PTLOC for output purpose, assuming
+ !!   they are not used for any inside calculation.  JGLi12Jun2012
+        PTLOC (1,NOPTS) = StdLon(IPT)
+        PTLOC (2,NOPTS) = StdLat(IPT)
+#endif
 !
         DO K = 1,4
           IPTINT(1,K,NOPTS) = IX(K)
@@ -362,147 +390,181 @@
 !
         END DO ! End loop over output points (IPT).
 !
-!/RTD       DEALLOCATE( EquLon, EquLat, StdLon, StdLat, AnglPT )
+#ifdef W3_RTD
+       DEALLOCATE( EquLon, EquLat, StdLon, StdLat, AnglPT )
+#endif
 !
 ! Diagnostic output
 !
-!/O7a      IF ( IAPROC .EQ. NAPOUT ) THEN
-!/O7a          WRITE (SCREEN,940) NOPTS
-!/O7a          DO J=1, NOPTS
+#ifdef W3_O7a
+      IF ( IAPROC .EQ. NAPOUT ) THEN
+          WRITE (SCREEN,940) NOPTS
+          DO J=1, NOPTS
+#endif
 !
-!/O7a            WRITE (SCREEN,941) PTNME(J), PTLOC(:,J)*FACTOR
-!/O7a            IX(:) = IPTINT(1,:,J)
-!/O7a            IY(:) = IPTINT(2,:,J)
-!/O7a            RD(:) = PTIFAC(:,J)
-!/O7a            WRITE (SCREEN,942) (IX(K),IY(K),RD(K),K=1,4)
+#ifdef W3_O7a
+            WRITE (SCREEN,941) PTNME(J), PTLOC(:,J)*FACTOR
+            IX(:) = IPTINT(1,:,J)
+            IY(:) = IPTINT(2,:,J)
+            RD(:) = PTIFAC(:,J)
+            WRITE (SCREEN,942) (IX(K),IY(K),RD(K),K=1,4)
+#endif
 !
-!/O7a            ZBOX   = 0.
-!/O7a            RDTOT  = 0.
-!/O7a            DO K = 1,4
-!/O7a                IF ( MAPFS(IY(K),IX(K)) .GT. 0 ) THEN
-!/O7a                    ZBOX(K) = ZB(IX(K))
-!/O7a                    RDTOT   = RDTOT + RD(K)
-!/O7a                  END IF
-!/O7a              END DO
-!/O7a            RDTOT  = MAX ( 1.E-7 , RDTOT )
+#ifdef W3_O7a
+            ZBOX   = 0.
+            RDTOT  = 0.
+            DO K = 1,4
+                IF ( MAPFS(IY(K),IX(K)) .GT. 0 ) THEN
+                    ZBOX(K) = ZB(IX(K))
+                    RDTOT   = RDTOT + RD(K)
+                  END IF
+              END DO
+            RDTOT  = MAX ( 1.E-7 , RDTOT )
+#endif
 !
-!/O7a            DEPTH  = - ( RD(1)*ZBOX(1) + &
-!/O7a                         RD(2)*ZBOX(2) + &
-!/O7a                         RD(3)*ZBOX(3) + &
-!/O7a                         RD(4)*ZBOX(4) ) / RDTOT
-!/O7a            WRITE (SCREEN,943) DEPTH
+#ifdef W3_O7a
+            DEPTH  = - ( RD(1)*ZBOX(1) + &
+                         RD(2)*ZBOX(2) + &
+                         RD(3)*ZBOX(3) + &
+                         RD(4)*ZBOX(4) ) / RDTOT
+            WRITE (SCREEN,943) DEPTH
+#endif
 !
-!/O7a      ! *** implementation of O7a option with curvilinear grids is incomplete ***
+#ifdef W3_O7a
+      ! *** implementation of O7a option with curvilinear grids is incomplete ***
+#endif
 !
-!/O7a            IF ( RD1 .LT. 0.05 ) IX2 = IX1
-!/O7a            IF ( RD1 .GT. 0.95 ) IX1 = IX2
-!/O7a            IF ( RD2 .LT. 0.05 ) IY2 = IY1
-!/O7a            IF ( RD2 .GT. 0.95 ) IY1 = IY2
-!/O7a            IX0    = IX1 - 1
-!/O7a            IXN    = IX2 + 1
-!/O7a            IY0    = MAX ( 1 , IY1 - 1 )
-!/O7a            IYN    = MIN ( IY2 + 1 , NY )
-!/O7a            NNX    = 13 * ( IXN - IX0 + 1 )
+#ifdef W3_O7a
+            IF ( RD1 .LT. 0.05 ) IX2 = IX1
+            IF ( RD1 .GT. 0.95 ) IX1 = IX2
+            IF ( RD2 .LT. 0.05 ) IY2 = IY1
+            IF ( RD2 .GT. 0.95 ) IY1 = IY2
+            IX0    = IX1 - 1
+            IXN    = IX2 + 1
+            IY0    = MAX ( 1 , IY1 - 1 )
+            IYN    = MIN ( IY2 + 1 , NY )
+            NNX    = 13 * ( IXN - IX0 + 1 )
+#endif
 !
-!/O7a            ALLOCATE ( STRING(NNX), LINE1(NNX), LINE2(NNX) )
-!/O7a            DO KX=1, NNX
-!/O7a              LINE1(KX) = ' '
-!/O7a              LINE2(KX) = '-'
-!/O7a              END DO
-!/O7a            DO KX=7, NNX, 13
-!/O7a              LINE1(KX) = '|'
-!/O7a              LINE2(KX) = '+'
-!/O7a              END DO
+#ifdef W3_O7a
+            ALLOCATE ( STRING(NNX), LINE1(NNX), LINE2(NNX) )
+            DO KX=1, NNX
+              LINE1(KX) = ' '
+              LINE2(KX) = '-'
+              END DO
+            DO KX=7, NNX, 13
+              LINE1(KX) = '|'
+              LINE2(KX) = '+'
+              END DO
+#endif
 !
-!/O7a            IF ( ICLOSE.NE.ICLOSE_NONE ) THEN
-!/O7a                WRITE (SCREEN,945) (1+MOD(KX+NX-1,NX),KX=IX0,IXN)
-!/O7a              ELSE
-!/O7a                WRITE (SCREEN,945) (KX,KX=IX0,IXN)
-!/O7a              END IF
-!/O7a            WRITE (SCREEN,946) LINE1
+#ifdef W3_O7a
+            IF ( ICLOSE.NE.ICLOSE_NONE ) THEN
+                WRITE (SCREEN,945) (1+MOD(KX+NX-1,NX),KX=IX0,IXN)
+              ELSE
+                WRITE (SCREEN,945) (KX,KX=IX0,IXN)
+              END IF
+            WRITE (SCREEN,946) LINE1
+#endif
 !
-!/O7a            DO KY=IYN, IY0, -1
+#ifdef W3_O7a
+            DO KY=IYN, IY0, -1
+#endif
 !
-!/O7a              STRING  = LINE1
-!/O7a              DO KX=IX0, IXN
-!/O7a                IF ( ICLOSE.NE.ICLOSE_NONE .OR. (KX.GE.1 .AND. KX.LE.NX) ) THEN
-!/O7a                    IIX    = 1 + MOD(KX-1+NX,NX)
-!/O7a                    IS1    = MAPFS(KY,IIX)
-!/O7a                    IF ( MAPSTA(KY,IIX) .NE. 0 ) THEN
-!/O7a                        WRITE (PARTS,'(F8.1,1X)') -ZB(IS1)
-!/O7a                        NNX    = 2 + (KX-IX0)*13
-!/O7a                        DO JX=1, 9
-!/O7a                          STRING(NNX+JX:NNX+JX) = PARTS(JX:JX)
-!/O7a                          END DO
-!/O7a                      ENDIF
-!/O7a                  END IF
-!/O7a                END DO
-!/O7a              WRITE (SCREEN,946) STRING
+#ifdef W3_O7a
+              STRING  = LINE1
+              DO KX=IX0, IXN
+                IF ( ICLOSE.NE.ICLOSE_NONE .OR. (KX.GE.1 .AND. KX.LE.NX) ) THEN
+                    IIX    = 1 + MOD(KX-1+NX,NX)
+                    IS1    = MAPFS(KY,IIX)
+                    IF ( MAPSTA(KY,IIX) .NE. 0 ) THEN
+                        WRITE (PARTS,'(F8.1,1X)') -ZB(IS1)
+                        NNX    = 2 + (KX-IX0)*13
+                        DO JX=1, 9
+                          STRING(NNX+JX:NNX+JX) = PARTS(JX:JX)
+                          END DO
+                      ENDIF
+                  END IF
+                END DO
+              WRITE (SCREEN,946) STRING
+#endif
 !
-!/O7a              STRING = LINE2
-!/O7a              DO KX=IX0, IXN
-!/O7a                NNX    = 5 + (KX-IX0)*13
-!/O7a                IF ( ICLOSE.EQ.ICLOSE_NONE .AND. (KX.LT.1.OR.KX.GT.NX) ) THEN
-!/O7a                    STRING(NNX:NNX+4) = OUT
-!/O7a                  ELSE
-!/O7a                    IIX    = 1 + MOD(KX-1+NX,NX)
-!/O7a                    IF ( MAPSTA(KY,IIX) .EQ. 0 ) THEN
-!/O7a                        STRING(NNX:NNX+4) = LND
-!/O7a                      ELSE
-!/O7a                        STRING(NNX:NNX+4) = SEA
-!/O7a                      END IF
-!/O7a                  END IF
-!/O7a                END DO
-!/O7a              WRITE (SCREEN,947) KY, STRING
+#ifdef W3_O7a
+              STRING = LINE2
+              DO KX=IX0, IXN
+                NNX    = 5 + (KX-IX0)*13
+                IF ( ICLOSE.EQ.ICLOSE_NONE .AND. (KX.LT.1.OR.KX.GT.NX) ) THEN
+                    STRING(NNX:NNX+4) = OUT
+                  ELSE
+                    IIX    = 1 + MOD(KX-1+NX,NX)
+                    IF ( MAPSTA(KY,IIX) .EQ. 0 ) THEN
+                        STRING(NNX:NNX+4) = LND
+                      ELSE
+                        STRING(NNX:NNX+4) = SEA
+                      END IF
+                  END IF
+                END DO
+              WRITE (SCREEN,947) KY, STRING
+#endif
 !
-!/O7a              STRING  = LINE1
-!/O7a              DO KX=IX0, IXN
-!/O7a                IF ( ICLOSE.NE.ICLOSE_NONE .OR. (KX.GE.1 .AND. KX.LE.NX) ) THEN
-!/O7a                    IS1    = MAPFS(KY,KX)
-!/O7a                    IIX    = 1 + MOD(KX-1+NX,NX)
-!/O7a                    IF ( MAPSTA(KY,IIX) .NE. 0 ) THEN
-!/O7a                        WRITE (PARTS,'(I4,1A,I4)')               &
-!/O7a                               NINT(1000.*TRNX(KY,IIX)),         &
-!/O7a                               '|', NINT(1000.*TRNY(KY,IIX))
-!/O7a                        NNX    = 2 + (KX-IX0)*13
-!/O7a                        DO JX=1, 9
-!/O7a                          STRING(NNX+JX:NNX+JX) = PARTS(JX:JX)
-!/O7a                          END DO
-!/O7a                      ENDIF
-!/O7a                  END IF
-!/O7a                END DO
-!/O7a              WRITE (SCREEN,946) STRING
-!/O7a              WRITE (SCREEN,946) LINE1
+#ifdef W3_O7a
+              STRING  = LINE1
+              DO KX=IX0, IXN
+                IF ( ICLOSE.NE.ICLOSE_NONE .OR. (KX.GE.1 .AND. KX.LE.NX) ) THEN
+                    IS1    = MAPFS(KY,KX)
+                    IIX    = 1 + MOD(KX-1+NX,NX)
+                    IF ( MAPSTA(KY,IIX) .NE. 0 ) THEN
+                        WRITE (PARTS,'(I4,1A,I4)')               &
+                               NINT(1000.*TRNX(KY,IIX)),         &
+                               '|', NINT(1000.*TRNY(KY,IIX))
+                        NNX    = 2 + (KX-IX0)*13
+                        DO JX=1, 9
+                          STRING(NNX+JX:NNX+JX) = PARTS(JX:JX)
+                          END DO
+                      ENDIF
+                  END IF
+                END DO
+              WRITE (SCREEN,946) STRING
+              WRITE (SCREEN,946) LINE1
+#endif
 !
-!/O7a              END DO
+#ifdef W3_O7a
+              END DO
+#endif
 !
-!/O7a            IF ( ICLOSE.NE.ICLOSE_NONE ) THEN
-!/O7a                WRITE (SCREEN,945) (1+MOD(KX+NX-1,NX),KX=IX0,IXN)
-!/O7a              ELSE
-!/O7a                WRITE (SCREEN,945) (KX,KX=IX0,IXN)
-!/O7a              END IF
-!/O7a            DEALLOCATE ( STRING, LINE1, LINE2 )
+#ifdef W3_O7a
+            IF ( ICLOSE.NE.ICLOSE_NONE ) THEN
+                WRITE (SCREEN,945) (1+MOD(KX+NX-1,NX),KX=IX0,IXN)
+              ELSE
+                WRITE (SCREEN,945) (KX,KX=IX0,IXN)
+              END IF
+            DEALLOCATE ( STRING, LINE1, LINE2 )
+#endif
 
-!/O7a            END DO
-!/O7a          WRITE (SCREEN,*)
-!/O7a          WRITE (SCREEN,*)
-!/O7a        END IF
+#ifdef W3_O7a
+            END DO
+          WRITE (SCREEN,*)
+          WRITE (SCREEN,*)
+        END IF
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/O7a  940 FORMAT (/' Diagnostic output for output points [',I3,'] :'/&
-!/O7a                '--------------------------------------------'/  &
-!/O7a                '    Bottom level in m above grid point'/        &
-!/O7a                '    X/Y transparency in thousands below')
-!/O7a  941 FORMAT (/'    Point ',A,' at ',2F8.2,' (degr or km)'/    &
-!/O7a          '    -------------------------------------------------')
-!/O7a  942 FORMAT ( '       Interp. cell :',4(' (',2I5,F4.2,')'))
-!/O7a  943 FORMAT ( '       Depth (water level = 0)  :',F10.1,' m'/)
-!/O7a  945 FORMAT ( '          IX =  ',4I13)
-!/O7a  946 FORMAT ( '                     ',52A1)
-!/O7a  947 FORMAT ( '          IY =',I5,2X,52A1)
+#ifdef W3_O7a
+  940 FORMAT (/' Diagnostic output for output points [',I3,'] :'/&
+                '--------------------------------------------'/  &
+                '    Bottom level in m above grid point'/        &
+                '    X/Y transparency in thousands below')
+  941 FORMAT (/'    Point ',A,' at ',2F8.2,' (degr or km)'/    &
+          '    -------------------------------------------------')
+  942 FORMAT ( '       Interp. cell :',4(' (',2I5,F4.2,')'))
+  943 FORMAT ( '       Depth (water level = 0)  :',F10.1,' m'/)
+  945 FORMAT ( '          IX =  ',4I13)
+  946 FORMAT ( '                     ',52A1)
+  947 FORMAT ( '          IY =',I5,2X,52A1)
+#endif
 !
  1000 FORMAT (/' *** WAVEWATCH-III WARNING :'/                   &
                '     OUTPUT POINT OUT OF GRID : ',2F10.3,2X,A/   &
@@ -518,14 +580,16 @@
                '     OUTPUT POINT ON LAND : ',2E10.3,2X,A/       &
                '     POINT SKIPPPED '/)
 !
-!/T 9010 FORMAT (' TEST W3IOPP : INPUT  : ',I4,2F12.2,2X,A)
-!/T 9011 FORMAT ('               CORR.  :     ',2F12.2)
-!/T 9012 FORMAT (' TEST W3IOPP : INT. DATA: ',2I6,1F8.2)
-!/T 9013 FORMAT (' TEST W3IOPP : INT. DATA B): ',4I4,2F8.2)
-!/T 9020 FORMAT (' TEST W3IOPP : PREPROCESSED DATA',I4,2X,A,2X,2F12.2, &
-!/T           4(/'             ',2I5,2F6.3))
-!/T 9021 FORMAT (' TEST W3IOPP : PREPROCESSED DATA',I4,2X,A,2X,2F12.2, &
-!/T           4(/'             ',2I5,F6.3))
+#ifdef W3_T
+ 9010 FORMAT (' TEST W3IOPP : INPUT  : ',I4,2F12.2,2X,A)
+ 9011 FORMAT ('               CORR.  :     ',2F12.2)
+ 9012 FORMAT (' TEST W3IOPP : INT. DATA: ',2I6,1F8.2)
+ 9013 FORMAT (' TEST W3IOPP : INT. DATA B): ',4I4,2F8.2)
+ 9020 FORMAT (' TEST W3IOPP : PREPROCESSED DATA',I4,2X,A,2X,2F12.2, &
+           4(/'             ',2I5,2F6.3))
+ 9021 FORMAT (' TEST W3IOPP : PREPROCESSED DATA',I4,2X,A,2X,2F12.2, &
+           4(/'             ',2I5,F6.3))
+#endif
 !/
 !/ End of W3IOPP ----------------------------------------------------- /
 !/
@@ -617,28 +681,46 @@
       USE CONSTANTS
       USE W3GDATMD, ONLY: NK, NTH, SIG, NX, NY, NSEA, NSEAL,          &
                           MAPSTA, MAPFS
-!/RTD !!   Use spectral rotation sub and angle.  JGLi12Jun2012
-!/RTD      USE W3GDATMD, ONLY: NSPEC, AnglD, FLAGUNR
-!/RTD      USE W3SERVMD, ONLY: W3ACTURN
+#ifdef W3_RTD
+ !!   Use spectral rotation sub and angle.  JGLi12Jun2012
+      USE W3GDATMD, ONLY: NSPEC, AnglD, FLAGUNR
+      USE W3SERVMD, ONLY: W3ACTURN
+#endif
       USE W3WDATMD, ONLY: ICE, ICEH, ICEF
-!/FLX5      USE W3WDATMD, ONLY: RHOAIR
+#ifdef W3_FLX5
+      USE W3WDATMD, ONLY: RHOAIR
+#endif
       USE W3ADATMD, ONLY: CG, DW, UA, UD, AS, CX, CY,                 &
                           SP => SPPNT
-!/FLX5      USE W3ADATMD, ONLY: TAUA, TAUADIR 
+#ifdef W3_FLX5
+      USE W3ADATMD, ONLY: TAUA, TAUADIR 
+#endif
       USE W3ODATMD, ONLY: NDST, NOPTS, IPTINT, PTIFAC, IL, IW, II,    &
                           DPO, WAO, WDO, ASO, CAO, CDO, ICEO, ICEHO,  &
                           ICEFO, SPCO, NAPROC
-!/FLX5      USE W3ODATMD, ONLY: TAUAO, TAUDO, DAIRO
-!/SETUP      USE W3WDATMD, ONLY: ZETA_SETUP
-!/SETUP      USE W3ODATMD, ONLY: ZET_SETO
-!/MPI      USE W3ODATMD, ONLY: IRQPO2
+#ifdef W3_FLX5
+      USE W3ODATMD, ONLY: TAUAO, TAUDO, DAIRO
+#endif
+#ifdef W3_SETUP
+      USE W3WDATMD, ONLY: ZETA_SETUP
+      USE W3ODATMD, ONLY: ZET_SETO
+#endif
+#ifdef W3_MPI
+      USE W3ODATMD, ONLY: IRQPO2
+#endif
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T      USE W3ARRYMD, ONLY: PRT2DS
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T
+      USE W3ARRYMD, ONLY: PRT2DS
+#endif
 !
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -650,21 +732,33 @@
 !/
       INTEGER                 :: I, IX1, IY1, IX(4), IY(4), J, IS(4), &
                                  IM(4), IK, ITH, ISP
-!/MPI      INTEGER                 :: IOFF, IERR_MPI
-!/MPI      INTEGER                 :: STAT(MPI_STATUS_SIZE,4*NOPTS)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                 :: IOFF, IERR_MPI
+      INTEGER                 :: STAT(MPI_STATUS_SIZE,4*NOPTS)
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: RD(4), RDS, RDI, FACRD,              &
                                  WNDX, WNDY, CURX, CURY, FAC1(NK),    &
                                  FAC2(NK), FAC3(NK), FAC4(NK)
-!/FLX5      REAL                    :: TAUX, TAUY
+#ifdef W3_FLX5
+      REAL                    :: TAUX, TAUY
+#endif
       INTEGER                 :: JSEA, ISEA
-!/T      REAL                    :: SPTEST(NK,NTH)
-!/RTD      REAL :: Spectr(NSPEC), AnglDIS
-!/RTD      INTEGER :: IROT
+#ifdef W3_T
+      REAL                    :: SPTEST(NK,NTH)
+#endif
+#ifdef W3_RTD
+      REAL :: Spectr(NSPEC), AnglDIS
+      INTEGER :: IROT
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3IOPE')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3IOPE')
+#endif
 !
       CX(0)  = 0.
       CY(0)  = 0.
@@ -673,7 +767,9 @@
 !
       DO I=1, NOPTS
 !
-!/T        WRITE (NDST,9000) I
+#ifdef W3_T
+        WRITE (NDST,9000) I
+#endif
 !
 ! Unpack interpolation data
 !
@@ -681,7 +777,9 @@
         IY(:)  = IPTINT(2,:,I)
         RD(:)  = PTIFAC(:,I)
 !
-!/T!        WRITE (NDST,9001) IX1, IY1, IX(2)
+#ifdef W3_T
+!        WRITE (NDST,9001) IX1, IY1, IX(2)
+#endif
 !
 !
 ! Correct for land and ice and get sea point counters
@@ -698,7 +796,9 @@
           IF ( IM(J).GT.0 ) THEN
               IW(I)  = IW(I) + 1
               RDS    = RDS + RD(J)
-!/RTD              IROT   = IS(J) ! For rotation angle
+#ifdef W3_RTD
+              IROT   = IS(J) ! For rotation angle
+#endif
             ELSE
               IF ( IM(J).LT.0 ) THEN
                   II(I)  = II(I) + 1
@@ -717,7 +817,9 @@
             RD     = RD * FACRD
           END IF
 !
-!/T        WRITE (NDST,9002) (IS(J),J=1,4), (IM(J),J=1,4), (RD(J),J=1,4)
+#ifdef W3_T
+        WRITE (NDST,9002) (IS(J),J=1,4), (IM(J),J=1,4), (RD(J),J=1,4)
+#endif
 !
 ! Interpolate ice depth, wind, stresses, rho air and current
 !
@@ -725,8 +827,12 @@
           ICEFO(I) = 0
           DO J=1, 4
             ISEA = MAPFS(IY(J),IX(J))
-!/DIST          JSEA = 1 + (ISEA-1)/NAPROC
-!/SHRD          JSEA = ISEA
+#ifdef W3_DIST
+          JSEA = 1 + (ISEA-1)/NAPROC
+#endif
+#ifdef W3_SHRD
+          JSEA = ISEA
+#endif
             ICEFO(I) = ICEFO(I) + RD(J)*ICEF(JSEA)
           END DO
         ELSE
@@ -742,13 +848,17 @@
 !
         DPO(I) = RD(1)*DW(IS(1)) + RD(2)*DW(IS(2)) +                  &
                  RD(3)*DW(IS(3)) + RD(4)*DW(IS(4))
-!/SETUP        DPO(I) = RD(1)*ZETA_SETUP(IS(1)) +                     &
-!/SETUP                 RD(2)*ZETA_SETUP(IS(2)) +                     &
-!/SETUP                 RD(3)*ZETA_SETUP(IS(3)) +                     &
-!/SETUP                 RD(4)*ZETA_SETUP(IS(4))
+#ifdef W3_SETUP
+        DPO(I) = RD(1)*ZETA_SETUP(IS(1)) +                     &
+                 RD(2)*ZETA_SETUP(IS(2)) +                     &
+                 RD(3)*ZETA_SETUP(IS(3)) +                     &
+                 RD(4)*ZETA_SETUP(IS(4))
+#endif
 !
-!/FLX5        DAIRO(I) = RD(1)*RHOAIR(IS(1)) + RD(2)*RHOAIR(IS(2)) +        &
-!/FLX5                 RD(3)*RHOAIR(IS(3)) + RD(4)*RHOAIR(IS(4))
+#ifdef W3_FLX5
+        DAIRO(I) = RD(1)*RHOAIR(IS(1)) + RD(2)*RHOAIR(IS(2)) +        &
+                 RD(3)*RHOAIR(IS(3)) + RD(4)*RHOAIR(IS(4))
+#endif
 !
         WNDX   = RD(1) * UA(IS(1)) * COS(UD(IS(1))) +                 &
                  RD(2) * UA(IS(2)) * COS(UD(IS(2))) +                 &
@@ -762,28 +872,34 @@
         WAO(I) = SQRT ( WNDX**2 + WNDY**2 )
         IF ( WAO(I).GT.1.E-7 ) THEN
             WDO(I) = ATAN2(WNDY,WNDX)
-!/RTD            IF ( FLAGUNR ) WDO(I) = WDO(I) - AnglD(IS(1))*DERA
+#ifdef W3_RTD
+            IF ( FLAGUNR ) WDO(I) = WDO(I) - AnglD(IS(1))*DERA
+#endif
           ELSE
             WDO(I) = 0.
           END IF
 !
-!/FLX5        TAUX   = RD(1) * TAUA(IS(1)) * COS(TAUADIR(IS(1))) +          &
-!/FLX5                 RD(2) * TAUA(IS(2)) * COS(TAUADIR(IS(2))) +          &
-!/FLX5                 RD(3) * TAUA(IS(3)) * COS(TAUADIR(IS(3))) +          &
-!/FLX5                 RD(4) * TAUA(IS(4)) * COS(TAUADIR(IS(4)))
-!/FLX5        TAUY   = RD(1) * TAUA(IS(1)) * SIN(TAUADIR(IS(1))) +          &
-!/FLX5                 RD(2) * TAUA(IS(2)) * SIN(TAUADIR(IS(2))) +          &
-!/FLX5                 RD(3) * TAUA(IS(3)) * SIN(TAUADIR(IS(3))) +          &
-!/FLX5                 RD(4) * TAUA(IS(4)) * SIN(TAUADIR(IS(4)))
-!/FLX5!
-!/FLX5        TAUAO(I) = SQRT ( TAUX**2 + TAUY**2 )
-!/FLX5        IF ( TAUAO(I).GT.1.E-7 ) THEN
-!/FLX5            TAUDO(I) = ATAN2(TAUY,TAUX)
-!/FLX5!/RTD            IF ( FLAGUNR ) TAUDO(I) = TAUDO(I) - AnglD(IS(1))*DERA
-!/FLX5          ELSE
-!/FLX5            TAUDO(I) = 0.
-!/FLX5          END IF
-!/FLX5!
+#ifdef W3_FLX5
+        TAUX   = RD(1) * TAUA(IS(1)) * COS(TAUADIR(IS(1))) +          &
+                 RD(2) * TAUA(IS(2)) * COS(TAUADIR(IS(2))) +          &
+                 RD(3) * TAUA(IS(3)) * COS(TAUADIR(IS(3))) +          &
+                 RD(4) * TAUA(IS(4)) * COS(TAUADIR(IS(4)))
+        TAUY   = RD(1) * TAUA(IS(1)) * SIN(TAUADIR(IS(1))) +          &
+                 RD(2) * TAUA(IS(2)) * SIN(TAUADIR(IS(2))) +          &
+                 RD(3) * TAUA(IS(3)) * SIN(TAUADIR(IS(3))) +          &
+                 RD(4) * TAUA(IS(4)) * SIN(TAUADIR(IS(4)))
+!
+        TAUAO(I) = SQRT ( TAUX**2 + TAUY**2 )
+        IF ( TAUAO(I).GT.1.E-7 ) THEN
+            TAUDO(I) = ATAN2(TAUY,TAUX)
+#ifdef W3_RTD
+            IF ( FLAGUNR ) TAUDO(I) = TAUDO(I) - AnglD(IS(1))*DERA
+#endif
+          ELSE
+            TAUDO(I) = 0.
+          END IF
+!
+#endif
         ASO(I) = RD(1)*AS(IS(1)) + RD(2)*AS(IS(2)) +                  &
                  RD(3)*AS(IS(3)) + RD(4)*AS(IS(4))
 !
@@ -795,7 +911,9 @@
         CAO(I) = SQRT ( CURX**2 + CURY**2 )
         IF ( CAO(I).GT.1.E-7 ) THEN
             CDO(I) = ATAN2(CURY,CURX)
-!/RTD            IF ( FLAGUNR ) CDO(I) = CDO(I) - AnglD(IS(1))*DERA
+#ifdef W3_RTD
+            IF ( FLAGUNR ) CDO(I) = CDO(I) - AnglD(IS(1))*DERA
+#endif
           ELSE
             CDO(I) = 0.
           END IF
@@ -807,24 +925,30 @@
             RD     = RD * FACRD
           END IF
 !
-!/T        WRITE (NDST,9003) (RD(J),J=1,4)
+#ifdef W3_T
+        WRITE (NDST,9003) (RD(J),J=1,4)
+#endif
 !
 ! Extract spectra, shared memory version
 !        (done in separate step for MPP compatibility)
 !
-!/SHRD        DO J=1, 4
-!/SHRD          DO IK=1, NK
-!/SHRD            DO ITH=1, NTH
-!/SHRD              SP(ITH,IK,J) = A(ITH,IK,IS(J))
-!/SHRD              END DO
-!/SHRD            END DO
-!/SHRD          END DO
+#ifdef W3_SHRD
+        DO J=1, 4
+          DO IK=1, NK
+            DO ITH=1, NTH
+              SP(ITH,IK,J) = A(ITH,IK,IS(J))
+              END DO
+            END DO
+          END DO
+#endif
 !
 ! Extract spectra, distributed memory version(s)
 !
-!/MPI        IOFF   = 1 + 4*(I-1)
-!/MPI        CALL MPI_STARTALL ( 4, IRQPO2(IOFF), IERR_MPI )
-!/MPI        CALL MPI_WAITALL  ( 4, IRQPO2(IOFF), STAT, IERR_MPI )
+#ifdef W3_MPI
+        IOFF   = 1 + 4*(I-1)
+        CALL MPI_STARTALL ( 4, IRQPO2(IOFF), IERR_MPI )
+        CALL MPI_WAITALL  ( 4, IRQPO2(IOFF), STAT, IERR_MPI )
+#endif
 !
 ! Interpolate spectrum
 !
@@ -842,30 +966,38 @@
                         + RD(2) * SP(ITH,IK,2) * FAC2(IK)             &
                         + RD(3) * SP(ITH,IK,3) * FAC3(IK)             &
                         + RD(4) * SP(ITH,IK,4) * FAC4(IK)
-!/T            SPTEST(IK,ITH) = SPCO(ISP,I)
+#ifdef W3_T
+            SPTEST(IK,ITH) = SPCO(ISP,I)
+#endif
             END DO
           END DO
 !
-!/RTD        !!  Rotate the interpolated spectrum by -AnglD(IS(1)).  JGLi12Jun2012
-!/RTD        !!  SPCO still holds action not energy spectrum yet.  JGLi18Jun2013
-!/RTD        !!  Use new index IROT rather than IS(1) as in some cases
-!/RTD        !!  IS(1) will be a coast point and have an index of 0. C.Bunney 15/02/2011
-!/RTD        IF ( FLAGUNR ) THEN
-!/RTD          Spectr = SPCO(:,I)
-!/RTD          AnglDIS = -AnglD(IROT)
-!/RTD          CALL  W3ACTURN( NTH, NK, AnglDIS, Spectr )
-!/RTD          SPCO(:,I) = Spectr
-!/RTD        END IF
-!/RTD
+#ifdef W3_RTD
+        !!  Rotate the interpolated spectrum by -AnglD(IS(1)).  JGLi12Jun2012
+        !!  SPCO still holds action not energy spectrum yet.  JGLi18Jun2013
+        !!  Use new index IROT rather than IS(1) as in some cases
+        !!  IS(1) will be a coast point and have an index of 0. C.Bunney 15/02/2011
+        IF ( FLAGUNR ) THEN
+          Spectr = SPCO(:,I)
+          AnglDIS = -AnglD(IROT)
+          CALL  W3ACTURN( NTH, NK, AnglDIS, Spectr )
+          SPCO(:,I) = Spectr
+        END IF
+
+#endif
 !
-!/T        WRITE (NDST,9004) DPO(I), WAO(I), WDO(I)*RADE,             &
-!/T                                  CAO(I), CDO(I)*RADE
+#ifdef W3_T
+        WRITE (NDST,9004) DPO(I), WAO(I), WDO(I)*RADE,             &
+                                  CAO(I), CDO(I)*RADE
+#endif
 
 ! FA COMMENTED OUT: BUG
 !At line 1974 of file w3arrymd.f90
 !Fortran runtime error: Index '52' of dimension 1 of array 'pnum2' above upper bound of 51
-!/T       ! CALL PRT2DS (NDST, NK, NK, NTH, SPTEST, SIG(1:), ' ', 1.,0.,&
-!/T       !              0.0001, 'E(f,theta)', 'm**2s', 'TEST OUTPUT' )
+#ifdef W3_T
+       ! CALL PRT2DS (NDST, NK, NK, NTH, SPTEST, SIG(1:), ' ', 1.,0.,&
+       !              0.0001, 'E(f,theta)', 'm**2s', 'TEST OUTPUT' )
+#endif
 !
         END DO
 !
@@ -873,11 +1005,13 @@
 !
 ! Formats
 !
-!/T 9000 FORMAT (' TEST W3IOPE : POINT NR.:',I3)
-!/T 9001 FORMAT (' TEST W3IOPE :',2I8,'   (',I3,')')
-!/T 9002 FORMAT (' TEST W3IOPE :',4I7,2X,4I2,2X,4F5.2)
-!/T 9003 FORMAT (' TEST W3IOPE :',40X,4F5.2)
-!/T 9004 FORMAT (' TEST W3IOPE :',F8.1,2(F7.2,F7.1))
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3IOPE : POINT NR.:',I3)
+ 9001 FORMAT (' TEST W3IOPE :',2I8,'   (',I3,')')
+ 9002 FORMAT (' TEST W3IOPE :',4I7,2X,4I2,2X,4F5.2)
+ 9003 FORMAT (' TEST W3IOPE :',40X,4F5.2)
+ 9004 FORMAT (' TEST W3IOPE :',F8.1,2(F7.2,F7.1))
+#endif
 !/
 !/ End of W3IOPE ----------------------------------------------------- /
 !/
@@ -967,13 +1101,19 @@
                           IL, IW, II, PTLOC, PTIFAC, DPO, WAO, WDO,   &
                           ASO, CAO, CDO, SPCO, PTNME, O2INIT, FNMPRE, &
                           GRDID, ICEO, ICEHO, ICEFO
-!/FLX5      USE W3ODATMD, ONLY: TAUAO, TAUDO, DAIRO
+#ifdef W3_FLX5
+      USE W3ODATMD, ONLY: TAUAO, TAUDO, DAIRO
+#endif
       USE W3ODATMD, ONLY :  OFILES
 !/
-!/SETUP      USE W3ODATMD, ONLY: ZET_SETO
+#ifdef W3_SETUP
+      USE W3ODATMD, ONLY: ZET_SETO
+#endif
 !/
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -989,7 +1129,9 @@
 !/ local parameters
 !/
       INTEGER                 :: IGRD, IERR, MK, MTH, I, J
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       LOGICAL,SAVE            :: WRITE
       CHARACTER(LEN=31)       :: IDTST
       CHARACTER(LEN=10)       :: VERTST
@@ -998,7 +1140,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3IOPO')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3IOPO')
+#endif
       IPASS  = IPASS + 1
       IOTST  = 0
 !
@@ -1036,7 +1180,9 @@
           I      = LEN_TRIM(FILEXT)
           J      = LEN_TRIM(FNMPRE)
 !
-!/T          WRITE (NDST,9001) FNMPRE(:J)//'out_pnt.'//FILEXT(:I)
+#ifdef W3_T
+          WRITE (NDST,9001) FNMPRE(:J)//'out_pnt.'//FILEXT(:I)
+#endif
           IF ( WRITE ) THEN
               OPEN (NDSOP,FILE=FNMPRE(:J)//'out_pnt.'//FILEXT(:I),    &
                     FORM='UNFORMATTED',ERR=800,IOSTAT=IERR)
@@ -1073,7 +1219,9 @@
                   CALL W3DMO2 ( IGRD, NDSE, NDST, NOPTS )
             END IF
 !
-!/T          WRITE (NDST,9002) IDSTR, VEROPT, NK, NTH, NOPTS
+#ifdef W3_T
+          WRITE (NDST,9002) IDSTR, VEROPT, NK, NTH, NOPTS
+#endif
 !
 ! Point specific info ------------------------------------------------ *
 ! ( IPASS = 1 )
@@ -1086,10 +1234,12 @@
                     ((PTLOC(J,I),J=1,2),I=1,NOPTS), (PTNME(I),I=1,NOPTS)
             END IF
 !
-!/T          WRITE (NDST,9003)
-!/T          DO I=1, NOPTS
-!/T            WRITE (NDST,9004) I, PTLOC(1,I), PTLOC(2,I), PTNME(I)
-!/T            END DO
+#ifdef W3_T
+          WRITE (NDST,9003)
+          DO I=1, NOPTS
+            WRITE (NDST,9004) I, PTLOC(1,I), PTLOC(2,I), PTNME(I)
+            END DO
+#endif
 !
         END IF
 !
@@ -1113,8 +1263,10 @@
 ! Create TIMETAG for file name using YYYYMMDD.HHMMS prefix
           WRITE(TIMETAG,"(i8.8,'.'i6.6)")TIME(1),TIME(2)
 !
-!/T          WRITE (NDST,9001) FNMPRE(:J)//TIMETAG//'.out_pnt.'// &
-!/T                               FILEXT(:I)
+#ifdef W3_T
+          WRITE (NDST,9001) FNMPRE(:J)//TIMETAG//'.out_pnt.'// &
+                               FILEXT(:I)
+#endif
           IF ( WRITE ) THEN
               OPEN (NDSOP,FILE=FNMPRE(:J)//TIMETAG//'.out_pnt.'   &
                     //FILEXT(:I),FORM='UNFORMATTED',ERR=800,IOSTAT=IERR)
@@ -1149,7 +1301,9 @@
                   CALL W3DMO2 ( IGRD, NDSE, NDST, NOPTS )
             END IF
 !
-!/T          WRITE (NDST,9002) IDSTR, VEROPT, NK, NTH, NOPTS
+#ifdef W3_T
+          WRITE (NDST,9002) IDSTR, VEROPT, NK, NTH, NOPTS
+#endif
 !
 ! Point specific info ------------------------------------------------ *
 ! ( IPASS GE.1 .AND. OFILES(2) .EQ. 1)
@@ -1162,10 +1316,12 @@
                     ((PTLOC(J,I),J=1,2),I=1,NOPTS), (PTNME(I),I=1,NOPTS)
             END IF
 !
-!/T          WRITE (NDST,9003)
-!/T          DO I=1, NOPTS
-!/T            WRITE (NDST,9004) I, PTLOC(1,I), PTLOC(2,I), PTNME(I)
-!/T            END DO
+#ifdef W3_T
+          WRITE (NDST,9003)
+          DO I=1, NOPTS
+            WRITE (NDST,9004) I, PTLOC(1,I), PTLOC(2,I), PTNME(I)
+            END DO
+#endif
 !
         END IF
 !
@@ -1178,7 +1334,9 @@
           READ (NDSOP,END=803,ERR=802,IOSTAT=IERR) TIME
         END IF
 !
-!/T      WRITE (NDST,9010) TIME
+#ifdef W3_T
+      WRITE (NDST,9010) TIME
+#endif
 !
 !
 ! Loop over spectra -------------------------------------------------- *
@@ -1193,15 +1351,23 @@
              IL(I) = 0
              WRITE (NDSOP)                                            &
                     IW(I), II(I), IL(I), DPO(I), WAO(I), WDO(I),      &
-!/FLX5                    TAUAO(I), TAUDO(I), DAIRO(I),                     &
-!/SETUP             ZET_SETO(I),                                      &
+#ifdef W3_FLX5
+                    TAUAO(I), TAUDO(I), DAIRO(I),                     &
+#endif
+#ifdef W3_SETUP
+             ZET_SETO(I),                                      &
+#endif
                     ASO(I), CAO(I), CDO(I), ICEO(I), ICEHO(I),        &
                     ICEFO(I), GRDID(I), (SPCO(J,I),J=1,NSPEC)
           ELSE
              READ (NDSOP,END=801,ERR=802,IOSTAT=IERR)                 &
                     IW(I), II(I), IL(I), DPO(I), WAO(I), WDO(I),      &
-!/FLX5                    TAUAO(I), TAUDO(I), DAIRO(I),                     &
-!/SETUP             ZET_SETO(I),                                      &
+#ifdef W3_FLX5
+                    TAUAO(I), TAUDO(I), DAIRO(I),                     &
+#endif
+#ifdef W3_SETUP
+             ZET_SETO(I),                                      &
+#endif
                     ASO(I), CAO(I), CDO(I), ICEO(I), ICEHO(I),        &
                     ICEFO(I), GRDID(I), (SPCO(J,I),J=1,NSPEC)
           END IF
@@ -1227,7 +1393,9 @@
 !
   803 CONTINUE
       IOTST  = -1
-!/T      WRITE (NDST,9011)
+#ifdef W3_T
+      WRITE (NDST,9011)
+#endif
       RETURN
 !
 ! Formats
@@ -1255,26 +1423,34 @@
                '     ERROR IN READING FROM FILE'/                     &
                '     IOSTAT =',I5/)
 !
-!/T 9000 FORMAT (' TEST W3IOPO : IPASS =',I4,'    INXOUT = ',A,       &
-!/T              ' WRITE = ',L1,' UNIT =',I3/                         &
-!/T              '               IGRD =',I3,' FEXT = ',A)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3IOPO : IPASS =',I4,'    INXOUT = ',A,       &
+              ' WRITE = ',L1,' UNIT =',I3/                         &
+              '               IGRD =',I3,' FEXT = ',A)
+#endif
 
-!/T 9001 FORMAT (' TEST W3IOPO : OPENING NEW FILE [',A,']')
-!/T 9002 FORMAT (' TEST W3IOPO : TEST PARAMETERS:'/                   &
-!/T              '       IDSTR : ',A/                                 &
-!/T              '      VEROPT : ',A/                                 &
-!/T              '      NK,NTH :',I5,I8/                              &
-!/T              '        NOPT :',I5)
-!/T 9003 FORMAT (' TEST W3IOPO : POINT LOCATION AND ID')
-!/T 9004 FORMAT (3X,I4,2F10.2,2X,A)
+#ifdef W3_T
+ 9001 FORMAT (' TEST W3IOPO : OPENING NEW FILE [',A,']')
+ 9002 FORMAT (' TEST W3IOPO : TEST PARAMETERS:'/                   &
+              '       IDSTR : ',A/                                 &
+              '      VEROPT : ',A/                                 &
+              '      NK,NTH :',I5,I8/                              &
+              '        NOPT :',I5)
+ 9003 FORMAT (' TEST W3IOPO : POINT LOCATION AND ID')
+ 9004 FORMAT (3X,I4,2F10.2,2X,A)
+#endif
 !
-!/T 9010 FORMAT (' TEST W3IOPO : TIME  :',I9.8,I7.6)
-!/T 9011 FORMAT (' TEST W3IOPO : END OF FILE REACHED')
+#ifdef W3_T
+ 9010 FORMAT (' TEST W3IOPO : TIME  :',I9.8,I7.6)
+ 9011 FORMAT (' TEST W3IOPO : END OF FILE REACHED')
+#endif
 !
-!/T 9020 FORMAT (' TEST W3IOPO : POINT NR.:',I5)
-!/T 9021 FORMAT (' TEST W3IOPO :',2I4,2F6.3)
-!/T 9022 FORMAT (' TEST W3IOPO :',4I7,2X,4I2,2X,4F5.2)
-!/T 9030 FORMAT (' TEST W3IOPO :',F8.1,2(F7.2,F7.1))
+#ifdef W3_T
+ 9020 FORMAT (' TEST W3IOPO : POINT NR.:',I5)
+ 9021 FORMAT (' TEST W3IOPO :',2I4,2F6.3)
+ 9022 FORMAT (' TEST W3IOPO :',4I7,2X,4I2,2X,4F5.2)
+ 9030 FORMAT (' TEST W3IOPO :',F8.1,2(F7.2,F7.1))
+#endif
 !/
 !/ End of W3IOPO ----------------------------------------------------- /
 !/

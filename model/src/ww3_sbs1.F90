@@ -146,7 +146,9 @@
 !/
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
@@ -154,7 +156,9 @@
       INTEGER              :: MPI_COMM = -99, IERR, NDST1, NDST2 = -1,&
                               NXW = -1, NYW = -1, TNEXT(2), TOLD(2),  &
                               I
-!/MPI      INTEGER              :: IERR_MPI
+#ifdef W3_MPI
+      INTEGER              :: IERR_MPI
+#endif
       INTEGER, PARAMETER   :: SLEEP1 = 10 , SLEEP2 = 10
       INTEGER, ALLOCATABLE :: TEND(:,:)
       REAL                 :: DTTST
@@ -168,11 +172,13 @@
 !
 ! 0.b MPI environment: Here, we use MPI_COMM_WORLD
 !
-!/MPI      CALL MPI_INIT      ( IERR_MPI )
-!/MPI      MPI_COMM = MPI_COMM_WORLD
-!/MPI      CALL MPI_COMM_SIZE ( MPI_COMM, NMPROC, IERR_MPI )
-!/MPI      CALL MPI_COMM_RANK ( MPI_COMM, IMPROC, IERR_MPI )
-!/MPI      IMPROC = IMPROC + 1
+#ifdef W3_MPI
+      CALL MPI_INIT      ( IERR_MPI )
+      MPI_COMM = MPI_COMM_WORLD
+      CALL MPI_COMM_SIZE ( MPI_COMM, NMPROC, IERR_MPI )
+      CALL MPI_COMM_RANK ( MPI_COMM, IMPROC, IERR_MPI )
+      IMPROC = IMPROC + 1
+#endif
 !
 ! 0.c Identifying output to "screen" unit
 !
@@ -207,7 +213,9 @@
                     NAME='times.inp',                                 &
                     DESC='times file for sbs driver' )
       OPEN (NDST1,FILE='times.inp',STATUS='OLD',ERR=820,IOSTAT=IERR)
-!/T      WRITE (MDST,9020)
+#ifdef W3_T
+      WRITE (MDST,9020)
+#endif
 !
       DO I=-1, -NAUXGR, -1
         CALL W3SETG ( I, MDSE, MDST )
@@ -224,8 +232,10 @@
       IF ( NXW .EQ. -1 ) GOTO 825
       IF ( NDST2 .EQ. -1 ) GOTO 825
 !
-!/T      WRITE (MDST,9021)
-!/T      WRITE (MDST,9022) NXW, NYW, NDST2, I
+#ifdef W3_T
+      WRITE (MDST,9021)
+      WRITE (MDST,9022) NXW, NYW, NDST2, I
+#endif
 !
 !/ ------------------------------------------------------------------- /
 ! 3.  Run the wave model
@@ -277,7 +287,9 @@
           TEND(:,I) = TNEXT(:)
           END DO
 !
-!/MPI        CALL MPI_BARRIER ( MPI_COMM, IERR_MPI )
+#ifdef W3_MPI
+        CALL MPI_BARRIER ( MPI_COMM, IERR_MPI )
+#endif
         CALL WMWAVE ( TEND )
 !
         DTTST  = DSEC21 ( TNEXT , ETIME )
@@ -297,8 +309,10 @@
 !
       IF ( IMPROC .EQ. NMPSCR ) WRITE (*,999)
 !
-!/MPI      CALL MPI_BARRIER ( MPI_COMM, IERR_MPI )
-!/MPI      CALL MPI_FINALIZE  ( IERR_MPI )
+#ifdef W3_MPI
+      CALL MPI_BARRIER ( MPI_COMM, IERR_MPI )
+      CALL MPI_FINALIZE  ( IERR_MPI )
+#endif
 !
       GO TO 888
 !
@@ -333,9 +347,11 @@
  1025 FORMAT (/' *** WAVEWATCH-III ERROR IN W3SBS1 : '/               &
                '     WIND FILE NOT FOUND, NDST2 =  ',I8/)
 !
-!/T 9020 FORMAT ( ' TEST W3SBS1: TIMES FILE SUCCESSFULLY OPENED')
-!/T 9021 FORMAT ( ' TEST W3SBS1: WINDS FILE SUCCESSFULLY OPENED')
-!/T 9022 FORMAT ( '              TEST DATA : ',2I8,2I4)
+#ifdef W3_T
+ 9020 FORMAT ( ' TEST W3SBS1: TIMES FILE SUCCESSFULLY OPENED')
+ 9021 FORMAT ( ' TEST W3SBS1: WINDS FILE SUCCESSFULLY OPENED')
+ 9022 FORMAT ( '              TEST DATA : ',2I8,2I4)
+#endif
 !/
 !/ Internal subroutines RDTIME and RDWIND ---------------------------- /
 !/
@@ -377,7 +393,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/SBS      CHARACTER(LEN=10)       :: COMMAND
+#ifdef W3_SBS
+      CHARACTER(LEN=10)       :: COMMAND
+#endif
 !/
 ! -------------------------------------------------------------------- /
 ! 1.  Reading loop
@@ -391,8 +409,10 @@
         IF ( IMPROC .EQ. NMPSCR ) WRITE (MDSS, 911 )
         BACKSPACE NDS
 !
-!/SBS        WRITE (COMMAND,'(A5,1X,I4)') 'sleep ', SLEEP1
-!/SBS        CALL SYSTEM ( COMMAND )
+#ifdef W3_SBS
+        WRITE (COMMAND,'(A5,1X,I4)') 'sleep ', SLEEP1
+        CALL SYSTEM ( COMMAND )
+#endif
 !
         END DO
 !
@@ -460,7 +480,9 @@
       INTEGER                 :: TTIME(2), IX, IY
       INTEGER, SAVE           :: NREW  = 0
       REAL                    :: DTTST, XXX(NX,NY)
-!/SBS      CHARACTER(LEN=10)       :: COMMAND
+#ifdef W3_SBS
+      CHARACTER(LEN=10)       :: COMMAND
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Loops
@@ -473,20 +495,28 @@
 !
           NREW   = NREW + 1
           READ (NDS,END=140,ERR=140) TTIME
-!/T          WRITE (MDST,9000) TTIME
+#ifdef W3_T
+          WRITE (MDST,9000) TTIME
+#endif
 !
           NREW   = NREW + 1
           READ (NDS,END=130,ERR=130) ((XXX(IX,IY),IX=1,NX),IY=1,NY)
-!/T          WRITE (MDST,9001) 'U'
+#ifdef W3_T
+          WRITE (MDST,9001) 'U'
+#endif
 !
           NREW   = NREW + 1
           READ (NDS,END=120,ERR=120) ((XXX(IX,IY),IX=1,NX),IY=1,NY)
-!/T          WRITE (MDST,9001) 'V'
+#ifdef W3_T
+          WRITE (MDST,9001) 'V'
+#endif
 !
           IF ( TYPE .EQ. 'WNS' ) THEN
               NREW   = NREW + 1
               READ (NDS,END=110,ERR=110) ((XXX(IX,IY),IX=1,NX),IY=1,NY)
-!/T             WRITE (MDST,9001) 'DT'
+#ifdef W3_T
+             WRITE (MDST,9001) 'DT'
+#endif
             END IF
 !
           EXIT
@@ -506,8 +536,10 @@
 !
           IF ( IMPROC .EQ. NMPSCR ) WRITE (MDSS,900)
 !
-!/SBS          WRITE (COMMAND,'(A5,1X,I4)') 'sleep ', SLEEP2
-!/SBS          CALL SYSTEM ( COMMAND )
+#ifdef W3_SBS
+          WRITE (COMMAND,'(A5,1X,I4)') 'sleep ', SLEEP2
+          CALL SYSTEM ( COMMAND )
+#endif
 !
           END DO
 !
@@ -556,8 +588,10 @@
  1010 FORMAT (/' *** WAVEWATCH-III ERROR IN W3SBS1/RDWIND : '/        &
                '     FILE READ PAST EXPECTED TIME '/)
 !
-!/T 9000 FORMAT ( ' TEST RDWIND: TIME READ ',I8.8,1X,I6.6)
-!/T 9001 FORMAT ( '              FIELD READ ',A)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST RDWIND: TIME READ ',I8.8,1X,I6.6)
+ 9001 FORMAT ( '              FIELD READ ',A)
+#endif
 !/
 !/ End of RDWIND ----------------------------------------------------- /
 !/

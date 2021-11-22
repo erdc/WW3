@@ -196,9 +196,13 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
-!/DEBUGFLS      USE W3ODATMD, only : IAPROC
+#ifdef W3_DEBUGFLS
+      USE W3ODATMD, only : IAPROC
+#endif
       IMPLICIT NONE
 !/
 !/ ------------------------------------------------------------------- /
@@ -219,7 +223,9 @@
 !/
       INTEGER                 :: NXT, NYT, GTYPET, I
       INTEGER                 :: FILLER(3)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       LOGICAL                 :: WRITE
       CHARACTER(LEN=3)        :: TSFLD
       CHARACTER(LEN=11)       :: FORM = 'UNFORMATTED'
@@ -234,14 +240,20 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLDO')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLDO')
+#endif
 !
-!/T      WRITE (NDST,9000) INXOUT, IDFLD, NDS, NDST, NDSE,            &
-!/T                        NX, NY, GTYPE, IERR
+#ifdef W3_T
+      WRITE (NDST,9000) INXOUT, IDFLD, NDS, NDST, NDSE,            &
+                        NX, NY, GTYPE, IERR
+#endif
 !
 ! test input parameters ---------------------------------------------- *
 !
-!/TIDE      TIDEOK = .TRUE.
+#ifdef W3_TIDE
+      TIDEOK = .TRUE.
+#endif
       FILLER(:)=0
       IF ( PRESENT(TIDEFLAGIN) ) THEN
         TIDEFLAG = TIDEFLAGIN
@@ -337,28 +349,42 @@
 !
       WRITE  = INXOUT .EQ. 'WRITE'
 !
-!/T      WRITE (NDST,9001)  WRITE, FNAME(:I)
+#ifdef W3_T
+      WRITE (NDST,9001)  WRITE, FNAME(:I)
+#endif
 !
 ! Open file ---------------------------------------------------------- *
 !
-!/DEBUGFLS       WRITE(740+IAPROC,*) 'W3FLDSMD 1 : WRITE=', WRITE
+#ifdef W3_DEBUGFLS
+       WRITE(740+IAPROC,*) 'W3FLDSMD 1 : WRITE=', WRITE
+#endif
       IF ( WRITE ) THEN
-!/DEBUGFLS       WRITE(740+IAPROC,*) 'W3FLDSMD 2 : WRITE=', WRITE
+#ifdef W3_DEBUGFLS
+       WRITE(740+IAPROC,*) 'W3FLDSMD 2 : WRITE=', WRITE
+#endif
           IF ( PRESENT(FPRE) ) THEN
-!/DEBUGFLS       WRITE(740+IAPROC,*) '1 : W3FLDSMD FNAME=', FNAME(:I)
+#ifdef W3_DEBUGFLS
+       WRITE(740+IAPROC,*) '1 : W3FLDSMD FNAME=', FNAME(:I)
+#endif
               OPEN (NDS,FILE=FPRE//FNAME(:I),FORM=FORM,ERR=803,       &
                     IOSTAT=IERR)
           ELSE
-!/DEBUGFLS       WRITE(740+IAPROC,*) '2 : W3FLDSMD FNAME=', FNAME(:I)
+#ifdef W3_DEBUGFLS
+       WRITE(740+IAPROC,*) '2 : W3FLDSMD FNAME=', FNAME(:I)
+#endif
               OPEN (NDS,FILE=FNAME(:I),FORM=FORM,ERR=803,IOSTAT=IERR)
             END IF
         ELSE
           IF ( PRESENT(FPRE) ) THEN
-!/DEBUGFLS       WRITE(740+IAPROC,*) '3 : W3FLDSMD FNAME=', FNAME(:I)
+#ifdef W3_DEBUGFLS
+       WRITE(740+IAPROC,*) '3 : W3FLDSMD FNAME=', FNAME(:I)
+#endif
               OPEN (NDS,FILE=FPRE//FNAME(:I),FORM=FORM,               &
                     STATUS='OLD',ERR=803,IOSTAT=IERR)
           ELSE
-!/DEBUGFLS       WRITE(740+IAPROC,*) '4 : W3FLDSMD FNAME=', FNAME(:I)
+#ifdef W3_DEBUGFLS
+       WRITE(740+IAPROC,*) '4 : W3FLDSMD FNAME=', FNAME(:I)
+#endif
               OPEN (NDS,FILE=FNAME(:I),FORM=FORM,                     &
                     STATUS='OLD',ERR=803,IOSTAT=IERR)
             END IF
@@ -366,7 +392,9 @@
 !
 ! Process test data -------------------------------------------------- *
 !
-!/DEBUGFLS       WRITE(740+IAPROC,*) 'WRITE=', WRITE
+#ifdef W3_DEBUGFLS
+       WRITE(740+IAPROC,*) 'WRITE=', WRITE
+#endif
       IF ( WRITE ) THEN
           IF ( FDHDR ) THEN
              IF ( FORM .EQ. 'UNFORMATTED' ) THEN
@@ -385,18 +413,22 @@
           IF ( FORM .EQ. 'UNFORMATTED' ) THEN
               READ (NDS,END=806,ERR=805,IOSTAT=IERR)                  &
                     TSSTR, TSFLD, NXT, NYT, GTYPET, FILLER(1:2), TIDEFLAG
-!/DEBUGFLS       WRITE(740+IAPROC,*) '1: NXT=', NXT, ' NYT=', NYT
-!/DEBUGFLS       WRITE(740+IAPROC,*)            '1: TSSTR=', TSSTR
-!/DEBUGFLS       WRITE(740+IAPROC,*)            '1: TSFLD=', TSFLD
-!/DEBUGFLS       WRITE(740+IAPROC,*)            '1: NXT=', NXT, ' NYT=', NYT
-!/DEBUGFLS       WRITE(740+IAPROC,*)            '1: GTYPET=', GTYPET
-!/DEBUGFLS       WRITE(740+IAPROC,*)            '1: FILLER=', FILLER
-!/DEBUGFLS       WRITE(740+IAPROC,*)            '1: TIDEFLAG=', TIDEFLAG
+#ifdef W3_DEBUGFLS
+       WRITE(740+IAPROC,*) '1: NXT=', NXT, ' NYT=', NYT
+       WRITE(740+IAPROC,*)            '1: TSSTR=', TSSTR
+       WRITE(740+IAPROC,*)            '1: TSFLD=', TSFLD
+       WRITE(740+IAPROC,*)            '1: NXT=', NXT, ' NYT=', NYT
+       WRITE(740+IAPROC,*)            '1: GTYPET=', GTYPET
+       WRITE(740+IAPROC,*)            '1: FILLER=', FILLER
+       WRITE(740+IAPROC,*)            '1: TIDEFLAG=', TIDEFLAG
+#endif
           ELSE
               READ (NDS,900,END=806,ERR=805,IOSTAT=IERR)              &
                     TSSTR, TSFLD, NXT, NYT, GTYPET, FILLER(1:2), TIDEFLAG
-!/DEBUGFLS       WRITE(740+IAPROC,*) '2: NXT=', NXT, ' NYT=', NYT
-!/DEBUGFLS       WRITE(740+IAPROC,*) '2: NXT=', NXT, ' NYT=', NYT
+#ifdef W3_DEBUGFLS
+       WRITE(740+IAPROC,*) '2: NXT=', NXT, ' NYT=', NYT
+       WRITE(740+IAPROC,*) '2: NXT=', NXT, ' NYT=', NYT
+#endif
           END IF
           IF ((FILLER(1).NE.0.OR.FILLER(2).NE.0).AND.TIDEFLAG.GE.0) TIDEFLAG=0
           IF (TIDEFLAG.NE.0.AND.(.NOT.TIDEOK)) THEN     
@@ -407,14 +439,18 @@
           IF (( IDFLD.EQ.'WND' .AND. TSFLD.EQ.'WNS') .OR.             &
               ( IDFLD.EQ.'ICE' .AND. TSFLD.EQ.'ISI')  ) THEN
               IDFLD  = TSFLD
-!/T              WRITE (NDST,9002) IDFLD
+#ifdef W3_T
+              WRITE (NDST,9002) IDFLD
+#endif
             END IF
           IF ( IDFLD .NE. TSFLD ) GOTO 808
           IF ( IDFLD(1:2) .NE. 'DT' ) THEN
             IF ( NX.NE.NXT .OR. NY.NE.NYT ) THEN 
-!/DEBUGFLS       WRITE(740+IAPROC,*) 'Dimension error'
-!/DEBUGFLS       WRITE(740+IAPROC,*) 'NX =', NX , ' NY =', NY
-!/DEBUGFLS       WRITE(740+IAPROC,*) 'NXT=', NXT, ' NYT=', NYT
+#ifdef W3_DEBUGFLS
+       WRITE(740+IAPROC,*) 'Dimension error'
+       WRITE(740+IAPROC,*) 'NX =', NX , ' NY =', NY
+       WRITE(740+IAPROC,*) 'NXT=', NXT, ' NYT=', NYT
+#endif
               GOTO 809
             ELSE
               NX     = NXT
@@ -517,17 +553,19 @@
          '     FILLER indicates use of tidal constituents',3I4, /&
          '     For this the code should be compiled with TIDE switch'/)
 !
-!/T 9000 FORMAT (' TEST W3FLDO : INXOUT : ',A/                     &
-!/T              '               IDFLD  : ',A/                     &
-!/T              '               NDS    : ',I2/                    &
-!/T              '               NDST   : ',I2/                    &
-!/T              '               NDSE   : ',I2/                    &
-!/T              '               NX, NY : ',I9,3X,I9/              &
-!/T              '               GTYPE  : ',I2/                    &
-!/T              '               IERR   : ',I2)
-!/T 9001 FORMAT ('               WRITE  : ',L2/                    &
-!/T              '               FNAME  : [',A,']')
-!/T 9002 FORMAT ('           NEW IDFLD  : ',A)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3FLDO : INXOUT : ',A/                     &
+              '               IDFLD  : ',A/                     &
+              '               NDS    : ',I2/                    &
+              '               NDST   : ',I2/                    &
+              '               NDSE   : ',I2/                    &
+              '               NX, NY : ',I9,3X,I9/              &
+              '               GTYPE  : ',I2/                    &
+              '               IERR   : ',I2)
+ 9001 FORMAT ('               WRITE  : ',L2/                    &
+              '               FNAME  : [',A,']')
+ 9002 FORMAT ('           NEW IDFLD  : ',A)
+#endif
 !/
 !/ End of W3FLDO  ---------------------------------------------------- /
 !/
@@ -616,9 +654,13 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
-!/TIDE      USE W3TIDEMD
+#ifdef W3_TIDE
+      USE W3TIDEMD
+#endif
       USE W3IDATMD
       IMPLICIT NONE
 !/
@@ -633,14 +675,18 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       LOGICAL                 :: WRITE
       INTEGER                 :: I, IX
 !
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLDTIDE1')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLDTIDE1')
+#endif
 !
 ! test input parameters ---------------------------------------------- *
 !
@@ -653,14 +699,16 @@
            IDFLD.NE.'ISI' )    GOTO 802
       WRITE  = INXOUT .EQ. 'WRITE'
 
-!/TIDE      IF ( WRITE ) THEN
-!/TIDE               WRITE (NDS,ERR=804,IOSTAT=IERR)                        &
-!/TIDE                     TIDE_MF
-!/TIDE        ELSE
-!/TIDE               READ (NDS,END=806,ERR=805,IOSTAT=IERR)              &
-!/TIDE                    TIDE_MF
-!/TIDE                    NTIDE = TIDE_MF
-!/TIDE               END IF
+#ifdef W3_TIDE
+      IF ( WRITE ) THEN
+               WRITE (NDS,ERR=804,IOSTAT=IERR)                        &
+                     TIDE_MF
+        ELSE
+               READ (NDS,END=806,ERR=805,IOSTAT=IERR)              &
+                    TIDE_MF
+                    NTIDE = TIDE_MF
+               END IF
+#endif
 !
 !
 ! File OK ------------------------------------------------------------ *
@@ -798,9 +846,13 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
-!/TIDE      USE W3TIDEMD
+#ifdef W3_TIDE
+      USE W3TIDEMD
+#endif
       USE W3IDATMD
       IMPLICIT NONE
 !/
@@ -815,14 +867,18 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       LOGICAL                 :: WRITE
       INTEGER                 :: I, IX, TIDE_MF1
       CHARACTER(LEN=100)      :: LIST(70)
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLDTIDE2')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLDTIDE2')
+#endif
 !
 ! test input parameters ---------------------------------------------- *
 !
@@ -835,44 +891,48 @@
            IDFLD.NE.'ISI' )    GOTO 802
       WRITE  = INXOUT .EQ. 'WRITE'
 
-!/TIDE      IF ( WRITE ) THEN
-!/TIDE               WRITE (NDS,ERR=804,IOSTAT=IERR)                        &
-!/TIDE                     TIDE_FREQC(:),TIDECON_NAME(:),TIDAL_CONST(:,:,:,:,:)
-!/TIDE        ELSE
-!/TIDE               IF (.NOT. ALLOCATED(TIDAL_CONST)) ALLOCATE(TIDAL_CONST(NX,NY,TIDE_MF,2,2))
-!/TIDE               IF (.NOT. ALLOCATED(TIDE_FREQC)) ALLOCATE(TIDE_FREQC(TIDE_MF))
-!/TIDE               IF (.NOT. ALLOCATED(TIDECON_NAMEI)) ALLOCATE(TIDECON_NAMEI(TIDE_MF))
-!/TIDE               READ (NDS,END=806,ERR=805,IOSTAT=IERR)              &
-!/TIDE                     TIDE_FREQC,TIDECON_NAMEI(:),TIDAL_CONST(:,:,:,:,:)
-!/TIDE                     LIST(:)=''
-!/TIDE                     TIDE_MF1=TIDE_MF
-!/TIDE                     DO I=1,TIDE_MF
-!/TIDE                       LIST(I)=TIDECON_NAMEI(I)
-!/TIDE                       END DO
-!/TIDE                     CALL TIDE_FIND_INDICES_ANALYSIS(LIST)
-!/TIDE               IF (TIDE_MF1.NE.TIDE_MF) GOTO 807
-!/TIDE               CALL TIDE_SET_INDICES
-!/TIDE               IF(IDFLD.EQ.'LEV') THEN 
-!/TIDE                 IF (IDAT.EQ.1) WLTIDE(:,:,:,:)=TIDAL_CONST(:,:,:,1,:)
-!/TIDE               ELSE 
-!/TIDE                 IF (IDAT.EQ.1) CXTIDE(:,:,:,:)=TIDAL_CONST(:,:,:,1,:)
-!/TIDE                 IF (IDAT.EQ.1) CYTIDE(:,:,:,:)=TIDAL_CONST(:,:,:,2,:)
-!/TIDE                 END IF 
-!/TIDE               END IF
-!/TIDET DO I=1,NTIDE 
-!/TIDET  WRITE(NDST,*) 'Tidal constituents for IX = 1:', IDFLD,' ',TIDECON_NAME(I),TIDAL_CONST(1,1,I,1,1),TIDAL_CONST(1,1,I,1,2), &
-!/TIDET                   '##',TIDAL_CONST(1,1,I,2,1),TIDAL_CONST(1,1,I,2,2)
-!/TIDET END DO
-!/TIDET DO I=1,NTIDE 
-!/TIDET  WRITE(NDST,*) 'Tidal constituents for IX = 2:', IDFLD,' ',TIDECON_NAME(I),TIDAL_CONST(2,1,I,1,1),TIDAL_CONST(2,1,I,1,2), &
-!/TIDET                   '##',TIDAL_CONST(2,1,I,2,1),TIDAL_CONST(2,1,I,2,2)
-!/TIDET END DO
-!/TIDET DO IX=1,NX
-!/TIDET IF (IDFLD.EQ.'CUR')  WRITE (989,'(I10,X,176F10.3)') IX,CXTIDE(IX,1,:,1),CYTIDE(IX,1,:,1), &
-!/TIDET            CXTIDE(IX,1,:,2),CYTIDE(IX,1,:,2)
-!/TIDET  END DO
-!/TIDET  IF (IDFLD.EQ.'CUR') WRITE(988,'(F10.3,/)') CXTIDE(:,1,15,1)
-!/TIDET  IF (IDFLD.EQ.'CUR') WRITE(988,'(F10.3,/)') CXTIDE(:,1,15,2)
+#ifdef W3_TIDE
+      IF ( WRITE ) THEN
+               WRITE (NDS,ERR=804,IOSTAT=IERR)                        &
+                     TIDE_FREQC(:),TIDECON_NAME(:),TIDAL_CONST(:,:,:,:,:)
+        ELSE
+               IF (.NOT. ALLOCATED(TIDAL_CONST)) ALLOCATE(TIDAL_CONST(NX,NY,TIDE_MF,2,2))
+               IF (.NOT. ALLOCATED(TIDE_FREQC)) ALLOCATE(TIDE_FREQC(TIDE_MF))
+               IF (.NOT. ALLOCATED(TIDECON_NAMEI)) ALLOCATE(TIDECON_NAMEI(TIDE_MF))
+               READ (NDS,END=806,ERR=805,IOSTAT=IERR)              &
+                     TIDE_FREQC,TIDECON_NAMEI(:),TIDAL_CONST(:,:,:,:,:)
+                     LIST(:)=''
+                     TIDE_MF1=TIDE_MF
+                     DO I=1,TIDE_MF
+                       LIST(I)=TIDECON_NAMEI(I)
+                       END DO
+                     CALL TIDE_FIND_INDICES_ANALYSIS(LIST)
+               IF (TIDE_MF1.NE.TIDE_MF) GOTO 807
+               CALL TIDE_SET_INDICES
+               IF(IDFLD.EQ.'LEV') THEN 
+                 IF (IDAT.EQ.1) WLTIDE(:,:,:,:)=TIDAL_CONST(:,:,:,1,:)
+               ELSE 
+                 IF (IDAT.EQ.1) CXTIDE(:,:,:,:)=TIDAL_CONST(:,:,:,1,:)
+                 IF (IDAT.EQ.1) CYTIDE(:,:,:,:)=TIDAL_CONST(:,:,:,2,:)
+                 END IF 
+               END IF
+#endif
+#ifdef W3_TIDET
+ DO I=1,NTIDE 
+  WRITE(NDST,*) 'Tidal constituents for IX = 1:', IDFLD,' ',TIDECON_NAME(I),TIDAL_CONST(1,1,I,1,1),TIDAL_CONST(1,1,I,1,2), &
+                   '##',TIDAL_CONST(1,1,I,2,1),TIDAL_CONST(1,1,I,2,2)
+ END DO
+ DO I=1,NTIDE 
+  WRITE(NDST,*) 'Tidal constituents for IX = 2:', IDFLD,' ',TIDECON_NAME(I),TIDAL_CONST(2,1,I,1,1),TIDAL_CONST(2,1,I,1,2), &
+                   '##',TIDAL_CONST(2,1,I,2,1),TIDAL_CONST(2,1,I,2,2)
+ END DO
+ DO IX=1,NX
+ IF (IDFLD.EQ.'CUR')  WRITE (989,'(I10,X,176F10.3)') IX,CXTIDE(IX,1,:,1),CYTIDE(IX,1,:,1), &
+            CXTIDE(IX,1,:,2),CYTIDE(IX,1,:,2)
+  END DO
+  IF (IDFLD.EQ.'CUR') WRITE(988,'(F10.3,/)') CXTIDE(:,1,15,1)
+  IF (IDFLD.EQ.'CUR') WRITE(988,'(F10.3,/)') CXTIDE(:,1,15,2)
+#endif
 !
 !
 ! File OK ------------------------------------------------------------ *
@@ -908,7 +968,9 @@
       RETURN
 !
   807 CONTINUE
-!/TIDE      IF ( NDSE .GE. 0 ) WRITE (NDSE,1007) TIDECON_NAMEI(:)
+#ifdef W3_TIDE
+      IF ( NDSE .GE. 0 ) WRITE (NDSE,1007) TIDECON_NAMEI(:)
+#endif
       IERR   = 7
       RETURN
 !
@@ -924,8 +986,10 @@
                '     ERROR IN READING ',A,' FILE, IOSTAT =',I6/)
  1006 FORMAT (/' *** WAVEWATCH III ERROR IN W3FLDTIDE2 : '/         &
                '     PREMATURE END OF ',A,' FILE'/)
-!/TIDE 1007 FORMAT (/' *** WAVEWATCH III ERROR IN W3FLDTIDE2 : '/         &
-!/TIDE               '     TIDAL CONSTITUENTS NOT RECOGNIZED ',A /)
+#ifdef W3_TIDE
+ 1007 FORMAT (/' *** WAVEWATCH III ERROR IN W3FLDTIDE2 : '/         &
+               '     TIDAL CONSTITUENTS NOT RECOGNIZED ',A /)
+#endif
 !/
 !/ End of W3FLDO  ---------------------------------------------------- /
 !/
@@ -935,7 +999,9 @@
       SUBROUTINE W3FLDG (INXOUT, IDFLD, NDS, NDST, NDSE, MX, MY,      &
                          NX, NY, T0, TN, TF0, FX0, FY0, FA0,          &
                          TFN, FXN, FYN, FAN, IERR, FLAGSC             &
-!/OASIS                  , COUPL_COMM                                 &
+#ifdef W3_OASIS
+                  , COUPL_COMM                                 &
+#endif
                          )
 !/
 !/                  +-----------------------------------+
@@ -1046,13 +1112,25 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3TIMEMD
-!/OASIS      USE W3OACPMD, ONLY: ID_OASIS_TIME, CPLT0
-!/OASACM      USE W3AGCMMD, ONLY: RCV_FIELDS_FROM_ATMOS
-!/OASOCM      USE W3OGCMMD, ONLY: RCV_FIELDS_FROM_OCEAN
-!/OASICM      USE W3IGCMMD, ONLY: RCV_FIELDS_FROM_ICE
-!/OASIS       USE W3ODATMD, ONLY: DTOUT 
+#ifdef W3_OASIS
+      USE W3OACPMD, ONLY: ID_OASIS_TIME, CPLT0
+#endif
+#ifdef W3_OASACM
+      USE W3AGCMMD, ONLY: RCV_FIELDS_FROM_ATMOS
+#endif
+#ifdef W3_OASOCM
+      USE W3OGCMMD, ONLY: RCV_FIELDS_FROM_OCEAN
+#endif
+#ifdef W3_OASICM
+      USE W3IGCMMD, ONLY: RCV_FIELDS_FROM_ICE
+#endif
+#ifdef W3_OASIS
+       USE W3ODATMD, ONLY: DTOUT 
+#endif
       IMPLICIT NONE
 !/
 !/ ------------------------------------------------------------------- /
@@ -1068,14 +1146,18 @@
       CHARACTER, INTENT(IN)        :: INXOUT*(*)
       CHARACTER(LEN=3), INTENT(IN) :: IDFLD
       LOGICAL, INTENT(INOUT), OPTIONAL        :: FLAGSC
-!/OASIS      INTEGER, INTENT(IN), OPTIONAL :: COUPL_COMM
+#ifdef W3_OASIS
+      INTEGER, INTENT(IN), OPTIONAL :: COUPL_COMM
+#endif
 
 !/
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
       INTEGER                 :: IX, IY, J, ISTAT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: DTTST
       LOGICAL                 :: WRITE, FL2D, FLFRST, FLBE, FLST,    &
                                  FLINTERP, FLCOUPL
@@ -1083,12 +1165,16 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLDG')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLDG')
+#endif
 !/
       IERR   = 0
 !
-!/T      WRITE (NDST,9000) INXOUT, IDFLD, NDS, NDST, NDSE, MX, MY,    &
-!/T                        NX, NY, TF0, TFN, IERR
+#ifdef W3_T
+      WRITE (NDST,9000) INXOUT, IDFLD, NDS, NDST, NDSE, MX, MY,    &
+                        NX, NY, TF0, TFN, IERR
+#endif
 !
 ! test input parameters ---------------------------------------------- *
 !
@@ -1129,7 +1215,9 @@
 
       FLFRST = TFN(1) .EQ. -1
 !
-!/T      WRITE (NDST,9001) WRITE, FL2D, FLBE, FLST, FLFRST
+#ifdef W3_T
+      WRITE (NDST,9001) WRITE, FL2D, FLBE, FLST, FLFRST
+#endif
 !
 ! Loop over times / fields ========================================== *
 !
@@ -1141,7 +1229,9 @@
 !
             TF0(1) = TFN(1)
             TF0(2) = TFN(2)
-!/T            WRITE (NDST,9020)
+#ifdef W3_T
+            WRITE (NDST,9020)
+#endif
 ! unless TFN has been changed in the do loop, the following line is essentally 
 !       "if not.flfrst"
             IF ( TFN(1) .NE. -1 ) THEN
@@ -1156,8 +1246,10 @@
                         END DO
                     END IF
                   END DO
-!/T              ELSE
-!/T                WRITE (NDST,9021)
+#ifdef W3_T
+              ELSE
+                WRITE (NDST,9021)
+#endif
               END IF
 !
           END IF
@@ -1167,7 +1259,9 @@
 !
         IF ( WRITE ) THEN
 !
-!/T            WRITE (NDST,9030) TF0
+#ifdef W3_T
+            WRITE (NDST,9030) TF0
+#endif
             WRITE (NDS,ERR=803,IOSTAT=ISTAT) TF0
             IF ( .NOT. FL2D ) THEN
                 J      = 1
@@ -1191,30 +1285,42 @@
 !
           ELSE
 !
-!/OASIS            IF (FLCOUPL) THEN 
-!/OASIS  ! Do not receive coupling fields at the end of the first integration time in case of  
-!/OASIS  ! forcing with a non interpolated field (like lev, ice, ...)
-!/OASIS              IF ( (ID_OASIS_TIME.EQ.0 .AND. ( FLFRST .OR. CPLT0 )) .OR. &
-!/OASIS                   (ID_OASIS_TIME.GT.0)) THEN
+#ifdef W3_OASIS
+            IF (FLCOUPL) THEN 
+  ! Do not receive coupling fields at the end of the first integration time in case of  
+  ! forcing with a non interpolated field (like lev, ice, ...)
+              IF ( (ID_OASIS_TIME.EQ.0 .AND. ( FLFRST .OR. CPLT0 )) .OR. &
+                   (ID_OASIS_TIME.GT.0)) THEN
+#endif
 !
-!/OASACM ! Getting U10 (FXN) and V10 (FYN) from atmospheric model
-!/OASACM                CALL RCV_FIELDS_FROM_ATMOS(COUPL_COMM,          &
-!/OASACM                                           IDFLD, FXN, FYN, FAN)
-!/OASOCM ! Getting UCUR (CX), VCUR (CY), WLV from ocean model
-!/OASOCM                CALL RCV_FIELDS_FROM_OCEAN(COUPL_COMM,          &
-!/OASOCM                                           IDFLD, FXN, FYN, FAN)
-!/OASICM ! Getting ICEF from ice model
-!/OASICM                CALL RCV_FIELDS_FROM_ICE(COUPL_COMM,            &
-!/OASICM                                         IDFLD, FXN, FYN, FAN)
+#ifdef W3_OASACM
+ ! Getting U10 (FXN) and V10 (FYN) from atmospheric model
+                CALL RCV_FIELDS_FROM_ATMOS(COUPL_COMM,          &
+                                           IDFLD, FXN, FYN, FAN)
+#endif
+#ifdef W3_OASOCM
+ ! Getting UCUR (CX), VCUR (CY), WLV from ocean model
+                CALL RCV_FIELDS_FROM_OCEAN(COUPL_COMM,          &
+                                           IDFLD, FXN, FYN, FAN)
+#endif
+#ifdef W3_OASICM
+ ! Getting ICEF from ice model
+                CALL RCV_FIELDS_FROM_ICE(COUPL_COMM,            &
+                                         IDFLD, FXN, FYN, FAN)
+#endif
 
-!/OASIS  ! Increment the time field TFN to the next coupling time
-!/OASIS                TFN(1)=T0(1)
-!/OASIS                TFN(2)=T0(2)
-!/OASIS                CALL TICK21(TFN,DTOUT(7))
-!/OASIS              END IF
-!/OASIS            ELSE 
+#ifdef W3_OASIS
+  ! Increment the time field TFN to the next coupling time
+                TFN(1)=T0(1)
+                TFN(2)=T0(2)
+                CALL TICK21(TFN,DTOUT(7))
+              END IF
+            ELSE 
+#endif
               READ (NDS,END=800,ERR=805,IOSTAT=ISTAT) TFN
-!/T             WRITE (NDST,9031) TFN
+#ifdef W3_T
+             WRITE (NDST,9031) TFN
+#endif
               IF ( .NOT. FL2D ) THEN
 ! note: "J" here does *not* refer to data type, wlev etc.
 !       It refers to the dimension.
@@ -1239,7 +1345,9 @@
                 IF ( FLST ) READ (NDS,END=806,ERR=807,IOSTAT=ISTAT)   &
                            ((FAN(IX,IY),IX=1,NX),IY=1,NY)
               END IF
-!/OASIS            END IF
+#ifdef W3_OASIS
+            END IF
+#endif
 !
 ! Check time, branch back if necessary
 !
@@ -1266,7 +1374,9 @@
 
       IF ( .NOT.WRITE .AND. FLINTERP .AND. TF0(1) .EQ. -1 ) THEN
 !
-!/T          WRITE (NDST,9040)
+#ifdef W3_T
+          WRITE (NDST,9040)
+#endif
           TF0(1) = T0(1)
           TF0(2) = T0(2)
 !
@@ -1288,11 +1398,13 @@
 !
   500 CONTINUE
 !
-!/T      IF ( FLINTERP ) THEN
-!/T          WRITE (NDST,9041) TF0, TFN
-!/T        ELSE
-!/T          WRITE (NDST,9042) TFN
-!/T        END IF
+#ifdef W3_T
+      IF ( FLINTERP ) THEN
+          WRITE (NDST,9041) TF0, TFN
+        ELSE
+          WRITE (NDST,9042) TFN
+        END IF
+#endif
 !
 ! Process fields, end ----------------------------------------------- *
 !
@@ -1308,7 +1420,9 @@
           TFN(2) = TN(2)
           CALL TICK21 ( TFN , 1. )
         END IF
-!/T      WRITE (NDST,9032) TFN, IERR
+#ifdef W3_T
+      WRITE (NDST,9032) TFN, IERR
+#endif
 !
       IF ( FLINTERP ) THEN
           GOTO 300
@@ -1371,32 +1485,40 @@
  1007 FORMAT (/' *** WAVEWATCH III ERROR IN W3FLDG : '/               &
                '     ERROR IN READING FIELD ',I1,', IOSTAT =',I6/)
 !
-!/T 9000 FORMAT (' TEST W3FLDG : INXOUT     : ',A/                    &
-!/T              '               IDFLD      : ',A/                    &
-!/T              '               NDS(T/E)   :',3I4/                   &
-!/T              '               MX, MY     :',2I8/                   &
-!/T              '               NX, NY     :',2I8/                   &
-!/T              '               TF0        :',I9.8,I7.6/             &
-!/T              '               TFN        :',I9.8,I7.6/             &
-!/T              '               IERR       :',I4)
-!/T 9001 FORMAT (' TEST W3FLDG : WRITE      :',L4/                    &
-!/T              '               FL2D       :',L4/                    &
-!/T              '               FLBE       :',L4/                    &
-!/T              '               FLST       :',L4/                    &
-!/T              '               FIRST      :',L4)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3FLDG : INXOUT     : ',A/                    &
+              '               IDFLD      : ',A/                    &
+              '               NDS(T/E)   :',3I4/                   &
+              '               MX, MY     :',2I8/                   &
+              '               NX, NY     :',2I8/                   &
+              '               TF0        :',I9.8,I7.6/             &
+              '               TFN        :',I9.8,I7.6/             &
+              '               IERR       :',I4)
+ 9001 FORMAT (' TEST W3FLDG : WRITE      :',L4/                    &
+              '               FL2D       :',L4/                    &
+              '               FLBE       :',L4/                    &
+              '               FLST       :',L4/                    &
+              '               FIRST      :',L4)
+#endif
 !
-!/T 9020 FORMAT (' TEST W3FLDG : FIELD SHIFTED')
-!/T 9021 FORMAT ('               NO FIELD TO SHIFT')
+#ifdef W3_T
+ 9020 FORMAT (' TEST W3FLDG : FIELD SHIFTED')
+ 9021 FORMAT ('               NO FIELD TO SHIFT')
+#endif
 !
-!/T 9030 FORMAT (' TEST W3FLDG : WRITE TIME : ',I8,I7.6)
-!/T 9031 FORMAT (' TEST W3FLDG : NEW TIME   : ',I8,I7.6)
-!/T 9032 FORMAT (' TEST W3FLDG : NEW TIME   : ',I8,I7.6,              &
-!/T              ' EOF (IERR =',I3,')')
+#ifdef W3_T
+ 9030 FORMAT (' TEST W3FLDG : WRITE TIME : ',I8,I7.6)
+ 9031 FORMAT (' TEST W3FLDG : NEW TIME   : ',I8,I7.6)
+ 9032 FORMAT (' TEST W3FLDG : NEW TIME   : ',I8,I7.6,              &
+              ' EOF (IERR =',I3,')')
+#endif
 !
-!/T 9040 FORMAT (' TEST W3FLDG : FILLING IN FIRST FIELD')
-!/T 9041 FORMAT (' TEST W3FLDG : FINAL TIMES: ',I8,I7.6/              &
-!/T              '                            ',I8,I7.6)
-!/T 9042 FORMAT (' TEST W3FLDG : FINAL TIME : ',I8,I7.6)
+#ifdef W3_T
+ 9040 FORMAT (' TEST W3FLDG : FILLING IN FIRST FIELD')
+ 9041 FORMAT (' TEST W3FLDG : FINAL TIMES: ',I8,I7.6/              &
+              '                            ',I8,I7.6)
+ 9042 FORMAT (' TEST W3FLDG : FINAL TIME : ',I8,I7.6)
+#endif
 !/
 !/ End of W3FLDG ----------------------------------------------------- /
 !/
@@ -1496,7 +1618,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3TIMEMD
 !
       IMPLICIT NONE
@@ -1515,18 +1639,24 @@
 !/ Local parameters
 !/
       INTEGER                 :: ISTAT, NRT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: DTTST
       LOGICAL                 :: WRITE, SIZE
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLDD')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLDD')
+#endif
 !/
       IERR   = 0
 !
-!/T      WRITE (NDST,9000) INXOUT, IDFLD, NDS, NDST, NDSE, NR, ND,    &
-!/T                        TIME, TD, IERR
+#ifdef W3_T
+      WRITE (NDST,9000) INXOUT, IDFLD, NDS, NDST, NDSE, NR, ND,    &
+                        TIME, TD, IERR
+#endif
 !
 ! test input parameters ---------------------------------------------- *
 !
@@ -1540,13 +1670,17 @@
       WRITE  = INXOUT .EQ. 'WRITE'
       SIZE   = INXOUT .EQ. 'SIZE'
 !
-!/T      WRITE (NDST,9001) WRITE, SIZE
+#ifdef W3_T
+      WRITE (NDST,9001) WRITE, SIZE
+#endif
 !
 ! Process fields, write --------------------------------------------- *
 !
       IF ( WRITE ) THEN
 !
-!/T          WRITE (NDST,9020) TD, ND
+#ifdef W3_T
+          WRITE (NDST,9020) TD, ND
+#endif
           WRITE (NDS,ERR=803,IOSTAT=ISTAT) TD, ND
           WRITE (NDS,ERR=804,IOSTAT=ISTAT) DATA
 !
@@ -1556,7 +1690,9 @@
 !
   100     CONTINUE
           READ (NDS,END=800,ERR=805,IOSTAT=ISTAT) TD, NDOUT
-!/T          WRITE (NDST,9021) TD, NDOUT
+#ifdef W3_T
+          WRITE (NDST,9021) TD, NDOUT
+#endif
 !
 ! Check time, read and branch back if necessary
 !
@@ -1571,7 +1707,9 @@
         ELSE
 !
           READ (NDS,END=806,ERR=807,IOSTAT=ISTAT) DATA
-!/T          WRITE (NDST,9030) TD
+#ifdef W3_T
+          WRITE (NDST,9030) TD
+#endif
         END IF
 !
 ! Process fields, end ----------------------------------------------- *
@@ -1638,22 +1776,28 @@
  1007 FORMAT (/' *** WAVEWATCH III ERROR IN W3FLDD : '/               &
                '     ERROR IN READING DATA, IOSTAT =',I6/)
 !
-!/T 9000 FORMAT (' TEST W3FLDD : INXOUT     : ',A/                    &
-!/T              '               IDFLD      : ',A/                    &
-!/T              '               NDS(T/E)   :',3I4/                   &
-!/T              '               NR, ND     :',2I4/                   &
-!/T              '               TIME       :',I8,I7.6/               &
-!/T              '               TD         :',I8,I7.6/               &
-!/T              '               IERR       :',I4)
-!/T 9001 FORMAT (' TEST W3FLDD : WRITE      :',L4/                    &
-!/T              '               SIZE       :',L4)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3FLDD : INXOUT     : ',A/                    &
+              '               IDFLD      : ',A/                    &
+              '               NDS(T/E)   :',3I4/                   &
+              '               NR, ND     :',2I4/                   &
+              '               TIME       :',I8,I7.6/               &
+              '               TD         :',I8,I7.6/               &
+              '               IERR       :',I4)
+ 9001 FORMAT (' TEST W3FLDD : WRITE      :',L4/                    &
+              '               SIZE       :',L4)
+#endif
 !
-!/T 9020 FORMAT (' TEST W3FLDD : WRITE TIME : ',I8,I7.6/              &
-!/T              '               RECORDS    : ',I6)
-!/T 9021 FORMAT (' TEST W3FLDD : NEW TIME   : ',I8,I7.6/              &
-!/T              '               RECORDS    : ',I6)
+#ifdef W3_T
+ 9020 FORMAT (' TEST W3FLDD : WRITE TIME : ',I8,I7.6/              &
+              '               RECORDS    : ',I6)
+ 9021 FORMAT (' TEST W3FLDD : NEW TIME   : ',I8,I7.6/              &
+              '               RECORDS    : ',I6)
+#endif
 !
-!/T 9030 FORMAT (' TEST W3FLDD : FINAL TIME : ',I8,I7.6)
+#ifdef W3_T
+ 9030 FORMAT (' TEST W3FLDD : FINAL TIME : ',I8,I7.6)
+#endif
 !/
 !/ End of W3FLDD ----------------------------------------------------- /
 !/
@@ -1802,7 +1946,9 @@
 !/ ------------------------------------------------------------------- /
 !/
       USE W3GSRUMD
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -1824,7 +1970,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       TYPE(T_GSU)             :: GSU
       INTEGER                 :: IX, IY, I, J, NNBR, II(4), JJ(4),    &
                                  MSKC, IFOUND, IMASK, ICOR1
@@ -1837,15 +1985,21 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLDP')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLDP')
+#endif
 !
-!/T      WRITE (NDST,9000) NDSM, NDST, NDSE, MX, MY, NX, NY, ILAND, &
-!/T                        MXI, MYI, NXI, NYI, CLOSED
+#ifdef W3_T
+      WRITE (NDST,9000) NDSM, NDST, NDSE, MX, MY, NX, NY, ILAND, &
+                        MXI, MYI, NXI, NYI, CLOSED
+#endif
 !
 ! 1.  Initializations ------------------------------------------------ *
 ! 1.a Initialize counters and factors
 !
-!/T8      LDBG   = .TRUE.
+#ifdef W3_T8
+      LDBG   = .TRUE.
+#endif
       IERR   = 0
       IFOUND = 0
       IMASK  = 0
@@ -1876,8 +2030,10 @@
       PLON => ALON
       GSU = W3GSUC( .TRUE., FLAGLL, ICLO, PLON, PLAT )
 !
-!/T      WRITE (NDST,9001)
-!/T      CALL W3GSUP( GSU, NDST )
+#ifdef W3_T
+      WRITE (NDST,9001)
+      CALL W3GSUP( GSU, NDST )
+#endif
 !
 ! 2.  Loop over output grid ------------------------------------------ *
 !
@@ -1886,7 +2042,9 @@
 !
           X = TLON(IY,IX)
           Y = TLAT(IY,IX)
-!/T1          WRITE (NDST,9010) IX, IY, X, Y
+#ifdef W3_T1
+          WRITE (NDST,9010) IX, IY, X, Y
+#endif
 !
 ! 2.a Check if sea point
 !
@@ -1932,14 +2090,16 @@
                               IY1 (IX,IY) = JJ(2)
                               RD22(IX,IY) = RR(2)
                             END IF
-!/T                          IF ( NNBR .EQ. 1 ) THEN
-!/T                              WRITE (NDST,9043) &
-!/T                              IX1(IX,IY), IY1(IX,IY), RD11(IX,IY)
-!/T                            ELSE
-!/T                              WRITE (NDST,9044) &
-!/T                              IX1(IX,IY), IY1(IX,IY), RD11(IX,IY), &
-!/T                              IX2(IX,IY), IY2(IX,IY), RD22(IX,IY)
-!/T                          END IF
+#ifdef W3_T
+                          IF ( NNBR .EQ. 1 ) THEN
+                              WRITE (NDST,9043) &
+                              IX1(IX,IY), IY1(IX,IY), RD11(IX,IY)
+                            ELSE
+                              WRITE (NDST,9044) &
+                              IX1(IX,IY), IY1(IX,IY), RD11(IX,IY), &
+                              IX2(IX,IY), IY2(IX,IY), RD22(IX,IY)
+                          END IF
+#endif
                         ELSE
                           IERR   = IERR + 1
                           WRITE (NDSE,910) IX, IY, X, Y,    &
@@ -1948,22 +2108,28 @@
 !
                     END IF ! MSKC
 !
-!/T                  WRITE (NDST,9031)                             &
-!/T                         IX1(IX,IY), IY1(IX,IY), RD11(IX,IY),   &
-!/T                         IX2(IX,IY), IY1(IX,IY), RD21(IX,IY),   &
-!/T                         IX1(IX,IY), IY2(IX,IY), RD12(IX,IY),   &
-!/T                         IX2(IX,IY), IY2(IX,IY), RD22(IX,IY)
+#ifdef W3_T
+                  WRITE (NDST,9031)                             &
+                         IX1(IX,IY), IY1(IX,IY), RD11(IX,IY),   &
+                         IX2(IX,IY), IY1(IX,IY), RD21(IX,IY),   &
+                         IX1(IX,IY), IY2(IX,IY), RD12(IX,IY),   &
+                         IX2(IX,IY), IY2(IX,IY), RD22(IX,IY)
+#endif
 !
 ! 2.e Update overlay map
 !
                   MAPOVR(IX,IY) = MAPOVR(IX,IY) + 1
                   IFOUND  = IFOUND + 1
 !
-!/T1                ELSE ! .NOT.INGRID
-!/T1                  WRITE (NDST,9021)
+#ifdef W3_T1
+                ELSE ! .NOT.INGRID
+                  WRITE (NDST,9021)
+#endif
                 END IF ! INGRID
-!/T1            ELSE ! land-point
-!/T1              WRITE (NDST,9020) IX, IY, X, Y, 'LAND'
+#ifdef W3_T1
+            ELSE ! land-point
+              WRITE (NDST,9020) IX, IY, X, Y, 'LAND'
+#endif
             ENDIF ! sea-point
 !
 ! ... End loop over output grid -------------------------------------- *
@@ -1995,31 +2161,39 @@
                '     X-COUNTERS IN INPUT GRID   :',2I4/         &
                '     Y-COUNTERS IN INPUT GRID   :',2I4)
 !
-!/T 9000 FORMAT ( ' TEST W3FLDP : NDSM/T/E : ',3I8/                &
-!/T               '               MX, MY   : ',2I8/                &
-!/T               '               NX, NY   : ',2I8/                &
-!/T               '               ILAND    : ',I8/                 &
-!/T               '               MXI, MYI : ',2I8/                &
-!/T               '               NXI, NYI : ',2I8/                &
-!/T               '               CLOSED   : ',L8)
-!/T 9001 FORMAT ( ' TEST W3FLDP : GRID SEARCH INFO -- OUTPUT FROM W3GSUP')
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST W3FLDP : NDSM/T/E : ',3I8/                &
+               '               MX, MY   : ',2I8/                &
+               '               NX, NY   : ',2I8/                &
+               '               ILAND    : ',I8/                 &
+               '               MXI, MYI : ',2I8/                &
+               '               NXI, NYI : ',2I8/                &
+               '               CLOSED   : ',L8)
+ 9001 FORMAT ( ' TEST W3FLDP : GRID SEARCH INFO -- OUTPUT FROM W3GSUP')
+#endif
 !
-!/T1 9010 FORMAT ( ' TEST W3FLDP : IX =',I4,' IY =',I4,             &
-!/T1               '  LONGITUDE =',F8.2, '  LATITUDE =',F8.2,       &
-!/T1               '  ================================')
+#ifdef W3_T1
+ 9010 FORMAT ( ' TEST W3FLDP : IX =',I4,' IY =',I4,             &
+               '  LONGITUDE =',F8.2, '  LATITUDE =',F8.2,       &
+               '  ================================')
+#endif
 !
-!/T1 9020 FORMAT ( ' TEST W3FLDP : IX =',I4,' IY =',I4,             &
-!/T1               '  LONGITUDE =',F8.2, '  LATITUDE =',F8.2,       &
-!/T1               '   (',A,')')
-!/T1 9021 FORMAT ( '                   ***** OUT OF RANGE *****')
+#ifdef W3_T1
+ 9020 FORMAT ( ' TEST W3FLDP : IX =',I4,' IY =',I4,             &
+               '  LONGITUDE =',F8.2, '  LATITUDE =',F8.2,       &
+               '   (',A,')')
+ 9021 FORMAT ( '                   ***** OUT OF RANGE *****')
+#endif
 !
-!/T 9031 FORMAT ( ' TEST W3FLDP : FINAL INTERPOLATION DATA (IX,IY,R)', &
-!/T            4(/'                                ',2I4,f7.3))
-!/T 9043 FORMAT ( ' TEST W3FLDP : CORRECTED INTERPOLATION '/       &
-!/T               '               POINT 1 : ',2I4,F6.2)
-!/T 9044 FORMAT ( ' TEST W3FLDP : CORRECTED INTERPOLATION '/       &
-!/T               '               POINT 1 : ',2I4,F6.2/            &
-!/T               '               POINT 2 : ',2I4,F6.2)
+#ifdef W3_T
+ 9031 FORMAT ( ' TEST W3FLDP : FINAL INTERPOLATION DATA (IX,IY,R)', &
+            4(/'                                ',2I4,f7.3))
+ 9043 FORMAT ( ' TEST W3FLDP : CORRECTED INTERPOLATION '/       &
+               '               POINT 1 : ',2I4,F6.2)
+ 9044 FORMAT ( ' TEST W3FLDP : CORRECTED INTERPOLATION '/       &
+               '               POINT 1 : ',2I4,F6.2/            &
+               '               POINT 2 : ',2I4,F6.2)
+#endif
 !/
 !/ End of W3FLDP ----------------------------------------------------- /
 !/
@@ -2134,7 +2308,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3TIMEMD
 !
       IMPLICIT NONE
@@ -2154,28 +2330,36 @@
 !/ Local parameters
 !/
       INTEGER                 :: IX, IY, I
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: X, Y, DIR, DTTST, DERA
       LOGICAL                 :: FLFRST
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLDH')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLDH')
+#endif
 !
       IERR   = 0
       DERA   = ATAN(1.)/45.
 
 
 !
-!/T      WRITE (NDST,9000) J, NDST, NDSE, MX, MY, NX, NY, T0, TN,     &
-!/T                        NH, NHM, TF0, TFN, IERR
+#ifdef W3_T
+      WRITE (NDST,9000) J, NDST, NDSE, MX, MY, NX, NY, T0, TN,     &
+                        NH, NHM, TF0, TFN, IERR
+#endif
 !
 ! Test field ID number for validity
 !
       IF ( J.LT.-9 .OR. J .GT.10 ) GOTO 801
       FLFRST = TFN(1) .EQ. -1
 !
-!/T      WRITE (NDST,9001) FLFRST
+#ifdef W3_T
+      WRITE (NDST,9001) FLFRST
+#endif
 !
 ! Loop over times / fields ========================================== *
 !
@@ -2193,7 +2377,9 @@
                     FY0(IX,IY) = FYN(IX,IY)
                     END DO
                   END DO
-!/T                WRITE (NDST,9020)
+#ifdef W3_T
+                WRITE (NDST,9020)
+#endif
                ELSE IF ( J .EQ. 3 ) THEN
                 DO IX=1, NX
                   DO IY=1, NY
@@ -2202,10 +2388,14 @@
                     FS0(IX,IY) = FSN(IX,IY)
                     END DO
                   END DO
-!/T                WRITE (NDST,9020)
+#ifdef W3_T
+                WRITE (NDST,9020)
+#endif
                END IF
-!/T          ELSE
-!/T            IF ( J .NE. 1 ) WRITE (NDST,9021)
+#ifdef W3_T
+          ELSE
+            IF ( J .NE. 1 ) WRITE (NDST,9021)
+#endif
           END IF
 !
 ! New field
@@ -2220,7 +2410,9 @@
                     FSN(IX,IY) = HA(1,J)
                     END DO
                   END DO
-!/T                WRITE (NDST,9050) HA(1,J)
+#ifdef W3_T
+                WRITE (NDST,9050) HA(1,J)
+#endif
               END IF
 ! cur
             IF ( (J .EQ. 2) .OR. (J .EQ. 5) ) THEN
@@ -2233,7 +2425,9 @@
                     FYN(IX,IY) = Y
                     END DO
                   END DO
-!/T                WRITE (NDST,9050) X, Y
+#ifdef W3_T
+                WRITE (NDST,9050) X, Y
+#endif
               END IF
 ! wnd
             IF ( J .EQ. 3 ) THEN
@@ -2247,7 +2441,9 @@
                     FSN(IX,IY) = HS(1,J)
                     END DO
                   END DO
-!/T                WRITE (NDST,9050) X, Y, HS(1,J)
+#ifdef W3_T
+                WRITE (NDST,9050) X, Y, HS(1,J)
+#endif
               END IF
 ! veg
             IF ( J .EQ. -9 ) THEN
@@ -2270,7 +2466,9 @@
               HS(I,J)    = HS(I+1,J)
               END DO
             NH      = NH - 1
-!/T            WRITE (NDST,9051) TFN
+#ifdef W3_T
+            WRITE (NDST,9051) TFN
+#endif
 !
           ELSE
 !
@@ -2278,7 +2476,9 @@
             TFN(2) = TN(2)
             CALL TICK21 ( TFN , 1. )
             IERR   = -1
-!/T            WRITE (NDST,9052) TFN, IERR
+#ifdef W3_T
+            WRITE (NDST,9052) TFN, IERR
+#endif
 !
           END IF
 !
@@ -2300,7 +2500,9 @@
 ! Check if first field
 !
       IF ( J.NE.1 .AND. TFN(1) .EQ. -1 ) THEN
-!/T          WRITE (NDST,9060)
+#ifdef W3_T
+          WRITE (NDST,9060)
+#endif
           TF0(1) = T0(1)
           TF0(2) = T0(2)
 !
@@ -2313,11 +2515,13 @@
             END DO
         END IF
 !
-!/T      IF ( J .GT. 1 ) THEN
-!/T          WRITE (NDST,9061) TF0, TFN
-!/T        ELSE
-!/T          WRITE (NDST,9062) TFN
-!/T        END IF
+#ifdef W3_T
+      IF ( J .GT. 1 ) THEN
+          WRITE (NDST,9061) TF0, TFN
+        ELSE
+          WRITE (NDST,9062) TFN
+        END IF
+#endif
 !
       RETURN
 !
@@ -2333,26 +2537,32 @@
  1001 FORMAT (/' *** WAVEWATCH III ERROR IN W3FLDH : '/               &
                '     ILLEGAL FIELD ID NR : ',I4/)
 !
-!/T 9000 FORMAT (' TEST W3FLDH : J, NDST/E  : ',3I4/                  &
-!/T              '               DIMENSIONS : ',4I4/                  &
-!/T              '               T0         : ',I8,I7.6/              &
-!/T              '               TN         : ',I8,I7.6/              &
-!/T              '               NH(M)      : ',2I4/                  &
-!/T              '               TF0        : ',I8,I7.6/              &
-!/T              '               TFN, IERR  : ',I8,I7.6,I4)
-!/T 9001 FORMAT (' TEST W3FLDH : FIRST FIELD : ',L2)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3FLDH : J, NDST/E  : ',3I4/                  &
+              '               DIMENSIONS : ',4I4/                  &
+              '               T0         : ',I8,I7.6/              &
+              '               TN         : ',I8,I7.6/              &
+              '               NH(M)      : ',2I4/                  &
+              '               TF0        : ',I8,I7.6/              &
+              '               TFN, IERR  : ',I8,I7.6,I4)
+ 9001 FORMAT (' TEST W3FLDH : FIRST FIELD : ',L2)
+#endif
 !
-!/T 9020 FORMAT (' TEST W3FLDH : FIELD SHIFTED')
-!/T 9021 FORMAT ('               NO FIELD TO SHIFT')
+#ifdef W3_T
+ 9020 FORMAT (' TEST W3FLDH : FIELD SHIFTED')
+ 9021 FORMAT ('               NO FIELD TO SHIFT')
+#endif
 !
-!/T 9050 FORMAT (' TEST W3FLDH : NEW VALUE(S) : ',3F8.2)
-!/T 9051 FORMAT (' TEST W3FLDH : NEW TIME     : ',I8,I7.6)
-!/T 9052 FORMAT (' TEST W3FLDH : NEW TIME     : ',I8,I7.6,            &
-!/T              ' LAST FIELD (IERR =',I3,')')
-!/T 9060 FORMAT (' TEST W3FLDH : FILLING IN FIRST FIELD')
-!/T 9061 FORMAT (' TEST W3FLDH : FINAL TIMES  : ',I8,I7.6/            &
-!/T              '                              ',I8,I7.6)
-!/T 9062 FORMAT (' TEST W3FLDH : FINAL TIME   : ',I8,I7.6)
+#ifdef W3_T
+ 9050 FORMAT (' TEST W3FLDH : NEW VALUE(S) : ',3F8.2)
+ 9051 FORMAT (' TEST W3FLDH : NEW TIME     : ',I8,I7.6)
+ 9052 FORMAT (' TEST W3FLDH : NEW TIME     : ',I8,I7.6,            &
+              ' LAST FIELD (IERR =',I3,')')
+ 9060 FORMAT (' TEST W3FLDH : FILLING IN FIRST FIELD')
+ 9061 FORMAT (' TEST W3FLDH : FINAL TIMES  : ',I8,I7.6/            &
+              '                              ',I8,I7.6)
+ 9062 FORMAT (' TEST W3FLDH : FINAL TIME   : ',I8,I7.6)
+#endif
 !/
 !/ End of W3FLDH ----------------------------------------------------- /
 !/
@@ -2438,7 +2648,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3TIMEMD
 !
       IMPLICIT NONE
@@ -2455,25 +2667,33 @@
 !/ Local parameters
 !/
       INTEGER                 :: I
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: DTTST, DERA
       LOGICAL                 :: FLFRST
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3FLDM')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3FLDM')
+#endif
 !
       IERR   = 0
       DERA   = ATAN(1.)/45.
 !
-!/T      WRITE (NDST,9000) J, NDST, NDSE, T0, TN, NH, NHM, TF0, TFN, IERR
+#ifdef W3_T
+      WRITE (NDST,9000) J, NDST, NDSE, T0, TN, NH, NHM, TF0, TFN, IERR
+#endif
 !
 ! Test field ID number for validity
 !
       IF ( J .NE. 4 ) GOTO 801
       FLFRST = TFN(1) .EQ. -1
 !
-!/T      WRITE (NDST,9001) FLFRST
+#ifdef W3_T
+      WRITE (NDST,9001) FLFRST
+#endif
 !
 ! Backward branch point ============================================= *
 !
@@ -2486,9 +2706,11 @@
       IF ( TFN(1) .NE. -1 ) THEN
           A0     = AN
           D0     = DN
-!/T          WRITE (NDST,9020)
-!/T        ELSE
-!/T          WRITE (NDST,9021)
+#ifdef W3_T
+          WRITE (NDST,9020)
+        ELSE
+          WRITE (NDST,9021)
+#endif
         END IF
 !
 ! New field
@@ -2498,7 +2720,9 @@
           TFN(2) = THO(2,J,1)
           AN     = HA(1,J)
           DN     = ( 90. - HD(1,J) ) * DERA
-!/T          WRITE (NDST,9050) AN, DN
+#ifdef W3_T
+          WRITE (NDST,9050) AN, DN
+#endif
 !
 ! Shift data arrays
 !
@@ -2509,7 +2733,9 @@
             HD(I,J)    = HD(I+1,J)
             END DO
           NH      = NH - 1
-!/T          WRITE (NDST,9051) TFN
+#ifdef W3_T
+          WRITE (NDST,9051) TFN
+#endif
 !
         ELSE
 !
@@ -2517,7 +2743,9 @@
           TFN(2) = TN(2)
           CALL TICK21 ( TFN , 1. )
           IERR   = -1
-!/T          WRITE (NDST,9052) TFN, IERR
+#ifdef W3_T
+          WRITE (NDST,9052) TFN, IERR
+#endif
 !
         END IF
 !
@@ -2529,14 +2757,18 @@
 ! Check if first field
 !
       IF ( TF0(1).EQ.-1 ) THEN
-!/T          WRITE (NDST,9060)
+#ifdef W3_T
+          WRITE (NDST,9060)
+#endif
           TF0(1) = T0(1)
           TF0(2) = T0(2)
           A0     = AN
           D0     = DN
         END IF
 !
-!/T      WRITE (NDST,9061) TF0, TFN
+#ifdef W3_T
+      WRITE (NDST,9061) TF0, TFN
+#endif
 !
       RETURN
 !
@@ -2552,24 +2784,30 @@
  1001 FORMAT (/' *** WAVEWATCH III ERROR IN W3FLDM : '/               &
                '     ILLEGAL FIELD ID NR : ',I4/)
 !
-!/T 9000 FORMAT (' TEST W3FLDM : J, NDST/E  : ',3I4/                  &
-!/T              '               T0         : ',I8,I7.6/              &
-!/T              '               TN         : ',I8,I7.6/              &
-!/T              '               NH(M)      : ',2I4/                  &
-!/T              '               TF0        : ',I8,I7.6/              &
-!/T              '               TFN, IERR  : ',I8,I7.6,I4)
-!/T 9001 FORMAT (' TEST W3FLDM : FIRST FIELD : ',L2)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3FLDM : J, NDST/E  : ',3I4/                  &
+              '               T0         : ',I8,I7.6/              &
+              '               TN         : ',I8,I7.6/              &
+              '               NH(M)      : ',2I4/                  &
+              '               TF0        : ',I8,I7.6/              &
+              '               TFN, IERR  : ',I8,I7.6,I4)
+ 9001 FORMAT (' TEST W3FLDM : FIRST FIELD : ',L2)
+#endif
 !
-!/T 9020 FORMAT (' TEST W3FLDM : FIELD SHIFTED')
-!/T 9021 FORMAT ('               NO FIELD TO SHIFT')
+#ifdef W3_T
+ 9020 FORMAT (' TEST W3FLDM : FIELD SHIFTED')
+ 9021 FORMAT ('               NO FIELD TO SHIFT')
+#endif
 !
-!/T 9050 FORMAT (' TEST W3FLDM : NEW VALUE(S) : ',2F8.2)
-!/T 9051 FORMAT (' TEST W3FLDM : NEW TIME     : ',I8,I7.6)
-!/T 9052 FORMAT (' TEST W3FLDM : NEW TIME     : ',I8,I7.6,            &
-!/T              ' LAST FIELD (IERR =',I3,')')
-!/T 9060 FORMAT (' TEST W3FLDM : FILLING IN FIRST FIELD')
-!/T 9061 FORMAT (' TEST W3FLDM : FINAL TIMES  : ',I8,I7.6/            &
-!/T              '                              ',I8,I7.6)
+#ifdef W3_T
+ 9050 FORMAT (' TEST W3FLDM : NEW VALUE(S) : ',2F8.2)
+ 9051 FORMAT (' TEST W3FLDM : NEW TIME     : ',I8,I7.6)
+ 9052 FORMAT (' TEST W3FLDM : NEW TIME     : ',I8,I7.6,            &
+              ' LAST FIELD (IERR =',I3,')')
+ 9060 FORMAT (' TEST W3FLDM : FILLING IN FIRST FIELD')
+ 9061 FORMAT (' TEST W3FLDM : FINAL TIMES  : ',I8,I7.6/            &
+              '                              ',I8,I7.6)
+#endif
 !/
 !/ End of W3FLDM ----------------------------------------------------- /
 !/

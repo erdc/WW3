@@ -118,20 +118,32 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/MPRF/!     use w3getmem ; fake use statement for make_makefile.sh
-!/MPRF/!
+#ifdef W3_MPRF
+!     use w3getmem ; fake use statement for make_makefile.sh
+!
+#endif
       USE W3TIMEMD, ONLY: TDIFF
       USE WMMDATMD, ONLY: MDSS, MDSO, NMPSCR, NMPLOG, IMPROC
       USE WMMDATMD, ONLY: CLKDT1, CLKDT2, CLKDT3, CLKFIN
-!/MPRF      USE WMMDATMD, ONLY: MDSP
-!/MPI      USE WMMDATMD, ONLY: MPI_COMM_MWAVE
+#ifdef W3_MPRF
+      USE WMMDATMD, ONLY: MDSP
+#endif
+#ifdef W3_MPI
+      USE WMMDATMD, ONLY: MPI_COMM_MWAVE
+#endif
 !/
-!/S      USE W3SERVMD, ONLY: STRACE
-!/MPRF      USE W3TIMEMD, ONLY: PRTIME
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_MPRF
+      USE W3TIMEMD, ONLY: PRTIME
+#endif
 !/
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -139,23 +151,37 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/MPI      INTEGER                 :: IERR_MPI
-!/MPRF      REAL                    :: PRFT0, PRFTN
-!/MPRF      REAL(KIND=8)            :: get_memory
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                 :: IERR_MPI
+#endif
+#ifdef W3_MPRF
+      REAL                    :: PRFT0, PRFTN
+      REAL(KIND=8)            :: get_memory
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 ! 1.  Identification at start
 !
-!/S      CALL STRACE (IENT, 'WMFINL')
-!/MPRF      CALL PRTIME ( PRFT0 )
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMFINL')
+#endif
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFT0 )
+#endif
 !
-!/O10      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,900)
+#ifdef W3_O10
+      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,900)
+#endif
 !
 !/ ------------------------------------------------------------------- /
 ! 2.  Finalization
 !
-!/MPI      CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#ifdef W3_MPI
+      CALL MPI_BARRIER ( MPI_COMM_MWAVE, IERR_MPI )
+#endif
 !
       IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC )             &
            WRITE (MDSS,920) CLKFIN
@@ -171,10 +197,14 @@
 !/ ------------------------------------------------------------------- /
 ! 3.  Identification at end
 !
-!/O10      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,999)
+#ifdef W3_O10
+      IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC ) WRITE (MDSS,999)
+#endif
 !
-!/MPRF      CALL PRTIME ( PRFTN )
-!/MPRF      WRITE (MDSP,990) PRFT0, PRFTN, get_memory()
+#ifdef W3_MPRF
+      CALL PRTIME ( PRFTN )
+      WRITE (MDSP,990) PRFT0, PRFTN, get_memory()
+#endif
 !
       RETURN
 !
@@ -186,7 +216,9 @@
   921 FORMAT ( '  Elapsed time        :',F10.2,' s')
 
 !
-!/MPRF  990 FORMAT (1X,3F12.3,' WMFINL')
+#ifdef W3_MPRF
+  990 FORMAT (1X,3F12.3,' WMFINL')
+#endif
 !
   999 FORMAT (/' ========== END OF MWW3 INITIALIZATION (WMFINL) ===', &
                '============================'/)

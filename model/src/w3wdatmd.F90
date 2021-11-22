@@ -123,19 +123,27 @@
       TYPE WDATA
         INTEGER               :: TIME(2), TLEV(2), TICE(2), TRHO(2),  &
                                  TIC1(2), TIC5(2)
-!/OASIS        INTEGER               :: TIME00(2)
-!/OASIS        INTEGER               :: TIMEEND(2)
-!/NL5        INTEGER               :: QI5TBEG(2)
-!/NL5        REAL, POINTER         :: QR5TIM0(:), QR5CVK0(:, :), QR5TMIX(:)
-!/NL5        COMPLEX, POINTER      :: QC5INT0(:, :)
+#ifdef W3_OASIS
+        INTEGER               :: TIME00(2)
+        INTEGER               :: TIMEEND(2)
+#endif
+#ifdef W3_NL5
+        INTEGER               :: QI5TBEG(2)
+        REAL, POINTER         :: QR5TIM0(:), QR5CVK0(:, :), QR5TMIX(:)
+        COMPLEX, POINTER      :: QC5INT0(:, :)
+#endif
         REAL, POINTER         :: VA(:,:), WLV(:), ICE(:), RHOAIR(:),   &
                                  UST(:), USTDIR(:), ASF(:), FPIS(:),  &
                                  BERG(:), ICEH(:), ICEF(:), ICEDMAX(:)
-!/SETUP  REAL, POINTER :: ZETA_SETUP(:), FX_zs(:), FY_zs(:)
-!/SETUP  REAL, POINTER :: SXX_zs(:), SXY_zs(:), SYY_zs(:)
-!/PDLIB  REAL, POINTER     :: VSTOT(:,:), VDTOT(:,:)
-!/PDLIB  REAL, POINTER     :: VAOLD(:,:)
-!/PDLIB  LOGICAL, POINTER  :: SHAVETOT(:)
+#ifdef W3_SETUP
+  REAL, POINTER :: ZETA_SETUP(:), FX_zs(:), FY_zs(:)
+  REAL, POINTER :: SXX_zs(:), SXY_zs(:), SYY_zs(:)
+#endif
+#ifdef W3_PDLIB
+  REAL, POINTER     :: VSTOT(:,:), VDTOT(:,:)
+  REAL, POINTER     :: VAOLD(:,:)
+  LOGICAL, POINTER  :: SHAVETOT(:)
+#endif
 !!/PDLIB     REAL, POINTER     :: VAOLD(:,:)
         LOGICAL               :: DINIT, FL_ALL
       END TYPE WDATA
@@ -149,19 +157,27 @@
 !/
       INTEGER, POINTER        :: TIME(:), TLEV(:), TICE(:), TRHO(:),  &
                                  TIC1(:), TIC5(:)
-!/OASIS      INTEGER, POINTER        :: TIME00(:)
-!/OASIS      INTEGER, POINTER        :: TIMEEND(:)
-!/NL5      INTEGER, POINTER        :: QI5TBEG(:)
-!/NL5      REAL, POINTER           :: QR5TIM0(:), QR5CVK0(:, :), QR5TMIX(:)
-!/NL5      COMPLEX, POINTER        :: QC5INT0(:, :)
+#ifdef W3_OASIS
+      INTEGER, POINTER        :: TIME00(:)
+      INTEGER, POINTER        :: TIMEEND(:)
+#endif
+#ifdef W3_NL5
+      INTEGER, POINTER        :: QI5TBEG(:)
+      REAL, POINTER           :: QR5TIM0(:), QR5CVK0(:, :), QR5TMIX(:)
+      COMPLEX, POINTER        :: QC5INT0(:, :)
+#endif
       REAL, POINTER           :: VA(:,:), WLV(:), ICE(:), RHOAIR(:),  &
                                  UST(:), USTDIR(:), ASF(:), FPIS(:),  &
                                  BERG(:), ICEH(:), ICEF(:), ICEDMAX(:)
-!/SETUP        REAL, POINTER :: ZETA_SETUP(:), FX_zs(:), FY_zs(:)
-!/SETUP        REAL, POINTER :: SXX_zs(:), SXY_zs(:), SYY_zs(:)
-!/PDLIB      REAL, POINTER           :: VSTOT(:,:), VDTOT(:,:)
-!/PDLIB      REAL, POINTER           :: VAOLD(:,:)
-!/PDLIB      LOGICAL, POINTER        :: SHAVETOT(:)
+#ifdef W3_SETUP
+        REAL, POINTER :: ZETA_SETUP(:), FX_zs(:), FY_zs(:)
+        REAL, POINTER :: SXX_zs(:), SXY_zs(:), SYY_zs(:)
+#endif
+#ifdef W3_PDLIB
+      REAL, POINTER           :: VSTOT(:,:), VDTOT(:,:)
+      REAL, POINTER           :: VAOLD(:,:)
+      LOGICAL, POINTER        :: SHAVETOT(:)
+#endif
 !!/PDLIB      REAL, POINTER           :: VAOLD(:,:)
       LOGICAL, POINTER        :: DINIT, FL_ALL
 !/
@@ -221,7 +237,9 @@
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: NGRIDS
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -234,9 +252,13 @@
 !/ Local parameters
 !/
       INTEGER                 :: I
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'W3NDAT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3NDAT')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -261,7 +283,9 @@
         WDATAS(I)%FL_ALL = .FALSE.
         END DO
 !
-!/T      WRITE (NDST,9000) NGRIDS
+#ifdef W3_T
+      WRITE (NDST,9000) NGRIDS
+#endif
 !
       RETURN
 !
@@ -271,7 +295,9 @@
                '                    NGRIDS = ',I10/                   &
                '                    RUN W3NMOD FIRST'/)
 !
-!/T 9000 FORMAT (' TEST W3NDAT : SETTING UP FOR ',I4,' GRIDS')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3NDAT : SETTING UP FOR ',I4,' GRIDS')
+#endif
 !/
 !/ End of W3NDAT ----------------------------------------------------- /
 !/
@@ -355,11 +381,17 @@
       USE W3SERVMD, ONLY: EXTCDE
       USE CONSTANTS, ONLY : LPDLIB, DAIR
       USE W3PARALL, ONLY: SET_UP_NSEAL_NSEALM
-!/NL5      USE W3GDATMD, ONLY: QI5NNZ
-!/PDLIB      use yowNodepool, only: npa, np
-!/PDLIB      use yowRankModule, only : rank
-!/PDLIB      USE W3GDATMD, ONLY: GTYPE, UNGTYPE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_NL5
+      USE W3GDATMD, ONLY: QI5NNZ
+#endif
+#ifdef W3_PDLIB
+      use yowNodepool, only: npa, np
+      use yowRankModule, only : rank
+      USE W3GDATMD, ONLY: GTYPE, UNGTYPE
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
@@ -375,12 +407,20 @@
 !/
       INTEGER                 :: JGRID, NSEALM, NSEATM
       INTEGER                 :: NSEAL_DUMMY, ISEA
-!/PDLIB  INTEGER IRANK
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_PDLIB
+  INTEGER IRANK
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'W3DIMW')
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 1'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3DIMW')
+#endif
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 1'
+    FLUSH(740+IAPROC)
+#endif
 
 !
 ! -------------------------------------------------------------------- /
@@ -391,132 +431,206 @@
         ELSE
           FL_ALL = .TRUE.
         END IF
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 2'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 2'
+    FLUSH(740+IAPROC)
+#endif
 !
       IF ( NGRIDS .EQ. -1 ) THEN
           WRITE (NDSE,1001)
           CALL EXTCDE (1)
         END IF
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 3'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 3'
+    FLUSH(740+IAPROC)
+#endif
 !
       IF ( IMOD.LT.1 .OR. IMOD.GT.NWDATA ) THEN
           WRITE (NDSE,1002) IMOD, NWDATA
           CALL EXTCDE (2)
         END IF
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 4'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 4'
+    FLUSH(740+IAPROC)
+#endif
 !
       IF ( WDATAS(IMOD)%DINIT ) THEN
           WRITE (NDSE,1003)
           CALL EXTCDE (3)
         END IF
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 5'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 5'
+    FLUSH(740+IAPROC)
+#endif
 !
-!/T      WRITE (NDST,9000) IMOD
+#ifdef W3_T
+      WRITE (NDST,9000) IMOD
+#endif
 !
       JGRID  = IGRID
       IF ( JGRID .NE. IMOD ) CALL W3SETG ( IMOD, NDSE, NDST )
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 6'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 6'
+    FLUSH(740+IAPROC)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Allocate arrays
 !
       CALL SET_UP_NSEAL_NSEALM(NSEAL_DUMMY, NSEALM)
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 7'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 7'
+    FLUSH(740+IAPROC)
+#endif
       NSEATM = NSEALM * NAPROC
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8'
+    FLUSH(740+IAPROC)
+#endif
 !
       IF ( FL_ALL ) THEN
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8'
+    FLUSH(740+IAPROC)
+#endif
           ALLOCATE ( WDATAS(IMOD)%VA(NSPEC,0:NSEALM), STAT=ISTAT ); WDATAS(IMOD)%VA = 0.
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.1'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.1'
+    FLUSH(740+IAPROC)
+#endif
           CHECK_ALLOC_STATUS ( ISTAT )
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.2'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.2'
+    FLUSH(740+IAPROC)
+#endif
 !!/PDLIB          ALLOCATE ( WDATAS(IMOD)%VAOLD(NSPEC,0:NSEALM) )
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.3'
-!/DEBUGINIT    FLUSH(740+IAPROC)
-!/PDLIB          ALLOCATE ( WDATAS(IMOD)%SHAVETOT(NSEAL), stat=istat )
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.4, stat=', istat
-!/DEBUGINIT    FLUSH(740+IAPROC)
-!/PDLIB          ALLOCATE ( WDATAS(IMOD)%VSTOT(NSPEC,NSEAL), stat=istat )
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.5, stat=', istat
-!/DEBUGINIT    FLUSH(740+IAPROC)
-!/PDLIB          ALLOCATE ( WDATAS(IMOD)%VDTOT(NSPEC,NSEAL), stat=istat )
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.6, stat=', istat
-!/DEBUGINIT    FLUSH(740+IAPROC)
-!/PDLIB          ALLOCATE ( WDATAS(IMOD)%VAOLD(NSPEC,NSEAL), stat=istat )
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.7, stat=', istat
-!/DEBUGINIT    FLUSH(740+IAPROC)
-!/PDLIB          DO ISEA=1,NSEAL
-!/DEBUGINIT        WRITE(740+IAPROC,*) 'Setting to ZERO at ISEA=', ISEA
-!/DEBUGINIT        FLUSH(740+IAPROC)
-!/PDLIB            WDATAS(IMOD)%VSTOT(:,ISEA)=0
-!/PDLIB          END DO
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.8'
-!/DEBUGINIT    FLUSH(740+IAPROC)
-!/PDLIB          WDATAS(IMOD)%VDTOT=0
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.9'
-!/DEBUGINIT    FLUSH(740+IAPROC)
-!/PDLIB          WDATAS(IMOD)%SHAVETOT=.FALSE.
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.10'
-!/DEBUGINIT    FLUSH(740+IAPROC)
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'NSEAL=', NSEAL, ' NSEALM=', NSEALM
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.3'
+    FLUSH(740+IAPROC)
+#endif
+#ifdef W3_PDLIB
+          ALLOCATE ( WDATAS(IMOD)%SHAVETOT(NSEAL), stat=istat )
+#endif
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.4, stat=', istat
+    FLUSH(740+IAPROC)
+#endif
+#ifdef W3_PDLIB
+          ALLOCATE ( WDATAS(IMOD)%VSTOT(NSPEC,NSEAL), stat=istat )
+#endif
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.5, stat=', istat
+    FLUSH(740+IAPROC)
+#endif
+#ifdef W3_PDLIB
+          ALLOCATE ( WDATAS(IMOD)%VDTOT(NSPEC,NSEAL), stat=istat )
+#endif
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.6, stat=', istat
+    FLUSH(740+IAPROC)
+#endif
+#ifdef W3_PDLIB
+          ALLOCATE ( WDATAS(IMOD)%VAOLD(NSPEC,NSEAL), stat=istat )
+#endif
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.7, stat=', istat
+    FLUSH(740+IAPROC)
+#endif
+#ifdef W3_PDLIB
+          DO ISEA=1,NSEAL
+#endif
+#ifdef W3_DEBUGINIT
+        WRITE(740+IAPROC,*) 'Setting to ZERO at ISEA=', ISEA
+        FLUSH(740+IAPROC)
+#endif
+#ifdef W3_PDLIB
+            WDATAS(IMOD)%VSTOT(:,ISEA)=0
+          END DO
+#endif
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.8'
+    FLUSH(740+IAPROC)
+#endif
+#ifdef W3_PDLIB
+          WDATAS(IMOD)%VDTOT=0
+#endif
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.9'
+    FLUSH(740+IAPROC)
+#endif
+#ifdef W3_PDLIB
+          WDATAS(IMOD)%SHAVETOT=.FALSE.
+#endif
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.10'
+    FLUSH(740+IAPROC)
+    WRITE(740+IAPROC,*) 'NSEAL=', NSEAL, ' NSEALM=', NSEALM
+    FLUSH(740+IAPROC)
+#endif
 !
 ! * Four arrays for NL5 (QL)
 ! * AFAIK, the set up of QR5TIM0, QR5CVK0, QC5INT0 should be similar
 ! * to VA, though I am not really clear about how FL_ALL works.
 ! *
-!/NL5          ALLOCATE ( WDATAS(IMOD)%QR5TIM0(0:NSEALM),             &
-!/NL5                     WDATAS(IMOD)%QR5CVK0(NSPEC, 0:NSEALM),      &
-!/NL5                     WDATAS(IMOD)%QC5INT0(QI5NNZ, 0:NSEALM),     &
-!/NL5                     WDATAS(IMOD)%QR5TMIX(0:NSEALM), STAT=ISTAT)
-!/NL5          CHECK_ALLOC_STATUS ( ISTAT )
+#ifdef W3_NL5
+          ALLOCATE ( WDATAS(IMOD)%QR5TIM0(0:NSEALM),             &
+                     WDATAS(IMOD)%QR5CVK0(NSPEC, 0:NSEALM),      &
+                     WDATAS(IMOD)%QC5INT0(QI5NNZ, 0:NSEALM),     &
+                     WDATAS(IMOD)%QR5TMIX(0:NSEALM), STAT=ISTAT)
+          CHECK_ALLOC_STATUS ( ISTAT )
+#endif
 !
 ! * Initialized NL5 arrays with zero (QL)
-!/NL5          WDATAS(IMOD)%QR5TIM0 = 0.0
-!/NL5          WDATAS(IMOD)%QR5CVK0 = 0.0
-!/NL5          WDATAS(IMOD)%QC5INT0 = (0.0, 0.0)
-!/NL5          WDATAS(IMOD)%QR5TMIX = 0.0
+#ifdef W3_NL5
+          WDATAS(IMOD)%QR5TIM0 = 0.0
+          WDATAS(IMOD)%QR5CVK0 = 0.0
+          WDATAS(IMOD)%QC5INT0 = (0.0, 0.0)
+          WDATAS(IMOD)%QR5TMIX = 0.0
+#endif
 !
-!/NL5          WRITE(*, *)
-!/NL5          WRITE(*, '(A, I4, I12)') '⊚ → [WW3 WDAT]: IMOD & QI5NNZ: ', IMOD, QI5NNZ
-!/NL5          WRITE(*, *)
+#ifdef W3_NL5
+          WRITE(*, *)
+          WRITE(*, '(A, I4, I12)') '⊚ → [WW3 WDAT]: IMOD & QI5NNZ: ', IMOD, QI5NNZ
+          WRITE(*, *)
+#endif
 !
           IF ( NSEAL .NE. NSEALM ) THEN
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'Before settings to ZERO'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'Before settings to ZERO'
+    FLUSH(740+IAPROC)
+#endif
             DO ISEA=NSEAL+1,NSEALM
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'ISEA=', ISEA
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'ISEA=', ISEA
+    FLUSH(740+IAPROC)
+#endif
               WDATAS(IMOD)%VA(:,ISEA) = 0.
 !
-!/NL5              WDATAS(IMOD)%QR5TIM0(ISEA)   = 0.0
-!/NL5              WDATAS(IMOD)%QR5CVK0(:,ISEA) = 0.0
-!/NL5              WDATAS(IMOD)%QC5INT0(:,ISEA) = (0.0, 0.0)
-!/NL5              WDATAS(IMOD)%QR5TMIX(ISEA)   = 0.0
+#ifdef W3_NL5
+              WDATAS(IMOD)%QR5TIM0(ISEA)   = 0.0
+              WDATAS(IMOD)%QR5CVK0(:,ISEA) = 0.0
+              WDATAS(IMOD)%QC5INT0(:,ISEA) = (0.0, 0.0)
+              WDATAS(IMOD)%QR5TMIX(ISEA)   = 0.0
+#endif
             END DO
           END IF
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 8.11'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 8.11'
+    FLUSH(740+IAPROC)
+#endif
         END IF
 !
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 9'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 9'
+    FLUSH(740+IAPROC)
+#endif
       ! ICE, ICEH, ICEF must be defined from 0:NSEA
       ALLOCATE ( WDATAS(IMOD)%WLV(NSEA),                              &
                  WDATAS(IMOD)%ICE(0:NSEA),                            &
                  WDATAS(IMOD)%RHOAIR(NSEA),                           &
-!/SETUP          WDATAS(IMOD)%ZETA_SETUP(NSEA),                       &
+#ifdef W3_SETUP
+          WDATAS(IMOD)%ZETA_SETUP(NSEA),                       &
+#endif
                  WDATAS(IMOD)%BERG(NSEA),                             &
                  WDATAS(IMOD)%ICEH(0:NSEA),                           &
                  WDATAS(IMOD)%ICEF(0:NSEA),                           &
@@ -526,13 +640,17 @@
                  WDATAS(IMOD)%ASF(NSEATM),                            &
                  WDATAS(IMOD)%FPIS(NSEATM), STAT=ISTAT                )
       CHECK_ALLOC_STATUS ( ISTAT )
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 10'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 10'
+    FLUSH(740+IAPROC)
+#endif
 
       WDATAS(IMOD)%WLV   (:) = 0.
       WDATAS(IMOD)%ICE   (0:NSEA) = 0.
       WDATAS(IMOD)%RHOAIR(:) = DAIR
-!/SETUP     WDATAS(IMOD)%ZETA_SETUP(:) = 0.
+#ifdef W3_SETUP
+     WDATAS(IMOD)%ZETA_SETUP(:) = 0.
+#endif
       WDATAS(IMOD)%BERG  (:) = 0.
       WDATAS(IMOD)%ICEH  (0:NSEA) = GRIDS(IMOD)%IICEHINIT
       WDATAS(IMOD)%ICEF  (0:NSEA) = 1000.
@@ -542,19 +660,25 @@
       WDATAS(IMOD)%ASF   (:) = 0.
       WDATAS(IMOD)%FPIS  (:) = 0.
       WDATAS(IMOD)%DINIT     = .TRUE.
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 11'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 11'
+    FLUSH(740+IAPROC)
+#endif
       CALL W3SETW ( IMOD, NDSE, NDST )
 !
-!/T      WRITE (NDST,9003)
+#ifdef W3_T
+      WRITE (NDST,9003)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 5.  Restore previous grid setting if necessary
 !
       IF ( JGRID .NE. IMOD ) CALL W3SETG ( JGRID, NDSE, NDST )
 !
-!/DEBUGINIT    WRITE(740+IAPROC,*) 'W3DIMW, step 12'
-!/DEBUGINIT    FLUSH(740+IAPROC)
+#ifdef W3_DEBUGINIT
+    WRITE(740+IAPROC,*) 'W3DIMW, step 12'
+    FLUSH(740+IAPROC)
+#endif
       RETURN
 !
 ! Formats
@@ -566,22 +690,30 @@
                '                    NWDATA = ',I10/)
  1003 FORMAT (/' *** ERROR W3DIMW : ARRAY(S) ALREADY ALLOCATED *** ')
 !
-!/T 9000 FORMAT (' TEST W3DIMW : MODEL ',I4,' DIM. AT ',2I5,I7)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3DIMW : MODEL ',I4,' DIM. AT ',2I5,I7)
+#endif
 !
-!/T      WRITE (NDST,9001)
+#ifdef W3_T
+      WRITE (NDST,9001)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 3.  Point to allocated arrays
 !
       CALL W3SETW ( IMOD, NDSE, NDST )
 !
-!/T      WRITE (NDST,9002)
+#ifdef W3_T
+      WRITE (NDST,9002)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 4.  Update counters in grid
-!/T 9001 FORMAT (' TEST W3DIMW : ARRAYS ALLOCATED')
-!/T 9002 FORMAT (' TEST W3DIMW : POINTERS RESET')
-!/T 9003 FORMAT (' TEST W3DIMW : DIMENSIONS STORED')
+#ifdef W3_T
+ 9001 FORMAT (' TEST W3DIMW : ARRAYS ALLOCATED')
+ 9002 FORMAT (' TEST W3DIMW : POINTERS RESET')
+ 9003 FORMAT (' TEST W3DIMW : DIMENSIONS STORED')
+#endif
 !/
 !/ End of W3DIMW ----------------------------------------------------- /
 !/
@@ -644,7 +776,9 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -656,9 +790,13 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'W3SETW')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SETW')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -673,7 +811,9 @@
           CALL EXTCDE (2)
         END IF
 !
-!/T      WRITE (NDST,9000) IMOD
+#ifdef W3_T
+      WRITE (NDST,9000) IMOD
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Set model numbers
@@ -684,9 +824,13 @@
 ! 3.  Set pointers
 !
       TIME   => WDATAS(IMOD)%TIME
-!/OASIS      TIME00 => WDATAS(IMOD)%TIME00
-!/OASIS      TIMEEND => WDATAS(IMOD)%TIMEEND
-!/NL5      QI5TBEG => WDATAS(IMOD)%QI5TBEG
+#ifdef W3_OASIS
+      TIME00 => WDATAS(IMOD)%TIME00
+      TIMEEND => WDATAS(IMOD)%TIMEEND
+#endif
+#ifdef W3_NL5
+      QI5TBEG => WDATAS(IMOD)%QI5TBEG
+#endif
       TLEV   => WDATAS(IMOD)%TLEV
       TICE   => WDATAS(IMOD)%TICE
       TRHO   => WDATAS(IMOD)%TRHO
@@ -698,25 +842,31 @@
       IF ( DINIT ) THEN
           IF ( FL_ALL ) THEN
             VA     => WDATAS(IMOD)%VA
-!/NL5            QR5TIM0 => WDATAS(IMOD)%QR5TIM0
-!/NL5            QR5CVK0 => WDATAS(IMOD)%QR5CVK0
-!/NL5            QC5INT0 => WDATAS(IMOD)%QC5INT0
-!/NL5            QR5TMIX => WDATAS(IMOD)%QR5TMIX
+#ifdef W3_NL5
+            QR5TIM0 => WDATAS(IMOD)%QR5TIM0
+            QR5CVK0 => WDATAS(IMOD)%QR5CVK0
+            QC5INT0 => WDATAS(IMOD)%QC5INT0
+            QR5TMIX => WDATAS(IMOD)%QR5TMIX
+#endif
 !!/PDLIB            VAOLD     => WDATAS(IMOD)%VAOLD
-!/PDLIB            SHAVETOT     => WDATAS(IMOD)%SHAVETOT
-!/PDLIB            VSTOT     => WDATAS(IMOD)%VSTOT
-!/PDLIB            VDTOT     => WDATAS(IMOD)%VDTOT
-!/PDLIB            VAOLD     => WDATAS(IMOD)%VAOLD
+#ifdef W3_PDLIB
+            SHAVETOT     => WDATAS(IMOD)%SHAVETOT
+            VSTOT     => WDATAS(IMOD)%VSTOT
+            VDTOT     => WDATAS(IMOD)%VDTOT
+            VAOLD     => WDATAS(IMOD)%VAOLD
+#endif
           END IF
           WLV    => WDATAS(IMOD)%WLV
           ICE    => WDATAS(IMOD)%ICE
           RHOAIR => WDATAS(IMOD)%RHOAIR
-!/SETUP          ZETA_SETUP => WDATAS(IMOD)%ZETA_SETUP
-!/SETUP          FX_zs => WDATAS(IMOD)%FX_zs
-!/SETUP          FY_zs => WDATAS(IMOD)%FY_zs
-!/SETUP          SXX_zs => WDATAS(IMOD)%SXX_zs
-!/SETUP          SXY_zs => WDATAS(IMOD)%SXY_zs
-!/SETUP          SYY_zs => WDATAS(IMOD)%SYY_zs
+#ifdef W3_SETUP
+          ZETA_SETUP => WDATAS(IMOD)%ZETA_SETUP
+          FX_zs => WDATAS(IMOD)%FX_zs
+          FY_zs => WDATAS(IMOD)%FY_zs
+          SXX_zs => WDATAS(IMOD)%SXX_zs
+          SXY_zs => WDATAS(IMOD)%SXY_zs
+          SYY_zs => WDATAS(IMOD)%SYY_zs
+#endif
           BERG   => WDATAS(IMOD)%BERG
           ICEH   => WDATAS(IMOD)%ICEH
           ICEF   => WDATAS(IMOD)%ICEF
@@ -737,7 +887,9 @@
                '                    IMOD   = ',I10/                   &
                '                    NWDATA = ',I10/)
 !
-!/T 9000 FORMAT (' TEST W3SETW : MODEL ',I4,' SELECTED')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SETW : MODEL ',I4,' SELECTED')
+#endif
 !/
 !/ End of W3SETW ----------------------------------------------------- /
 !/

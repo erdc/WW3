@@ -190,7 +190,9 @@
                           NMXY, MAPX2, MAPY2, MAPAXY, MAPXY,          &
                           MAPTH2, MAPWN2
       USE W3ODATMD, ONLY: NDST
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -202,18 +204,26 @@
 !/
       INTEGER                 :: IX, IY, IXY0, IX2, IY2, IX0, IY0,    &
                                  IK, ITH, ISP, ISP0, ISP2
-!/S      INTEGER, SAVE           :: IENT = 0
-!/T      INTEGER                 :: MAPTXY(NY,NX), I, IXY
-!/T      INTEGER                 :: MAPTST(NK+2,NTH)
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_T
+      INTEGER                 :: MAPTXY(NY,NX), I, IXY
+      INTEGER                 :: MAPTST(NK+2,NTH)
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3MAP2')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3MAP2')
+#endif
 !
 ! 1.  Map MAPX2 ------------------------------------------------------ *
 ! 1.a Range 1 to NMX0
 !
-!/T      MAPTXY = 0.
+#ifdef W3_T
+      MAPTXY = 0.
+#endif
 !
       NMX0   = 0
       DO IX=1, NX
@@ -223,7 +233,9 @@
           IF ( MAPSTA(IY,IX).EQ.1 .AND. MAPSTA(IY,IX2).EQ.1 ) THEN
               NMX0   = NMX0 + 1
               MAPX2(NMX0) = IXY0 + IY
-!/T              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 1
+#ifdef W3_T
+              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 1
+#endif
             END IF
           END DO
         END DO
@@ -238,7 +250,9 @@
           IF ( MAPSTA(IY,IX).EQ.1 .AND. MAPSTA(IY,IX2).NE.1 ) THEN
               NMX1   = NMX1 + 1
               MAPX2(NMX1) = IXY0 + IY
-!/T              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 2
+#ifdef W3_T
+              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 2
+#endif
             END IF
           END DO
         END DO
@@ -253,22 +267,28 @@
           IF ( MAPSTA(IY,IX).NE.1 .AND. MAPSTA(IY,IX2).EQ.1 ) THEN
               NMX2   = NMX2 + 1
               MAPX2(NMX2) = IXY0 + IY
-!/T              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 4
+#ifdef W3_T
+              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 4
+#endif
             END IF
           END DO
         END DO
 !
 
-!/T      WRITE (NDST,9000) 'MAPX2', NMX0, NMX1-NMX0,                  &
-!/T                         NMX2-NMX1, NMX2
-!/T      DO IY=NY, 1, -1
-!/T        WRITE (NDST,9001) (MAPTXY(IY,IX),IX=1, NX)
-!/T        END DO
+#ifdef W3_T
+      WRITE (NDST,9000) 'MAPX2', NMX0, NMX1-NMX0,                  &
+                         NMX2-NMX1, NMX2
+      DO IY=NY, 1, -1
+        WRITE (NDST,9001) (MAPTXY(IY,IX),IX=1, NX)
+        END DO
+#endif
 !
 ! 2.  Map MAPY2 ------------------------------------------------------ *
 ! 2.a Range 1 to NMY0
 !
-!/T      MAPTXY = 0.
+#ifdef W3_T
+      MAPTXY = 0.
+#endif
 !
       NMY0   = 0
       DO IX=1, NX
@@ -278,7 +298,9 @@
           IF ( MAPSTA(IY,IX).EQ.1 .AND. MAPSTA(IY2,IX).EQ.1 ) THEN
               NMY0   = NMY0 + 1
               MAPY2(NMY0) = IXY0 + IY
-!/T              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 1
+#ifdef W3_T
+              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 1
+#endif
             END IF
           END DO
         END DO
@@ -293,7 +315,9 @@
           IF ( MAPSTA(IY,IX).EQ.1 .AND. MAPSTA(IY2,IX).NE.1 ) THEN
               NMY1   = NMY1 + 1
               MAPY2(NMY1) = IXY0 + IY
-!/T              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 2
+#ifdef W3_T
+              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 2
+#endif
             END IF
           END DO
         END DO
@@ -308,16 +332,20 @@
           IF ( MAPSTA(IY,IX).NE.1 .AND. MAPSTA(IY2,IX).EQ.1 ) THEN
               NMY2   = NMY2 + 1
               MAPY2(NMY2) = IXY0 + IY
-!/T              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 4
+#ifdef W3_T
+              MAPTXY(IY,IX) = MAPTXY(IY,IX) + 4
+#endif
             END IF
            END DO
          END DO
 !
-!/T      WRITE (NDST,9000) 'MAPY2', NMY0, NMY1-NMY0,                  &
-!/T                         NMY2-NMY1, NMY2
-!/T      DO IY=NY, 1, -1
-!/T        WRITE (NDST,9001) (MAPTXY(IY,IX),IX=1, NX)
-!/T        END DO
+#ifdef W3_T
+      WRITE (NDST,9000) 'MAPY2', NMY0, NMY1-NMY0,                  &
+                         NMY2-NMY1, NMY2
+      DO IY=NY, 1, -1
+        WRITE (NDST,9001) (MAPTXY(IY,IX),IX=1, NX)
+        END DO
+#endif
 !
 ! 3.  Map MAPAXY and MAPXY ------------------------------------------- *
 !
@@ -352,7 +380,9 @@
 !
       IF ( MAPTH2(1) .NE. 0 ) RETURN
 !
-!/T      MAPTST = 0
+#ifdef W3_T
+      MAPTST = 0
+#endif
 !
 ! 4.a MAPTH2 and MAPBTK
 !
@@ -361,16 +391,22 @@
           ISP    = ITH + (IK-1)*NTH
           ISP2   = (IK+1) + (ITH-1)*(NK+2)
           MAPTH2(ISP) = ISP2
-!/T          MAPTST(IK+1,ITH) = MAPTST(IK+1,ITH) + 1
+#ifdef W3_T
+          MAPTST(IK+1,ITH) = MAPTST(IK+1,ITH) + 1
+#endif
           END DO
         END DO
 !
-!/T      WRITE (NDST,9000) 'MAPTH2', ISP, 0, 0, ISP
-!/T      DO IK=NK+2, 1, -1
-!/T        WRITE (NDST,9001) (MAPTST(IK,ITH),ITH=1, NTH)
-!/T        END DO
+#ifdef W3_T
+      WRITE (NDST,9000) 'MAPTH2', ISP, 0, 0, ISP
+      DO IK=NK+2, 1, -1
+        WRITE (NDST,9001) (MAPTST(IK,ITH),ITH=1, NTH)
+        END DO
+#endif
 !
-!/T      MAPTST = 0
+#ifdef W3_T
+      MAPTST = 0
+#endif
 !
 ! 4.b MAPWN2
 !
@@ -380,7 +416,9 @@
           ISP0   = ISP0 + 1
           ISP2   = (IK+1) + (ITH-1)*(NK+2)
           MAPWN2(ISP0) = ISP2
-!/T          MAPTST(IK+1,ITH) = MAPTST(IK+1,ITH) + 1
+#ifdef W3_T
+          MAPTST(IK+1,ITH) = MAPTST(IK+1,ITH) + 1
+#endif
           END DO
         END DO
 !
@@ -388,35 +426,45 @@
         ISP0   = ISP0 + 1
         ISP2   = NK+1 + (ITH-1)*(NK+2)
         MAPWN2(ISP0) = ISP2
-!/T          MAPTST(NK+1,ITH) = MAPTST(NK+1,ITH) + 2
+#ifdef W3_T
+          MAPTST(NK+1,ITH) = MAPTST(NK+1,ITH) + 2
+#endif
         END DO
 !
       DO ITH=1, NTH
         ISP0   = ISP0 + 1
         ISP2   = 1 + (ITH-1)*(NK+2)
         MAPWN2(ISP0) = ISP2
-!/T          MAPTST(1,ITH) = MAPTST(1,ITH) + 4
+#ifdef W3_T
+          MAPTST(1,ITH) = MAPTST(1,ITH) + 4
+#endif
         END DO
 !
-!/T      WRITE (NDST,9000) 'MAPWN2', NSPEC-NTH, NTH, NTH, NSPEC+NTH
-!/T      DO IK=NK+2, 1, -1
-!/T        WRITE (NDST,9001) (MAPTST(IK,ITH),ITH=1, NTH)
-!/T        END DO
+#ifdef W3_T
+      WRITE (NDST,9000) 'MAPWN2', NSPEC-NTH, NTH, NTH, NSPEC+NTH
+      DO IK=NK+2, 1, -1
+        WRITE (NDST,9001) (MAPTST(IK,ITH),ITH=1, NTH)
+        END DO
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9000 FORMAT (/' TEST W3MAP2 : TEST MAP FOR PROPAGATION'/          &
-!/T               '      MAP     : ',A/                               &
-!/T               '      CENTRAL : ',I6/                              &
-!/T               '      ABOVE   : ',I6/                              &
-!/T               '      BELOW   : ',I6/                              &
-!/T               '      TOTAL   : ',I6/)
-!/T 9001 FORMAT (1X,130I1)
+#ifdef W3_T
+ 9000 FORMAT (/' TEST W3MAP2 : TEST MAP FOR PROPAGATION'/          &
+               '      MAP     : ',A/                               &
+               '      CENTRAL : ',I6/                              &
+               '      ABOVE   : ',I6/                              &
+               '      BELOW   : ',I6/                              &
+               '      TOTAL   : ',I6/)
+ 9001 FORMAT (1X,130I1)
+#endif
 !
-!/T 9010 FORMAT (' TEST W3MAP2 : COMPOSITE MAPS TH2, WN2 AND BTK')
-!/T 9011 FORMAT (2X,60I2)
+#ifdef W3_T
+ 9010 FORMAT (' TEST W3MAP2 : COMPOSITE MAPS TH2, WN2 AND BTK')
+ 9011 FORMAT (2X,60I2)
+#endif
 !/
 !/ End of W3MAP2 ----------------------------------------------------- /
 !/
@@ -604,9 +652,15 @@
       USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPI0, TBPIN,       &
                           ISBPI, BBPI0, BBPIN, IAPROC, NAPERR
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
-!/UQ      USE W3UQCKMD
-!/UNO      USE W3UNO2MD
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_UQ
+      USE W3UQCKMD
+#endif
+#ifdef W3_UNO
+      USE W3UNO2MD
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -623,7 +677,9 @@
       INTEGER                 :: ITH, IK, NTLOC, ITLOC, ISEA, IXY,    &
                                  IX,IY, IY0, IP, IBI
       INTEGER                 :: TTEST(2),DTTST
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: CG0, CGA, CGN, CGX, CGY, CXC, CYC,  &
                                  CXMIN, CXMAX, CYMIN, CYMAX
       REAL                    :: DTLOC, DTRAD,               &
@@ -652,7 +708,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3XYP2')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3XYP2')
+#endif
 !
 !     IF ( MAXVAL(VQ) .EQ. 0. ) THEN
 !         IF ( NBI .EQ. 0 ) THEN
@@ -682,8 +740,10 @@
       CGA    = 0.575 * GRAV / SIG(IK)
       CGX    = CGA * ECOS(ITH)
       CGY    = CGA * ESIN(ITH)
-!/MGP      CGX    = CGX - VGX
-!/MGP      CGY    = CGY - VGY
+#ifdef W3_MGP
+      CGX    = CGX - VGX
+      CGY    = CGY - VGY
+#endif
 !
       IF ( FLCUR ) THEN
           CXMIN  = MINVAL ( CX(1:NSEA) )
@@ -702,8 +762,10 @@
             END IF
           CXC    = MAX ( ABS(CXMIN) , ABS(CXMAX) )
           CYC    = MAX ( ABS(CYMIN) , ABS(CYMAX) )
-!/MGP          CXC    = MAX ( ABS(CXMIN-VGX) , ABS(CXMAX-VGX) )
-!/MGP          CYC    = MAX ( ABS(CYMIN-VGY) , ABS(CYMAX-VGY) )
+#ifdef W3_MGP
+          CXC    = MAX ( ABS(CXMIN-VGX) , ABS(CXMAX-VGX) )
+          CYC    = MAX ( ABS(CYMIN-VGY) , ABS(CYMAX-VGY) )
+#endif
         ELSE
           CXC    = 0.
           CYC    = 0.
@@ -729,10 +791,14 @@
       DTTST = DSEC21(TTEST,TIME)
       YFIRST = MOD(NINT(DTTST/DTG),2) .EQ. 0
 !
-!/T      WRITE (NDST,9000) YFIRST
-!/T      WRITE (NDST,9001) ISP, ITH, IK, ECOS(ITH), ESIN(ITH)
+#ifdef W3_T
+      WRITE (NDST,9000) YFIRST
+      WRITE (NDST,9001) ISP, ITH, IK, ECOS(ITH), ESIN(ITH)
+#endif
 !
-!/TDYN      IF ( ISP .EQ. 1 ) DTME = DTME + DTG
+#ifdef W3_TDYN
+      IF ( ISP .EQ. 1 ) DTME = DTME + DTG
+#endif
 !
       IF ( DTME .NE. 0. ) THEN
           DFRR   = XFR - 1.
@@ -740,15 +806,19 @@
           CGD    = 0.5 * GRAV / SIG(IK)
           DSSD   = ( DFRR * CGD )**2 * DTME / 12.
           DNND   = ( CGD * DTH )**2 * DTME / 12.
-!/T          WRITE (NDST,9002) DFRR, CELLP, DTME
-!/T        ELSE
-!/T          WRITE (NDST,9003)
+#ifdef W3_T
+          WRITE (NDST,9002) DFRR, CELLP, DTME
+        ELSE
+          WRITE (NDST,9003)
+#endif
         END IF
 
 !
 ! 1.b Initialize arrays
 !
-!/T      WRITE (NDST,9010)
+#ifdef W3_T
+      WRITE (NDST,9010)
+#endif
 !
       VLCFLX = 0.
       VLCFLY = 0.
@@ -768,37 +838,53 @@
 !     LCFLX = ( COS*CG / CLATS ) * DT / DX
 !     LCFLY = (     SIN*CG )     * DT / DX
 !
-!/T      WRITE (NDST,9020) NSEA
+#ifdef W3_T
+      WRITE (NDST,9020) NSEA
+#endif
 !
-!/OMPH/!$OMP PARALLEL DO PRIVATE (ISEA, IXY)
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE (ISEA, IXY)
+#endif
 !
       DO ISEA=1, NSEA
         IXY         = MAPSF(ISEA,3)
         VQ    (IXY) = VQ(IXY) / CG(IK,ISEA) * CLATS(ISEA)
         CXTOT(IXY) = ECOS(ITH) * CG(IK,ISEA) / CLATS(ISEA)
         CYTOT(IXY) = ESIN(ITH) * CG(IK,ISEA)
-!/MGP        CXTOT(IXY) = CXTOT(IXY) - VGX/CLATS(ISEA)
-!/MGP        CYTOT(IXY) = CYTOT(IXY) - VGY
-!/T1        IF ( .NOT. FLCUR )                                        &
-!/T1            WRITE (NDST,9021) ISEA, MAPSF(ISEA,1), MAPSF(ISEA,2), &
-!/T1                              VQ(IXY), CXTOT(IXY), CYTOT(IXY)
+#ifdef W3_MGP
+        CXTOT(IXY) = CXTOT(IXY) - VGX/CLATS(ISEA)
+        CYTOT(IXY) = CYTOT(IXY) - VGY
+#endif
+#ifdef W3_T1
+        IF ( .NOT. FLCUR )                                        &
+            WRITE (NDST,9021) ISEA, MAPSF(ISEA,1), MAPSF(ISEA,2), &
+                              VQ(IXY), CXTOT(IXY), CYTOT(IXY)
+#endif
         END DO
 !
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
 !
       IF ( FLCUR ) THEN
-!/T          WRITE (NDST,9022)
+#ifdef W3_T
+          WRITE (NDST,9022)
+#endif
           DO ISEA=1, NSEA
             IXY         = MAPSF(ISEA,3)
             CXTOT(IXY) = CXTOT(IXY) + CX(ISEA)/CLATS(ISEA)
             CYTOT(IXY) = CYTOT(IXY) + CY(ISEA)
-!/T1            WRITE (NDST,9021) ISEA, MAPSF(ISEA,1), MAPSF(ISEA,2), &
-!/T1                              VQ(IXY), CXTOT(IXY), CYTOT(IXY)
+#ifdef W3_T1
+            WRITE (NDST,9021) ISEA, MAPSF(ISEA,1), MAPSF(ISEA,2), &
+                              VQ(IXY), CXTOT(IXY), CYTOT(IXY)
+#endif
            END DO
         END IF
 
 !
-!/OMPH/!$OMP PARALLEL DO PRIVATE (ISEA, IX, IY, IXY, CP, CQ)
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE (ISEA, IX, IY, IXY, CP, CQ)
+#endif
 !
       DO ISEA=1, NSEA
          IX     = MAPSF(ISEA,1)
@@ -810,14 +896,18 @@
          VLCFLY(IXY) = CQ*DTRAD
       END DO
 !
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
 !
 ! 2.b Diffusion coefficients
 !
       IF ( DTME .NE. 0. ) THEN
 !
-!/OMPH/!$OMP PARALLEL DO PRIVATE (ISEA, IX, IY, IXY, &
-!/OMPH/!$OMP&                     DCELL, XWIND, TFAC, DSS, DNN)
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE (ISEA, IX, IY, IXY, &
+!$OMP&                     DCELL, XWIND, TFAC, DSS, DNN)
+#endif
 !
           DO ISEA=1, NSEA
             IX        = MAPSF(ISEA,1)
@@ -829,11 +919,17 @@
                                         HQFAC(IY,IX)*RFAC ) / CELLP
                 XWIND     = 3.3 * U10(ISEA)*WN(IK,ISEA)/SIG(IK) - 2.3
                 XWIND     = MAX ( 0. , MIN ( 1. , XWIND ) )
-!/XW0                XWIND     = 0.
-!/XW1                XWIND     = 1.
+#ifdef W3_XW0
+                XWIND     = 0.
+#endif
+#ifdef W3_XW1
+                XWIND     = 1.
+#endif
                 TFAC      = MIN ( 1. , (CLATS(ISEA)/CLATMN)**2 )
                 DSS       = XWIND * DCELL + (1.-XWIND) * DSSD * TFAC
-!/DSS0                DSS       = 0.
+#ifdef W3_DSS0
+                DSS       = 0.
+#endif
                 DNN       = XWIND * DCELL + (1.-XWIND) * DNND * TFAC
 
                 VDXX(IXY) = DTLOC * (DSS*ECOS(ITH)**2+DNN*ESIN(ITH)**2)
@@ -845,7 +941,9 @@
               END IF
             END DO
 !
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
 !
         END IF
 !
@@ -855,7 +953,9 @@
 !
 ! 3.a Propagate fields
 !
-!/OMPH/!$OMP PARALLEL DO PRIVATE (ISEA, IX, IY, IXY )
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE (ISEA, IX, IY, IXY )
+#endif
 !
       DO ISEA=1, NSEA
         IX     = MAPSF(ISEA,1)
@@ -864,51 +964,63 @@
         VQ(IXY)= VQ(IXY) * GSQRT(IY,IX)
       END DO
 !
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
 !
         IF ( YFIRST ) THEN
 !
-!/UQ            IF ( FLCY ) CALL W3QCK3                               &
-!/UQ                        (NX, NY, NX, NY, VLCFLY, ATRNY, VQ,       &
-!/UQ                         .FALSE., 1, MAPAXY, NACT, MAPY2, NMY0,   &
-!/UQ                         NMY1, NMY2, NDSE, NDST )
-!/UQ            IF ( FLCX ) CALL W3QCK3                               &
-!/UQ                        (NX, NY, NX, NY, VLCFLX, ATRNX, VQ,       &
-!/UQ                         GLOBAL, NY, MAPAXY, NACT, MAPX2, NMX0,   &
-!/UQ                         NMX1, NMX2, NDSE, NDST )
+#ifdef W3_UQ
+            IF ( FLCY ) CALL W3QCK3                               &
+                        (NX, NY, NX, NY, VLCFLY, ATRNY, VQ,       &
+                         .FALSE., 1, MAPAXY, NACT, MAPY2, NMY0,   &
+                         NMY1, NMY2, NDSE, NDST )
+            IF ( FLCX ) CALL W3QCK3                               &
+                        (NX, NY, NX, NY, VLCFLX, ATRNX, VQ,       &
+                         GLOBAL, NY, MAPAXY, NACT, MAPX2, NMX0,   &
+                         NMX1, NMX2, NDSE, NDST )
+#endif
 !
-!/UNO            IF ( FLCY ) CALL W3UNO2s                             &
-!/UNO                        (NX, NY, NX, NY, VLCFLY, ATRNY, VQ,      &
-!/UNO                         .FALSE., 1, MAPAXY, NACT, MAPY2, NMY0,  &
-!/UNO                         NMY1, NMY2, NDSE, NDST )
-!/UNO            IF ( FLCX ) CALL W3UNO2s                             &
-!/UNO                        (NX, NY, NX, NY, VLCFLX, ATRNX, VQ,      &
-!/UNO                         GLOBAL, NY, MAPAXY, NACT, MAPX2, NMX0,  &
-!/UNO                         NMX1, NMX2, NDSE, NDST )
+#ifdef W3_UNO
+            IF ( FLCY ) CALL W3UNO2s                             &
+                        (NX, NY, NX, NY, VLCFLY, ATRNY, VQ,      &
+                         .FALSE., 1, MAPAXY, NACT, MAPY2, NMY0,  &
+                         NMY1, NMY2, NDSE, NDST )
+            IF ( FLCX ) CALL W3UNO2s                             &
+                        (NX, NY, NX, NY, VLCFLX, ATRNX, VQ,      &
+                         GLOBAL, NY, MAPAXY, NACT, MAPX2, NMX0,  &
+                         NMX1, NMX2, NDSE, NDST )
+#endif
 !
           ELSE
 !
-!/UQ            IF ( FLCX ) CALL W3QCK3                               &
-!/UQ                        (NX, NY, NX, NY, VLCFLX, ATRNX, VQ,       &
-!/UQ                         GLOBAL, NY, MAPAXY, NACT, MAPX2, NMX0,   &
-!/UQ                         NMX1, NMX2, NDSE, NDST )
-!/UQ            IF ( FLCY ) CALL W3QCK3                               &
-!/UQ                        (NX, NY, NX, NY, VLCFLY, ATRNY, VQ,       &
-!/UQ                         .FALSE., 1, MAPAXY, NACT, MAPY2, NMY0,   &
-!/UQ                         NMY1, NMY2, NDSE, NDST )
+#ifdef W3_UQ
+            IF ( FLCX ) CALL W3QCK3                               &
+                        (NX, NY, NX, NY, VLCFLX, ATRNX, VQ,       &
+                         GLOBAL, NY, MAPAXY, NACT, MAPX2, NMX0,   &
+                         NMX1, NMX2, NDSE, NDST )
+            IF ( FLCY ) CALL W3QCK3                               &
+                        (NX, NY, NX, NY, VLCFLY, ATRNY, VQ,       &
+                         .FALSE., 1, MAPAXY, NACT, MAPY2, NMY0,   &
+                         NMY1, NMY2, NDSE, NDST )
+#endif
 !
-!/UNO            IF ( FLCX ) CALL W3UNO2s                             &
-!/UNO                        (NX, NY, NX, NY, VLCFLX, ATRNX, VQ,      &
-!/UNO                         GLOBAL, NY, MAPAXY, NACT, MAPX2, NMX0,  &
-!/UNO                         NMX1, NMX2, NDSE, NDST )
-!/UNO            IF ( FLCY ) CALL W3UNO2s                             &
-!/UNO                        (NX, NY, NX, NY, VLCFLY, ATRNY, VQ,      &
-!/UNO                         .FALSE., 1, MAPAXY, NACT, MAPY2, NMY0,  &
-!/UNO                         NMY1, NMY2, NDSE, NDST )
+#ifdef W3_UNO
+            IF ( FLCX ) CALL W3UNO2s                             &
+                        (NX, NY, NX, NY, VLCFLX, ATRNX, VQ,      &
+                         GLOBAL, NY, MAPAXY, NACT, MAPX2, NMX0,  &
+                         NMX1, NMX2, NDSE, NDST )
+            IF ( FLCY ) CALL W3UNO2s                             &
+                        (NX, NY, NX, NY, VLCFLY, ATRNY, VQ,      &
+                         .FALSE., 1, MAPAXY, NACT, MAPY2, NMY0,  &
+                         NMY1, NMY2, NDSE, NDST )
+#endif
 !
           END IF
 !
-!/OMPH/!$OMP PARALLEL DO PRIVATE (ISEA, IX, IY, IXY )
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE (ISEA, IX, IY, IXY )
+#endif
 !
       DO ISEA=1, NSEA
         IX     = MAPSF(ISEA,1)
@@ -917,7 +1029,9 @@
         VQ(IXY)= VQ(IXY) / GSQRT(IY,IX)
       END DO
 !
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
 !
 ! 3.b Update boundaries
 !
@@ -977,8 +1091,10 @@
 
             VQ_OLD = VQ
 !
-!/OMPH/!$OMP PARALLEL DO PRIVATE (ISEA, IX, IY, IXY, &
-!/OMPH/!$OMP&                     QXX, QYY, QXY, DVQ )
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE (ISEA, IX, IY, IXY, &
+!$OMP&                     QXX, QYY, QXY, DVQ )
+#endif
 !
             DO IP=1, NACT
                  IXY    = MAPAXY(IP)
@@ -1047,7 +1163,9 @@
 !
              END DO
 !
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
 !
           END IF
 !
@@ -1056,40 +1174,62 @@
 !
 ! 4.  Store results in VQ in proper format --------------------------- *
 !
-!/T      WRITE (NDST,9040) NSEA
+#ifdef W3_T
+      WRITE (NDST,9040) NSEA
+#endif
 !
-!/OMPH/!$OMP PARALLEL DO PRIVATE (ISEA, IXY )
+#ifdef W3_OMPH
+!$OMP PARALLEL DO PRIVATE (ISEA, IXY )
+#endif
 !
       DO ISEA=1, NSEA
         IXY    = MAPSF(ISEA,3)
         IF ( MAPSTA(IXY) .GT. 0 ) THEN
-!/T2            WRITE (NDST,9041) ISEA, MAPSF(ISEA,1), MAPSF(ISEA,2), VQ(IXY)
+#ifdef W3_T2
+            WRITE (NDST,9041) ISEA, MAPSF(ISEA,1), MAPSF(ISEA,2), VQ(IXY)
+#endif
             VQ(IXY) =  MAX ( 0. , CG(IK,ISEA) / CLATS(ISEA) * VQ(IXY) )
 !         ELSE
 !           VQ(IXY) =  0.
           END IF
         END DO
 !
-!/OMPH/!$OMP END PARALLEL DO
+#ifdef W3_OMPH
+!$OMP END PARALLEL DO
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9000 FORMAT (' TEST W3XYP2 : YFIRST  :',L2)
-!/T 9001 FORMAT (' TEST W3XYP2 : ISP, ITH, IK, COS-SIN :',I8,2I4,2F7.3)
-!/T 9002 FORMAT (' TEST W3XYP2 : DFRR, CELLP, DTME     :',3E10.3)
-!/T 9003 FORMAT (' TEST W3XYP2 : NO DISPERSION CORRECTION ')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3XYP2 : YFIRST  :',L2)
+ 9001 FORMAT (' TEST W3XYP2 : ISP, ITH, IK, COS-SIN :',I8,2I4,2F7.3)
+ 9002 FORMAT (' TEST W3XYP2 : DFRR, CELLP, DTME     :',3E10.3)
+ 9003 FORMAT (' TEST W3XYP2 : NO DISPERSION CORRECTION ')
+#endif
 !
-!/T 9010 FORMAT (' TEST W3XYP2 : INITIALIZE ARRAYS')
+#ifdef W3_T
+ 9010 FORMAT (' TEST W3XYP2 : INITIALIZE ARRAYS')
+#endif
 !
-!/T 9020 FORMAT (' TEST W3XYP2 : CALCULATING LCFLX/Y AND DSS/NN (NSEA=', &
-!/T               I6,')')
-!/T1 9021 FORMAT (1X,I6,2I5,E12.4,2f7.3)
-!/T 9022 FORMAT (' TEST W3XYP2 : CORRECTING FOR CURRENT')
+#ifdef W3_T
+ 9020 FORMAT (' TEST W3XYP2 : CALCULATING LCFLX/Y AND DSS/NN (NSEA=', &
+               I6,')')
+#endif
+#ifdef W3_T1
+ 9021 FORMAT (1X,I6,2I5,E12.4,2f7.3)
+#endif
+#ifdef W3_T
+ 9022 FORMAT (' TEST W3XYP2 : CORRECTING FOR CURRENT')
+#endif
 !
-!/T 9040 FORMAT (' TEST W3XYP2 : FIELD AFTER PROP. (NSEA=',I6,')')
-!/T2 9041 FORMAT (1X,I6,2I5,E12.4)
+#ifdef W3_T
+ 9040 FORMAT (' TEST W3XYP2 : FIELD AFTER PROP. (NSEA=',I6,')')
+#endif
+#ifdef W3_T2
+ 9041 FORMAT (1X,I6,2I5,E12.4)
+#endif
 !/
 !/ End of W3XYP2 ----------------------------------------------------- /
 !/
@@ -1212,9 +1352,15 @@
       USE W3ADATMD, ONLY: MAPTH2, MAPWN2, ITIME
       USE W3IDATMD, ONLY: FLCUR
       USE W3ODATMD, ONLY: NDSE, NDST
-!/S      USE W3SERVMD, ONLY: STRACE
-!/UQ      USE W3UQCKMD
-!/UNO      USE W3UNO2MD
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_UQ
+      USE W3UQCKMD
+#endif
+#ifdef W3_UNO
+      USE W3UNO2MD
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -1232,7 +1378,9 @@
 !/ Local parameters
 !/
       INTEGER                 :: ITH, IK, ISP
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: FDDMAX, FDG, FKD, FKD0, DCYX,        &
                                  DCXXYY, DCXY, DCXX, DCXYYX, DCYY
       REAL                    :: DSDD(0:NK+1), FRK(NK), FRG(NK),      &
@@ -1242,16 +1390,20 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3KTP2')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3KTP2')
+#endif
 !
 ! 1.  Preparations --------------------------------------------------- *
 ! 1.a Initialize arrays
 !
       IF ( FLCK ) VQ = 0.
 !
-!/T      WRITE (NDST,9000) FLCTH, FLCK, FACTH, FACK, CTMAX
-!/T      WRITE (NDST,9010) ISEA, DEPTH, CX, CY, DDDX, DDDY,           &
-!/T                        DCXDX, DCXDY, DCYDX, DCYDY
+#ifdef W3_T
+      WRITE (NDST,9000) FLCTH, FLCK, FACTH, FACK, CTMAX
+      WRITE (NDST,9010) ISEA, DEPTH, CX, CY, DDDX, DDDY,           &
+                        DCXDX, DCXDY, DCYDX, DCYDY
+#endif
 !
 ! 2.  Preparation for point ------------------------------------------ *
 ! 2.a Array with partial derivative of sigma versus depth
@@ -1265,11 +1417,13 @@
           END IF
         END DO
 !
-!/T      WRITE (NDST,9020)
-!/T      DO IK=1, NK+1
-!/T        WRITE (NDST,9021) IK, TPI/SIG(IK), TPI/WN(IK),             &
-!/T                              CG(IK), DSDD(IK)
-!/T        END DO
+#ifdef W3_T
+      WRITE (NDST,9020)
+      DO IK=1, NK+1
+        WRITE (NDST,9021) IK, TPI/SIG(IK), TPI/WN(IK),             &
+                              CG(IK), DSDD(IK)
+        END DO
+#endif
 !
 ! 2.b Extract spectrum
 !
@@ -1303,24 +1457,30 @@
              + FRK(MAPWN(ISP)) * ( ESIN(ISP)*DDDX - ECOS(ISP)*DDDY )
             END DO
 !
-!/REFRX! 3.c @C/@x refraction and great-circle propagation
-!/REFRX          VCFLT  = 0.
-!/REFRX          FRK    = 0.
-!/REFRX          FDDMAX = 0.
+#ifdef W3_REFRX
+! 3.c @C/@x refraction and great-circle propagation
+          VCFLT  = 0.
+          FRK    = 0.
+          FDDMAX = 0.
+#endif
 !
-!/REFRX          DO ISP=1, NSPEC
-!/REFRX            FDDMAX = MAX ( FDDMAX , ABS (                      &
-!/REFRX               ESIN(ISP)*DCDX(MAPWN(ISP)) - ECOS(ISP)*DCDY(MAPWN(ISP)) ) )
-!/REFRX            END DO
+#ifdef W3_REFRX
+          DO ISP=1, NSPEC
+            FDDMAX = MAX ( FDDMAX , ABS (                      &
+               ESIN(ISP)*DCDX(MAPWN(ISP)) - ECOS(ISP)*DCDY(MAPWN(ISP)) ) )
+            END DO
+#endif
 !
-!/REFRX          DO IK=1, NK
-!/REFRX            FRK(IK) = FACTH * CG(IK) * WN(IK) / SIG(IK)
-!/REFRX          END DO
-!/REFRX          DO ISP=1, NSPEC
-!/REFRX            VCFLT(MAPTH2(ISP)) = FRG(MAPWN(ISP)) * ECOS(ISP)   &
-!/REFRX              + FRK(MAPWN(ISP)) * ( ESIN(ISP)*DCDX(MAPWN(ISP)) &
-!/REFRX              - ECOS(ISP)*DCDY(MAPWN(ISP)) )
-!/REFRX          END DO
+#ifdef W3_REFRX
+          DO IK=1, NK
+            FRK(IK) = FACTH * CG(IK) * WN(IK) / SIG(IK)
+          END DO
+          DO ISP=1, NSPEC
+            VCFLT(MAPTH2(ISP)) = FRG(MAPWN(ISP)) * ECOS(ISP)   &
+              + FRK(MAPWN(ISP)) * ( ESIN(ISP)*DCDX(MAPWN(ISP)) &
+              - ECOS(ISP)*DCDY(MAPWN(ISP)) )
+          END DO
+#endif
 !
 ! 3.d Current refraction
 !
@@ -1391,37 +1551,49 @@
                 VQ(NK+2+(ITH-1)*NK2) = FACHFA * VQ(NK+1+(ITH-1)*NK2)
                 END DO
 !
-!/UQ              CALL W3QCK2 ( NTH, NK2, NTH, NK2, CFLK, FACK, DB, DM,   &
-!/UQ                            VQ, .FALSE., 1, MAPTH2, NSPEC,            &
-!/UQ                            MAPWN2, NSPEC-NTH, NSPEC, NSPEC+NTH,      &
-!/UQ                            NDSE, NDST )
+#ifdef W3_UQ
+              CALL W3QCK2 ( NTH, NK2, NTH, NK2, CFLK, FACK, DB, DM,   &
+                            VQ, .FALSE., 1, MAPTH2, NSPEC,            &
+                            MAPWN2, NSPEC-NTH, NSPEC, NSPEC+NTH,      &
+                            NDSE, NDST )
+#endif
 !
-!/UNO              CALL W3UNO2 ( NTH, NK2, NTH, NK2, CFLK, FACK, DB, DM,  &
-!/UNO                            VQ, .FALSE., 1, MAPTH2, NSPEC,           &
-!/UNO                            MAPWN2, NSPEC-NTH, NSPEC, NSPEC+NTH,     &
-!/UNO                            NDSE, NDST )
+#ifdef W3_UNO
+              CALL W3UNO2 ( NTH, NK2, NTH, NK2, CFLK, FACK, DB, DM,  &
+                            VQ, .FALSE., 1, MAPTH2, NSPEC,           &
+                            MAPWN2, NSPEC-NTH, NSPEC, NSPEC+NTH,     &
+                            NDSE, NDST )
+#endif
             END IF
           IF ( FLCTH ) THEN
 !
-!/UQ              CALL W3QCK1 ( NTH, NK2, NTH, NK2, VCFLT, VQ, .TRUE.,    &
-!/UQ                            NK2, MAPTH2, NSPEC, MAPTH2, NSPEC, NSPEC, &
-!/UQ                            NSPEC, NDSE, NDST )
+#ifdef W3_UQ
+              CALL W3QCK1 ( NTH, NK2, NTH, NK2, VCFLT, VQ, .TRUE.,    &
+                            NK2, MAPTH2, NSPEC, MAPTH2, NSPEC, NSPEC, &
+                            NSPEC, NDSE, NDST )
+#endif
 !
-!/UNO              CALL W3UNO2r( NTH, NK2, NTH, NK2, VCFLT, VQ, .TRUE.,   &
-!/UNO                            NK2, MAPTH2, NSPEC, MAPTH2, NSPEC, NSPEC,&
-!/UNO                            NSPEC, NDSE, NDST )
+#ifdef W3_UNO
+              CALL W3UNO2r( NTH, NK2, NTH, NK2, VCFLT, VQ, .TRUE.,   &
+                            NK2, MAPTH2, NSPEC, MAPTH2, NSPEC, NSPEC,&
+                            NSPEC, NDSE, NDST )
+#endif
 !
             END IF
         ELSE
           IF ( FLCTH ) THEN
 !
-!/UQ              CALL W3QCK1 ( NTH, NK2, NTH, NK2, VCFLT, VQ, .TRUE.,    &
-!/UQ                            NK2, MAPTH2, NSPEC, MAPTH2, NSPEC, NSPEC, &
-!/UQ                            NSPEC, NDSE, NDST )
+#ifdef W3_UQ
+              CALL W3QCK1 ( NTH, NK2, NTH, NK2, VCFLT, VQ, .TRUE.,    &
+                            NK2, MAPTH2, NSPEC, MAPTH2, NSPEC, NSPEC, &
+                            NSPEC, NDSE, NDST )
+#endif
 !
-!/UNO              CALL W3UNO2r( NTH, NK2, NTH, NK2, VCFLT, VQ, .TRUE.,   &
-!/UNO                            NK2, MAPTH2, NSPEC, MAPTH2, NSPEC, NSPEC,&
-!/UNO                            NSPEC, NDSE, NDST )
+#ifdef W3_UNO
+              CALL W3UNO2r( NTH, NK2, NTH, NK2, VCFLT, VQ, .TRUE.,   &
+                            NK2, MAPTH2, NSPEC, MAPTH2, NSPEC, NSPEC,&
+                            NSPEC, NDSE, NDST )
+#endif
 !
             END IF
           IF ( FLCK )  THEN
@@ -1429,15 +1601,19 @@
                 VQ(NK+2+(ITH-1)*NK2) = FACHFA * VQ(NK+1+(ITH-1)*NK2)
                 END DO
 !
-!/UQ              CALL W3QCK2 ( NTH, NK2, NTH, NK2, CFLK, FACK, DB, DM,   &
-!/UQ                            VQ, .FALSE., 1, MAPTH2, NSPEC,            &
-!/UQ                            MAPWN2, NSPEC-NTH, NSPEC, NSPEC+NTH,      &
-!/UQ                            NDSE, NDST )
+#ifdef W3_UQ
+              CALL W3QCK2 ( NTH, NK2, NTH, NK2, CFLK, FACK, DB, DM,   &
+                            VQ, .FALSE., 1, MAPTH2, NSPEC,            &
+                            MAPWN2, NSPEC-NTH, NSPEC, NSPEC+NTH,      &
+                            NDSE, NDST )
+#endif
 !
-!/UNO              CALL W3UNO2 ( NTH, NK2, NTH, NK2, CFLK, FACK, DB, DM,  &
-!/UNO                            VQ, .FALSE., 1, MAPTH2, NSPEC,           &
-!/UNO                            MAPWN2, NSPEC-NTH, NSPEC, NSPEC+NTH,     &
-!/UNO                            NDSE, NDST )
+#ifdef W3_UNO
+              CALL W3UNO2 ( NTH, NK2, NTH, NK2, CFLK, FACK, DB, DM,  &
+                            VQ, .FALSE., 1, MAPTH2, NSPEC,           &
+                            MAPWN2, NSPEC-NTH, NSPEC, NSPEC+NTH,     &
+                            NDSE, NDST )
+#endif
 !
           END IF
         END IF
@@ -1452,15 +1628,19 @@
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST W3KTP2 : FLCTH-K, FACTH-K, CTMAX  :',        &
-!/T                 2L2,2E10.3,F7.3)
-!/T 9010 FORMAT ( ' TEST W3KTP2 : LOCAL DATA :',I7,F7.1,2F6.2,1X,6E10.2)
-!/T 9020 FORMAT ( ' TEST W3KTP2 : IK, T, L, CG, DSDD : ')
-!/T 9021 FORMAT ( '              ',I3,F7.2,F7.1,F7.2,E11.3)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST W3KTP2 : FLCTH-K, FACTH-K, CTMAX  :',        &
+                 2L2,2E10.3,F7.3)
+ 9010 FORMAT ( ' TEST W3KTP2 : LOCAL DATA :',I7,F7.1,2F6.2,1X,6E10.2)
+ 9020 FORMAT ( ' TEST W3KTP2 : IK, T, L, CG, DSDD : ')
+ 9021 FORMAT ( '              ',I3,F7.2,F7.1,F7.2,E11.3)
+#endif
 !
-!/T0 9040 FORMAT (/' TEST W3KTP2 : NORMALIZED ',A/)
-!/T0 9041 FORMAT (1X,60(1X,I2))
-!/T0 9042 FORMAT (1X,60I3)
+#ifdef W3_T0
+ 9040 FORMAT (/' TEST W3KTP2 : NORMALIZED ',A/)
+ 9041 FORMAT (1X,60(1X,I2))
+ 9042 FORMAT (1X,60I3)
+#endif
 !/
 !/ End of W3KTP2 ----------------------------------------------------- /
 !/

@@ -569,14 +569,18 @@
 !--------------------------------------------------------------------------
       USE W3GDATMD, ONLY: CLATS
       USE CONSTANTS, ONLY : DERA, RADIUS
-!/RTD      USE W3SERVMD, ONLY: W3LLTOEQ
-!/RTD      USE W3GDATMD, ONLY: POLON, POLAT
+#ifdef W3_RTD
+      USE W3SERVMD, ONLY: W3LLTOEQ
+      USE W3GDATMD, ONLY: POLON, POLAT
+#endif
 
       IMPLICIT NONE
       INTEGER :: IERR, I, J, ISEA, N, CFAC
       REAL :: mlon(NSEA), mlat(NSEA), olon(nxo,nyo), olat(nxo,nyo),     &
              ang(nxo,nyo), lon, lat
-!/RTD     REAL :: tmplon(nxo,nyo), tmplat(nxo,nyo)
+#ifdef W3_RTD
+     REAL :: tmplon(nxo,nyo), tmplat(nxo,nyo)
+#endif
 
       ! Determine smallest cell size factor:
       cfac = 2**(NRLv - 1)
@@ -601,12 +605,14 @@
         ENDDO
       ENDDO
 
-!/RTD          tmplat = olat
-!/RTD          tmplon = olon
-!/RTD          PRINT*,'Rotating coordinates'
-!/RTD          CALL W3LLTOEQ ( tmplat, tmplon, olat, olon,     &              
-!/RTD                            ang, POLAT, POLON, NXO*NYO )             
-!/RTD          PRINT*,'Rotating coordinates complete'
+#ifdef W3_RTD
+          tmplat = olat
+          tmplon = olon
+          PRINT*,'Rotating coordinates'
+          CALL W3LLTOEQ ( tmplat, tmplon, olat, olon,     &              
+                            ang, POLAT, POLON, NXO*NYO )             
+          PRINT*,'Rotating coordinates complete'
+#endif
 
       ! Cycle over output grid points and find containing SMC cell:
       ! NOTE : BRUTE FORCE!

@@ -128,7 +128,9 @@
 !/ ------------------------------------------------------------------- /
       USE CONSTANTS, ONLY: GRAV, DWAT
       USE W3GDATMD,  ONLY: NK, NTH, NSPEC, SIG2, DDEN, FTE, SWL6B1
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -139,7 +141,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
-!/S      INTEGER, SAVE     :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE     :: IENT = 0
+#endif
       INTEGER           :: IKN(NK), ITH
       REAL, PARAMETER   :: VA = 1.4E-5 ! Air kinematic viscosity (used in WAM).
       REAL              :: EB(NK), WN2(NSPEC), EMEAN
@@ -147,7 +151,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SWL4')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SWL4')
+#endif
 !
       IKN = IRANGE(1,NSPEC,NTH) 
       D   = 0.
@@ -265,8 +271,12 @@
       USE CONSTANTS, ONLY: GRAV
       USE W3GDATMD,  ONLY: NK, NTH, NSPEC, SIG, DDEN, DTH
       USE W3GDATMD,  ONLY: SWL6CSTB1, SWL6B1, FTE, FTWN
-!/T6      USE W3ODATMD,  ONLY: NDST
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_T6
+      USE W3ODATMD,  ONLY: NDST
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -277,14 +287,18 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
-!/S      INTEGER, SAVE     :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE     :: IENT = 0
+#endif
       INTEGER             :: IK, ITH, IKN(NK)
       REAL, DIMENSION(NK) :: ABAND, KMAX, ANAR, BN, AORB, DDIS
       REAL                :: K(NTH,NK), B1
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SWL6')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SWL6')
+#endif
 !
 !/ 0) --- Initialize parameters -------------------------------------- /
       IKN   = IRANGE(1,NSPEC,NTH)            ! Index vector for array access, e.g.  

@@ -144,9 +144,15 @@
       USE W3ODATMD, ONLY: NDST
       USE W3GDATMD, ONLY: SIG
       USE W3ODATMD, only : IAPROC
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T0      USE W3ARRYMD, ONLY: PRT2DS
-!/T1      USE W3ARRYMD, ONLY: OUTMAT
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T0
+      USE W3ARRYMD, ONLY: PRT2DS
+#endif
+#ifdef W3_T1
+      USE W3ARRYMD, ONLY: OUTMAT
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -165,16 +171,24 @@
 !/ Local parameters
 !/
       INTEGER                 :: IS
-!/S      INTEGER, SAVE           :: IENT = 0
-!/T0      INTEGER                 :: IK, ITH
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_T0
+      INTEGER                 :: IK, ITH
+#endif
       REAL*8                    :: HM, BB, ARG, Q0, QB, B, CBJ, HRMS, EB(NK)
       REAL*8                    :: AUX, CBJ2, RATIO, S0, S1, THR, BR1, BR2, FAK
       REAL                      :: ETOT, FMEAN2
-!/T0      REAL                    :: DOUT(NK,NTH)
+#ifdef W3_T0
+      REAL                    :: DOUT(NK,NTH)
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SDB1')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SDB1')
+#endif
 !
 ! 0.  Initialzations ------------------------------------------------- /
 !     Never touch this 4 lines below ... otherwise my exceptionhandling will not work.
@@ -186,7 +200,9 @@
       D = 0.
       IWB = 1
 !
-!/T      WRITE (NDST,9000) SDBC1, SDBC2, FDONLY
+#ifdef W3_T
+      WRITE (NDST,9000) SDBC1, SDBC2, FDONLY
+#endif
 !
 ! 1.  Integral quantities. AR: make sure mean quantities are computed, need to move upward
 !
@@ -212,9 +228,11 @@
 ! 1.a. Maximum wave height
 ! 1.a.1. Simple limit
 !
-!/DEBUGDB1      WRITE(740+IAPROC,*) 'FDONLY=', FDONLY
-!/DEBUGDB1      WRITE(740+IAPROC,*) 'FSSOURCE=', FSSOURCE
-!/DEBUGDB1      FLUSH(740+IAPROC)
+#ifdef W3_DEBUGDB1
+      WRITE(740+IAPROC,*) 'FDONLY=', FDONLY
+      WRITE(740+IAPROC,*) 'FSSOURCE=', FSSOURCE
+      FLUSH(740+IAPROC)
+#endif
       IF ( FDONLY ) THEN
           HM     = DBLE(SDBC2) * DBLE(DEPTH)
       ELSE
@@ -292,32 +310,44 @@
         LBREAK = .FALSE. 
       ENDIF
 
-!/DEBUGRUN      IF (IX == DEBUG_NODE) THEN
-!/DEBUGRUN        WRITE(*,'(A200)') 'IX, DEPTH, CBJ, BB, QB, SDBC1, SDBC2, FMEAN, FMEAN2, HS'
-!/DEBUGRUN        WRITE(*,'(I10,20F20.10)') IX, DEPTH, CBJ, BB, QB, SDBC1, SDBC2, FMEAN, FMEAN2, 4*SQRT(ETOT)
-!/DEBUGRUN      ENDIF
+#ifdef W3_DEBUGRUN
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,'(A200)') 'IX, DEPTH, CBJ, BB, QB, SDBC1, SDBC2, FMEAN, FMEAN2, HS'
+        WRITE(*,'(I10,20F20.10)') IX, DEPTH, CBJ, BB, QB, SDBC1, SDBC2, FMEAN, FMEAN2, 4*SQRT(ETOT)
+      ENDIF
+#endif
 
-!/DEBUGDB1      WRITE(740+IAPROC,*) 'CBJ=', CBJ
-!/DEBUGDB1      FLUSH(740+IAPROC)
+#ifdef W3_DEBUGDB1
+      WRITE(740+IAPROC,*) 'CBJ=', CBJ
+      FLUSH(740+IAPROC)
+#endif
 !
 ! ... Test output of arrays
 !
-!/T0      DO IK=1, NK
-!/T0        DO ITH=1, NTH
-!/T0          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
-!/T0          END DO
-!/T0        END DO
+#ifdef W3_T0
+      DO IK=1, NK
+        DO ITH=1, NTH
+          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
+          END DO
+        END DO
+#endif
 !
-!/T0      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG, '  ', 1.,    &
-!/T0                         0.0, 0.001, 'Diag Sdb', ' ', 'NONAME')
+#ifdef W3_T0
+      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG, '  ', 1.,    &
+                         0.0, 0.001, 'Diag Sdb', ' ', 'NONAME')
+#endif
 !     
-!/T1      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sdb')
+#ifdef W3_T1
+      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sdb')
+#endif
 !  
       RETURN
 !
 ! Formats   
 !
-!/T 9000 FORMAT (' TEST W3SDB1 : PARAMETERS :',2F7.3,L4)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SDB1 : PARAMETERS :',2F7.3,L4)
+#endif
 !/
 !/ End of W3SDB1 ----------------------------------------------------- /
 !/

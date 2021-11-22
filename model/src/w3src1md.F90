@@ -131,8 +131,12 @@
 !/ ------------------------------------------------------------------- /
       USE CONSTANTS
       USE W3GDATMD, ONLY: NK, NTH, SIG, DDEN, FTE, FTF, FTWN
-!/T      USE W3ODATMD, ONLY: NDST
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -146,12 +150,16 @@
 !/ Local parameters
 !/
       INTEGER                 :: IK, ITH
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                    :: EB(NK), EBAND
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SPR1')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SPR1')
+#endif
 !
       EMEAN  = 0.
       FMEAN  = 0.
@@ -190,13 +198,17 @@
       FMEAN  = TPIINV * EMEAN / MAX ( 1.E-7 , FMEAN )
       WNMEAN = ( EMEAN / MAX ( 1.E-7 , WNMEAN ) )**2
 !
-!/T      WRITE (NDST,9000) EMEAN, FMEAN, WNMEAN
+#ifdef W3_T
+      WRITE (NDST,9000) EMEAN, FMEAN, WNMEAN
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9000 FORMAT (' TEST W3SPR1 : E,F,WN MEAN ',3E10.3)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SPR1 : E,F,WN MEAN ',3E10.3)
+#endif
 !/
 !/ End of W3SPR1 ----------------------------------------------------- /
 !/
@@ -273,12 +285,22 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/T      USE CONSTANTS
+#ifdef W3_T
+      USE CONSTANTS
+#endif
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, SIG2, ESIN, ECOS, SINC1
-!/T      USE W3ODATMD, ONLY: NDST
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T0      USE W3ARRYMD, ONLY: PRT2DS
-!/T1      USE W3ARRYMD, ONLY: OUTMAT
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T0
+      USE W3ARRYMD, ONLY: PRT2DS
+#endif
+#ifdef W3_T1
+      USE W3ARRYMD, ONLY: OUTMAT
+#endif
 !
       IMPLICIT NONE
 !/
@@ -292,16 +314,26 @@
 !/ Local parameters
 !/
       INTEGER                 :: IS
-!/S      INTEGER, SAVE           :: IENT = 0
-!/T0      INTEGER                 :: IK, ITH
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_T0
+      INTEGER                 :: IK, ITH
+#endif
       REAL                    :: COSU, SINU
-!/T0      REAL                    :: DOUT(NK,NTH)
+#ifdef W3_T0
+      REAL                    :: DOUT(NK,NTH)
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SIN1')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SIN1')
+#endif
 !
-!/T      WRITE (NDST,9000) SINC1, USTAR, USDIR*RADE
+#ifdef W3_T
+      WRITE (NDST,9000) SINC1, USTAR, USDIR*RADE
+#endif
 !
 ! 1.  Preparations
 !
@@ -320,22 +352,30 @@
 !
 ! ... Test output of arrays
 !
-!/T0      DO IK=1, NK
-!/T0        DO ITH=1, NTH
-!/T0          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
-!/T0          END DO
-!/T0        END DO
+#ifdef W3_T0
+      DO IK=1, NK
+        DO ITH=1, NTH
+          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
+          END DO
+        END DO
+#endif
 !
-!/T0      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG(1:), '  ', 1.,    &
-!/T0                         0.0, 0.001, 'Diag Sin', ' ', 'NONAME')
+#ifdef W3_T0
+      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG(1:), '  ', 1.,    &
+                         0.0, 0.001, 'Diag Sin', ' ', 'NONAME')
+#endif
 !
-!/T1      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sin')
+#ifdef W3_T1
+      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sin')
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9000 FORMAT (' TEST W3SIN1 : COMMON FACT.: ',3E10.3)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SIN1 : COMMON FACT.: ',3E10.3)
+#endif
 !/
 !/ End of W3SIN1 ----------------------------------------------------- /
 !/
@@ -413,10 +453,18 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, SDSC1
-!/T      USE W3ODATMD, ONLY: NDST
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T0      USE W3ARRYMD, ONLY: PRT2DS
-!/T1      USE W3ARRYMD, ONLY: OUTMAT
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T0
+      USE W3ARRYMD, ONLY: PRT2DS
+#endif
+#ifdef W3_T1
+      USE W3ARRYMD, ONLY: OUTMAT
+#endif
 !
       IMPLICIT NONE
 !/
@@ -431,20 +479,30 @@
 !/ Local parameters
 !/
       INTEGER                 :: IS
-!/S      INTEGER, SAVE           :: IENT = 0
-!/T0      INTEGER                 :: IK, ITH
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_T0
+      INTEGER                 :: IK, ITH
+#endif
       REAL                    :: FACTOR
-!/T0      REAL                    :: DOUT(NK,NTH)
+#ifdef W3_T0
+      REAL                    :: DOUT(NK,NTH)
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SDS1')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SDS1')
+#endif
 !
 ! 1.  Common factor
 !
       FACTOR = SDSC1 * FMEAN * WNMEAN**3 * EMEAN**2
 !
-!/T      WRITE (NDST,9000) SDSC1, FMEAN, WNMEAN, EMEAN, FACTOR
+#ifdef W3_T
+      WRITE (NDST,9000) SDSC1, FMEAN, WNMEAN, EMEAN, FACTOR
+#endif
 !
 ! 3.  Source term
 !
@@ -453,22 +511,30 @@
 !
 ! ... Test output of arrays
 !
-!/T0      DO IK=1, NK
-!/T0        DO ITH=1, NTH
-!/T0          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
-!/T0          END DO
-!/T0        END DO
+#ifdef W3_T0
+      DO IK=1, NK
+        DO ITH=1, NTH
+          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
+          END DO
+        END DO
+#endif
 !
-!/T0      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG(1:), '  ', 1.,    &
-!/T0                         0.0, 0.001, 'Diag Sds', ' ', 'NONAME')
+#ifdef W3_T0
+      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG(1:), '  ', 1.,    &
+                         0.0, 0.001, 'Diag Sds', ' ', 'NONAME')
+#endif
 !
-!/T1      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sds')
+#ifdef W3_T1
+      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sds')
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/T 9000 FORMAT (' TEST W3SDS1 : COMMON FACT.: ',5E10.3)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SDS1 : COMMON FACT.: ',5E10.3)
+#endif
 !/
 !/ End of W3SDS1 ----------------------------------------------------- /
 !/

@@ -267,10 +267,18 @@
 ! 10. Source code :
 !/ ------------------------------------------------------------------- /
 !/
-!/T      USE W3ODATMD, ONLY: NDST
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T0      USE W3ARRYMD, ONLY: PRT2DS
-!/T1      USE W3ARRYMD, ONLY: OUTMAT
+#ifdef W3_T
+      USE W3ODATMD, ONLY: NDST
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T0
+      USE W3ARRYMD, ONLY: PRT2DS
+#endif
+#ifdef W3_T1
+      USE W3ARRYMD, ONLY: OUTMAT
+#endif
 !/
       USE CONSTANTS, ONLY: TPI
       USE W3SERVMD,  ONLY: EXTCDE
@@ -290,9 +298,13 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
-!/T0      INTEGER                :: ITH
-!/T0      REAL                   :: DOUT(NK,NTH)
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_T0
+      INTEGER                :: ITH
+      REAL                   :: DOUT(NK,NTH)
+#endif
 !/
       REAL                    :: ICECOEF1, ICECOEF2, ICECOEF3, &
                                  ICECOEF4, ICECONC
@@ -302,7 +314,9 @@
       LOGICAL                 :: NOICE
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SIC5')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SIC5')
+#endif
 !
 ! 0.  Initializations ------------------------------------------------ /
       D        = 0.
@@ -391,16 +405,22 @@
 !
 ! ... Test output of arrays
 !
-!/T0      DO IK=1, NK
-!/T0        DO ITH=1, NTH
-!/T0          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
-!/T0          END DO
-!/T0        END DO
+#ifdef W3_T0
+      DO IK=1, NK
+        DO ITH=1, NTH
+          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
+          END DO
+        END DO
+#endif
 !
-!/T0      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG(1:), '  ', 1.,    &
-!/T0                         0.0, 0.001, 'Diag Sice', ' ', 'NONAME')
+#ifdef W3_T0
+      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG(1:), '  ', 1.,    &
+                         0.0, 0.001, 'Diag Sice', ' ', 'NONAME')
+#endif
 !
-!/T1      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sice')
+#ifdef W3_T1
+      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sice')
+#endif
 !
 ! Formats
 !
@@ -487,7 +507,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE CONSTANTS, ONLY: TPI
       USE W3GDATMD,  ONLY: NK, SIG
       USE W3ODATMD,  ONLY: NDSE, IAPROC, NAPROC, NAPERR
@@ -507,11 +529,15 @@
       INTEGER               :: KL, KU, IK
       REAL                  :: TWN_R, TWN_I
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3IC5WNCG')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3IC5WNCG')
+#endif
 !/
 ! Initialize SIGMA {in w3gdatmd: SIG (0: NK+1)}
       IF (ALLOCATED(SIGMA)) DEALLOCATE(SIGMA); ALLOCATE(SIGMA(SIZE(CG)))
@@ -628,7 +654,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       USE CONSTANTS, ONLY: GRAV, TPI
       USE W3DISPMD,  ONLY: WAVNU1
@@ -662,11 +690,15 @@
       COMPLEX(KDPC)         :: GUESS, CROOT, C1D, C2D
       REAL(KDP)             :: HWATD
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'FSDISP')
+#ifdef W3_S
+      CALL STRACE (IENT, 'FSDISP')
+#endif
 ! Note, same as W3IC3WNCG_xx in w3sic3md :
 !     HICE   →   ICE1
 !     IVISC  →   ICE2
@@ -926,7 +958,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -936,14 +970,18 @@
       REAL, INTENT(INOUT)    :: MATRIX(NMAT, NMAT)
 !/ ------------------------------------------------------------------- /
 !/ Local parameter
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 ! the parameter radx is the machine's floating-point radix
       REAL, PARAMETER        :: RADX = RADIX(MATRIX), &
                                 SQRADX = RADX ** 2
       INTEGER                :: I, LAST
       REAL                   :: C, F, G, R, S
 !/ ------------------------------------------------------------------- /
-!/S      CALL STRACE (IENT, 'BALANCING_MATRIX')
+#ifdef W3_S
+      CALL STRACE (IENT, 'BALANCING_MATRIX')
+#endif
 !
       DO
           LAST = 1
@@ -1081,7 +1119,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       USE W3SERVMD, ONLY: EXTCDE
       USE W3ODATMD, ONLY: NDSE, IAPROC, NAPROC, NAPERR
@@ -1098,14 +1138,18 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
       INTEGER              :: I, ITS, K, L, M, NN, MNNK, IDIAG
       REAL                 :: ANORM, P, Q, R, S, T, U, V, W, X, Y, Z
       REAL                 :: PP(NMAT)
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'EIG_HQR')
+#ifdef W3_S
+      CALL STRACE (IENT, 'EIG_HQR')
+#endif
 !
 ! Compute matrix norm for possible use in locating single small
 ! subdiagonal element.
@@ -1379,7 +1423,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       USE W3SERVMD, ONLY: EXTCDE
       USE W3ODATMD, ONLY: NDSE, IAPROC, NAPROC, NAPERR
@@ -1395,13 +1441,17 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL                  :: HESS(NPC-1, NPC-1)
       INTEGER               :: J
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'POLYROOTS')
+#ifdef W3_S
+      CALL STRACE (IENT, 'POLYROOTS')
+#endif
 !
 !
       IF (ABS(PCVEC(1)) < ERRTOL) THEN
@@ -1521,7 +1571,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -1537,14 +1589,18 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 ! A rough value to differentiate deep water case from finite water case
       REAL(KDP), PARAMETER          :: KH_LIM = 7.5
       COMPLEX(KDPC)                 :: LAM, LAMPR, FV, DF, TKH
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'NR_CORR')
+#ifdef W3_S
+      CALL STRACE (IENT, 'NR_CORR')
+#endif
 ! f(k) = (c1 * k**4 + c2) * k * tanh(k*H) - 1
 !      = lam * k * tanh(k*H) - 1
 !
@@ -1649,7 +1705,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       USE W3SERVMD, ONLY: EXTCDE
       USE W3ODATMD, ONLY: NDSE, IAPROC, NAPROC, NAPERR
@@ -1669,7 +1727,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       COMPLEX(KDPC)                 :: K0, K1, DK
       INTEGER                       :: ITER
       REAL                          :: TRANVAL
@@ -1677,7 +1737,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'NR_ROOT')
+#ifdef W3_S
+      CALL STRACE (IENT, 'NR_ROOT')
+#endif
 !/ Set parameters
       IC5MAXITER = IC5PARS(6)
       IC5RKICK   = IC5PARS(7) ! 0: False, 1: True
@@ -1797,7 +1859,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -1810,10 +1874,14 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
-!/S      CALL STRACE (IENT, 'CMPLX_SINH')
+#ifdef W3_S
+      CALL STRACE (IENT, 'CMPLX_SINH')
+#endif
 !/
       CMPLX_SINH = (EXP(X) - EXP(-X)) * 0.5
 !/
@@ -1888,7 +1956,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -1901,10 +1971,14 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
-!/S      CALL STRACE (IENT, 'CMPLX_COSH')
+#ifdef W3_S
+      CALL STRACE (IENT, 'CMPLX_COSH')
+#endif
 !/
       CMPLX_COSH = (EXP(X) + EXP(-X)) * 0.5
 !/
@@ -1981,7 +2055,9 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -1994,10 +2070,14 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
-!/S      CALL STRACE (IENT, 'CMPLX_TANH2')
+#ifdef W3_S
+      CALL STRACE (IENT, 'CMPLX_TANH2')
+#endif
 !/
       CMPLX_TANH2 = (1 - EXP(-2*X)) / (1 + EXP(-2*X))
 !/
@@ -2056,19 +2136,25 @@
 ! 10. Source code :
 !
 !/ ------------------------------------------------------------------- /
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
       INTEGER                            :: I, N, CLOCK
       INTEGER, DIMENSION(:), ALLOCATABLE :: SEED
 !/ ------------------------------------------------------------------- /
-!/S      CALL STRACE (IENT, 'INIT_RANDOM_SEED')
+#ifdef W3_S
+      CALL STRACE (IENT, 'INIT_RANDOM_SEED')
+#endif
 !/
       CALL RANDOM_SEED(SIZE = N)
       ALLOCATE(SEED(N))

@@ -170,7 +170,9 @@
 !
 !/ ------------------------------------------------------------------- /
 !
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -182,11 +184,15 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'INSIN3')
+#ifdef W3_S
+      CALL STRACE (IENT, 'INSIN3')
+#endif
 !
 ! 1.  .... ----------------------------------------------------------- *
 !
@@ -350,7 +356,9 @@
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, DDEN,  &
                           SBTCX, ECOS, ESIN, DTH      
           
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       IMPLICIT NONE
 !/
 !/ ------------------------------------------------------------------- /
@@ -360,7 +368,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
       LOGICAL, SAVE           :: FIRST = .TRUE.
       REAL, INTENT(IN)        :: CG(NK), WN(NK), DEPTH, A(NSPEC), D50
@@ -387,7 +397,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SBT4')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SBT4')
+#endif
 !
 ! 0.  Initializations ------------------------------------------------ *
       IF ( FIRST ) THEN

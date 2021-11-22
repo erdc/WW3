@@ -144,18 +144,24 @@
       USE W3ADATMD, ONLY: W3NAUX, W3SETA
       USE W3ODATMD, ONLY: W3NOUT, W3SETO
       USE W3SERVMD, ONLY : ITRACE, NEXTLN, EXTCDE, STR_TO_UPPER
-!/S      USE W3SERVMD, ONLY : STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY : STRACE
+#endif
       USE W3TIMEMD
       USE W3IOGRMD, ONLY: W3IOGR
       USE W3IOGOMD, ONLY: W3IOGO, W3READFLGRD, W3FLGRDFLAG
       USE W3INITMD, ONLY: WWVER, SWITCHES
       USE W3ODATMD, ONLY: NAPROC, NOSWLL, PTMETH, PTFCUT
-!/DEBUG      USE W3ODATMD, only : IAPROC
+#ifdef W3_DEBUG
+      USE W3ODATMD, only : IAPROC
+#endif
 !/
       USE W3GDATMD
       USE W3WDATMD, ONLY: TIME, WLV, ICE, ICEH, ICEF, BERG,            &
                           UST, USTDIR, RHOAIR
-!/SETUP     USE W3WDATMD, ONLY: ZETA_SETUP
+#ifdef W3_SETUP
+     USE W3WDATMD, ONLY: ZETA_SETUP
+#endif
       USE W3ADATMD, ONLY: DW, UA, UD, AS, CX, CY, HS, WLM, T0M1, THM,  &
                           THS, FP0, THP0, DTDYN, FCUT,                 &
                           ABA, ABD, UBA, UBD, SXX, SYY, SXY, USERO,    &
@@ -185,7 +191,9 @@
 !
       USE NETCDF
 
-!/SMC      USE W3SMCOMD, SMCNOVAL=>NOVAL
+#ifdef W3_SMC
+      USE W3SMCOMD, SMCNOVAL=>NOVAL
+#endif
 
       IMPLICIT NONE
 
@@ -209,7 +217,9 @@
 !
       INTEGER, ALLOCATABLE    :: TABIPART(:), NCIDS(:,:,:)
 !
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !
       REAL                    :: DTREQ, DTEST
 !
@@ -221,7 +231,9 @@
                                  VECTOR, TOGETHER, FLGNML, FLGFC
       LOGICAL                 :: MAPSTAOUT = .TRUE.
       LOGICAL                 :: SMCGRD = .FALSE.
-!/RTD      LOGICAL                 :: RTDL = .FALSE.
+#ifdef W3_RTD
+      LOGICAL                 :: RTDL = .FALSE.
+#endif
 
       INTEGER                 :: TVARTYPE = NF90_DOUBLE
       CHARACTER(LEN=32)       :: EPOCH_ISO
@@ -251,7 +263,9 @@
       NTRACE = 10
       CALL ITRACE ( NDSTRC, NTRACE )
 !
-!/S      CALL STRACE (IENT, 'W3OUNF')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3OUNF')
+#endif
 !
       WRITE (NDSO,900)
 !
@@ -265,17 +279,21 @@
       CALL W3IOGR ( 'READ', NDSM )
       WRITE (NDSO,920) GNAME
 !
-!/RTD ! Is the grid really rotated?
-!/RTD      IF ( Polat < 90. ) RTDL = .True.
-!/RTD !
+#ifdef W3_RTD
+ ! Is the grid really rotated?
+      IF ( Polat < 90. ) RTDL = .True.
+ !
+#endif
 !
 !--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! 3.  Read general data and first fields from file
 !
-!/DEBUG      WRITE (NDSO,*) 'Before FLOGRD(2,1)=', FLOGRD(2,1)
-!/DEBUG      WRITE (NDSO,*) 'IAPROC=', IAPROC
-!/DEBUG      WRITE(740+IAPROC,*) 'Calling W3IOGO from ww3_ounf'
-!/DEBUG      FLUSH(740+IAPROC)
+#ifdef W3_DEBUG
+      WRITE (NDSO,*) 'Before FLOGRD(2,1)=', FLOGRD(2,1)
+      WRITE (NDSO,*) 'IAPROC=', IAPROC
+      WRITE(740+IAPROC,*) 'Calling W3IOGO from ww3_ounf'
+      FLUSH(740+IAPROC)
+#endif
       CALL W3IOGO ( 'READ', NDSOG, IOTEST )
 !
       WRITE (NDSO,930)
@@ -285,10 +303,12 @@
         END DO
       END DO
 !
-!/SMC      IF( GTYPE .EQ. SMCTYPE )  THEN
-!/SMC          SMCGRD = .TRUE.
-!/SMC          WRITE (NDSO, *) " Conversion for SMCTYPE:", GTYPE
-!/SMC      ENDIF 
+#ifdef W3_SMC
+      IF( GTYPE .EQ. SMCTYPE )  THEN
+          SMCGRD = .TRUE.
+          WRITE (NDSO, *) " Conversion for SMCTYPE:", GTYPE
+      ENDIF 
+#endif
 !
 !--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! 4.  Read requests from input file.
@@ -328,13 +348,15 @@
         NOVAL = NML_FIELD%NOVAL
         MAPSTAOUT = NML_FIELD%MAPSTA
         IF(SMCGRD) THEN
-!/SMC          SMCOTYPE = NML_SMC%TYPE
-!/SMC          SXO = NML_SMC%SXO
-!/SMC          SYO = NML_SMC%SYO
-!/SMC          EXO = NML_SMC%EXO
-!/SMC          EYO = NML_SMC%EYO
-!/SMC          CELFAC = NML_SMC%CELFAC
-!/SMC          SMCNOVAL = NOVAL
+#ifdef W3_SMC
+          SMCOTYPE = NML_SMC%TYPE
+          SXO = NML_SMC%SXO
+          SYO = NML_SMC%SYO
+          EXO = NML_SMC%EXO
+          EYO = NML_SMC%EYO
+          CELFAC = NML_SMC%CELFAC
+          SMCNOVAL = NOVAL
+#endif
         ELSE
           IX1 = NML_FILE%IX0
           IXN = NML_FILE%IXN
@@ -395,16 +417,18 @@
         CALL NEXTLN ( COMSTR , NDSI , NDSE )
 
         IF(SMCGRD) THEN
-!/SMC        ! SMC output type (1 or 2)
-!/SMC        READ (NDSI,*,END=801,ERR=802) SMCOTYPE
-!/SMC        IF(SMCOTYPE .EQ. 1) THEN  ! Flat sea point output
-!/SMC           CALL NEXTLN ( COMSTR , NDSI , NDSE )
-!/SMC           READ (NDSI,*,END=801,ERR=802) SXO, SYO, EXO, EYO
-!/SMC        ELSE IF(SMCOTYPE .EQ. 2) THEN  ! Regular grid output
-!/SMC           CALL NEXTLN ( COMSTR , NDSI , NDSE )
-!/SMC           READ (NDSI,*,END=801,ERR=802) SXO, SYO, EXO, EYO, CELFAC
-!/SMC        ENDIF
-!/SMC        SMCNOVAL = NOVAL
+#ifdef W3_SMC
+        ! SMC output type (1 or 2)
+        READ (NDSI,*,END=801,ERR=802) SMCOTYPE
+        IF(SMCOTYPE .EQ. 1) THEN  ! Flat sea point output
+           CALL NEXTLN ( COMSTR , NDSI , NDSE )
+           READ (NDSI,*,END=801,ERR=802) SXO, SYO, EXO, EYO
+        ELSE IF(SMCOTYPE .EQ. 2) THEN  ! Regular grid output
+           CALL NEXTLN ( COMSTR , NDSI , NDSE )
+           READ (NDSI,*,END=801,ERR=802) SXO, SYO, EXO, EYO, CELFAC
+        ENDIF
+        SMCNOVAL = NOVAL
+#endif
         ELSE 
            READ (NDSI,*,END=801,ERR=802) IX1, IXN, IY1, IYN
         ENDIF
@@ -510,44 +534,48 @@
       END IF
 
       IF(SMCGRD) THEN
-!/SMC      WRITE(NDSO, 4100)
-!/SMC      IF(SMCOTYPE .EQ. 1) THEN  ! Flat sea point output
-!/SMC        ALLOCATE(SMCMASK(NSEA))
-!/SMC        ALLOCATE(SMCIDX(NSEA))
-!/SMC        SMCMASK(:) = .FALSE.
-!/SMC        CALL SMC_INTERP()
-!/SMC        SMCNOUT = COUNT(SMCMASK)
-!/SMC        NXO = SMCNOUT
-!/SMC        NYO = 1
-!/SMC        WRITE(NDSO, 4120) SMCNOUT
-!/SMC      ELSE IF(SMCOTYPE .EQ. 2) THEN  ! Regular grid output
-!/SMC        ! Calculate regridding weights:
-!/SMC        ALLOCATE(XIDX(NSEA), YIDX(NSEA), XSPAN(NSEA),                   &
-!/SMC                 YSPAN(NSEA), WTS(NSEA), SMCIDX(NSEA))
-!/SMC        CALL SMC_INTERP()
-!/SMC        WRITE(NDSO, 4110) NXO, NYO, SXO, SYO, DXO, DYO
-!/SMC
-!/SMC        ! Allocate space for coverage array and new MAPSTA array
-!/SMC        ALLOCATE(COV(NXO,NYO), MAPSMC(NXO,NYO))
-!/SMC      ELSE IF(SMCOTYPE .EQ. 3 .OR. SMCOTYPE .EQ. 4) THEN  ! Nearest neighbour interpolation
-!/SMC        CALL READ_SMCINT()
-!/SMC      ENDIF
-!/SMC
-!/SMC      ! CB: IXN and IXY are calculated by SMC_INTERP for SMC GRID
-!/SMC      IX1 = 1
-!/SMC      IXN = NXO
-!/SMC      IY1 = 1
-!/SMC      IYN = NYO
-!/SMC
-!/SMC      ! Also store NXO and NYO in __local__ RTDNX and RTDNY variables.
-!/SMC      ! This avoids compilation errors when the RTD switch is enabled
-!/SMC      ! but the SMC switch is not. TODO: Remove this when C-preprocessor
-!/SMC      ! is used in preference to switches.
-!/SMC      RTDNX = NXO
-!/SMC      RTDNY = NYO
-!/SMC
-!/SMC!/RTD      ! SMC type 3/4 outputs are currently on standard pole grid only
-!/SMC!/RTD      IF(SMCOTYPE .EQ. 3 .OR. SMCOTYPE .EQ. 4) RTDL = .FALSE.
+#ifdef W3_SMC
+      WRITE(NDSO, 4100)
+      IF(SMCOTYPE .EQ. 1) THEN  ! Flat sea point output
+        ALLOCATE(SMCMASK(NSEA))
+        ALLOCATE(SMCIDX(NSEA))
+        SMCMASK(:) = .FALSE.
+        CALL SMC_INTERP()
+        SMCNOUT = COUNT(SMCMASK)
+        NXO = SMCNOUT
+        NYO = 1
+        WRITE(NDSO, 4120) SMCNOUT
+      ELSE IF(SMCOTYPE .EQ. 2) THEN  ! Regular grid output
+        ! Calculate regridding weights:
+        ALLOCATE(XIDX(NSEA), YIDX(NSEA), XSPAN(NSEA),                   &
+                 YSPAN(NSEA), WTS(NSEA), SMCIDX(NSEA))
+        CALL SMC_INTERP()
+        WRITE(NDSO, 4110) NXO, NYO, SXO, SYO, DXO, DYO
+
+        ! Allocate space for coverage array and new MAPSTA array
+        ALLOCATE(COV(NXO,NYO), MAPSMC(NXO,NYO))
+      ELSE IF(SMCOTYPE .EQ. 3 .OR. SMCOTYPE .EQ. 4) THEN  ! Nearest neighbour interpolation
+        CALL READ_SMCINT()
+      ENDIF
+
+      ! CB: IXN and IXY are calculated by SMC_INTERP for SMC GRID
+      IX1 = 1
+      IXN = NXO
+      IY1 = 1
+      IYN = NYO
+
+      ! Also store NXO and NYO in __local__ RTDNX and RTDNY variables.
+      ! This avoids compilation errors when the RTD switch is enabled
+      ! but the SMC switch is not. TODO: Remove this when C-preprocessor
+      ! is used in preference to switches.
+      RTDNX = NXO
+      RTDNY = NYO
+
+#ifdef W3_RTD
+      ! SMC type 3/4 outputs are currently on standard pole grid only
+      IF(SMCOTYPE .EQ. 3 .OR. SMCOTYPE .EQ. 4) RTDL = .FALSE.
+#endif
+#endif
       ELSE 
         IX1    = MAX ( IX1 , 1 )
         IXN    = MIN ( IXN , NX )
@@ -719,23 +747,25 @@
  3940 FORMAT ( '      X range : ',2I7/                                &
                '      Y range : ',2I7)
 !
-!/SMC 4100 FORMAT (//'  SMC grid output :' /                               &
-!/SMC!
-!/SMC               ' --------------------------------------------------')
-!/SMC 4110 FORMAT ( '   SMC to regular lat/lon grid using cell averaging' /&
-!/SMC               '   Aligned output grid definition: ' /                &
-!/SMC               '      NX, NY           : ', 2I8 /                     &
-!/SMC               '      X0, Y0           : ', 2F8.3 /                   &
-!/SMC               '      DX, DY           : ', 2F8.5 )
-!/SMC 4120 FORMAT ( '   Flat seapoint dimensioned SMC output file' /       &
-!/SMC               '      Num seapoints    : ',I9 )
-!/SMC!
-!/SMC 4130 FORMAT ( '   SMC regridding to regular lat/lon grid.' /         &
-!/SMC               '   Output grid definition: ' /                        &
-!/SMC               '      NX, NY           : ', 2I8 /                     &
-!/SMC               '      X0, Y0           : ', 2F8.3 /                   &
-!/SMC               '      DX, DY           : ', 2F8.5 /                   &
-!/SMC               '      Interpolate ?    : ', L )
+#ifdef W3_SMC
+ 4100 FORMAT (//'  SMC grid output :' /                               &
+!
+               ' --------------------------------------------------')
+ 4110 FORMAT ( '   SMC to regular lat/lon grid using cell averaging' /&
+               '   Aligned output grid definition: ' /                &
+               '      NX, NY           : ', 2I8 /                     &
+               '      X0, Y0           : ', 2F8.3 /                   &
+               '      DX, DY           : ', 2F8.5 )
+ 4120 FORMAT ( '   Flat seapoint dimensioned SMC output file' /       &
+               '      Num seapoints    : ',I9 )
+!
+ 4130 FORMAT ( '   SMC regridding to regular lat/lon grid.' /         &
+               '   Output grid definition: ' /                        &
+               '      NX, NY           : ', 2I8 /                     &
+               '      X0, Y0           : ', 2F8.3 /                   &
+               '      DX, DY           : ', 2F8.5 /                   &
+               '      Interpolate ?    : ', L )
+#endif
 !
   970 FORMAT (/'  Generating files '/                                 &
                ' --------------------------------------------------')
@@ -878,14 +908,20 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3SERVMD, ONLY : W3S2XY, UV_TO_MAG_DIR
-!/RTD      USE W3SERVMD, ONLY : W3THRTN, W3XYRTN, W3EQTOLL
+#ifdef W3_RTD
+      USE W3SERVMD, ONLY : W3THRTN, W3XYRTN, W3EQTOLL
+#endif
       USE W3ARRYMD, ONLY : OUTA2I, PRTBLK
       USE W3GDATMD, ONLY : SIG, GTYPE, FLAGLL, MAPSTA, MAPST2
       USE W3GDATMD, ONLY : NK, UNGTYPE, MAPSF, NTRI, CLGTYPE, RLGTYPE, &
                            XGRD, YGRD, SX, SY, X0, Y0, XYB, TRIGP, USSP_WN
-!/RTD ! Rotated pole data from the mod_def file
-!/RTD      USE W3GDATMD, ONLY : POLAT, POLON, FLAGUNR, AnglD
-!/T      USE W3ODATMD, ONLY : NDST
+#ifdef W3_RTD
+ ! Rotated pole data from the mod_def file
+      USE W3GDATMD, ONLY : POLAT, POLON, FLAGUNR, AnglD
+#endif
+#ifdef W3_T
+      USE W3ODATMD, ONLY : NDST
+#endif
       USE NETCDF
       IMPLICIT NONE
 
@@ -918,7 +954,9 @@
                                  MAP(NX+1,NY), MP2(NX+1,NY)
 !
       INTEGER                  :: DEFLATE=1
-!/S      INTEGER, SAVE           :: IENT   =   0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT   =   0
+#endif
 !
       INTEGER, ALLOCATABLE    :: TRIGP2(:,:)
       ! Make the below allocatable to avoid stack overflow on some machines
@@ -926,11 +964,15 @@
                                          MXY(:,:), MAPOUT(:,:)
 !
       REAL                    :: CABS, UABS, MFILLR
-!/BT4   REAL, PARAMETER            :: LOG2=LOG(2.)
+#ifdef W3_BT4
+   REAL, PARAMETER            :: LOG2=LOG(2.)
+#endif
 !
       REAL,DIMENSION(:),  ALLOCATABLE    :: LON, LAT, FREQ
       REAL,DIMENSION(:,:),  ALLOCATABLE  :: LON2D, LAT2D, ANGLD2D
-!/RTD      REAL,DIMENSION(:,:),  ALLOCATABLE  :: LON2DEQ, LAT2DEQ
+#ifdef W3_RTD
+      REAL,DIMENSION(:,:),  ALLOCATABLE  :: LON2DEQ, LAT2DEQ
+#endif
       ! Make the below allocatable to avoid stack overflow on some machines
       REAL, ALLOCATABLE       :: X1(:,:), X2(:,:), XX(:,:), XY(:,:),   &
                                  XK(:,:,:), XXK(:,:,:), XYK(:,:,:),    &
@@ -953,7 +995,9 @@
 !
       LOGICAL                 :: FLFRQ, FLDIR, FEXIST, FREMOVE
       LOGICAL                 :: CUSTOMFRQ=.FALSE.
-!/T      LOGICAL                 :: LTEMP(NGRPP)
+#ifdef W3_T
+      LOGICAL                 :: LTEMP(NGRPP)
+#endif
 
       TYPE(META_T)            :: META(3)
       !TYPE(META_T)            :: META
@@ -961,13 +1005,17 @@
 !/ ------------------------------------------------------------------- /
 !/
 !
-!/S      CALL STRACE (IENT, 'W3EXNC')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3EXNC')
+#endif
 !
-!/T      DO IFI=1, NOGRP
-!/T        LTEMP  = FLG2D(IFI,:)
-!/T        WRITE (NDST,9000) IFI, LTEMP
-!/T        END DO
-!/T      WRITE (NDST,9001) NCTYPE, IX1, IXN, IY1, IYN, VECTOR
+#ifdef W3_T
+      DO IFI=1, NOGRP
+        LTEMP  = FLG2D(IFI,:)
+        WRITE (NDST,9000) IFI, LTEMP
+        END DO
+      WRITE (NDST,9001) NCTYPE, IX1, IXN, IY1, IYN, VECTOR
+#endif
 !
 !--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! 1.  Preparations
@@ -978,12 +1026,14 @@
       ! arrays allocatable also moves them to the heap and avoids stack
       ! overflow issues that can occur on some architectures. (Chris Bunney)
       IF(SMCGRD) THEN
-!/SMC        ALLOCATE(X1(NXO,NYO), X2(NXO,NYO), XX(NXO,NYO), XY(NXO,NYO))
-!/SMC        ALLOCATE(XK(NXO,NYO,NK), XXK(NXO,NYO,NK), XYK(NXO,NYO,NK))
-!/SMC
-!/SMC        ALLOCATE(MX1(NXO,NYO), MXX(NXO,NYO), MYY(NXO,NYO),               &
-!/SMC                 MXY(NXO,NYO), MAPOUT(NXO,NYO))
-!/SMC        ALLOCATE(MX1R(NXO,NYO), MXXR(NXO,NYO), MYYR(NXO,NYO), MXYR(NXO,NYO))
+#ifdef W3_SMC
+        ALLOCATE(X1(NXO,NYO), X2(NXO,NYO), XX(NXO,NYO), XY(NXO,NYO))
+        ALLOCATE(XK(NXO,NYO,NK), XXK(NXO,NYO,NK), XYK(NXO,NYO,NK))
+
+        ALLOCATE(MX1(NXO,NYO), MXX(NXO,NYO), MYY(NXO,NYO),               &
+                 MXY(NXO,NYO), MAPOUT(NXO,NYO))
+        ALLOCATE(MX1R(NXO,NYO), MXXR(NXO,NYO), MYYR(NXO,NYO), MXYR(NXO,NYO))
+#endif
       ELSE
         ALLOCATE(X1(NX+1,NY),X2(NX+1,NY),XX(NX+1,NY),XY(NX+1,NY))
         ALLOCATE(XK(NX+1,NY,NK), XXK(NX+1,NY,NK), XYK(NX+1,NY,NK))
@@ -1067,12 +1117,14 @@
       FNAMENC(S1+1:S1+S4) = TIMEID(1:S4)
 
       !
-!/SMC!
-!/SMC!---  Update MAPSMC for SMC type 2 output. This needs to be
-!/SMC!     done at each timestep as MAPSTA could change if there
-!/SMC!     are water level or ice input chagnes.
-!/SMC!
-!/SMC      IF( SMCGRD .AND. (SMCOTYPE .EQ. 2) ) CALL MAPSTA_SMC()
+#ifdef W3_SMC
+!
+!---  Update MAPSMC for SMC type 2 output. This needs to be
+!     done at each timestep as MAPSTA could change if there
+!     are water level or ice input chagnes.
+!
+      IF( SMCGRD .AND. (SMCOTYPE .EQ. 2) ) CALL MAPSTA_SMC()
+#endif
 !
 !--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 ! 2.  Loop over output fields.
@@ -1099,7 +1151,9 @@
             IF (I1.EQ.0) I1=IFI
             IF (J1.EQ.0) J1=IFJ
             FORMF  = '(1X,32I5)'
-!/T            WRITE (NDST,9020) IDOUT(IFI,IFJ)
+#ifdef W3_T
+            WRITE (NDST,9020) IDOUT(IFI,IFJ)
+#endif
 !
 ! 2.1 Set output arrays and parameters
 !
@@ -1115,8 +1169,10 @@
             ! Surface current
             ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 2 ) THEN
               !! Note - CX and CY read in from .ww3 file are X-Y vectors
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, CX(1:NSEA), CY(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, CX(1:NSEA), CY(1:NSEA), AnglD)
+#endif
 !
               IF( .NOT. VECTOR ) THEN
                 CALL UV_TO_MAG_DIR(CX(1:NSEA), CY(1:NSEA), NSEA,       &
@@ -1130,8 +1186,10 @@
             ! Wind
             ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 3 ) THEN
               !! Note - UA and UD read in from .ww3 file are UX,UY
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, UA(1:NSEA), UD(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, UA(1:NSEA), UD(1:NSEA), AnglD)
+#endif
 !
               IF( .NOT. VECTOR ) THEN
                 CALL UV_TO_MAG_DIR(UA(1:NSEA), UD(1:NSEA), NSEA,       &
@@ -1162,12 +1220,16 @@
             ! Atmospheric momentum
             ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 8 ) THEN
               !! Note - TAUA and TAUADIR read in from .ww3 file are TAUAX,TAUAY
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUA(1:NSEA), TAUADIR(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUA(1:NSEA), TAUADIR(1:NSEA), AnglD)
+#endif
 
               IF( SMCGRD ) THEN
-!/SMC                 CALL W3S2XY_SMC( TAUA   (1:NSEA), XX )
-!/SMC                 CALL W3S2XY_SMC( TAUADIR(1:NSEA), XY )
+#ifdef W3_SMC
+                 CALL W3S2XY_SMC( TAUA   (1:NSEA), XX )
+                 CALL W3S2XY_SMC( TAUADIR(1:NSEA), XY )
+#endif
               ELSE ! IF(SMCGRD)
                  CALL W3S2XY ( NSEA, NSEA, NX+1, NY, TAUA(1:NSEA)      &
                                                         , MAPSF, XX )
@@ -1179,26 +1241,34 @@
             ! Air density
             ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 9 ) THEN
               IF( SMCGRD ) THEN
-!/SMC                 CALL W3S2XY_SMC(RHOAIR, X1)
+#ifdef W3_SMC
+                 CALL W3S2XY_SMC(RHOAIR, X1)
+#endif
               ELSE
                  CALL W3S2XY ( NSEA, NSEA, NX+1, NY, RHOAIR, MAPSF, X1 )
               ENDIF
 !
-!/BT4 ! Krumbein phi scale
-!/BT4 ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
-!/BT4              CALL S2GRID(SED_D50, X1)
-!/BT4              WHERE ( X1.NE.UNDEF) X1 = -LOG(X1/0.001)/LOG2
-!/BT4              NFIELD=1
+#ifdef W3_BT4
+ ! Krumbein phi scale
+ ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
+              CALL S2GRID(SED_D50, X1)
+              WHERE ( X1.NE.UNDEF) X1 = -LOG(X1/0.001)/LOG2
+              NFIELD=1
+#endif
 !
-!/IS2 ! Ice thickness
-!/IS2 ELSE IF (IFI .EQ. 1 .AND. IFJ .EQ. 11 ) THEN
-!/IS2              CALL S2GRID(ICEH(1:NSEA), X1)
-!/IS2              NFIELD=1
+#ifdef W3_IS2
+ ! Ice thickness
+ ELSE IF (IFI .EQ. 1 .AND. IFJ .EQ. 11 ) THEN
+              CALL S2GRID(ICEH(1:NSEA), X1)
+              NFIELD=1
+#endif
 !
-!/IS2 ! Maximum ice floe diameter
-!/IS2 ELSE IF (IFI .EQ. 1 .AND. IFJ .EQ. 12 ) THEN
-!/IS2              CALL S2GRID(ICEF(1:NSEA), X1)
-!/IS2              NFIELD=1
+#ifdef W3_IS2
+ ! Maximum ice floe diameter
+ ELSE IF (IFI .EQ. 1 .AND. IFJ .EQ. 12 ) THEN
+              CALL S2GRID(ICEF(1:NSEA), X1)
+              NFIELD=1
+#endif
 
             ! Significant wave height
             ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 1 ) THEN
@@ -1227,8 +1297,10 @@
 !
             ! Wave mean direction
             ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 7 ) THEN
-!/RTD              ! Rotate direction back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3THRTN(NSEA, THM, AnglD, .FALSE.)
+#ifdef W3_RTD
+              ! Rotate direction back to standard pole
+              IF ( FLAGUNR ) CALL W3THRTN(NSEA, THM, AnglD, .FALSE.)
+#endif
 
               CALL S2GRID(THM, X1, .TRUE.)
 !              IF( SMCGRD ) THEN
@@ -1248,8 +1320,10 @@
 !
             ! Peak direction
             ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 9 ) THEN
-!/RTD              ! Rotate direction back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3THRTN(NSEA, THP0, AnglD, .FALSE.)
+#ifdef W3_RTD
+              ! Rotate direction back to standard pole
+              IF ( FLAGUNR ) CALL W3THRTN(NSEA, THP0, AnglD, .FALSE.)
+#endif
               CALL S2GRID(THP0, X1, .TRUE.)
 !              IF( SMCGRD ) THEN
 !!/SMC                CALL W3S2XY_SMC( THP0, X1, .TRUE. )
@@ -1309,7 +1383,9 @@
             ! Mean wave number
             ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 19 ) THEN
               IF( SMCGRD ) THEN
-!/SMC                CALL W3S2XY_SMC( WNMEAN, X1 )
+#ifdef W3_SMC
+                CALL W3S2XY_SMC( WNMEAN, X1 )
+#endif
               ELSE
                  CALL W3S2XY ( NSEA, NSEA, NX+1, NY, WNMEAN, MAPSF, X1 )
               END IF
@@ -1333,8 +1409,10 @@
               I1F=E3DF(2,2)
               I2F=E3DF(3,2)
               DO IK=I1F,I2F
-!/RTD                ! Rotate direction back to standard pole
-!/RTD                IF ( FLAGUNR ) CALL W3THRTN(NSEA, TH1M(:,IK), AnglD, .FALSE.)
+#ifdef W3_RTD
+                ! Rotate direction back to standard pole
+                IF ( FLAGUNR ) CALL W3THRTN(NSEA, TH1M(:,IK), AnglD, .FALSE.)
+#endif
                 CALL S2GRID(TH1M(:,IK), XX)
                 XK(:,:,IK)=XX
               END DO
@@ -1357,8 +1435,10 @@
               I1F=E3DF(2,4)
               I2F=E3DF(3,4)
               DO IK=I1F,I2F
-!/RTD                ! Rotate direction back to standard pole
-!/RTD                IF ( FLAGUNR ) CALL W3THRTN(NSEA, TH2M(:,IK), AnglD, .FALSE.)
+#ifdef W3_RTD
+                ! Rotate direction back to standard pole
+                IF ( FLAGUNR ) CALL W3THRTN(NSEA, TH2M(:,IK), AnglD, .FALSE.)
+#endif
                 CALL S2GRID(TH2M(:,IK), XX)
                 XK(:,:,IK)=XX
               END DO
@@ -1399,8 +1479,10 @@
 !
             ! Partition wave mean direction
             ELSE IF ( IFI .EQ. 4 .AND. IFJ .EQ. 4 ) THEN
-!/RTD                ! Rotate direction back to standard pole
-!/RTD                IF ( FLAGUNR ) CALL W3THRTN(NSEA, PDIR(:,IPART), AnglD, .FALSE.)
+#ifdef W3_RTD
+                ! Rotate direction back to standard pole
+                IF ( FLAGUNR ) CALL W3THRTN(NSEA, PDIR(:,IPART), AnglD, .FALSE.)
+#endif
               CALL S2GRID(PDIR(:,IPART), X1, .TRUE.)
 !              IF( SMCGRD ) THEN
 !!/SMC                CALL W3S2XY_SMC( PDIR(:,IPART), X1, .TRUE. )
@@ -1423,8 +1505,10 @@
 !
             ! Partition peak direction
             ELSE IF ( IFI .EQ. 4 .AND. IFJ .EQ. 7 ) THEN
-!/RTD                ! Rotate direction back to standard pole
-!/RTD                IF ( FLAGUNR ) CALL W3THRTN(NSEA, PTHP0(:,IPART), AnglD, .FALSE.)
+#ifdef W3_RTD
+                ! Rotate direction back to standard pole
+                IF ( FLAGUNR ) CALL W3THRTN(NSEA, PTHP0(:,IPART), AnglD, .FALSE.)
+#endif
               CALL S2GRID(PTHP0(:,IPART), X1, .TRUE.)
 !              IF( SMCGRD ) THEN
 !!/SMC                CALL W3S2XY_SMC( PTHP0(:,IPART), X1, .TRUE. )
@@ -1488,8 +1572,10 @@
                   USTDIR(ISEA)=UNDEF
                 END IF
               END DO
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, UST(1:NSEA), USTDIR(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, UST(1:NSEA), USTDIR(1:NSEA), AnglD)
+#endif
               CALL S2GRID(UST(1:NSEA), XX)
               CALL S2GRID(USTDIR(1:NSEA), XY)
               !! Commented out unnecessary statements below for time being
@@ -1528,8 +1614,10 @@
 !
             ! Wave supported wind stress
             ELSE IF ( IFI .EQ. 5 .AND. IFJ .EQ. 5 ) THEN
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUWIX(1:NSEA), TAUWIY(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUWIX(1:NSEA), TAUWIY(1:NSEA), AnglD)
+#endif
               CALL S2GRID(TAUWIX(1:NSEA), XX)
               CALL S2GRID(TAUWIY(1:NSEA), XY)
 
@@ -1552,8 +1640,10 @@
 !
             ! Wave to wind stress
             ELSE IF ( IFI .EQ. 5 .AND. IFJ .EQ. 6 ) THEN
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUWNX(1:NSEA), TAUWNY(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUWNX(1:NSEA), TAUWNY(1:NSEA), AnglD)
+#endif
               CALL S2GRID(TAUWNX(1:NSEA), XX)
               CALL S2GRID(TAUWNY(1:NSEA), XY)
               NFIELD=2
@@ -1580,8 +1670,10 @@
 !
             ! Radiation stress
             ELSE IF ( IFI .EQ. 6 .AND. IFJ .EQ. 1 ) THEN
-!/RTD         ! Radition stress components are always left on rotated pole
-!/RTD         ! at present - need to confirm how to de-rotate
+#ifdef W3_RTD
+         ! Radition stress components are always left on rotated pole
+         ! at present - need to confirm how to de-rotate
+#endif
 
               CALL S2GRID(SXX(1:NSEA), X1)
               CALL S2GRID(SYY(1:NSEA), X2)
@@ -1590,8 +1682,10 @@
 !
             ! Wave to ocean stress
             ELSE IF ( IFI .EQ. 6 .AND. IFJ .EQ. 2 ) THEN
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUOX(1:NSEA), TAUOY(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUOX(1:NSEA), TAUOY(1:NSEA), AnglD)
+#endif
               CALL S2GRID(TAUOX(1:NSEA), XX)
               CALL S2GRID(TAUOY(1:NSEA), XY)
               NFIELD=2
@@ -1610,8 +1704,10 @@
 !
             ! Stokes transport
             ELSE IF ( IFI .EQ. 6 .AND. IFJ .EQ. 5 ) THEN
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TUSX(1:NSEA), TUSY(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TUSX(1:NSEA), TUSY(1:NSEA), AnglD)
+#endif
               CALL S2GRID(TUSX(1:NSEA), XX)
               CALL S2GRID(TUSY(1:NSEA), XY)
 ! X1, X2 will not be output when NFIELD == 2
@@ -1629,8 +1725,10 @@
               !  TUSX(ISEA) = CABS
               !  END DO
               !IF( SMCGRD ) THEN
-!/SMC                !CALL W3S2XY_SMC( TUSX(:), X1 )
-!/SMC                !CALL W3S2XY_SMC( TUSY(:), X2 ) ! TODO: CHRISB: TUSY is in degrees....W3S2XY_SMC expects radians...
+#ifdef W3_SMC
+                !CALL W3S2XY_SMC( TUSX(:), X1 )
+                !CALL W3S2XY_SMC( TUSY(:), X2 ) ! TODO: CHRISB: TUSY is in degrees....W3S2XY_SMC expects radians...
+#endif
               !ELSE
               !  CALL W3S2XY ( NSEA, NSEA, NX+1, NY,TUSX,MAPSF, X1 )
               !  CALL W3S2XY ( NSEA, NSEA, NX+1, NY,TUSY,MAPSF, X2 )
@@ -1643,8 +1741,10 @@
                 USSX(ISEA)=MAX(-0.9998,MIN(0.9998,USSX(ISEA)))
                 USSY(ISEA)=MAX(-0.9998,MIN(0.9998,USSY(ISEA)))
               END DO
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, USSX(1:NSEA), USSY(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, USSX(1:NSEA), USSY(1:NSEA), AnglD)
+#endif
               CALL S2GRID(USSX(1:NSEA), XX)
               CALL S2GRID(USSY(1:NSEA), XY)
               !! Commented out unnecessary statements below for time being
@@ -1678,8 +1778,10 @@
               I1F=US3DF(2)
               I2F=US3DF(3)
               DO IK= I1F,I2F
-!/RTD                ! Rotate x,y vector back to standard pole
-!/RTD                IF ( FLAGUNR ) CALL W3XYRTN(NSEA, US3D(:,IK), US3D(:,NK+IK), AnglD)
+#ifdef W3_RTD
+                ! Rotate x,y vector back to standard pole
+                IF ( FLAGUNR ) CALL W3XYRTN(NSEA, US3D(:,IK), US3D(:,NK+IK), AnglD)
+#endif
                 CALL S2GRID(US3D(:,IK), XX)
                 CALL S2GRID(US3D(:,NK+IK), XY)
                 XXK(:,:,IK)=XX
@@ -1706,8 +1808,10 @@
 !
             ! Wave to sea ice stress
             ELSE IF ( IFI .EQ. 6 .AND. IFJ .EQ. 10 ) THEN
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUICE(1:NSEA,1), TAUICE(1:NSEA,2), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUICE(1:NSEA,1), TAUICE(1:NSEA,2), AnglD)
+#endif
               CALL S2GRID(TAUICE(1:NSEA,1), XX)
               CALL S2GRID(TAUICE(1:NSEA,2), XY)
               NFIELD=2
@@ -1731,8 +1835,10 @@
               I1F=1
               I2F=USSPF(2)
               DO IK= I1F,I2F
-!/RTD                ! Rotate x,y vector back to standard pole
-!/RTD                IF ( FLAGUNR ) CALL W3XYRTN(NSEA, USSP(:,IK), USSP(:,NK+IK), AnglD)
+#ifdef W3_RTD
+                ! Rotate x,y vector back to standard pole
+                IF ( FLAGUNR ) CALL W3XYRTN(NSEA, USSP(:,IK), USSP(:,NK+IK), AnglD)
+#endif
                 CALL S2GRID(USSP(:,IK), XX)
                 CALL S2GRID(USSP(:,NK+IK), XY)
                 XXK(:,:,IK) = XX
@@ -1741,11 +1847,15 @@
 !
             ! Total momentum to the ocean
             ELSE IF ( IFI .EQ. 6 .AND. IFJ .EQ. 13 ) THEN
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUOCX(1:NSEA), TAUOCY(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUOCX(1:NSEA), TAUOCY(1:NSEA), AnglD)
+#endif
               IF( SMCGRD ) THEN
-!/SMC                CALL W3S2XY_SMC( TAUOCX(1:NSEA), XX )
-!/SMC                CALL W3S2XY_SMC( TAUOCY(1:NSEA), XY )
+#ifdef W3_SMC
+                CALL W3S2XY_SMC( TAUOCX(1:NSEA), XX )
+                CALL W3S2XY_SMC( TAUOCY(1:NSEA), XY )
+#endif
               ELSE
                 CALL W3S2XY ( NSEA, NSEA, NX+1, NY, TAUOCX(1:NSEA)     &
                                                         , MAPSF, XX )
@@ -1757,8 +1867,10 @@
             ! RMS of bottom displacement amplitude
             ELSE IF ( IFI .EQ. 7 .AND. IFJ .EQ. 1 ) THEN
               ! NB: ABA and ABD are the X and Y components of the bottom displacement
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, ABA(1:NSEA), ABD(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, ABA(1:NSEA), ABD(1:NSEA), AnglD)
+#endif
               CALL S2GRID(ABA(1:NSEA), XX)
               CALL S2GRID(ABD(1:NSEA), XY)
               NFIELD=2
@@ -1766,17 +1878,21 @@
             ! RMS of bottom velocity amplitude
             ELSE IF ( IFI .EQ. 7 .AND. IFJ .EQ. 2 ) THEN
               ! NB: UBA and UBD are the X and Y components of the bottom velocity
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, UBA(1:NSEA), UBD(1:NSEA), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, UBA(1:NSEA), UBD(1:NSEA), AnglD)
+#endif
               CALL S2GRID(UBA(1:NSEA), XX)
               CALL S2GRID(UBD(1:NSEA), XY)
               NFIELD=2
 !
             ! Bottom roughness
             ELSE IF ( IFI .EQ. 7 .AND. IFJ .EQ. 3 ) THEN
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, BEDFORMS(1:NSEA,2), &
-!/RTD                                           BEDFORMS(1:NSEA,3), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, BEDFORMS(1:NSEA,2), &
+                                           BEDFORMS(1:NSEA,3), AnglD)
+#endif
               CALL S2GRID(BEDFORMS(1:NSEA,1), X1)
               CALL S2GRID(BEDFORMS(1:NSEA,2), X2)
               CALL S2GRID(BEDFORMS(1:NSEA,3), XY)
@@ -1788,33 +1904,41 @@
 !
             ! Wave to bottom boundary layer stress
             ELSE IF ( IFI .EQ. 7 .AND. IFJ .EQ. 5 ) THEN
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUBBL(1:NSEA,1), &
-!/RTD                                           TAUBBL(1:NSEA,2), AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, TAUBBL(1:NSEA,1), &
+                                           TAUBBL(1:NSEA,2), AnglD)
+#endif
               CALL S2GRID(TAUBBL(1:NSEA,1), XX)
               CALL S2GRID(TAUBBL(1:NSEA,2), XY)
               NFIELD=2
 !
             ! Mean square slope
             ELSE IF ( IFI .EQ. 8 .AND. IFJ .EQ. 1 ) THEN
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, MSSX, MSSY, AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, MSSX, MSSY, AnglD)
+#endif
               CALL S2GRID(MSSX, XX)
               CALL S2GRID(MSSY, XY)
               NFIELD=2
 !
             ! Phillips constant
             ELSE IF ( IFI .EQ. 8 .AND. IFJ .EQ. 2 ) THEN
-!/RTD              ! Rotate x,y vector back to standard pole
-!/RTD              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, MSCX, MSCY, AnglD)
+#ifdef W3_RTD
+              ! Rotate x,y vector back to standard pole
+              IF ( FLAGUNR ) CALL W3XYRTN(NSEA, MSCX, MSCY, AnglD)
+#endif
               CALL S2GRID(MSCX, XX)
               CALL S2GRID(MSCY, XY)
               NFIELD=2
 !
             ! u direction for mss
             ELSE IF ( IFI .EQ. 8 .AND. IFJ .EQ. 3 ) THEN
-!/RTD                ! Rotate direction back to standard pole
-!/RTD                IF ( FLAGUNR ) CALL W3THRTN(NSEA, MSSD, AnglD, .FALSE.)
+#ifdef W3_RTD
+                ! Rotate direction back to standard pole
+                IF ( FLAGUNR ) CALL W3THRTN(NSEA, MSSD, AnglD, .FALSE.)
+#endif
               DO ISEA=1, NSEA
                 IF ( MSSD(ISEA) .NE. UNDEF )  THEN
                   MSSD(ISEA) = MOD ( 630. - RADE*MSSD(ISEA) , 180. )
@@ -1824,8 +1948,10 @@
 !
             ! x direction for msc
             ELSE IF ( IFI .EQ. 8 .AND. IFJ .EQ. 4 ) THEN
-!/RTD                ! Rotate direction back to standard pole
-!/RTD                IF ( FLAGUNR ) CALL W3THRTN(NSEA, MSCD, AnglD, .FALSE.)
+#ifdef W3_RTD
+                ! Rotate direction back to standard pole
+                IF ( FLAGUNR ) CALL W3THRTN(NSEA, MSCD, AnglD, .FALSE.)
+#endif
               DO ISEA=1, NSEA
                 IF ( MSCD(ISEA) .NE. UNDEF )  THEN
                   MSCD(ISEA) = MOD ( 630. - RADE*MSCD(ISEA) , 180. )
@@ -1936,16 +2062,18 @@
             ! If regular grid, initializes the lat/lon or x/y dimension lengths
             IF (GTYPE.NE.UNGTYPE) THEN
               IF( SMCGRD ) THEN
-!/SMC                IF( SMCOTYPE .EQ. 1 ) THEN
-!/SMC                  ! Flat seapoints file
-!/SMC                  !dimln(2) = NSEA
-!/SMC                  dimln(2) = SMCNOUT
-!/SMC                  dimln(3) = -1  ! not used
-!/SMC                ELSE
-!/SMC                  ! Regular gridded lat/lon file:
-!/SMC                  dimln(2) = NXO
-!/SMC                  dimln(3) = NYO
-!/SMC                ENDIF ! SMCOTYPE
+#ifdef W3_SMC
+                IF( SMCOTYPE .EQ. 1 ) THEN
+                  ! Flat seapoints file
+                  !dimln(2) = NSEA
+                  dimln(2) = SMCNOUT
+                  dimln(3) = -1  ! not used
+                ELSE
+                  ! Regular gridded lat/lon file:
+                  dimln(2) = NXO
+                  dimln(3) = NYO
+                ENDIF ! SMCOTYPE
+#endif
               ELSE ! SMCGRD
                 DIMLN(2)=IXN-IX1+1
                 DIMLN(3)=IYN-IY1+1
@@ -2059,49 +2187,61 @@
               ! If NOT curvilinear grid,
               ELSE
                 IF( SMCGRD ) THEN
-!/SMC                   IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                     ! Flat seapoints file
-!/SMC                     IF(.NOT.ALLOCATED(lon)) ALLOCATE(lon(SMCNOUT))
-!/SMC                     IF(.NOT.ALLOCATED(lat)) ALLOCATE(lat(SMCNOUT))
-!/SMC                     IF(.NOT.ALLOCATED(smccx)) ALLOCATE(smccx(SMCNOUT))
-!/SMC                     IF(.NOT.ALLOCATED(smccy)) ALLOCATE(smccy(SMCNOUT))
-!/SMC                   ELSE
-!/SMC                     ! Regular gridded file
-!/SMC                     IF(.NOT.ALLOCATED(lon)) ALLOCATE(lon(NXO))
-!/SMC                     IF(.NOT.ALLOCATED(lat)) ALLOCATE(lat(NYO))
-!/RTD                     ! Intermediate EQUatorial lat/lon arrays for de-rotation
-!/RTD                     ! of rotated pole coordinates:
-!/RTD                     !!IF(.NOT.ALLOCATED(LON2DEQ)) ALLOCATE(LON2DEQ(NXO,NYO))
-!/RTD                     !!IF(.NOT.ALLOCATED(LAT2DEQ)) ALLOCATE(LAT2DEQ(NXO,NYO))
-!/RTD                     !
-!/RTD                     ! Use local RTDNX/RTDNY variables until CPP implemented to
-!/RTD                     ! avoid compile error when SMC switch not enabled (C.Bunney):
-!/RTD                     IF(.NOT.ALLOCATED(LON2DEQ)) ALLOCATE(LON2DEQ(RTDNX,RTDNY))
-!/RTD                     IF(.NOT.ALLOCATED(LAT2DEQ)) ALLOCATE(LAT2DEQ(RTDNX,RTDNY))
-!/SMC                   ENDIF
-!/RTD                   ! Arrays for de-rotated lat/lon coordinates:
-!/RTD                   IF(.NOT.ALLOCATED(LON2D)) THEN
-!/RTD                      !!ALLOCATE(LON2D(NXO,NYO), LAT2D(NXO,NYO))
-!/RTD                      !!ALLOCATE(ANGLD2D(NXO,NYO))
-!/RTD                      !
-!/RTD                      ! Use local RTDNX/RTDNY variables until CPP implemented to
-!/RTD                      ! avoid compile error when SMC switch not enabled (C.Bunney):
-!/RTD                      ALLOCATE(LON2D(RTDNX,RTDNY), LAT2D(RTDNX,RTDNY))
-!/RTD                      ALLOCATE(ANGLD2D(RTDNX,RTDNY))
-!/RTD                   ENDIF
+#ifdef W3_SMC
+                   IF(SMCOTYPE .EQ. 1) THEN
+                     ! Flat seapoints file
+                     IF(.NOT.ALLOCATED(lon)) ALLOCATE(lon(SMCNOUT))
+                     IF(.NOT.ALLOCATED(lat)) ALLOCATE(lat(SMCNOUT))
+                     IF(.NOT.ALLOCATED(smccx)) ALLOCATE(smccx(SMCNOUT))
+                     IF(.NOT.ALLOCATED(smccy)) ALLOCATE(smccy(SMCNOUT))
+                   ELSE
+                     ! Regular gridded file
+                     IF(.NOT.ALLOCATED(lon)) ALLOCATE(lon(NXO))
+                     IF(.NOT.ALLOCATED(lat)) ALLOCATE(lat(NYO))
+#endif
+#ifdef W3_RTD
+                     ! Intermediate EQUatorial lat/lon arrays for de-rotation
+                     ! of rotated pole coordinates:
+                     !!IF(.NOT.ALLOCATED(LON2DEQ)) ALLOCATE(LON2DEQ(NXO,NYO))
+                     !!IF(.NOT.ALLOCATED(LAT2DEQ)) ALLOCATE(LAT2DEQ(NXO,NYO))
+                     !
+                     ! Use local RTDNX/RTDNY variables until CPP implemented to
+                     ! avoid compile error when SMC switch not enabled (C.Bunney):
+                     IF(.NOT.ALLOCATED(LON2DEQ)) ALLOCATE(LON2DEQ(RTDNX,RTDNY))
+                     IF(.NOT.ALLOCATED(LAT2DEQ)) ALLOCATE(LAT2DEQ(RTDNX,RTDNY))
+#endif
+#ifdef W3_SMC
+                   ENDIF
+#endif
+#ifdef W3_RTD
+                   ! Arrays for de-rotated lat/lon coordinates:
+                   IF(.NOT.ALLOCATED(LON2D)) THEN
+                      !!ALLOCATE(LON2D(NXO,NYO), LAT2D(NXO,NYO))
+                      !!ALLOCATE(ANGLD2D(NXO,NYO))
+                      !
+                      ! Use local RTDNX/RTDNY variables until CPP implemented to
+                      ! avoid compile error when SMC switch not enabled (C.Bunney):
+                      ALLOCATE(LON2D(RTDNX,RTDNY), LAT2D(RTDNX,RTDNY))
+                      ALLOCATE(ANGLD2D(RTDNX,RTDNY))
+                   ENDIF
+#endif
                 ELSE ! SMCGRD
                   ! instanciates lon with x/lon for regular grid or nodes for unstructured mesh
                   IF (.NOT.ALLOCATED(LON)) ALLOCATE(LON(NX))
-!/RTD                  ! 2d longitude array for standard grid coordinates
-!/RTD                  IF ( RTDL .AND. .NOT.ALLOCATED(LON2D)) &
-!/RTD                    ALLOCATE(LON2D(NX,NY),LON2DEQ(NX,NY),ANGLD2D(NX,NY))
+#ifdef W3_RTD
+                  ! 2d longitude array for standard grid coordinates
+                  IF ( RTDL .AND. .NOT.ALLOCATED(LON2D)) &
+                    ALLOCATE(LON2D(NX,NY),LON2DEQ(NX,NY),ANGLD2D(NX,NY))
+#endif
                   IF (.NOT.ALLOCATED(LAT)) THEN
                     ! If regular grid, instanciates lat with y/lat
                     IF (GTYPE.EQ.RLGTYPE) THEN
                       ALLOCATE(LAT(NY))
-!/RTD                      ! 2d latitude array for standard grid coordinates
-!/RTD                      IF ( RTDL .AND. .NOT.ALLOCATED(LAT2D)) &
-!/RTD                        ALLOCATE(LAT2D(NX,NY),LAT2DEQ(NX,NY))
+#ifdef W3_RTD
+                      ! 2d latitude array for standard grid coordinates
+                      IF ( RTDL .AND. .NOT.ALLOCATED(LAT2D)) &
+                        ALLOCATE(LAT2D(NX,NY),LAT2DEQ(NX,NY))
+#endif
                     ! If unstructured mesh, instanciates lat with nodes
                     ELSE
                       ALLOCATE(LAT(NX))
@@ -2116,55 +2256,73 @@
               ! If regular grid
               IF (GTYPE.EQ.RLGTYPE .OR. GTYPE.EQ.SMCTYPE) THEN
                 IF( SMCGRD ) THEN
-!/SMC                  ! CB: Calculate lat/lons of SMC grid
-!/SMC                  IF( SMCOTYPE .EQ. 1 ) THEN
-!/SMC                    ! CB: Flat seapoints file
-!/SMC                    DO i=1,SMCNOUT
-!/SMC                       j = SMCIDX(i)
-!/SMC                       lon(i) = (X0-0.5*SX) + (IJKCel(1,j) + 0.5 * IJKCel(3,j)) * dlon
-!/SMC                       lat(i) = (Y0-0.5*SY) + (IJKCel(2,j) + 0.5 * IJKCel(4,j)) * dlat
-!/SMC                       smccx(i) = IJKCel(3,j)
-!/SMC                       smccy(i) = IJKCel(4,j)
-!/SMC                    ENDDO
-!/RTD                    !!CALL W3EQTOLL(lat, lon, LAT2D(:,1), LON2D(:,1),       &
-!/RTD                    !!              ANGLD2D(:,1), POLAT, POLON, NYO*NXO)
-!/RTD                    !
-!/RTD                    ! Use local RTDNX/RTDNY variables until CPP implemented to
-!/RTD                    ! avoid compile error when SMC switch not enabled (C.Bunney):
-!/RTD                    CALL W3EQTOLL(lat, lon, LAT2D(:,1), LON2D(:,1),       &
-!/RTD                                  ANGLD2D(:,1), POLAT, POLON, RTDNY*RTDNX)
-!/SMC                  ELSE
-!/SMC                    ! CB: Regridded SMC data
-!/SMC                    SXD=DBLE(0.000001d0*DNINT(1d6*(DBLE(DXO)) ))
-!/SMC                    SYD=DBLE(0.000001d0*DNINT(1d6*(DBLE(DYO)) ))
-!/SMC                    X0D=DBLE(0.000001d0*DNINT(1d6*(DBLE(SXO)) ))
-!/SMC                    Y0D=DBLE(0.000001d0*DNINT(1d6*(DBLE(SYO)) ))
-!/SMC                    DO i=1,NXO
-!/SMC                      lon(i)=REAL(X0D+SXD*DBLE(i-1))
-!/RTD                      LON2DEQ(i,:) = lon(i)
-!/SMC                    END DO
-!/SMC                    DO i=1,NYO
-!/SMC                      lat(i)=REAL(Y0D+SYD*DBLE(i-1))
-!/RTD                      LAT2DEQ(:,i) = lat(i)
-!/SMC                    END DO
-!/SMC                    WRITE(STR2,'(F12.7)') DYO
-!/SMC                    STR2=ADJUSTL(STR2)
-!/SMC                    IF(FL_DEFAULT_GBL_META) THEN
-!/SMC                      IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,   &
-!/SMC                               'latitude_resolution', TRIM(str2))
-!/SMC                      WRITE(STR2,'(F12.7)') DXO
-!/SMC                      STR2=ADJUSTL(STR2)
-!/SMC                      IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,   &
-!/SMC                               'longitude_resolution',TRIM(str2))
-!/SMC                    ENDIF
-!/RTD                    !!CALL W3EQTOLL(LAT2DEQ, LON2DEQ, LAT2D, LON2D,       &
-!/RTD                    !!              ANGLD2D, POLAT, POLON, NYO*NXO)
-!/RTD                    !
-!/RTD                    ! Use local RTDNX/RTDNY variables until CPP implemented to
-!/RTD                    ! avoid compile error when SMC switch not enabled (C.Bunney):
-!/RTD                    CALL W3EQTOLL(LAT2DEQ, LON2DEQ, LAT2D, LON2D,       &
-!/RTD                                  ANGLD2D, POLAT, POLON, RTDNY*RTDNX)
-!/SMC                  ENDIF ! SMCOTYPE
+#ifdef W3_SMC
+                  ! CB: Calculate lat/lons of SMC grid
+                  IF( SMCOTYPE .EQ. 1 ) THEN
+                    ! CB: Flat seapoints file
+                    DO i=1,SMCNOUT
+                       j = SMCIDX(i)
+                       lon(i) = (X0-0.5*SX) + (IJKCel(1,j) + 0.5 * IJKCel(3,j)) * dlon
+                       lat(i) = (Y0-0.5*SY) + (IJKCel(2,j) + 0.5 * IJKCel(4,j)) * dlat
+                       smccx(i) = IJKCel(3,j)
+                       smccy(i) = IJKCel(4,j)
+                    ENDDO
+#endif
+#ifdef W3_RTD
+                    !!CALL W3EQTOLL(lat, lon, LAT2D(:,1), LON2D(:,1),       &
+                    !!              ANGLD2D(:,1), POLAT, POLON, NYO*NXO)
+                    !
+                    ! Use local RTDNX/RTDNY variables until CPP implemented to
+                    ! avoid compile error when SMC switch not enabled (C.Bunney):
+                    CALL W3EQTOLL(lat, lon, LAT2D(:,1), LON2D(:,1),       &
+                                  ANGLD2D(:,1), POLAT, POLON, RTDNY*RTDNX)
+#endif
+#ifdef W3_SMC
+                  ELSE
+                    ! CB: Regridded SMC data
+                    SXD=DBLE(0.000001d0*DNINT(1d6*(DBLE(DXO)) ))
+                    SYD=DBLE(0.000001d0*DNINT(1d6*(DBLE(DYO)) ))
+                    X0D=DBLE(0.000001d0*DNINT(1d6*(DBLE(SXO)) ))
+                    Y0D=DBLE(0.000001d0*DNINT(1d6*(DBLE(SYO)) ))
+                    DO i=1,NXO
+                      lon(i)=REAL(X0D+SXD*DBLE(i-1))
+#endif
+#ifdef W3_RTD
+                      LON2DEQ(i,:) = lon(i)
+#endif
+#ifdef W3_SMC
+                    END DO
+                    DO i=1,NYO
+                      lat(i)=REAL(Y0D+SYD*DBLE(i-1))
+#endif
+#ifdef W3_RTD
+                      LAT2DEQ(:,i) = lat(i)
+#endif
+#ifdef W3_SMC
+                    END DO
+                    WRITE(STR2,'(F12.7)') DYO
+                    STR2=ADJUSTL(STR2)
+                    IF(FL_DEFAULT_GBL_META) THEN
+                      IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,   &
+                               'latitude_resolution', TRIM(str2))
+                      WRITE(STR2,'(F12.7)') DXO
+                      STR2=ADJUSTL(STR2)
+                      IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,   &
+                               'longitude_resolution',TRIM(str2))
+                    ENDIF
+#endif
+#ifdef W3_RTD
+                    !!CALL W3EQTOLL(LAT2DEQ, LON2DEQ, LAT2D, LON2D,       &
+                    !!              ANGLD2D, POLAT, POLON, NYO*NXO)
+                    !
+                    ! Use local RTDNX/RTDNY variables until CPP implemented to
+                    ! avoid compile error when SMC switch not enabled (C.Bunney):
+                    CALL W3EQTOLL(LAT2DEQ, LON2DEQ, LAT2D, LON2D,       &
+                                  ANGLD2D, POLAT, POLON, RTDNY*RTDNX)
+#endif
+#ifdef W3_SMC
+                  ENDIF ! SMCOTYPE
+#endif
                 ELSE ! SMCGRD
                     SXD=DBLE(0.000001d0*DNINT(1d6*(DBLE(SX)) ))
                     SYD=DBLE(0.000001d0*DNINT(1d6*(DBLE(SY)) ))
@@ -2176,17 +2334,19 @@
                     DO I=1,NY
                       LAT(I)=REAL(Y0D+SYD*DBLE(I-1))
                     END DO
-!/RTD                  IF ( RTDL ) THEN
-!/RTD                    ! Calculate the standard grid coordinates
-!/RTD                    DO I=1,NX
-!/RTD                      LON2DEQ(I,:)=LON(I)
-!/RTD                    END DO
-!/RTD                    DO I=1,NY
-!/RTD                      LAT2DEQ(:,I)=LAT(I)
-!/RTD                    END DO
-!/RTD                    CALL W3EQTOLL(LAT2DEQ, LON2DEQ, LAT2D, LON2D,       &
-!/RTD                                  ANGLD2D, POLAT, POLON, NY*NX)
-!/RTD                  END IF ! RTDL
+#ifdef W3_RTD
+                  IF ( RTDL ) THEN
+                    ! Calculate the standard grid coordinates
+                    DO I=1,NX
+                      LON2DEQ(I,:)=LON(I)
+                    END DO
+                    DO I=1,NY
+                      LAT2DEQ(:,I)=LAT(I)
+                    END DO
+                    CALL W3EQTOLL(LAT2DEQ, LON2DEQ, LAT2D, LON2D,       &
+                                  ANGLD2D, POLAT, POLON, NY*NX)
+                  END IF ! RTDL
+#endif
                   IF(FL_DEFAULT_GBL_META) THEN
                     WRITE(STR2,'(F12.0)') SY
                     STR2=ADJUSTL(STR2)
@@ -2272,12 +2432,14 @@
                     'altitude_resolution','n/a')
                 CALL CHECK_ERR(IRET)
 
-!/RTD                IF ( RTDL ) THEN
-!/RTD                    IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,  &
-!/RTD                        'grid_north_pole_latitude',POLAT)
-!/RTD                    IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,  &
-!/RTD                        'grid_north_pole_longitude',POLON)
-!/RTD                  END IF
+#ifdef W3_RTD
+                IF ( RTDL ) THEN
+                    IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,  &
+                        'grid_north_pole_latitude',POLAT)
+                    IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,  &
+                        'grid_north_pole_longitude',POLON)
+                  END IF
+#endif
               ENDIF ! FL_DEFAULT_GBL_META
 
               CALL T2D(TIME,STARTDATE,IERR)
@@ -2293,29 +2455,33 @@
               ! If regular grid
               IF (GTYPE.EQ.RLGTYPE .OR. GTYPE.EQ.SMCTYPE) THEN
                 IF(SMCGRD) THEN ! CB: shelter original code from SMC grid
-!/SMC                  IRET=NF90_PUT_VAR(NCID,VARID(1),LON(:))
-!/SMC                  CALL CHECK_ERR(IRET)
-!/SMC                  IRET=NF90_PUT_VAR(NCID,VARID(2),LAT(:))
-!/SMC                  CALL CHECK_ERR(IRET)
-!/SMC                  IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                    ! For type 1 SCM file also put lat/lons and cell sizes:
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(5),SMCCX)
-!/SMC                    CALL CHECK_ERR(IRET)
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(6),SMCCY)
-!/SMC                    CALL CHECK_ERR(IRET)
-!/SMC                  ENDIF
+#ifdef W3_SMC
+                  IRET=NF90_PUT_VAR(NCID,VARID(1),LON(:))
+                  CALL CHECK_ERR(IRET)
+                  IRET=NF90_PUT_VAR(NCID,VARID(2),LAT(:))
+                  CALL CHECK_ERR(IRET)
+                  IF(SMCOTYPE .EQ. 1) THEN
+                    ! For type 1 SCM file also put lat/lons and cell sizes:
+                    IRET=NF90_PUT_VAR(NCID,VARID(5),SMCCX)
+                    CALL CHECK_ERR(IRET)
+                    IRET=NF90_PUT_VAR(NCID,VARID(6),SMCCY)
+                    CALL CHECK_ERR(IRET)
+                  ENDIF
+#endif
                 ELSE ! SMCGRD
                   IRET=NF90_PUT_VAR(NCID,VARID(1),LON(IX1:IXN))
                   CALL CHECK_ERR(IRET)
                   IRET=NF90_PUT_VAR(NCID,VARID(2),LAT(IY1:IYN))
                   CALL CHECK_ERR(IRET)
                 ENDIF ! SMCGRD
-!/RTD                IF ( RTDL ) THEN
-!/RTD                  IRET=NF90_PUT_VAR(NCID,VARID(7),LON2D(IX1:IXN,IY1:IYN))
-!/RTD                  CALL CHECK_ERR(IRET)
-!/RTD                  IRET=NF90_PUT_VAR(NCID,VARID(8),LAT2D(IX1:IXN,IY1:IYN))
-!/RTD                  CALL CHECK_ERR(IRET)
-!/RTD                  END IF
+#ifdef W3_RTD
+                IF ( RTDL ) THEN
+                  IRET=NF90_PUT_VAR(NCID,VARID(7),LON2D(IX1:IXN,IY1:IYN))
+                  CALL CHECK_ERR(IRET)
+                  IRET=NF90_PUT_VAR(NCID,VARID(8),LAT2D(IX1:IXN,IY1:IYN))
+                  CALL CHECK_ERR(IRET)
+                  END IF
+#endif
               END IF
 
               ! If curvilinear grid
@@ -2396,14 +2562,16 @@
                 IF (COORDTYPE.EQ.1) THEN
                   IF (NCVARTYPE.EQ.2) THEN
                     IF( SMCGRD ) THEN
-!/SMC                      IF( SMCOTYPE .EQ. 1 ) THEN
-!/SMC                        ! SMC Flat file
-!/SMC                        IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_SHORT, (/DIMID(2), DIMID(4+EXTRADIM)/), VARID(IVAR))
-!/SMC                      ELSE
-!/SMC                        ! SMC Regridded file
-!/SMC                        IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_SHORT, DIMID(2:4+EXTRADIM), VARID(IVAR))
-!/SMC                      ENDIF
-!/SMC                      CALL CHECK_ERR(IRET)
+#ifdef W3_SMC
+                      IF( SMCOTYPE .EQ. 1 ) THEN
+                        ! SMC Flat file
+                        IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_SHORT, (/DIMID(2), DIMID(4+EXTRADIM)/), VARID(IVAR))
+                      ELSE
+                        ! SMC Regridded file
+                        IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_SHORT, DIMID(2:4+EXTRADIM), VARID(IVAR))
+                      ENDIF
+                      CALL CHECK_ERR(IRET)
+#endif
                     ELSE ! SMCGRD
                       IRET=NF90_DEF_VAR(NCID,META(I)%VARNM, NF90_SHORT, DIMID(2:4+EXTRADIM), VARID(IVAR))
                       CALL CHECK_ERR(IRET)
@@ -2412,14 +2580,16 @@
                     IF (NCTYPE.EQ.4) CALL CHECK_ERR(IRET)
                   ELSE
                     IF( SMCGRD ) THEN
-!/SMC                      IF( SMCOTYPE .EQ. 1 ) THEN
-!/SMC                        ! SMC Flat file
-!/SMC                        IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_FLOAT, (/DIMID(2), DIMID(4+EXTRADIM)/), VARID(IVAR))
-!/SMC                      ELSE
-!/SMC                        ! SMC Regridded file
-!/SMC                        IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_FLOAT, DIMID(2:4+EXTRADIM), VARID(IVAR))
-!/SMC                      ENDIF
-!/SMC                      CALL CHECK_ERR(IRET)
+#ifdef W3_SMC
+                      IF( SMCOTYPE .EQ. 1 ) THEN
+                        ! SMC Flat file
+                        IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_FLOAT, (/DIMID(2), DIMID(4+EXTRADIM)/), VARID(IVAR))
+                      ELSE
+                        ! SMC Regridded file
+                        IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_FLOAT, DIMID(2:4+EXTRADIM), VARID(IVAR))
+                      ENDIF
+                      CALL CHECK_ERR(IRET)
+#endif
                     ELSE ! SMCGRD
                       IRET=NF90_DEF_VAR(NCID,META(I)%VARNM, NF90_FLOAT, DIMID(2:4+EXTRADIM), VARID(IVAR))
                       CALL CHECK_ERR(IRET)
@@ -2452,14 +2622,16 @@
                 CALL CHECK_ERR(IRET) ! CB
 !
              !! CHRISB: Commenting out below - will be handled by w3oundmeta module
-!/RTD
-!/RTD        !        IF ( RTDL ) THEN
-!/RTD        !          ! Add grid mapping attribute for rotated pole grids:
-!/RTD        !          IRET=NF90_PUT_ATT(NCID,VARID(IVAR),'grid_mapping',    &
-!/RTD        !                            'rotated_pole')
-!/RTD        !          CALL CHECK_ERR(IRET)
-!/RTD        !          END IF
-!/RTD
+#ifdef W3_RTD
+
+        !        IF ( RTDL ) THEN
+        !          ! Add grid mapping attribute for rotated pole grids:
+        !          IRET=NF90_PUT_ATT(NCID,VARID(IVAR),'grid_mapping',    &
+        !                            'rotated_pole')
+        !          CALL CHECK_ERR(IRET)
+        !          END IF
+
+#endif
               END DO
 !
               ! put START date in global attribute
@@ -2487,12 +2659,14 @@
                 ! If it is spherical coordinate
                 IF (FLAGLL) THEN
                   IF(SMCGRD) THEN
-!/SMC                    IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                      IRET=NF90_INQ_DIMID (NCID, 'seapoint', DIMID(2))
-!/SMC                    ELSE
-!/SMC                      IRET=NF90_INQ_DIMID (NCID, 'longitude', DIMID(2))
-!/SMC                      IRET=NF90_INQ_DIMID (NCID, 'latitude', DIMID(3))
-!/SMC                    ENDIF
+#ifdef W3_SMC
+                    IF(SMCOTYPE .EQ. 1) THEN
+                      IRET=NF90_INQ_DIMID (NCID, 'seapoint', DIMID(2))
+                    ELSE
+                      IRET=NF90_INQ_DIMID (NCID, 'longitude', DIMID(2))
+                      IRET=NF90_INQ_DIMID (NCID, 'latitude', DIMID(3))
+                    ENDIF
+#endif
                   ELSE
                     IRET=NF90_INQ_DIMID (NCID, 'longitude', DIMID(2))
                     IRET=NF90_INQ_DIMID (NCID, 'latitude', DIMID(3))
@@ -2542,13 +2716,15 @@
                   IF (COORDTYPE.EQ.1) THEN
                     IF (NCVARTYPE.EQ.2) THEN
                       IF( SMCGRD ) THEN
-!/SMC                        IF( SMCOTYPE .EQ. 1 ) THEN
-!/SMC                          ! SMC Flat file
-!/SMC                          IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_SHORT, (/DIMID(2), DIMID(4+EXTRADIM)/), VARID(IVAR))
-!/SMC                        ELSE
-!/SMC                          ! SMC Regridded file
-!/SMC                          IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_SHORT, DIMID(2:4+EXTRADIM), VARID(IVAR))
-!/SMC                        ENDIF
+#ifdef W3_SMC
+                        IF( SMCOTYPE .EQ. 1 ) THEN
+                          ! SMC Flat file
+                          IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_SHORT, (/DIMID(2), DIMID(4+EXTRADIM)/), VARID(IVAR))
+                        ELSE
+                          ! SMC Regridded file
+                          IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_SHORT, DIMID(2:4+EXTRADIM), VARID(IVAR))
+                        ENDIF
+#endif
                       ELSE
                          IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_SHORT, DIMID(2:4+EXTRADIM), VARID(IVAR))
                          CALL CHECK_ERR(IRET)
@@ -2556,13 +2732,15 @@
                       IF (NCTYPE.EQ.4) IRET = NF90_DEF_VAR_DEFLATE(NCID, VARID(IVAR), 1, 1, DEFLATE)
                     ELSE
                       IF( SMCGRD ) THEN
-!/SMC                        IF( SMCOTYPE .EQ. 1 ) THEN
-!/SMC                          ! SMC Flat file
-!/SMC                          IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_FLOAT, (/DIMID(2), DIMID(4+EXTRADIM)/), VARID(IVAR))
-!/SMC                        ELSE
-!/SMC                          ! SMC Regridded file
-!/SMC                          IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_FLOAT, DIMID(2:4+EXTRADIM), VARID(IVAR))
-!/SMC                        ENDIF
+#ifdef W3_SMC
+                        IF( SMCOTYPE .EQ. 1 ) THEN
+                          ! SMC Flat file
+                          IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_FLOAT, (/DIMID(2), DIMID(4+EXTRADIM)/), VARID(IVAR))
+                        ELSE
+                          ! SMC Regridded file
+                          IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_FLOAT, DIMID(2:4+EXTRADIM), VARID(IVAR))
+                        ENDIF
+#endif
                       ELSE
                         IRET = NF90_DEF_VAR(NCID,META(I)%varnm, NF90_FLOAT, DIMID(2:4+EXTRADIM), VARID(IVAR))
                         CALL CHECK_ERR(IRET)
@@ -2595,14 +2773,16 @@
                   CALL CHECK_ERR(IRET) ! CB
 !
              !! CHRISB: Commenting out below - will be handled by w3oundmeta module
-!/RTD
-!/RTD        !          IF ( RTDL ) THEN
-!/RTD        !            ! Add grid mapping attribute for rotated pole grids:
-!/RTD        !            IRET=NF90_PUT_ATT(NCID,VARID(IVAR),'grid_mapping',   &
-!/RTD        !                              'rotated_pole')
-!/RTD        !            CALL CHECK_ERR(IRET)
-!/RTD        !            END IF
-!/RTD
+#ifdef W3_RTD
+
+        !          IF ( RTDL ) THEN
+        !            ! Add grid mapping attribute for rotated pole grids:
+        !            IRET=NF90_PUT_ATT(NCID,VARID(IVAR),'grid_mapping',   &
+        !                              'rotated_pole')
+        !            CALL CHECK_ERR(IRET)
+        !            END IF
+
+#endif
                 END DO
                 IRET = NF90_ENDDEF(NCID)
                 CALL CHECK_ERR(IRET)
@@ -2680,41 +2860,43 @@
             IF (NCVARTYPE.EQ.2) THEN
               IF ( NFIELD.EQ.3 ) THEN
                 IF (SMCGRD) THEN
-!/SMC                  DO IX=IX1, IXN
-!/SMC                    DO IY=IY1, IYN
-!/SMC                      ! TODO: Find some other way to access MAPSTA
-!/SMC                      IF ( X1(IX,IY) .EQ. UNDEF ) THEN
-!/SMC                        MXX(IX,IY) = MFILL
-!/SMC                        MYY(IX,IY) = MFILL
-!/SMC                        MXY(IX,IY) = MFILL
-!/SMC                      ELSE
-!/SMC                        MXX(IX,IY) = NINT(X1(IX,IY)/META(1)%FSC)
-!/SMC                        MYY(IX,IY) = NINT(X2(IX,IY)/META(2)%FSC)
-!/SMC                        MXY(IX,IY) = NINT(XY(IX,IY)/META(3)%FSC)
-!/SMC                      END IF
-!/SMC                    END DO
-!/SMC                  END DO
-!/SMC                  IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                        MXX(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
-!/SMC                        MYY(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+3),               &
-!/SMC                        MXY(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                  ELSE
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                        MXX(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
-!/SMC                        MYY(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+3),               &
-!/SMC                        MXY(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                  ENDIF
+#ifdef W3_SMC
+                  DO IX=IX1, IXN
+                    DO IY=IY1, IYN
+                      ! TODO: Find some other way to access MAPSTA
+                      IF ( X1(IX,IY) .EQ. UNDEF ) THEN
+                        MXX(IX,IY) = MFILL
+                        MYY(IX,IY) = MFILL
+                        MXY(IX,IY) = MFILL
+                      ELSE
+                        MXX(IX,IY) = NINT(X1(IX,IY)/META(1)%FSC)
+                        MYY(IX,IY) = NINT(X2(IX,IY)/META(2)%FSC)
+                        MXY(IX,IY) = NINT(XY(IX,IY)/META(3)%FSC)
+                      END IF
+                    END DO
+                  END DO
+                  IF(SMCOTYPE .EQ. 1) THEN
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                        MXX(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                    call CHECK_ERR(IRET)
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
+                        MYY(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                    call CHECK_ERR(IRET)
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+3),               &
+                        MXY(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                    call CHECK_ERR(IRET)
+                  ELSE
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                        MXX(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                    call CHECK_ERR(IRET)
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
+                        MYY(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                    call CHECK_ERR(IRET)
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+3),               &
+                        MXY(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                    call CHECK_ERR(IRET)
+                  ENDIF
+#endif
                 ELSE ! IF(SMCGRD)
                   DO IX=IX1, IXN
                     DO IY=IY1, IYN
@@ -2745,33 +2927,35 @@
 ! EXTRADIM=0
                 IF (EXTRADIM.EQ.0) THEN
                   IF (SMCGRD) THEN
-!/SMC                    DO IX=IX1, IXN
-!/SMC                      DO IY=IY1, IYN
-!/SMC                        ! TODO: Find some other way to access MAPSTA
-!/SMC                        IF ( XX(IX,IY) .EQ. UNDEF ) THEN
-!/SMC                          MXX(IX,IY) = MFILL
-!/SMC                          MYY(IX,IY) = MFILL
-!/SMC                        ELSE
-!/SMC                          MXX(IX,IY) = NINT(XX(IX,IY)/META(1)%FSC)
-!/SMC                          MYY(IX,IY) = NINT(XY(IX,IY)/META(2)%FSC)
-!/SMC                        END IF
-!/SMC                      END DO
-!/SMC                    END DO
-!/SMC                    IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                          MXX(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
-!/SMC                          MYY(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                    ELSE
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                          MXX(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
-!/SMC                          MYY(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                    ENDIF
+#ifdef W3_SMC
+                    DO IX=IX1, IXN
+                      DO IY=IY1, IYN
+                        ! TODO: Find some other way to access MAPSTA
+                        IF ( XX(IX,IY) .EQ. UNDEF ) THEN
+                          MXX(IX,IY) = MFILL
+                          MYY(IX,IY) = MFILL
+                        ELSE
+                          MXX(IX,IY) = NINT(XX(IX,IY)/META(1)%FSC)
+                          MYY(IX,IY) = NINT(XY(IX,IY)/META(2)%FSC)
+                        END IF
+                      END DO
+                    END DO
+                    IF(SMCOTYPE .EQ. 1) THEN
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                          MXX(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                      call CHECK_ERR(IRET)
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
+                          MYY(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                      call CHECK_ERR(IRET)
+                    ELSE
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                          MXX(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                      call CHECK_ERR(IRET)
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
+                          MYY(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                      call CHECK_ERR(IRET)
+                    ENDIF
+#endif
                   ELSE ! IF(SMCGRD)
                     DO IX=IX1, IXN
                       DO IY=IY1, IYN
@@ -2800,35 +2984,37 @@
                     START(3+1-COORDTYPE)=START(3+1-COORDTYPE)+1
 
                     IF (SMCGRD) THEN
-!/SMC                      DO IX=IX1, IXN
-!/SMC                        DO IY=IY1, IYN
-!/SMC                          ! TODO: Find some other way to access MAPSTA
-!/SMC                          IF ( XXK(IX,IY,IK) .EQ. UNDEF ) THEN
-!/SMC                            MXX(IX,IY) = MFILL
-!/SMC                            MYY(IX,IY) = MFILL
-!/SMC                          ELSE
-!/SMC                            MXX(IX,IY) = NINT(XXK(IX,IY,IK)/META(1)%FSC)
-!/SMC                            MYY(IX,IY) = NINT(XYK(IX,IY,IK)/META(2)%FSC)
-!/SMC                          END IF
-!/SMC                        END DO
-!/SMC                      END DO
-!/SMC                      IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),                     &
-!/SMC                            MXX(IX1:IXN,IY1:IYN),(/START(1), START(3), START(4)/), &
-!/SMC                            (/COUNT(1), COUNT(3), COUNT(4)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),                     &
-!/SMC                            MXY(IX1:IXN,IY1:IYN),(/START(1), START(3), START(4)/), &
-!/SMC                            (/COUNT(1), COUNT(3), COUNT(4)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                      ELSE
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                            MXX(IX1:IXN,IY1:IYN),(/START(1:4)/),(/COUNT(1:4)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                            MXX(IX1:IXN,IY1:IYN),(/START(1:4)/),(/COUNT(1:4)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                      ENDIF
+#ifdef W3_SMC
+                      DO IX=IX1, IXN
+                        DO IY=IY1, IYN
+                          ! TODO: Find some other way to access MAPSTA
+                          IF ( XXK(IX,IY,IK) .EQ. UNDEF ) THEN
+                            MXX(IX,IY) = MFILL
+                            MYY(IX,IY) = MFILL
+                          ELSE
+                            MXX(IX,IY) = NINT(XXK(IX,IY,IK)/META(1)%FSC)
+                            MYY(IX,IY) = NINT(XYK(IX,IY,IK)/META(2)%FSC)
+                          END IF
+                        END DO
+                      END DO
+                      IF(SMCOTYPE .EQ. 1) THEN
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),                     &
+                            MXX(IX1:IXN,IY1:IYN),(/START(1), START(3), START(4)/), &
+                            (/COUNT(1), COUNT(3), COUNT(4)/))
+                        call CHECK_ERR(IRET)
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),                     &
+                            MXY(IX1:IXN,IY1:IYN),(/START(1), START(3), START(4)/), &
+                            (/COUNT(1), COUNT(3), COUNT(4)/))
+                        call CHECK_ERR(IRET)
+                      ELSE
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                            MXX(IX1:IXN,IY1:IYN),(/START(1:4)/),(/COUNT(1:4)/))
+                        call CHECK_ERR(IRET)
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                            MXX(IX1:IXN,IY1:IYN),(/START(1:4)/),(/COUNT(1:4)/))
+                        call CHECK_ERR(IRET)
+                      ENDIF
+#endif
                     ELSE ! IF(SMCGRD)
                       DO IX=IX1, IXN
                         DO IY=IY1, IYN
@@ -2853,25 +3039,27 @@
 ! EXTRADIM=0
                 IF (EXTRADIM.EQ.0) THEN
                   IF (SMCGRD) THEN
-!/SMC                    DO IX=IX1, IXN
-!/SMC                      DO IY=IY1, IYN
-!/SMC                        ! TODO: Find some other way to access MAPSTA
-!/SMC                        IF ( X1(IX,IY) .EQ. UNDEF ) THEN
-!/SMC                          MX1(IX,IY) = MFILL
-!/SMC                        ELSE
-!/SMC                          MX1(IX,IY) = NINT(X1(IX,IY)/META(1)%FSC)
-!/SMC                        END IF
-!/SMC                      END DO
-!/SMC                    END DO
-!/SMC                    IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                          MX1(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                    ELSE
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                          MX1(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                    ENDIF
+#ifdef W3_SMC
+                    DO IX=IX1, IXN
+                      DO IY=IY1, IYN
+                        ! TODO: Find some other way to access MAPSTA
+                        IF ( X1(IX,IY) .EQ. UNDEF ) THEN
+                          MX1(IX,IY) = MFILL
+                        ELSE
+                          MX1(IX,IY) = NINT(X1(IX,IY)/META(1)%FSC)
+                        END IF
+                      END DO
+                    END DO
+                    IF(SMCOTYPE .EQ. 1) THEN
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                          MX1(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                      call CHECK_ERR(IRET)
+                    ELSE
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                          MX1(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                      call CHECK_ERR(IRET)
+                    ENDIF
+#endif
                   ELSE ! IF(SMCGRD)
                     DO IX=IX1, IXN
                       DO IY=IY1, IYN
@@ -2893,25 +3081,27 @@
                     START(3+1-COORDTYPE)=START(3+1-COORDTYPE)+1
 
                     IF (SMCGRD) THEN
-!/SMC                      DO IX=IX1, IXN
-!/SMC                        DO IY=IY1, IYN
-!/SMC                          ! TODO: Find some other way to access MAPSTA
-!/SMC                          IF ( XK(IX,IY,IK) .EQ. UNDEF ) THEN
-!/SMC                            MX1(IX,IY) = MFILL
-!/SMC                          ELSE
-!/SMC                            MX1(IX,IY) = NINT(XK(IX,IY,IK)/META(1)%FSC)
-!/SMC                          END IF
-!/SMC                        END DO
-!/SMC                      END DO
-!/SMC                      IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                            MX1(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                      ELSE
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                            MX1(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                      ENDIF
+#ifdef W3_SMC
+                      DO IX=IX1, IXN
+                        DO IY=IY1, IYN
+                          ! TODO: Find some other way to access MAPSTA
+                          IF ( XK(IX,IY,IK) .EQ. UNDEF ) THEN
+                            MX1(IX,IY) = MFILL
+                          ELSE
+                            MX1(IX,IY) = NINT(XK(IX,IY,IK)/META(1)%FSC)
+                          END IF
+                        END DO
+                      END DO
+                      IF(SMCOTYPE .EQ. 1) THEN
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                            MX1(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                        call CHECK_ERR(IRET)
+                      ELSE
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                            MX1(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                        call CHECK_ERR(IRET)
+                      ENDIF
+#endif
                     ELSE ! IF(SMCGRD)
                       DO IX=IX1, IXN
                         DO IY=IY1, IYN
@@ -2935,41 +3125,43 @@
             ELSE
               IF ( NFIELD.EQ.3 ) THEN
                 IF (SMCGRD) THEN
-!/SMC                  DO IX=IX1, IXN
-!/SMC                    DO IY=IY1, IYN
-!/SMC                      ! TODO: Find some other way to access MAPSTA
-!/SMC                      IF ( X1(IX,IY) .EQ. UNDEF ) THEN
-!/SMC                        MXXR(IX,IY) = MFILLR
-!/SMC                        MYYR(IX,IY) = MFILLR
-!/SMC                        MXYR(IX,IY) = MFILLR
-!/SMC                      ELSE
-!/SMC                        MXXR(IX,IY) = X1(IX,IY)
-!/SMC                        MYYR(IX,IY) = X2(IX,IY)
-!/SMC                        MXYR(IX,IY) = XY(IX,IY)
-!/SMC                      END IF
-!/SMC                    END DO
-!/SMC                  END DO
-!/SMC                  IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                        MXXR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
-!/SMC                        MYYR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+3),               &
-!/SMC                        MXYR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                  ELSE
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                        MXXR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
-!/SMC                        MYYR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+3),               &
-!/SMC                        MXYR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                    call CHECK_ERR(IRET)
-!/SMC                  ENDIF
+#ifdef W3_SMC
+                  DO IX=IX1, IXN
+                    DO IY=IY1, IYN
+                      ! TODO: Find some other way to access MAPSTA
+                      IF ( X1(IX,IY) .EQ. UNDEF ) THEN
+                        MXXR(IX,IY) = MFILLR
+                        MYYR(IX,IY) = MFILLR
+                        MXYR(IX,IY) = MFILLR
+                      ELSE
+                        MXXR(IX,IY) = X1(IX,IY)
+                        MYYR(IX,IY) = X2(IX,IY)
+                        MXYR(IX,IY) = XY(IX,IY)
+                      END IF
+                    END DO
+                  END DO
+                  IF(SMCOTYPE .EQ. 1) THEN
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                        MXXR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                    call CHECK_ERR(IRET)
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
+                        MYYR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                    call CHECK_ERR(IRET)
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+3),               &
+                        MXYR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                    call CHECK_ERR(IRET)
+                  ELSE
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                        MXXR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                    call CHECK_ERR(IRET)
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
+                        MYYR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                    call CHECK_ERR(IRET)
+                    IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+3),               &
+                        MXYR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                    call CHECK_ERR(IRET)
+                  ENDIF
+#endif
                 ELSE ! IF(SMCGRD)
                   DO IX=IX1, IXN
                     DO IY=IY1, IYN
@@ -3000,33 +3192,35 @@
 ! EXTRADIM=0
                 IF (EXTRADIM.EQ.0) THEN
                   IF (SMCGRD) THEN
-!/SMC                    DO IX=IX1, IXN
-!/SMC                      DO IY=IY1, IYN
-!/SMC                        ! TODO: Find some other way to access MAPSTA
-!/SMC                        IF ( XX(IX,IY) .EQ. UNDEF ) THEN
-!/SMC                          MXXR(IX,IY) = MFILLR
-!/SMC                          MYYR(IX,IY) = MFILLR
-!/SMC                        ELSE
-!/SMC                          MXXR(IX,IY) = XX(IX,IY)
-!/SMC                          MYYR(IX,IY) = XY(IX,IY)
-!/SMC                        END IF
-!/SMC                      END DO
-!/SMC                    END DO
-!/SMC                    IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                          MXXR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
-!/SMC                          MYYR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                    ELSE
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                          MXXR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
-!/SMC                          MYYR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                    ENDIF
+#ifdef W3_SMC
+                    DO IX=IX1, IXN
+                      DO IY=IY1, IYN
+                        ! TODO: Find some other way to access MAPSTA
+                        IF ( XX(IX,IY) .EQ. UNDEF ) THEN
+                          MXXR(IX,IY) = MFILLR
+                          MYYR(IX,IY) = MFILLR
+                        ELSE
+                          MXXR(IX,IY) = XX(IX,IY)
+                          MYYR(IX,IY) = XY(IX,IY)
+                        END IF
+                      END DO
+                    END DO
+                    IF(SMCOTYPE .EQ. 1) THEN
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                          MXXR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                      call CHECK_ERR(IRET)
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
+                          MYYR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                      call CHECK_ERR(IRET)
+                    ELSE
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                          MXXR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                      call CHECK_ERR(IRET)
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
+                          MYYR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                      call CHECK_ERR(IRET)
+                    ENDIF
+#endif
                   ELSE ! IF SMCGRD
                     DO IX=IX1, IXN
                       DO IY=IY1, IYN
@@ -3053,33 +3247,35 @@
                     START(4-COORDTYPE)=START(4-COORDTYPE)+1
 
                     IF (SMCGRD) THEN
-!/SMC                      DO IX=IX1, IXN
-!/SMC                        DO IY=IY1, IYN
-!/SMC                          ! TODO: Find some other way to access MAPSTA
-!/SMC                          IF ( XXK(IX,IY,IK) .EQ. UNDEF ) THEN
-!/SMC                            MXXR(IX,IY) = MFILLR
-!/SMC                            MYYR(IX,IY) = MFILLR
-!/SMC                          ELSE
-!/SMC                            MXXR(IX,IY) = XXK(IX,IY,IK)
-!/SMC                            MYYR(IX,IY) = XYK(IX,IY,IK)
-!/SMC                          END IF
-!/SMC                        END DO
-!/SMC                      END DO
-!/SMC                      IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                            MXXR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
-!/SMC                            MYYR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                      ELSE
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                            MXXR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
-!/SMC                            MYYR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                      ENDIF
+#ifdef W3_SMC
+                      DO IX=IX1, IXN
+                        DO IY=IY1, IYN
+                          ! TODO: Find some other way to access MAPSTA
+                          IF ( XXK(IX,IY,IK) .EQ. UNDEF ) THEN
+                            MXXR(IX,IY) = MFILLR
+                            MYYR(IX,IY) = MFILLR
+                          ELSE
+                            MXXR(IX,IY) = XXK(IX,IY,IK)
+                            MYYR(IX,IY) = XYK(IX,IY,IK)
+                          END IF
+                        END DO
+                      END DO
+                      IF(SMCOTYPE .EQ. 1) THEN
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                            MXXR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                        call CHECK_ERR(IRET)
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
+                            MYYR(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                        call CHECK_ERR(IRET)
+                      ELSE
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                            MXXR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                        call CHECK_ERR(IRET)
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+2),               &
+                            MYYR(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                        call CHECK_ERR(IRET)
+                      ENDIF
+#endif
                     ELSE ! IF SMCGRD
                       DO IX=IX1, IXN
                         DO IY=IY1, IYN
@@ -3104,25 +3300,27 @@
 ! EXTRADIM=0
                 IF (EXTRADIM.EQ.0) THEN
                   IF (SMCGRD) THEN
-!/SMC                    DO IX=IX1, IXN
-!/SMC                      DO IY=IY1, IYN
-!/SMC                        ! TODO: Find some other way to access MAPSTA
-!/SMC                        IF ( X1(IX,IY) .EQ. UNDEF ) THEN
-!/SMC                          MX1R(IX,IY) = MFILLR
-!/SMC                        ELSE
-!/SMC                          MX1R(IX,IY) = X1(IX,IY)
-!/SMC                        END IF
-!/SMC                      END DO
-!/SMC                    END DO
-!/SMC                    IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                          MX1R(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                    ELSE
-!/SMC                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                          MX1R(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                      call CHECK_ERR(IRET)
-!/SMC                    ENDIF
+#ifdef W3_SMC
+                    DO IX=IX1, IXN
+                      DO IY=IY1, IYN
+                        ! TODO: Find some other way to access MAPSTA
+                        IF ( X1(IX,IY) .EQ. UNDEF ) THEN
+                          MX1R(IX,IY) = MFILLR
+                        ELSE
+                          MX1R(IX,IY) = X1(IX,IY)
+                        END IF
+                      END DO
+                    END DO
+                    IF(SMCOTYPE .EQ. 1) THEN
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                          MX1R(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                      call CHECK_ERR(IRET)
+                    ELSE
+                      IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                          MX1R(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                      call CHECK_ERR(IRET)
+                    ENDIF
+#endif
                   ELSE ! IF SMCGRD
                     DO IX=IX1, IXN
                       DO IY=IY1, IYN
@@ -3143,25 +3341,27 @@
                   DO IK=I1F,I2F
                     START(4-COORDTYPE)=START(4-COORDTYPE)+1
                     IF (SMCGRD) THEN
-!/SMC                      DO IX=IX1, IXN
-!/SMC                        DO IY=IY1, IYN
-!/SMC                          ! TODO: Find some other way to access MAPSTA
-!/SMC                          IF ( XK(IX,IY,IK) .EQ. UNDEF ) THEN
-!/SMC                            MX1R(IX,IY) = MFILLR
-!/SMC                          ELSE
-!/SMC                            MX1R(IX,IY) = XK(IX,IY,IK)
-!/SMC                          END IF
-!/SMC                        END DO
-!/SMC                      END DO
-!/SMC                      IF(SMCOTYPE .EQ. 1) THEN
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                            MX1R(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                      ELSE
-!/SMC                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
-!/SMC                            MX1R(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
-!/SMC                        call CHECK_ERR(IRET)
-!/SMC                      ENDIF
+#ifdef W3_SMC
+                      DO IX=IX1, IXN
+                        DO IY=IY1, IYN
+                          ! TODO: Find some other way to access MAPSTA
+                          IF ( XK(IX,IY,IK) .EQ. UNDEF ) THEN
+                            MX1R(IX,IY) = MFILLR
+                          ELSE
+                            MX1R(IX,IY) = XK(IX,IY,IK)
+                          END IF
+                        END DO
+                      END DO
+                      IF(SMCOTYPE .EQ. 1) THEN
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                            MX1R(IX1:IXN,IY1:IYN),(/START(1), START(3)/),(/COUNT(1), COUNT(3)/))
+                        call CHECK_ERR(IRET)
+                      ELSE
+                        IRET=NF90_PUT_VAR(NCID,VARID(IVAR1+1),               &
+                            MX1R(IX1:IXN,IY1:IYN),(/START(1:3)/),(/COUNT(1:3)/))
+                        call CHECK_ERR(IRET)
+                      ENDIF
+#endif
                     ELSE ! IF SMCGRD
                       DO IX=IX1, IXN
                         DO IY=IY1, IYN
@@ -3212,7 +3412,9 @@
       DEALLOCATE(AUX1)
       IF (ALLOCATED(LON)) DEALLOCATE(LON, LAT)
       IF (ALLOCATED(LON2D)) DEALLOCATE(LON2D, LAT2D)
-!/RTD      IF (ALLOCATED(LON2DEQ)) DEALLOCATE(LAT2DEQ, LON2DEQ, ANGLD2D)
+#ifdef W3_RTD
+      IF (ALLOCATED(LON2DEQ)) DEALLOCATE(LAT2DEQ, LON2DEQ, ANGLD2D)
+#endif
 !
       RETURN
 !
@@ -3227,16 +3429,22 @@
                '     PLEASE UPDATE FIELDS !!! '/                      &
                '     IFI = ',I2, '- IFJ = ',I2/)
 !
-!/T 9000 FORMAT (' TEST W3EXNC : FLAGS :',I3,2X,20L2)
-!/T 9001 FORMAT (' TEST W3EXNC : ITPYE :',I4/                         &
-!/T              '             IX1/N   :',2I7/                        &
-!/T              '             IY1/N   :',2I7/                        &
-!/T              '             VECTOR  :',1L2)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3EXNC : FLAGS :',I3,2X,20L2)
+ 9001 FORMAT (' TEST W3EXNC : ITPYE :',I4/                         &
+              '             IX1/N   :',2I7/                        &
+              '             IY1/N   :',2I7/                        &
+              '             VECTOR  :',1L2)
+#endif
 !
-!/T 9012 FORMAT (' TEST W3EXNC : BLOK PARS    : ',3I4)
-!/T 9014 FORMAT ('           BASE NAME : ',A)
+#ifdef W3_T
+ 9012 FORMAT (' TEST W3EXNC : BLOK PARS    : ',3I4)
+ 9014 FORMAT ('           BASE NAME : ',A)
+#endif
 !
-!/T 9020 FORMAT (' TEST W3EXNC : OUTPUT FIELD : ',A)
+#ifdef W3_T
+ 9020 FORMAT (' TEST W3EXNC : OUTPUT FIELD : ',A)
+#endif
 !/
 
 
@@ -3253,8 +3461,10 @@
                          EXTRADIM, NCTYPE, MAPSTAOUT )
 !
       USE W3GDATMD, ONLY : GTYPE, FLAGLL, UNGTYPE, CLGTYPE, RLGTYPE
-!/RTD ! Rotated pole parameters from the mod_def file
-!/RTD      USE W3GDATMD, ONLY : POLAT, POLON
+#ifdef W3_RTD
+ ! Rotated pole parameters from the mod_def file
+      USE W3GDATMD, ONLY : POLAT, POLON
+#endif
       USE NETCDF
       USE W3TIMEMD
 
@@ -3298,14 +3508,16 @@
       IF (GTYPE.NE.UNGTYPE) THEN
         IF (FLAGLL) THEN
           IF (SMCGRD) THEN
-!/SMC            IF(SMCOTYPE .EQ. 1) THEN
-!/SMC               ! Flat seapoints file
-!/SMC               IRET = NF90_DEF_DIM(NCID, 'seapoint', dimln(2), DIMID(2))
-!/SMC            ELSE
-!/SMC               ! Regular gridded file:
-!/SMC               IRET = NF90_DEF_DIM(NCID, 'longitude', dimln(2), DIMID(2))
-!/SMC               IRET = NF90_DEF_DIM(NCID, 'latitude', dimln(3), DIMID(3))
-!/SMC            ENDIF
+#ifdef W3_SMC
+            IF(SMCOTYPE .EQ. 1) THEN
+               ! Flat seapoints file
+               IRET = NF90_DEF_DIM(NCID, 'seapoint', dimln(2), DIMID(2))
+            ELSE
+               ! Regular gridded file:
+               IRET = NF90_DEF_DIM(NCID, 'longitude', dimln(2), DIMID(2))
+               IRET = NF90_DEF_DIM(NCID, 'latitude', dimln(3), DIMID(3))
+            ENDIF
+#endif
           ELSE
             IRET = NF90_DEF_DIM(NCID, 'longitude', DIMLN(2), DIMID(2))
             IRET = NF90_DEF_DIM(NCID, 'latitude', DIMLN(3), DIMID(3))
@@ -3348,38 +3560,40 @@
 !longitude
         IF (GTYPE.EQ.RLGTYPE .OR. GTYPE.EQ.SMCTYPE) THEN
           IF (SMCGRD) THEN
-!/SMC            IF(SMCOTYPE .EQ. 1) THEN
-!/SMC              ! Flat SMC grid - use seapoint dimension:
-!/SMC              IRET = NF90_DEF_VAR(NCID, 'longitude', NF90_FLOAT, DIMID(2), VARID(1))
-!/SMC              CALL CHECK_ERR(IRET)
-!/SMC              IRET = NF90_DEF_VAR(NCID, 'latitude', NF90_FLOAT, DIMID(2), VARID(2))
-!/SMC              CALL CHECK_ERR(IRET)
-!/SMC
-!/SMC              ! Latitude and longitude are auxililary variables in type 1 sea point
-!/SMC              ! SMC file; add to "coordinates" attribute:
-!/SMC              COORDS_ATTR = TRIM(COORDS_ATTR) // " latitude longitude"
-!/SMC
-!/SMC              ! For seapoint style SMC grid, also define out cell size variables:
-!/SMC              IRET = NF90_DEF_VAR(NCID, 'cx', NF90_SHORT, DIMID(2), VARID(5))
-!/SMC              CALL CHECK_ERR(IRET)
-!/SMC              IRET = NF90_PUT_ATT(NCID, VARID(5), 'long_name',        &
-!/SMC                                  'longitude cell size factor')
-!/SMC              IRET = NF90_PUT_ATT(NCID, VARID(5), 'valid_min', 1)
-!/SMC              IRET = NF90_PUT_ATT(NCID, VARID(5), 'valid_max', 256)
-!/SMC
-!/SMC              IRET = NF90_DEF_VAR(NCID, 'cy', NF90_SHORT, DIMID(2), VARID(6))
-!/SMC              call CHECK_ERR(IRET)
-!/SMC              IRET = NF90_PUT_ATT(NCID, VARID(6), 'long_name',        &
-!/SMC                                  'latitude cell size factor')
-!/SMC              IRET = NF90_PUT_ATT(NCID, VARID(6), 'valid_min', 1)
-!/SMC              IRET = NF90_PUT_ATT(NCID, VARID(6), 'valid_max', 256)
-!/SMC            ELSE
-!/SMC              ! Regirdded regular SMC grid - use lon/lat dimensions:
-!/SMC              IRET = NF90_DEF_VAR(NCID, 'longitude', NF90_FLOAT, DIMID(2), VARID(1))
-!/SMC              call CHECK_ERR(IRET)
-!/SMC              IRET = NF90_DEF_VAR(NCID, 'latitude', NF90_FLOAT, DIMID(3), VARID(2))
-!/SMC              call CHECK_ERR(IRET)
-!/SMC            ENDIF
+#ifdef W3_SMC
+            IF(SMCOTYPE .EQ. 1) THEN
+              ! Flat SMC grid - use seapoint dimension:
+              IRET = NF90_DEF_VAR(NCID, 'longitude', NF90_FLOAT, DIMID(2), VARID(1))
+              CALL CHECK_ERR(IRET)
+              IRET = NF90_DEF_VAR(NCID, 'latitude', NF90_FLOAT, DIMID(2), VARID(2))
+              CALL CHECK_ERR(IRET)
+
+              ! Latitude and longitude are auxililary variables in type 1 sea point
+              ! SMC file; add to "coordinates" attribute:
+              COORDS_ATTR = TRIM(COORDS_ATTR) // " latitude longitude"
+
+              ! For seapoint style SMC grid, also define out cell size variables:
+              IRET = NF90_DEF_VAR(NCID, 'cx', NF90_SHORT, DIMID(2), VARID(5))
+              CALL CHECK_ERR(IRET)
+              IRET = NF90_PUT_ATT(NCID, VARID(5), 'long_name',        &
+                                  'longitude cell size factor')
+              IRET = NF90_PUT_ATT(NCID, VARID(5), 'valid_min', 1)
+              IRET = NF90_PUT_ATT(NCID, VARID(5), 'valid_max', 256)
+
+              IRET = NF90_DEF_VAR(NCID, 'cy', NF90_SHORT, DIMID(2), VARID(6))
+              call CHECK_ERR(IRET)
+              IRET = NF90_PUT_ATT(NCID, VARID(6), 'long_name',        &
+                                  'latitude cell size factor')
+              IRET = NF90_PUT_ATT(NCID, VARID(6), 'valid_min', 1)
+              IRET = NF90_PUT_ATT(NCID, VARID(6), 'valid_max', 256)
+            ELSE
+              ! Regirdded regular SMC grid - use lon/lat dimensions:
+              IRET = NF90_DEF_VAR(NCID, 'longitude', NF90_FLOAT, DIMID(2), VARID(1))
+              call CHECK_ERR(IRET)
+              IRET = NF90_DEF_VAR(NCID, 'latitude', NF90_FLOAT, DIMID(3), VARID(2))
+              call CHECK_ERR(IRET)
+            ENDIF
+#endif
           ELSE
             IRET = NF90_DEF_VAR(NCID, 'longitude', NF90_FLOAT, DIMID(2), VARID(1))
             IRET = NF90_DEF_VAR(NCID, 'latitude', NF90_FLOAT, DIMID(3), VARID(2))
@@ -3394,94 +3608,118 @@
           IRET = NF90_DEF_VAR(NCID, 'latitude', NF90_FLOAT, DIMID(2), VARID(2))
           END IF
         IRET=NF90_PUT_ATT(NCID,VARID(1),'units','degree_east')
-!/RTD ! Is the grid really rotated
-!/RTD        IF ( .NOT. RTDL ) THEN
+#ifdef W3_RTD
+ ! Is the grid really rotated
+        IF ( .NOT. RTDL ) THEN
+#endif
         IRET=NF90_PUT_ATT(NCID,VARID(1),'long_name','longitude')
         IRET=NF90_PUT_ATT(NCID,VARID(1),'standard_name','longitude')
-!/RTD        ELSE
-!/RTD        ! Override the above for RTD pole:
-!/RTD          IRET=NF90_PUT_ATT(NCID,VARID(1),'long_name','longitude in rotated pole grid')
-!/RTD          IRET=NF90_PUT_ATT(NCID,VARID(1),'standard_name','grid_longitude')
-!/RTD        END IF
+#ifdef W3_RTD
+        ELSE
+        ! Override the above for RTD pole:
+          IRET=NF90_PUT_ATT(NCID,VARID(1),'long_name','longitude in rotated pole grid')
+          IRET=NF90_PUT_ATT(NCID,VARID(1),'standard_name','grid_longitude')
+        END IF
+#endif
         IRET=NF90_PUT_ATT(NCID,VARID(1),'valid_min',-180.0)
         IRET=NF90_PUT_ATT(NCID,VARID(1),'valid_max',360.)
 !
         IRET=NF90_PUT_ATT(NCID,VARID(2),'units','degree_north')
-!/RTD        IF ( .NOT. RTDL ) THEN
+#ifdef W3_RTD
+        IF ( .NOT. RTDL ) THEN
+#endif
         IRET=NF90_PUT_ATT(NCID,VARID(2),'long_name','latitude')
         IRET=NF90_PUT_ATT(NCID,VARID(2),'standard_name','latitude')
-!/RTD        ELSE
-!/RTD        ! Override the above for RTD pole:
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(2),'long_name','latitude in rotated pole grid')
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(2),'standard_name','grid_latitude')
-!/RTD        END IF
+#ifdef W3_RTD
+        ELSE
+        ! Override the above for RTD pole:
+        IRET=NF90_PUT_ATT(NCID,VARID(2),'long_name','latitude in rotated pole grid')
+        IRET=NF90_PUT_ATT(NCID,VARID(2),'standard_name','grid_latitude')
+        END IF
+#endif
         IRET=NF90_PUT_ATT(NCID,VARID(2),'valid_min',-90.0)
         IRET=NF90_PUT_ATT(NCID,VARID(2),'valid_max',90.)
 !
         IF(SMCGRD) THEN
-!/SMC          IF(SMCOTYPE .EQ. 1) THEN
-!/RTD            IF ( RTDL ) THEN
-!/RTD              ! For SMC grid type 1, standard lat/lon variables are 1D:
-!/RTD              IRET = NF90_DEF_VAR(NCID, 'standard_longitude', NF90_FLOAT, &
-!/RTD                      (/ DIMID(2) /), VARID(7))
-!/RTD              call CHECK_ERR(IRET)
-!/RTD
-!/RTD              IRET = NF90_DEF_VAR(NCID, 'standard_latitude', NF90_FLOAT, &
-!/RTD                      (/ DIMID(2) /), VARID(8))
-!/RTD              call CHECK_ERR(IRET)
-!/RTD            ENDIF ! RTDL
-!/SMC          ELSE
-!/RTD            IF ( RTDL ) THEN
-!/RTD              IRET = NF90_DEF_VAR(NCID, 'standard_longitude', NF90_FLOAT, &
-!/RTD                      (/ DIMID(2), DIMID(3)/), VARID(7))
-!/RTD              call CHECK_ERR(IRET)
-!/RTD
-!/RTD              IRET = NF90_DEF_VAR(NCID, 'standard_latitude', NF90_FLOAT, &
-!/RTD                      (/ DIMID(2), DIMID(3)/), VARID(8))
-!/RTD              call CHECK_ERR(IRET)
-!/RTD            ENDIF ! RTDL
-!/SMC          ENDIF
+#ifdef W3_SMC
+          IF(SMCOTYPE .EQ. 1) THEN
+#endif
+#ifdef W3_RTD
+            IF ( RTDL ) THEN
+              ! For SMC grid type 1, standard lat/lon variables are 1D:
+              IRET = NF90_DEF_VAR(NCID, 'standard_longitude', NF90_FLOAT, &
+                      (/ DIMID(2) /), VARID(7))
+              call CHECK_ERR(IRET)
+
+              IRET = NF90_DEF_VAR(NCID, 'standard_latitude', NF90_FLOAT, &
+                      (/ DIMID(2) /), VARID(8))
+              call CHECK_ERR(IRET)
+            ENDIF ! RTDL
+#endif
+#ifdef W3_SMC
+          ELSE
+#endif
+#ifdef W3_RTD
+            IF ( RTDL ) THEN
+              IRET = NF90_DEF_VAR(NCID, 'standard_longitude', NF90_FLOAT, &
+                      (/ DIMID(2), DIMID(3)/), VARID(7))
+              call CHECK_ERR(IRET)
+
+              IRET = NF90_DEF_VAR(NCID, 'standard_latitude', NF90_FLOAT, &
+                      (/ DIMID(2), DIMID(3)/), VARID(8))
+              call CHECK_ERR(IRET)
+            ENDIF ! RTDL
+#endif
+#ifdef W3_SMC
+          ENDIF
+#endif
         ELSE
-!/RTD      IF ( RTDL ) THEN
-!/RTD        !Add secondary coordinate system linking rotated grid back to standard lat-lon
-!/RTD        IRET = NF90_DEF_VAR(NCID, 'standard_longitude', NF90_FLOAT, (/ DIMID(2), DIMID(3)/), &
-!/RTD                             VARID(7))
-!/RTD        call CHECK_ERR(IRET)
-!/RTD
-!/RTD        IRET = NF90_DEF_VAR(NCID, 'standard_latitude', NF90_FLOAT, (/ DIMID(2), DIMID(3)/), &
-!/RTD                             VARID(8))
-!/RTD        call CHECK_ERR(IRET)
-!/RTD      END IF
+#ifdef W3_RTD
+      IF ( RTDL ) THEN
+        !Add secondary coordinate system linking rotated grid back to standard lat-lon
+        IRET = NF90_DEF_VAR(NCID, 'standard_longitude', NF90_FLOAT, (/ DIMID(2), DIMID(3)/), &
+                             VARID(7))
+        call CHECK_ERR(IRET)
+
+        IRET = NF90_DEF_VAR(NCID, 'standard_latitude', NF90_FLOAT, (/ DIMID(2), DIMID(3)/), &
+                             VARID(8))
+        call CHECK_ERR(IRET)
+      END IF
+#endif
         ENDIF ! SMCGRD
-!/RTD
-!/RTD      IF ( RTDL ) THEN
-!/RTD        ! Attributes for standard_longitude:
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(7),'units','degree_east')
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(7),'long_name','longitude')
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(7),'standard_name','longitude')
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(7),'valid_min',-180.0)
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(7),'valid_max',360.)
-!/RTD
-!/RTD        ! Attributes for standard_latitude:
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(8),'units','degree_north')
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(8),'long_name','latitude')
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(8),'standard_name','latitude')
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(8),'valid_min',-90.0)
-!/RTD        IRET=NF90_PUT_ATT(NCID,VARID(8),'valid_max',90.)
-!/RTD
-!/RTD        ! Add rotated pole grid mapping variable (dummy scalar variable
-!/RTD        ! used to simply store rotated pole information; see CF1.6 conventions).
-!/RTD        ! TODO: FUTURE WW3_OUNF DEVELOPMENT WILL ALLOW USER TO DEFINE THE
-!/RTD        ! COORDINATE REFERENCE SYSTEM - THIS WILL REQUIRE THE BELOW TO BE
-!/RTD        ! HANDLED DIFFERENTLY. C. Bunney.
+#ifdef W3_RTD
+
+      IF ( RTDL ) THEN
+        ! Attributes for standard_longitude:
+        IRET=NF90_PUT_ATT(NCID,VARID(7),'units','degree_east')
+        IRET=NF90_PUT_ATT(NCID,VARID(7),'long_name','longitude')
+        IRET=NF90_PUT_ATT(NCID,VARID(7),'standard_name','longitude')
+        IRET=NF90_PUT_ATT(NCID,VARID(7),'valid_min',-180.0)
+        IRET=NF90_PUT_ATT(NCID,VARID(7),'valid_max',360.)
+
+        ! Attributes for standard_latitude:
+        IRET=NF90_PUT_ATT(NCID,VARID(8),'units','degree_north')
+        IRET=NF90_PUT_ATT(NCID,VARID(8),'long_name','latitude')
+        IRET=NF90_PUT_ATT(NCID,VARID(8),'standard_name','latitude')
+        IRET=NF90_PUT_ATT(NCID,VARID(8),'valid_min',-90.0)
+        IRET=NF90_PUT_ATT(NCID,VARID(8),'valid_max',90.)
+
+        ! Add rotated pole grid mapping variable (dummy scalar variable
+        ! used to simply store rotated pole information; see CF1.6 conventions).
+        ! TODO: FUTURE WW3_OUNF DEVELOPMENT WILL ALLOW USER TO DEFINE THE
+        ! COORDINATE REFERENCE SYSTEM - THIS WILL REQUIRE THE BELOW TO BE
+        ! HANDLED DIFFERENTLY. C. Bunney.
+#endif
 
              !! CHRISB: Commenting out below - will be handled by w3oundmeta module
-!/RTD        !!IRET=NF90_DEF_VAR(NCID, 'rotated_pole', NF90_CHAR, VARID(12))
-!/RTD        !!IRET=NF90_PUT_ATT(NCID, VARID(12), 'grid_north_pole_latitude',POLAT)
-!/RTD        !!IRET=NF90_PUT_ATT(NCID, VARID(12), 'grid_north_pole_longitude',POLON)
-!/RTD        !!IRET=NF90_PUT_ATT(NCID, VARID(12), 'grid_mapping_name',              &
-!/RTD        !!                           'rotated_latitude_longitude')
-!/RTD      END IF
+#ifdef W3_RTD
+        !!IRET=NF90_DEF_VAR(NCID, 'rotated_pole', NF90_CHAR, VARID(12))
+        !!IRET=NF90_PUT_ATT(NCID, VARID(12), 'grid_north_pole_latitude',POLAT)
+        !!IRET=NF90_PUT_ATT(NCID, VARID(12), 'grid_north_pole_longitude',POLON)
+        !!IRET=NF90_PUT_ATT(NCID, VARID(12), 'grid_mapping_name',              &
+        !!                           'rotated_latitude_longitude')
+      END IF
+#endif
 !
       ELSE
         IF (GTYPE.EQ.RLGTYPE) THEN
@@ -3646,28 +3884,32 @@
         CALL CHECK_ERR(IRET)
         IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'WAVEWATCH_III_switches',TRIM(SWITCHES))
         CALL CHECK_ERR(IRET)
-!/ST4      IF (ZZWND.NE.10)      IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SIN4 namelist parameter ZWD',ZZWND)
-!/ST4      IF (AALPHA.NE.0.0095) IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SIN4 namelist parameter ALPHA0',AALPHA)
-!/ST4      IF (BBETA.NE.1.43)    IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SIN4 namelist parameter BETAMAX',BBETA)
-!/ST4      IF(SSDSC(7).NE.0.3)   IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SDS4 namelist parameter WHITECAPWIDTH', SSDSC(7))
+#ifdef W3_ST4
+      IF (ZZWND.NE.10)      IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SIN4 namelist parameter ZWD',ZZWND)
+      IF (AALPHA.NE.0.0095) IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SIN4 namelist parameter ALPHA0',AALPHA)
+      IF (BBETA.NE.1.43)    IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SIN4 namelist parameter BETAMAX',BBETA)
+      IF(SSDSC(7).NE.0.3)   IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SDS4 namelist parameter WHITECAPWIDTH', SSDSC(7))
+#endif
 ! ... TO BE CONTINUED ...
 
         IF(SMCGRD) THEN
-!/SMC           IF(SMCOTYPE .EQ. 1) THEN
-!/SMC             IRET = NF90_PUT_ATT(NCID, NF90_GLOBAL, 'first_lat', Y0)
-!/SMC             call CHECK_ERR(IRET)
-!/SMC             IRET = NF90_PUT_ATT(NCID, NF90_GLOBAL, 'first_lon', X0)
-!/SMC             call CHECK_ERR(IRET)
-!/SMC             IRET = NF90_PUT_ATT(NCID, NF90_GLOBAL, 'base_lat_size', dlat)
-!/SMC             call CHECK_ERR(IRET)
-!/SMC             IRET = NF90_PUT_ATT(NCID, NF90_GLOBAL, 'base_lon_size', dlon)
-!/SMC             call CHECK_ERR(IRET)
-!/SMC             IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SMC_grid_type','seapoint')
-!/SMC             call CHECK_ERR(IRET)
-!/SMC           ELSE IF(SMCOTYPE .EQ. 2) THEN
-!/SMC             IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SMC_grid_type','regular_regridded')
-!/SMC             call CHECK_ERR(IRET)
-!/SMC           ENDIF
+#ifdef W3_SMC
+           IF(SMCOTYPE .EQ. 1) THEN
+             IRET = NF90_PUT_ATT(NCID, NF90_GLOBAL, 'first_lat', Y0)
+             call CHECK_ERR(IRET)
+             IRET = NF90_PUT_ATT(NCID, NF90_GLOBAL, 'first_lon', X0)
+             call CHECK_ERR(IRET)
+             IRET = NF90_PUT_ATT(NCID, NF90_GLOBAL, 'base_lat_size', dlat)
+             call CHECK_ERR(IRET)
+             IRET = NF90_PUT_ATT(NCID, NF90_GLOBAL, 'base_lon_size', dlon)
+             call CHECK_ERR(IRET)
+             IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SMC_grid_type','seapoint')
+             call CHECK_ERR(IRET)
+           ELSE IF(SMCOTYPE .EQ. 2) THEN
+             IRET=NF90_PUT_ATT(NCID,NF90_GLOBAL,'SMC_grid_type','regular_regridded')
+             call CHECK_ERR(IRET)
+           ENDIF
+#endif
         ENDIF
       ENDIF ! FL_DEFAULT_GBL_META
 
@@ -3746,9 +3988,11 @@
       FLDR = .FALSE.
       IF(PRESENT(FLDIRN)) FLDR = FLDIRN
 
-!/SMC     IF( SMCGRD ) THEN
-!/SMC        CALL W3S2XY_SMC( S, X, FLDR )
-!/SMC     ELSE ! IF(SMCGRD)
+#ifdef W3_SMC
+     IF( SMCGRD ) THEN
+        CALL W3S2XY_SMC( S, X, FLDR )
+     ELSE ! IF(SMCGRD)
+#endif
       IF(FLDR) THEN
         DO ISEA=1, NSEA
           IF (S(ISEA) .NE. UNDEF )  THEN
@@ -3761,7 +4005,9 @@
       IF(NOVAL .NE. UNDEF) WHERE(S .EQ. UNDEF) S = NOVAL
 
       CALL W3S2XY ( NSEA, NSEA, NX+1, NY, S, MAPSF, X )
-!/SMC     ENDIF
+#ifdef W3_SMC
+     ENDIF
+#endif
 
      END SUBROUTINE S2GRID
 

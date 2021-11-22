@@ -93,16 +93,24 @@
       INTEGER                  :: NDEPTH
       REAL                     :: DEPTHA         ! first depth in table
       REAL, SAVE , PRIVATE, ALLOCATABLE   :: OMEGA(:)
-!/OMPG/!$omp threadprivate( OMEGA )
+#ifdef W3_OMPG
+!$omp threadprivate( OMEGA )
+#endif
       INTEGER, SAVE , PRIVATE             :: COUNTER = 0
-!/OMPG/!$omp threadprivate( COUNTER )
+#ifdef W3_OMPG
+!$omp threadprivate( COUNTER )
+#endif
 ! Tables for non-linear coefficients ...   
       REAL, SAVE , PRIVATE, ALLOCATABLE   :: TA(:,:,:,:),TB(:,:,:,:),TC_QL(:,:,:,:),&
                                              TT_4M(:,:,:,:),TT_4P(:,:,:,:),TFAKH(:,:),    &
                                              TFAK(:,:)
-!/OMPG/!$omp threadprivate( TA, TB, TC_QL, TT_4M, TT_4P, TFAKH, TFAK )
+#ifdef W3_OMPG
+!$omp threadprivate( TA, TB, TC_QL, TT_4M, TT_4P, TFAKH, TFAK )
+#endif
       INTEGER, SAVE, PRIVATE, ALLOCATABLE :: IM_P(:,:),IM_M(:,:)
-!/OMPG/!$omp threadprivate( IM_P, IM_M )
+#ifdef W3_OMPG
+!$omp threadprivate( IM_P, IM_M )
+#endif
 
 
 !
@@ -185,7 +193,9 @@
       USE W3DISPMD
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, TH, DTH, IGPARS
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
 !
       IMPLICIT NONE
@@ -204,19 +214,29 @@
 !/ 
       INTEGER           :: ISPEC, IK, ITH, M
       REAL              :: CO1, ATOE, DPTH
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       LOGICAL, SAVE     :: FIRST = .TRUE.
-!/OMPG/!$omp threadprivate( FIRST ) 
+#ifdef W3_OMPG
+!$omp threadprivate( FIRST ) 
+#endif
       REAL, ALLOCATABLE, SAVE  :: FR(:), DFIM(:)
       REAL, ALLOCATABLE, SAVE  :: F1(:,:), F3(:,:)
-!/OMPG/!$omp threadprivate( FR, DFIM, F1, F3 ) 
+#ifdef W3_OMPG
+!$omp threadprivate( FR, DFIM, F1, F3 ) 
+#endif
       INTEGER, SAVE     ::  NFRE, NANG
       INTEGER, SAVE     ::  NFREH, NANGH
-!/OMPG/!$omp threadprivate( NFRE, NANG, NFREH, NANGH )
+#ifdef W3_OMPG
+!$omp threadprivate( NFRE, NANG, NFREH, NANGH )
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3ADD2NDORDER')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3ADD2NDORDER')
+#endif
 !
 ! 0.  Initializations ------------------------------------------------ *
 !
@@ -283,7 +303,9 @@
          !WRITE(101,'(I3,100G16.8)') SIG(IK)*ZPI,(F3(ITH,IK),ITH=1,NTH)
         END DO
       
-!/T      PRINT*,' END CAL_SEC_ORDER_SPEC'
+#ifdef W3_T
+      PRINT*,' END CAL_SEC_ORDER_SPEC'
+#endif
       RETURN
 
       END SUBROUTINE W3ADD2NDORDER
@@ -349,12 +371,16 @@
 
       INTEGER MDW,M,K, K0,M0,MP,KP,MM,KM,KL,KLL,ML,JD
       INTEGER, SAVE :: MR, MA,NMAX
-!/OMPG/!$omp threadprivate( MR, MA, NMAX )
+#ifdef W3_OMPG
+!$omp threadprivate( MR, MA, NMAX )
+#endif
 
 !      PARAMETER (NFREH=32,NANGH=36)
 
       INTEGER, SAVE            :: INDEP
-!/OMPG/!$omp threadprivate( INDEP )
+#ifdef W3_OMPG
+!$omp threadprivate( INDEP )
+#endif
       REAL,ALLOCATABLE         :: PF1(:,:),PF3(:,:)
 
 
@@ -365,7 +391,9 @@
      C2,XM,XK
       REAL, SAVE :: OMSTART
       REAL, SAVE :: XMR,XMA, DELTHH, CO1
-!/OMPG/!$omp threadprivate( OMSTART, XMR,XMA, DELTHH, CO1 )
+#ifdef W3_OMPG
+!$omp threadprivate( OMSTART, XMR,XMA, DELTHH, CO1 )
+#endif
       REAL :: F13(NFREH,NANGH)
       REAL :: SUM0,AKMEAN
       REAL :: DELOM(NFREH),THH(NANGH),DFDTH(NFREH)
@@ -380,7 +408,9 @@
 !     ----------------------------------------------------
 
 !
-!/T      PRINT*,' START SECOND-ORDER CALC.'
+#ifdef W3_T
+      PRINT*,' START SECOND-ORDER CALC.'
+#endif
 
       DOUBLEP = .TRUE.
 !
@@ -435,7 +465,9 @@
 !
         NMAX = XMR*(1+NINT(LOG(2.*OMEGA(NFREH)/OMSTART)/LOG(1.+FRAC)))
         NMAX = NMAX+1
-!/T      PRINT*,' NMAX = ',NMAX
+#ifdef W3_T
+      PRINT*,' NMAX = ',NMAX
+#endif
 
         DEPTHD = 1.1
  
@@ -486,8 +518,10 @@
 !***     2.21 NO INTERPOLATION.
 !        ----------------------
 ! 
-!/T         PRINT*,' NO THINNING AND INTERPOLATION'
-!/T         PRINT*,'nanG:',NANG,NMAX,NFRE,NDEPTH,DEPTHA,DEPTHD,DPTH,'##',DELTH,DELTHH
+#ifdef W3_T
+         PRINT*,' NO THINNING AND INTERPOLATION'
+         PRINT*,'nanG:',NANG,NMAX,NFRE,NDEPTH,DEPTHA,DEPTHD,DPTH,'##',DELTH,DELTHH
+#endif
 
          CALL SECSPOM(F1,F3,NFRE,NANG,NMAX,NDEPTH,&
                 DEPTHA,DEPTHD,OMSTART,FRAC,MR,DFDTH,OMEGA,&
@@ -592,8 +626,10 @@
             BB1 = MAX(BB1,EPSMIN)
             F   = OMEGA(M)/ZPI
    
-!/T            WRITE(6,62) M,F,AA1,BB1,DELTHH     
-!/T            WRITE(80,62) M,F,AA1,BB1,DELTHH     
+#ifdef W3_T
+            WRITE(6,62) M,F,AA1,BB1,DELTHH     
+            WRITE(80,62) M,F,AA1,BB1,DELTHH     
+#endif
          ENDDO
 
          DO M=1,NFREH
@@ -604,7 +640,9 @@
       ENDIF
 
 !
-!/T   62 FORMAT(I4,9F16.9)
+#ifdef W3_T
+   62 FORMAT(I4,9F16.9)
+#endif
 !      
       RETURN
       END SUBROUTINE CAL_SEC_ORDER_SPEC

@@ -151,7 +151,9 @@
       USE W3PARALL,  ONLY: INIT_GET_ISEA
       USE W3TIMEMD,  ONLY: DSEC21
       USE W3SERVMD,  ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -184,12 +186,16 @@
       REAL                    :: PM_PREV, PM_IVAL, PM_DELT
       REAL                    :: WBT, BTINV
       INTEGER                 :: IUNT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SNL5')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SNL5')
+#endif
 !
 !/ ------------------------------------------------------------------- /
 ! Read in wave info. @ the previous time step t0
@@ -208,15 +214,19 @@
 ! Three options for phase mixing
       IF (QI5PMX .EQ. 0) THEN
 ! 1) 0: no phase mixing
-!/TS      IF (IAPROC .EQ. NAPOUT)                                    &
-!/TS      WRITE(SCREEN, '(A, 2(I10.8, I7.6), E12.3)')                &
-!/TS          " ⊚ → [WW3 SNL₅] QI5TBEG, T1ABS, T1REL:",              &
-!/TS          QI5TBEG, T1ABS, T1REL
+#ifdef W3_TS
+      IF (IAPROC .EQ. NAPOUT)                                    &
+      WRITE(SCREEN, '(A, 2(I10.8, I7.6), E12.3)')                &
+          " ⊚ → [WW3 SNL₅] QI5TBEG, T1ABS, T1REL:",              &
+          QI5TBEG, T1ABS, T1REL
+#endif
       ELSE
-!/TS      IF (IAPROC .EQ. NAPOUT)                                    &
-!/TS      WRITE(SCREEN, '(A, 2(I10.8, I7.6), E12.3)', ADVANCE='no')  &
-!/TS          " ⊚ → [WW3 SNL₅] QI5TBEG, T1ABS, T1REL, T1REL[P]:",    &
-!/TS          QI5TBEG, T1ABS, T1REL
+#ifdef W3_TS
+      IF (IAPROC .EQ. NAPOUT)                                    &
+      WRITE(SCREEN, '(A, 2(I10.8, I7.6), E12.3)', ADVANCE='no')  &
+          " ⊚ → [WW3 SNL₅] QI5TBEG, T1ABS, T1REL, T1REL[P]:",    &
+          QI5TBEG, T1ABS, T1REL
+#endif
 !
 ! Calc. Phase mixing interval
           IF (QI5PMX .GT. 0) THEN
@@ -252,10 +262,12 @@
           ELSE
               T1REL         = PM_DELT
           END IF
-!/TS      IF (IAPROC .EQ. NAPOUT) THEN
-!/TS          WRITE(SCREEN, '(F9.1)') T1REL
-!/TS          IF (QI5PMX .LT. 0 ) WRITE(SCREEN, '(A, F6.3)') '↔ bT: ', WBT
-!/TS      ENDIF
+#ifdef W3_TS
+      IF (IAPROC .EQ. NAPOUT) THEN
+          WRITE(SCREEN, '(F9.1)') T1REL
+          IF (QI5PMX .LT. 0 ) WRITE(SCREEN, '(A, F6.3)') '↔ bT: ', WBT
+      ENDIF
+#endif
       END IF
 !
 ! Calc. Cvk1 from A (C(\bm{k}) = g N(k, θ) / k)
@@ -322,9 +334,11 @@
               PDIFF = ABS(PSEA(1:NSEL) - ISEA)
               IF (ANY(PDIFF .EQ. 0)) THEN
                   JLOC = MINLOC(PDIFF, 1)
-!/TS              IF (IAPROC .EQ. NAPOUT)                               &
-!/TS              WRITE(SCREEN, '(3A, I10.8, I7.6)')                    &
-!/TS                  '✓ Point output for |', PNMS(JLOC), '| @', T1ABS
+#ifdef W3_TS
+              IF (IAPROC .EQ. NAPOUT)                               &
+              WRITE(SCREEN, '(3A, I10.8, I7.6)')                    &
+                  '✓ Point output for |', PNMS(JLOC), '| @', T1ABS
+#endif
 
 ! N(θ, k) →  F(f, θ) & S(θ, k) →  S(f, θ)
                   DO ITH = 1, NTH
@@ -426,7 +440,9 @@
                           QI5IPL, QI5PMX
       USE W3ODATMD, ONLY: IAPROC, NAPOUT, SCREEN
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -437,11 +453,15 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'INSNL5')
+#ifdef W3_S
+      CALL STRACE (IENT, 'INSNL5')
+#endif
 !
 ! Set important parameters for GKE module (QR[I]5DPT/OML/DIS/KEV are
 ! defined in ww3_grid.inp, and QI5NNZ is not known yet)
@@ -508,7 +528,9 @@
 !/ ------------------------------------------------------------------- /
       USE W3DISPMD, ONLY: WAVNU1
       USE W3GDATMD, ONLY: NK, NTH, SIG, ESIN, ECOS, DTH, DSII
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
@@ -526,7 +548,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !
       REAL, PARAMETER      :: BETA  = 1.2
 !
@@ -538,7 +562,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'CALC_WBTv2')
+#ifdef W3_S
+      CALL STRACE (IENT, 'CALC_WBTv2')
+#endif
 !
 ! Wind info. is required to select wind sea partition from the wave
 ! spectrum.
@@ -673,7 +699,9 @@
       USE W3ODATMD,  ONLY: NOPTS, PTNME, PTLOC, IPTINT,      &
                            IAPROC, NAPOUT, SCREEN
       USE W3SERVMD,  ONLY: DIST_SPHERE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/ ------------------------------------------------------------------- /
@@ -725,17 +753,19 @@
           JY   = IYS(JLOC)
           ISEA = MAPFS(JY, JX)
 ! Basic check
-!/TS      IF (FLAGLL) THEN
-!/TS          IF (IAPROC .EQ. NAPOUT)                                    &
-!/TS          WRITE(SCREEN, "(A, 2F10.3, A, 2F10.3, A)")                 &
-!/TS              '✗ (PLON, PLAT): (', PLON, PLAT, ') | (XGRD, YGRD): (',&
-!/TS              XGRD(JY, JX), YGRD(JY, JX), ')'
-!/TS      ELSE
-!/TS          IF (IAPROC .EQ. NAPOUT)                                    &
-!/TS          WRITE(SCREEN, "(A, 2E10.3, A, 2E10.3, A)")                 &
-!/TS              '✗ (PLON, PLAT): (', PLON, PLAT, ') | (XGRD, YGRD): (',&
-!/TS              XGRD(JY, JX), YGRD(JY, JX), ')'
-!/TS      END IF
+#ifdef W3_TS
+      IF (FLAGLL) THEN
+          IF (IAPROC .EQ. NAPOUT)                                    &
+          WRITE(SCREEN, "(A, 2F10.3, A, 2F10.3, A)")                 &
+              '✗ (PLON, PLAT): (', PLON, PLAT, ') | (XGRD, YGRD): (',&
+              XGRD(JY, JX), YGRD(JY, JX), ')'
+      ELSE
+          IF (IAPROC .EQ. NAPOUT)                                    &
+          WRITE(SCREEN, "(A, 2E10.3, A, 2E10.3, A)")                 &
+              '✗ (PLON, PLAT): (', PLON, PLAT, ') | (XGRD, YGRD): (',&
+              XGRD(JY, JX), YGRD(JY, JX), ')'
+      END IF
+#endif
 ! Store ISEA
           NSEL = NSEL + 1
           PSEA(NSEL) = ISEA

@@ -146,7 +146,9 @@
       USE W3GDATMD,  ONLY: NK, NTH, SIG, DTH, DDEN, FTE, FTF, FTWN, DSII
       USE W3ODATMD,  ONLY: NDST, NDSE
       USE W3SERVMD,  ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -159,7 +161,9 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       INTEGER                 :: IMAX
       REAL                    :: EB(NK), EBAND
       REAL, PARAMETER         :: HSMIN = 0.05
@@ -167,7 +171,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SPR6')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SPR6')
+#endif
 !
 !
 ! 1.  Integrate over directions -------------------------------------- /
@@ -300,7 +306,9 @@
       USE W3GDATMD,  ONLY: ECOS, ESIN, SIN6A0, SIN6WS
       USE W3ODATMD,  ONLY: NDSE
       USE W3SERVMD,  ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -313,7 +321,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
-!/S      INTEGER, SAVE          :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE          :: IENT = 0
+#endif
       INTEGER                :: IK, ITH, IKN(NK)
       REAL                   :: COSU, SINU, UPROXY
       REAL, DIMENSION(NSPEC) :: CG2, ECOS2, ESIN2, DSII2
@@ -323,7 +333,9 @@
       REAL, DIMENSION(NSPEC) :: W1, W2, SQRTBN2, CINV2               ! 4,7)
       REAL, DIMENSION(NK)    :: LFACT, CINV                          ! 5)
 !/ ------------------------------------------------------------------- /
-!/S      CALL STRACE (IENT, 'W3SIN6')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SIN6')
+#endif
 !
 !/ 0) --- set up a basic variables ----------------------------------- /
       COSU   = COS(USDIR)
@@ -517,10 +529,14 @@
       USE W3GDATMD,  ONLY: SDS6A1, SDS6A2, SDS6P1, SDS6P2, SDS6ET
       USE W3ODATMD,  ONLY: NDSE
       USE W3SERVMD,  ONLY: EXTCDE
-!/T6     USE W3TIMEMD,  ONLY: STME21
-!/T6     USE W3WDATMD,  ONLY: TIME
-!/T6     USE W3ODATMD,  ONLY: NDST
-!/S      USE W3SERVMD,  ONLY: STRACE
+#ifdef W3_T6
+     USE W3TIMEMD,  ONLY: STME21
+     USE W3WDATMD,  ONLY: TIME
+     USE W3ODATMD,  ONLY: NDST
+#endif
+#ifdef W3_S
+      USE W3SERVMD,  ONLY: STRACE
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -531,7 +547,9 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
-!/S      INTEGER, SAVE     :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE     :: IENT = 0
+#endif
       INTEGER           :: IK, ITH, IKN(NK)
       REAL              :: FREQ(NK)     ! frequencies [Hz]
       REAL              :: DFII(NK)     ! frequency bandwiths [Hz]
@@ -546,11 +564,15 @@
       REAL              :: T2(NK)       ! forced dissipation term
       REAL              :: T12(NK)      ! = T1+T2 or combined dissipation
       REAL              :: ADF(NK), XFAC, EDENSMAX ! temp. variables
-!/T6     CHARACTER(LEN=23) :: IDTIME
+#ifdef W3_T6
+     CHARACTER(LEN=23) :: IDTIME
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SDS6')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SDS6')
+#endif
 !
 !/ 0) --- Initialize essential parameters ---------------------------- /
       IKN     = IRANGE(1,NSPEC,NTH)    ! Index vector for elements of 1,
@@ -606,13 +628,17 @@
       S = D * A
 !
 !/ 5) --- Diagnostic output (switch !/T6) ---------------------------- /
-!/T6     CALL STME21 ( TIME , IDTIME )
-!/T6     WRITE (NDST,270) 'T1*E',IDTIME(1:19),(T1*EDENS)
-!/T6     WRITE (NDST,270) 'T2*E',IDTIME(1:19),(T2*EDENS)
-!/T6     WRITE (NDST,271) SUM(SUM(RESHAPE(S,(/ NTH,NK /)),1)*DDEN/CG)
+#ifdef W3_T6
+     CALL STME21 ( TIME , IDTIME )
+     WRITE (NDST,270) 'T1*E',IDTIME(1:19),(T1*EDENS)
+     WRITE (NDST,270) 'T2*E',IDTIME(1:19),(T2*EDENS)
+     WRITE (NDST,271) SUM(SUM(RESHAPE(S,(/ NTH,NK /)),1)*DDEN/CG)
+#endif
 !
-!/T6     270 FORMAT (' TEST W3SDS6 : ',A,'(',A,')',':',70E11.3)
-!/T6     271 FORMAT (' TEST W3SDS6 : Total SDS  =',E13.5)
+#ifdef W3_T6
+     270 FORMAT (' TEST W3SDS6 : ',A,'(',A,')',':',70E11.3)
+     271 FORMAT (' TEST W3SDS6 : Total SDS  =',E13.5)
+#endif
 !/
 !/ End of W3SDS6 ----------------------------------------------------- /
 !/
@@ -705,7 +731,9 @@
       USE W3ODATMD,  ONLY: NDST, NDSE, IAPROC, NAPERR
       USE W3TIMEMD,  ONLY: STME21
       USE W3WDATMD,  ONLY: TIME
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       IMPLICIT NONE
 !
 !/ ------ I/O parameters --------------------------------------------- /
@@ -719,7 +747,9 @@
       REAL, INTENT(OUT) :: TAUWX, TAUWY   ! normal stress components
 !
 !/    --- local parameters (in order of appearance) ------------------ /
-!/S      INTEGER, SAVE     :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE     :: IENT = 0
+#endif
       REAL, PARAMETER   :: FRQMAX  = 10.  ! Upper freq. limit to extrapolate to.
       INTEGER, PARAMETER:: ITERMAX = 80   ! Maximum number of iterations to
                                           ! find numerical solution for LFACT.
@@ -737,7 +767,9 @@
       CHARACTER(LEN=23) :: IDTIME
 !
 !/ ------------------------------------------------------------------- /
-!/S      CALL STRACE (IENT, 'LFACTOR')
+#ifdef W3_S
+      CALL STRACE (IENT, 'LFACTOR')
+#endif
 !
 !/ 0) --- Find the number of frequencies required to extend arrays
 !/        up to f=10Hz and allocate arrays --------------------------- /
@@ -828,8 +860,10 @@
          UPROXY      = SIN6WS * USTAR
          UCINV10Hz   = 1.0 - (UPROXY * CINV10Hz)
 !
-!/T6          WRITE (NDST,270) IDTIME, U10
-!/T6          WRITE (NDST,271)
+#ifdef W3_T6
+          WRITE (NDST,270) IDTIME, U10
+          WRITE (NDST,271)
+#endif
          DO IK=1,ITERMAX
             LF10Hz   = MIN(1.0, EXP(UCINV10Hz * RTAU) )
 !
@@ -845,8 +879,10 @@
 !
             SIGN_OLD = SIGN_NEW
             SIGN_NEW = INT(SIGN(1.0, ERR))
-!/T6             WRITE (NDST,272) IK, RTAU, DRTAU, TAU, TAU_TOT, ERR, &
-!/T6                              TAUWX, TAUWY, TAUVX, TAUVY, TAU_NND
+#ifdef W3_T6
+             WRITE (NDST,272) IK, RTAU, DRTAU, TAU, TAU_TOT, ERR, &
+                              TAUWX, TAUWY, TAUVX, TAUVY, TAU_NND
+#endif
 !
 !        --- Slow down DRTAU when overshot. -------------------------- /
             IF (SIGN_NEW .NE. SIGN_OLD) OVERSHOT = .TRUE.
@@ -863,18 +899,22 @@
 !
       LFACT(1:NK) = LF10Hz(1:NK)
 !
-!/T6      WRITE (NDST,273) 'Sin ', IDTIME(1:19), SDENS10Hz*TPI
-!/T6      WRITE (NDST,273) 'SinR', IDTIME(1:19), SDENS10Hz*LF10Hz*TPI
-!/T6      WRITE (NDST,274) 'Sin   ', SUM(SDENS10Hz(1:NK)*DSII)
-!/T6      WRITE (NDST,274) 'SinR  ', SUM(SDENS10Hz(1:NK)*LF10Hz(1:NK)*DSII)
-!/T6      WRITE (NDST,274) 'SinR/C', TAUWINDS(SDENS10Hz(1:NK)*LFACT,CINV,DSII)
+#ifdef W3_T6
+      WRITE (NDST,273) 'Sin ', IDTIME(1:19), SDENS10Hz*TPI
+      WRITE (NDST,273) 'SinR', IDTIME(1:19), SDENS10Hz*LF10Hz*TPI
+      WRITE (NDST,274) 'Sin   ', SUM(SDENS10Hz(1:NK)*DSII)
+      WRITE (NDST,274) 'SinR  ', SUM(SDENS10Hz(1:NK)*LF10Hz(1:NK)*DSII)
+      WRITE (NDST,274) 'SinR/C', TAUWINDS(SDENS10Hz(1:NK)*LFACT,CINV,DSII)
+#endif
 !
-!/T6      270 FORMAT (' TEST W3SIN6 : LFACTOR SUBROUTINE CALCULATING FOR ', &
-!/T6                  A,'  U10=',F5.1                                       )
-!/T6      271 FORMAT (' TEST W3SIN6 : IK    RTAU     DRTAU   TAU   TAU_TOT' &
-!/T6                  '    ERR    TAUW_X TAUW_Y TAUV_X TAUV_Y  TAU1D'       )
-!/T6      272 FORMAT (' TEST W3SIN6 : ',I2,2F9.5,2F8.5,E10.2,4F7.4,F7.3     )
-!/T6      273 FORMAT (' TEST W3SIN6 : ',A,'(',A,'):', 70E11.3               )
+#ifdef W3_T6
+      270 FORMAT (' TEST W3SIN6 : LFACTOR SUBROUTINE CALCULATING FOR ', &
+                  A,'  U10=',F5.1                                       )
+      271 FORMAT (' TEST W3SIN6 : IK    RTAU     DRTAU   TAU   TAU_TOT' &
+                  '    ERR    TAUW_X TAUW_Y TAUV_X TAUV_Y  TAU1D'       )
+      272 FORMAT (' TEST W3SIN6 : ',I2,2F9.5,2F8.5,E10.2,4F7.4,F7.3     )
+      273 FORMAT (' TEST W3SIN6 : ',A,'(',A,'):', 70E11.3               )
+#endif
       274 FORMAT (' TEST W3SIN6 : Total ',A,' =', E13.5                  )
       280 FORMAT (' WARNING LFACTOR (TIME,U10,TAU,TAU_TOT,ERR,TAUW_XY,'  &
                   'TAUV_XY,TAU_SCALAR): ',A,F6.1,2F7.4,E10.3,4F7.4,F7.3  )
@@ -939,7 +979,9 @@
 !/
       USE CONSTANTS, ONLY: GRAV, TPI
       USE W3GDATMD,  ONLY: NK, NTH, NSPEC, DTH, XFR, ECOS, ESIN
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       IMPLICIT NONE
 !
 !/ ------ I/O parameters --------------------------------------------- /
@@ -950,7 +992,9 @@
       REAL, INTENT(OUT) :: TAUNWX, TAUNWY ! stress components (wave->atmos)
 !
 !/    --- local parameters (in order of appearance) ------------------ /
-!/S      INTEGER, SAVE     :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE     :: IENT = 0
+#endif
       REAL, PARAMETER   :: FRQMAX  = 10.  ! Upper freq. limit to extrapolate to.
       INTEGER           :: NK10Hz
 !
@@ -960,7 +1004,9 @@
       REAL, ALLOCATABLE :: DSII10Hz(:), UCINV10Hz(:)
 !
 !/ ------------------------------------------------------------------- /
-!/S      CALL STRACE (IENT, 'TAU_WAVE_ATMOS')
+#ifdef W3_S
+      CALL STRACE (IENT, 'TAU_WAVE_ATMOS')
+#endif
 !
 !/ 0) --- Find the number of frequencies required to extend arrays
 !/        up to f=10Hz and allocate arrays --------------------------- /

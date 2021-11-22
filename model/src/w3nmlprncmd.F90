@@ -142,7 +142,9 @@
 !/ ------------------------------------------------------------------- /
 
     USE W3ODATMD, ONLY: NDSE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -151,10 +153,14 @@
     TYPE(NML_FORCING_T), INTENT(INOUT)          :: NML_FORCING
     TYPE(NML_FILE_T), INTENT(INOUT)             :: NML_FILE
     INTEGER, INTENT(OUT)                        :: IERR
-!/S      INTEGER, SAVE                             :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                             :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'W3NMLPRNC')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3NMLPRNC')
+#endif
 
     ! open namelist log file
     NDSN = 3
@@ -252,7 +258,9 @@
 
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -263,10 +271,14 @@
     INTEGER                                :: IERR
     TYPE(NML_FORCING_T) :: FORCING
     NAMELIST /FORCING_NML/ FORCING
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_FORCING_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_FORCING_NML')
+#endif
 
     ! set default values for forcing structure
     FORCING%TIMESTART  = '19000101 000000'
@@ -387,7 +399,9 @@
 
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -398,10 +412,14 @@
     INTEGER                                :: IERR
     TYPE(NML_FILE_T) :: FILE
     NAMELIST /FILE_NML/ FILE
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_FILE_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_FILE_NML')
+#endif
 
     ! set default values for file structure
     FILE%FILENAME  = 'unset'
@@ -491,14 +509,20 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
     TYPE(NML_FORCING_T), INTENT(IN) :: NML_FORCING
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_FORCING_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_FORCING_NML')
+#endif
 
       WRITE (MSG,'(A)') 'FORCING % '
       WRITE (NDSN,'(A)')
@@ -599,14 +623,20 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
     TYPE(NML_FILE_T), INTENT(IN) :: NML_FILE
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_FILE_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_FILE_NML')
+#endif
 
       WRITE (MSG,'(A)') 'FILE % '
       WRITE (NDSN,'(A)')

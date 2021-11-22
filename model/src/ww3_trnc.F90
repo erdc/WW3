@@ -61,7 +61,9 @@
       USE W3GDATMD, ONLY : W3NMOD, W3SETG, FLAGLL, XFR
       USE W3ODATMD, ONLY : W3NOUT, W3SETO, FNMPRE
       USE W3SERVMD, ONLY : ITRACE, NEXTLN, EXTCDE
-!/S      USE W3SERVMD, ONLY : STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY : STRACE
+#endif
       USE W3TIMEMD
 !
       USE W3ODATMD, ONLY: NDSO, NDSE
@@ -86,7 +88,9 @@
       INTEGER                 :: TIME(2), TOUT(2), NOUT, TDUM(2),     &
                                  DIMID(4), VARID(18), DIMLN(4),       &
                                  STOPDATE(8)
-!/S      INTEGER, SAVE           :: IENT   = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT   = 0
+#endif
 !
       REAL                    :: TH1, DTH, X, Y, DW, CX, CY, CAO, CDO,&
                                  WX, WY, WAO, WDO, UST, AS, DTEST,    &
@@ -126,7 +130,9 @@
       NTRACE = 10
       CALL ITRACE ( NDSTRC, NTRACE )
 !
-!/S      CALL STRACE ( IENT, 'W3TRNC' )
+#ifdef W3_S
+      CALL STRACE ( IENT, 'W3TRNC' )
+#endif
 !
       WRITE (NDSO,900)
 !
@@ -483,7 +489,9 @@
       INTEGER                 :: S1, S2, S4, S5, NDSDAT, IRET
       INTEGER                 :: STARTDATE(8), CURDATE(8), REFDATE(8)
       INTEGER                  :: DEFLATE=1
-!/S      INTEGER, SAVE           :: IENT   =   0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT   =   0
+#endif
 !
       DOUBLE PRECISION        :: OUTJULDAY
 !
@@ -496,7 +504,9 @@
 !/ ------------------------------------------------------------------- /
 !/
 !
-!/S      CALL STRACE (IENT, 'W3EXNC')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3EXNC')
+#endif
 !
       CALL U2D('days since 1990-01-01 00:00:00',REFDATE,IERR)
 

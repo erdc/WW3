@@ -148,8 +148,10 @@
 
       INTEGER                 :: JFIRST = 1
 
-!/TIDE      INTEGER                 :: NTIDE   ! number of tidal constituents
-!/TIDE      REAL, ALLOCATABLE       :: TIDEFREQ(:)
+#ifdef W3_TIDE
+      INTEGER                 :: NTIDE   ! number of tidal constituents
+      REAL, ALLOCATABLE       :: TIDEFREQ(:)
+#endif
 !/
 !/ Data structure INPUT
 !/
@@ -157,7 +159,9 @@
         INTEGER               :: TFN(2,-9:10), TC0(2), TW0(2),        &
                                  TU0(2), TR0(2), TDN(2), TG0(2)
         REAL                  :: GA0, GD0, GAN, GDN
-!/WRST        REAL, POINTER         :: WXNwrst(:,:),WYNwrst(:,:)
+#ifdef W3_WRST
+        REAL, POINTER         :: WXNwrst(:,:),WYNwrst(:,:)
+#endif
         REAL, POINTER         :: WX0(:,:), WY0(:,:), DT0(:,:),        &
                                  WXN(:,:), WYN(:,:), DTN(:,:),        &
                                  CX0(:,:), CY0(:,:), CXN(:,:),        &
@@ -169,10 +173,14 @@
                                  ICEP3(:,:), ICEP4(:,:), ICEP5(:,:),  &
                                  VEGLS(:,:), VEGBV(:,:), VEGN(:,:),   &
                                  VEGCD(:,:)
-!/TIDE REAL, POINTER         ::  CXTIDE(:,:,:,:), CYTIDE(:,:,:,:),    &
-!/TIDE                           WLTIDE(:,:,:,:)
+#ifdef W3_TIDE
+ REAL, POINTER         ::  CXTIDE(:,:,:,:), CYTIDE(:,:,:,:),    &
+                           WLTIDE(:,:,:,:)
+#endif
         LOGICAL               :: IINIT
-!/WRST        LOGICAL               :: WRSTIINIT=.FALSE.
+#ifdef W3_WRST
+        LOGICAL               :: WRSTIINIT=.FALSE.
+#endif
 ! note that if size of INFLAGS1 is changed, then TFLAGS in wminitmd.ftn
 !    also must be resized.
         LOGICAL               :: INFLAGS1(-9:14), FLAGSC(-9:14),      &
@@ -195,7 +203,9 @@
       REAL, POINTER           :: GA0, GD0, GAN, GDN
       REAL, POINTER           :: WX0(:,:), WY0(:,:), DT0(:,:),        &
                                  WXN(:,:), WYN(:,:), DTN(:,:),        &
-!/WRST                                 WXNwrst(:,:),WYNwrst(:,:),           &
+#ifdef W3_WRST
+                                 WXNwrst(:,:),WYNwrst(:,:),           &
+#endif
                                  CX0(:,:), CY0(:,:), CXN(:,:),        &
                                  CYN(:,:), WLEV(:,:), ICEI(:,:),      &
                                  UX0(:,:), UY0(:,:), UXN(:,:),        &
@@ -205,8 +215,10 @@
                                  ICEP3(:,:), ICEP4(:,:), ICEP5(:,:),  &
                                  VEGLS(:,:), VEGBV(:,:), VEGN(:,:),   &
                                  VEGCD(:,:)
-!/TIDE       REAL, POINTER           :: CXTIDE(:,:,:,:),         &
-!/TIDE                                  CYTIDE(:,:,:,:), WLTIDE(:,:,:,:)
+#ifdef W3_TIDE
+       REAL, POINTER           :: CXTIDE(:,:,:,:),         &
+                                  CYTIDE(:,:,:,:), WLTIDE(:,:,:,:)
+#endif
       LOGICAL, POINTER        :: IINIT
       LOGICAL, POINTER        :: INFLAGS1(:), INFLAGS2(:), FLAGSC(:)
       LOGICAL, POINTER        :: FLLEV, FLCUR, FLWIND, FLICE, FLTAUA, &
@@ -215,8 +227,10 @@
       LOGICAL, POINTER        :: FLIC1, FLIC2, FLIC3, FLIC4, FLIC5 
       LOGICAL, POINTER        :: FLVG1, FLVG2
 
-!/TIDE      LOGICAL, POINTER        ::  FLLEVTIDE, FLCURTIDE,  &
-!/TIDE                                  FLLEVRESI, FLCURRESI
+#ifdef W3_TIDE
+      LOGICAL, POINTER        ::  FLLEVTIDE, FLCURTIDE,  &
+                                  FLLEVRESI, FLCURRESI
+#endif
 !/
       CONTAINS
 !/ ------------------------------------------------------------------- /
@@ -276,7 +290,9 @@
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD, ONLY: NGRIDS, NAUXGR
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -289,9 +305,13 @@
 !/ Local parameters
 !/
       INTEGER                 :: I
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'W3NINP')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3NINP')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -336,7 +356,9 @@
         INPUTS(I)%FLAGSC   = .FALSE.
         END DO
 !
-!/T      WRITE (NDST,9000) -NAUXGR, NGRIDS
+#ifdef W3_T
+      WRITE (NDST,9000) -NAUXGR, NGRIDS
+#endif
 !
       RETURN
 !
@@ -346,7 +368,9 @@
                '                    NGRIDS = ',I10/                   &
                '                    RUN W3NMOD FIRST'/)
 !
-!/T 9000 FORMAT (' TEST W3NINP : SETTING UP FOR ',I2,' -',I3,' GRIDS')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3NINP : SETTING UP FOR ',I2,' -',I3,' GRIDS')
+#endif
 !/
 !/ End of W3NINP ----------------------------------------------------- /
 !/
@@ -417,9 +441,13 @@
 !
 !/ ------------------------------------------------------------------- /
       USE W3GDATMD,  ONLY: NGRIDS, NAUXGR, IGRID, W3SETG, NX, NY
-!/SMC      USE W3GDATMD,  ONLY: FSWND, NSEA
+#ifdef W3_SMC
+      USE W3GDATMD,  ONLY: FSWND, NSEA
+#endif
       USE W3SERVMD,  ONLY: EXTCDE
-!/S      USE W3SERVMD,  ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD,  ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -434,9 +462,13 @@
 !/
       INTEGER                 :: JGRID
       LOGICAL                 :: FLAGSTIDE(4)=.FALSE.
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'W3DIMI')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3DIMI')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -456,7 +488,9 @@
           CALL EXTCDE (3)
         END IF
 !
-!/T      WRITE (NDST,9000) IMOD
+#ifdef W3_T
+      WRITE (NDST,9000) IMOD
+#endif
 !
       JGRID  = IGRID
       IF ( JGRID .NE. IMOD ) CALL W3SETG ( IMOD, NDSE, NDST )
@@ -464,9 +498,11 @@
 ! -------------------------------------------------------------------- /
 ! 2.  Allocate arrays
 !
-!/TIDE      IF ( PRESENT(FLAGSTIDEIN) ) THEN
-!/TIDE          FLAGSTIDE(:) = FLAGSTIDEIN(:)
-!/TIDE        END IF
+#ifdef W3_TIDE
+      IF ( PRESENT(FLAGSTIDEIN) ) THEN
+          FLAGSTIDE(:) = FLAGSTIDEIN(:)
+        END IF
+#endif
 
       FLVG1  => INPUTS(IMOD)%INFLAGS1(-9)
       FLVG2  => INPUTS(IMOD)%INFLAGS1(-8)
@@ -483,15 +519,17 @@
 !
       FLLEV  => INPUTS(IMOD)%INFLAGS1(1)
       FLCUR  => INPUTS(IMOD)%INFLAGS1(2)
-!/TIDE      FLLEVTIDE  => INPUTS(IMOD)%INFLAGS1(11)
-!/TIDE      FLCURTIDE  => INPUTS(IMOD)%INFLAGS1(12)
-!/TIDE      FLLEVRESI  => INPUTS(IMOD)%INFLAGS1(13)
-!/TIDE      FLCURRESI  => INPUTS(IMOD)%INFLAGS1(14)
-!/TIDE!
-!/TIDE      FLLEVTIDE = FLAGSTIDE(1)
-!/TIDE      FLCURTIDE = FLAGSTIDE(2)
-!/TIDE      FLLEVRESI = FLAGSTIDE(3)
-!/TIDE      FLCURRESI = FLAGSTIDE(4)     
+#ifdef W3_TIDE
+      FLLEVTIDE  => INPUTS(IMOD)%INFLAGS1(11)
+      FLCURTIDE  => INPUTS(IMOD)%INFLAGS1(12)
+      FLLEVRESI  => INPUTS(IMOD)%INFLAGS1(13)
+      FLCURRESI  => INPUTS(IMOD)%INFLAGS1(14)
+!
+      FLLEVTIDE = FLAGSTIDE(1)
+      FLCURTIDE = FLAGSTIDE(2)
+      FLLEVRESI = FLAGSTIDE(3)
+      FLCURRESI = FLAGSTIDE(4)     
+#endif
  
       FLWIND => INPUTS(IMOD)%INFLAGS1(3)
       FLICE  => INPUTS(IMOD)%INFLAGS1(4)
@@ -552,54 +590,66 @@
         END IF
 !
       IF ( FLCUR  ) THEN
-!/SMC       IF( FSWND ) THEN
-!/SMC          ALLOCATE ( INPUTS(IMOD)%CX0(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%CY0(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%CXN(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%CYN(NSEA,1) , STAT=ISTAT )
-!/SMC       ELSE
+#ifdef W3_SMC
+       IF( FSWND ) THEN
+          ALLOCATE ( INPUTS(IMOD)%CX0(NSEA,1) ,              &
+                     INPUTS(IMOD)%CY0(NSEA,1) ,              &
+                     INPUTS(IMOD)%CXN(NSEA,1) ,              &
+                     INPUTS(IMOD)%CYN(NSEA,1) , STAT=ISTAT )
+       ELSE
+#endif
           ALLOCATE ( INPUTS(IMOD)%CX0(NX,NY) ,              &
                      INPUTS(IMOD)%CY0(NX,NY) ,              &
                      INPUTS(IMOD)%CXN(NX,NY) ,              &
                      INPUTS(IMOD)%CYN(NX,NY) , STAT=ISTAT )
-!/SMC       ENDIF
+#ifdef W3_SMC
+       ENDIF
+#endif
           CHECK_ALLOC_STATUS ( ISTAT )
         END IF
 !
-!/TIDE      IF ( FLLEVTIDE  ) THEN
-!/TIDE          ALLOCATE ( INPUTS(IMOD)%WLTIDE(NX,NY,NTIDE,2), STAT=ISTAT )
-!/TIDE          CHECK_ALLOC_STATUS ( ISTAT )
-!/TIDE        END IF
-!/TIDE!
-!/TIDE      IF ( FLCURTIDE  ) THEN
-!/TIDE          ALLOCATE ( INPUTS(IMOD)%CXTIDE(NX,NY,NTIDE,2),  &
-!/TIDE                     INPUTS(IMOD)%CYTIDE(NX,NY,NTIDE,2), STAT=ISTAT )
-!/TIDE          CHECK_ALLOC_STATUS ( ISTAT )
-!/TIDE        END IF
+#ifdef W3_TIDE
+      IF ( FLLEVTIDE  ) THEN
+          ALLOCATE ( INPUTS(IMOD)%WLTIDE(NX,NY,NTIDE,2), STAT=ISTAT )
+          CHECK_ALLOC_STATUS ( ISTAT )
+        END IF
+!
+      IF ( FLCURTIDE  ) THEN
+          ALLOCATE ( INPUTS(IMOD)%CXTIDE(NX,NY,NTIDE,2),  &
+                     INPUTS(IMOD)%CYTIDE(NX,NY,NTIDE,2), STAT=ISTAT )
+          CHECK_ALLOC_STATUS ( ISTAT )
+        END IF
+#endif
 !
 
-!/WRST      IF(.NOT.(INPUTS(IMOD)%WRSTIINIT)) THEN 
-!/WRST        ALLOCATE (   INPUTS(IMOD)%WXNwrst(NX,NY) ,              &
-!/WRST                     INPUTS(IMOD)%WYNwrst(NX,NY) , STAT=ISTAT )
-!/WRST        INPUTS(IMOD)%WRSTIINIT=.TRUE.
-!/WRST      ENDIF
+#ifdef W3_WRST
+      IF(.NOT.(INPUTS(IMOD)%WRSTIINIT)) THEN 
+        ALLOCATE (   INPUTS(IMOD)%WXNwrst(NX,NY) ,              &
+                     INPUTS(IMOD)%WYNwrst(NX,NY) , STAT=ISTAT )
+        INPUTS(IMOD)%WRSTIINIT=.TRUE.
+      ENDIF
+#endif
 
       IF ( FLWIND ) THEN
-!/SMC       IF( FSWND ) THEN
-!/SMC          ALLOCATE ( INPUTS(IMOD)%WX0(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%WY0(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%DT0(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%WXN(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%WYN(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%DTN(NSEA,1) , STAT=ISTAT )
-!/SMC       ELSE
+#ifdef W3_SMC
+       IF( FSWND ) THEN
+          ALLOCATE ( INPUTS(IMOD)%WX0(NSEA,1) ,              &
+                     INPUTS(IMOD)%WY0(NSEA,1) ,              &
+                     INPUTS(IMOD)%DT0(NSEA,1) ,              &
+                     INPUTS(IMOD)%WXN(NSEA,1) ,              &
+                     INPUTS(IMOD)%WYN(NSEA,1) ,              &
+                     INPUTS(IMOD)%DTN(NSEA,1) , STAT=ISTAT )
+       ELSE
+#endif
           ALLOCATE ( INPUTS(IMOD)%WX0(NX,NY) ,              &
                      INPUTS(IMOD)%WY0(NX,NY) ,              &
                      INPUTS(IMOD)%DT0(NX,NY) ,              &
                      INPUTS(IMOD)%WXN(NX,NY) ,              &
                      INPUTS(IMOD)%WYN(NX,NY) ,              &
                      INPUTS(IMOD)%DTN(NX,NY) , STAT=ISTAT )
-!/SMC       ENDIF
+#ifdef W3_SMC
+       ENDIF
+#endif
           CHECK_ALLOC_STATUS ( ISTAT )
           INPUTS(IMOD)%DT0 = 0.
           INPUTS(IMOD)%DTN = 0.
@@ -613,46 +663,60 @@
         END IF
 !
       IF ( FLTAUA  ) THEN
-!/SMC       IF( FSWND ) THEN
-!/SMC          ALLOCATE ( INPUTS(IMOD)%UX0(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%UY0(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%UXN(NSEA,1) ,              &
-!/SMC                     INPUTS(IMOD)%UYN(NSEA,1) , STAT=ISTAT )
-!/SMC       ELSE
+#ifdef W3_SMC
+       IF( FSWND ) THEN
+          ALLOCATE ( INPUTS(IMOD)%UX0(NSEA,1) ,              &
+                     INPUTS(IMOD)%UY0(NSEA,1) ,              &
+                     INPUTS(IMOD)%UXN(NSEA,1) ,              &
+                     INPUTS(IMOD)%UYN(NSEA,1) , STAT=ISTAT )
+       ELSE
+#endif
           ALLOCATE ( INPUTS(IMOD)%UX0(NX,NY) ,              &
                      INPUTS(IMOD)%UY0(NX,NY) ,              &
                      INPUTS(IMOD)%UXN(NX,NY) ,              &
                      INPUTS(IMOD)%UYN(NX,NY) , STAT=ISTAT )
-!/SMC       ENDIF
+#ifdef W3_SMC
+       ENDIF
+#endif
           CHECK_ALLOC_STATUS ( ISTAT )
         END IF
 !
       IF ( FLRHOA  ) THEN
-!/SMC       IF( FSWND ) THEN
-!/SMC          ALLOCATE ( INPUTS(IMOD)%RH0(NSEA,1) ,             &
-!/SMC                     INPUTS(IMOD)%RHN(NSEA,1) , STAT=ISTAT )
-!/SMC       ELSE
+#ifdef W3_SMC
+       IF( FSWND ) THEN
+          ALLOCATE ( INPUTS(IMOD)%RH0(NSEA,1) ,             &
+                     INPUTS(IMOD)%RHN(NSEA,1) , STAT=ISTAT )
+       ELSE
+#endif
           ALLOCATE ( INPUTS(IMOD)%RH0(NX,NY) ,              &
                      INPUTS(IMOD)%RHN(NX,NY) , STAT=ISTAT )
-!/SMC       ENDIF
+#ifdef W3_SMC
+       ENDIF
+#endif
           CHECK_ALLOC_STATUS ( ISTAT )
         END IF
 !
       INPUTS(IMOD)%IINIT  = .TRUE.
 !
-!/T      WRITE (NDST,9001)
+#ifdef W3_T
+      WRITE (NDST,9001)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 3.  Point to allocated arrays
 !
       CALL W3SETI ( IMOD, NDSE, NDST )
 !
-!/T      WRITE (NDST,9002)
+#ifdef W3_T
+      WRITE (NDST,9002)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 4.  Update counters in grid
 !
-!/T      WRITE (NDST,9003)
+#ifdef W3_T
+      WRITE (NDST,9003)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 5.  Restore previous grid setting if necessary
@@ -663,11 +727,21 @@
 !
 ! Check inputs for stresses
       IF(FLTAUA) THEN
-!/FLX0        WRITE (NDSE,*) " *** WARNING W3DIMI : TAUA NOT USED *** "
-!/FLX1        WRITE (NDSE,*) " *** WARNING W3DIMI : TAUA NOT USED *** "
-!/FLX2        WRITE (NDSE,*) " *** WARNING W3DIMI : TAUA NOT USED *** "
-!/FLX3        WRITE (NDSE,*) " *** WARNING W3DIMI : TAUA NOT USED *** "
-!/FLX4        WRITE (NDSE,*) " *** WARNING W3DIMI : TAUA NOT USED *** "
+#ifdef W3_FLX0
+        WRITE (NDSE,*) " *** WARNING W3DIMI : TAUA NOT USED *** "
+#endif
+#ifdef W3_FLX1
+        WRITE (NDSE,*) " *** WARNING W3DIMI : TAUA NOT USED *** "
+#endif
+#ifdef W3_FLX2
+        WRITE (NDSE,*) " *** WARNING W3DIMI : TAUA NOT USED *** "
+#endif
+#ifdef W3_FLX3
+        WRITE (NDSE,*) " *** WARNING W3DIMI : TAUA NOT USED *** "
+#endif
+#ifdef W3_FLX4
+        WRITE (NDSE,*) " *** WARNING W3DIMI : TAUA NOT USED *** "
+#endif
       END IF
 !
 ! Formats
@@ -680,10 +754,12 @@
                '                    NIDATA = ',I10/)
  1003 FORMAT (/' *** ERROR W3DIMI : ARRAY(S) ALREADY ALLOCATED *** ')
 !
-!/T 9000 FORMAT (' TEST W3DIMI : MODEL ',I4,' DIM. AT ',2I5,I7)
-!/T 9001 FORMAT (' TEST W3DIMI : ARRAYS ALLOCATED')
-!/T 9002 FORMAT (' TEST W3DIMI : POINTERS RESET')
-!/T 9003 FORMAT (' TEST W3DIMI : DIMENSIONS STORED')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3DIMI : MODEL ',I4,' DIM. AT ',2I5,I7)
+ 9001 FORMAT (' TEST W3DIMI : ARRAYS ALLOCATED')
+ 9002 FORMAT (' TEST W3DIMI : POINTERS RESET')
+ 9003 FORMAT (' TEST W3DIMI : DIMENSIONS STORED')
+#endif
 !/
 !/ End of W3DIMI ----------------------------------------------------- /
 !/
@@ -748,7 +824,9 @@
       USE W3GDATMD, ONLY: NAUXGR
 !
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !/
@@ -760,9 +838,13 @@
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
 !/
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'W3SETI')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SETI')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input and module status
@@ -777,7 +859,9 @@
           CALL EXTCDE (2)
         END IF
 !
-!/T      WRITE (NDST,9000) IMOD
+#ifdef W3_T
+      WRITE (NDST,9000) IMOD
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Set model numbers
@@ -844,10 +928,12 @@
 !
       FLLEV  => INPUTS(IMOD)%INFLAGS1(1)
       FLCUR  => INPUTS(IMOD)%INFLAGS1(2)
-!/TIDE      FLLEVTIDE  => INPUTS(IMOD)%INFLAGS1(11)
-!/TIDE      FLCURTIDE  => INPUTS(IMOD)%INFLAGS1(12)
-!/TIDE      FLLEVRESI  => INPUTS(IMOD)%INFLAGS1(13)
-!/TIDE      FLCURRESI  => INPUTS(IMOD)%INFLAGS1(14)
+#ifdef W3_TIDE
+      FLLEVTIDE  => INPUTS(IMOD)%INFLAGS1(11)
+      FLCURTIDE  => INPUTS(IMOD)%INFLAGS1(12)
+      FLLEVRESI  => INPUTS(IMOD)%INFLAGS1(13)
+      FLCURRESI  => INPUTS(IMOD)%INFLAGS1(14)
+#endif
 
       FLWIND => INPUTS(IMOD)%INFLAGS1(3)
       FLICE  => INPUTS(IMOD)%INFLAGS1(4)
@@ -901,16 +987,20 @@
               CXN    => INPUTS(IMOD)%CXN
               CYN    => INPUTS(IMOD)%CYN
             END IF
-!/TIDE          IF ( FLLEVTIDE ) THEN 
-!/TIDE              WLTIDE => INPUTS(IMOD)%WLTIDE
-!/TIDE            END IF
-!/TIDE          IF ( FLCURTIDE ) THEN 
-!/TIDE              CXTIDE => INPUTS(IMOD)%CXTIDE
-!/TIDE              CYTIDE => INPUTS(IMOD)%CYTIDE
-!/TIDE            END IF
+#ifdef W3_TIDE
+          IF ( FLLEVTIDE ) THEN 
+              WLTIDE => INPUTS(IMOD)%WLTIDE
+            END IF
+          IF ( FLCURTIDE ) THEN 
+              CXTIDE => INPUTS(IMOD)%CXTIDE
+              CYTIDE => INPUTS(IMOD)%CYTIDE
+            END IF
+#endif
 !
-!/WRST          WXNwrst    => INPUTS(IMOD)%WXNwrst
-!/WRST          WYNwrst    => INPUTS(IMOD)%WYNwrst
+#ifdef W3_WRST
+          WXNwrst    => INPUTS(IMOD)%WXNwrst
+          WYNwrst    => INPUTS(IMOD)%WYNwrst
+#endif
 
           IF ( FLWIND  ) THEN
               WX0    => INPUTS(IMOD)%WX0
@@ -960,7 +1050,9 @@
                '                    NAUXGR = ',I10/                   &
                '                    NIDATA = ',I10/)
 !
-!/T 9000 FORMAT (' TEST W3SETI : MODEL ',I4,' SELECTED')
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SETI : MODEL ',I4,' SELECTED')
+#endif
 !/
 !/ End of W3SETI ----------------------------------------------------- /
 !/

@@ -146,7 +146,9 @@
 !/ ------------------------------------------------------------------- /
 
     USE W3ODATMD, ONLY: NDSE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -158,10 +160,14 @@
     TYPE(NML_PARAM_T), INTENT(INOUT)            :: NML_PARAM
     TYPE(NML_SOURCE_T), INTENT(INOUT)           :: NML_SOURCE
     INTEGER, INTENT(OUT)                        :: IERR
-!/S      INTEGER, SAVE                             :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                             :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'W3NMLOUNP')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3NMLOUNP')
+#endif
 
     ! open namelist log file
     NDSN = 3
@@ -271,7 +277,9 @@
 
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -282,10 +290,14 @@
     INTEGER                                :: IERR
     TYPE(NML_POINT_T) :: POINT
     NAMELIST /POINT_NML/ POINT
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_POINT_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_POINT_NML')
+#endif
 
     ! set default values for point structure
     POINT%TIMESTART  = '19000101 000000'
@@ -376,7 +388,9 @@
 
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -387,10 +401,14 @@
     INTEGER                                :: IERR
     TYPE(NML_FILE_T) :: FILE
     NAMELIST /FILE_NML/ FILE
-!/S    INTEGER, SAVE                       :: IENT = 0
+#ifdef W3_S
+    INTEGER, SAVE                       :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_FILE_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_FILE_NML')
+#endif
 
     ! set default values for file structure
     FILE%PREFIX    = 'ww3.'
@@ -475,7 +493,9 @@
 
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -486,10 +506,14 @@
     INTEGER                                :: IERR
     TYPE(NML_SPECTRA_T) :: SPECTRA
     NAMELIST /SPECTRA_NML/ SPECTRA
-!/S    INTEGER, SAVE                       :: IENT = 0
+#ifdef W3_S
+    INTEGER, SAVE                       :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_SPECTRA_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_SPECTRA_NML')
+#endif
 
     ! set default values for spectra structure
     SPECTRA%OUTPUT      = 3
@@ -575,7 +599,9 @@
 
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -586,10 +612,14 @@
     INTEGER                                :: IERR
     TYPE(NML_PARAM_T) :: PARAM
     NAMELIST /PARAM_NML/ PARAM
-!/S    INTEGER, SAVE                       :: IENT = 0
+#ifdef W3_S
+    INTEGER, SAVE                       :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_PARAM_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_PARAM_NML')
+#endif
 
     ! set default values for param structure
     PARAM%OUTPUT      = 3
@@ -670,7 +700,9 @@
 
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
@@ -681,10 +713,14 @@
     INTEGER                                :: IERR
     TYPE(NML_SOURCE_T) :: SOURCE
     NAMELIST /SOURCE_NML/ SOURCE
-!/S    INTEGER, SAVE                       :: IENT = 0
+#ifdef W3_S
+    INTEGER, SAVE                       :: IENT = 0
+#endif
 
     IERR = 0
-!/S      CALL STRACE (IENT, 'READ_SOURCE_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'READ_SOURCE_NML')
+#endif
 
     ! set default values for source structure
     SOURCE%OUTPUT      = 4
@@ -778,14 +814,20 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
     TYPE(NML_POINT_T), INTENT(IN) :: NML_POINT
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_POINT_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_POINT_NML')
+#endif
 
       WRITE (MSG,'(A)') 'POINT % '
       WRITE (NDSN,'(A)')
@@ -869,14 +911,20 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
     TYPE(NML_FILE_T), INTENT(IN) :: NML_FILE
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_FILE_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_FILE_NML')
+#endif
 
       WRITE (MSG,'(A)') 'FILE % '
       WRITE (NDSN,'(A)')
@@ -948,14 +996,20 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
     TYPE(NML_SPECTRA_T), INTENT(IN) :: NML_SPECTRA
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_SPECTRA_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_SPECTRA_NML')
+#endif
 
       WRITE (MSG,'(A)') 'SPECTRA % '
       WRITE (NDSN,'(A)')
@@ -1029,14 +1083,20 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
     TYPE(NML_PARAM_T), INTENT(IN) :: NML_PARAM
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_PARAM_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_PARAM_NML')
+#endif
 
       WRITE (MSG,'(A)') 'PARAM % '
       WRITE (NDSN,'(A)')
@@ -1104,14 +1164,20 @@
 !
 !/ ------------------------------------------------------------------- /
 
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 
     IMPLICIT NONE
 
     TYPE(NML_SOURCE_T), INTENT(IN) :: NML_SOURCE
-!/S      INTEGER, SAVE                           :: IENT = 0
+#ifdef W3_S
+      INTEGER, SAVE                           :: IENT = 0
+#endif
 
-!/S      CALL STRACE (IENT, 'REPORT_SOURCE_NML')
+#ifdef W3_S
+      CALL STRACE (IENT, 'REPORT_SOURCE_NML')
+#endif
 
       WRITE (MSG,'(A)') 'SOURCE % '
       WRITE (NDSN,'(A)')

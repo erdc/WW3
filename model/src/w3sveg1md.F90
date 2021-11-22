@@ -119,11 +119,19 @@
       USE W3GDATMD, ONLY: SIG
       USE W3ODATMD, only : IAPROC, NAPERR, NDSE
       USE W3IDATMD, ONLY: INFLAGS2, VEGLS, VEGBV, VEGN, VEGCD
-!/PDLIB   use yowNodepool, only: ipgl, iplg
+#ifdef W3_PDLIB
+   use yowNodepool, only: ipgl, iplg
+#endif
       USE CONSTANTS, ONLY: GRAV, PI, TPI, LPDLIB 
-!/S      USE W3SERVMD, ONLY: STRACE
-!/T0      USE W3ARRYMD, ONLY: PRT2DS
-!/T1      USE W3ARRYMD, ONLY: OUTMAT
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+#ifdef W3_T0
+      USE W3ARRYMD, ONLY: PRT2DS
+#endif
+#ifdef W3_T1
+      USE W3ARRYMD, ONLY: OUTMAT
+#endif
 !/
       IMPLICIT NONE
 !/
@@ -146,8 +154,12 @@
 !/ Local parameters
 !/
       INTEGER                 :: IS
-!/S      INTEGER, SAVE           :: IENT = 0
-!/T0     INTEGER                 :: IK, ITH
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_T0
+     INTEGER                 :: IK, ITH
+#endif
       REAL                    :: ETOT, FMEAN2, TMP1, TMP2
 !      REAL                    :: VCD   = 0.9559! drag coefficient 
 !      REAL                    :: VDM   = 0.0064 ! diam of veg. 
@@ -158,11 +170,15 @@
       REAL                    :: VALPHAD   
       REAL                    :: VALPHADH 
       REAL                    :: THR, KSBAR, SBAR
-!/T0     REAL                   :: DOUT(NK,NTH)
+#ifdef W3_T0
+     REAL                   :: DOUT(NK,NTH)
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/
-!/S      CALL STRACE (IENT, 'W3SDB1')
+#ifdef W3_S
+      CALL STRACE (IENT, 'W3SDB1')
+#endif
 !
 ! 0.  Initialzations ------------------------------------------------- /
 
@@ -201,8 +217,10 @@
         CALL EXTCDE(2)
       END IF
 
-!/PDLIB 
-!/PDLIB 
+#ifdef W3_PDLIB
+ 
+ 
+#endif
 
 !      VCD = 0.18
 !      VNV = 1200
@@ -220,7 +238,9 @@
         RETURN
       ENDIF
 !
-!/T      WRITE (NDST,9000) SDBC1, SDBC2, FDONLY
+#ifdef W3_T
+      WRITE (NDST,9000) SDBC1, SDBC2, FDONLY
+#endif
 !
       !VALPHAP   = VDM*VNV*VCD/TWO
        VALPHAP   = VDM*VNV*VCD !3 for check
@@ -242,16 +262,22 @@
 !
 ! ... Test output of arrays
 !
-!/T0      DO IK=1, NK
-!/T0        DO ITH=1, NTH
-!/T0          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
-!/T0          END DO
-!/T0        END DO
+#ifdef W3_T0
+      DO IK=1, NK
+        DO ITH=1, NTH
+          DOUT(IK,ITH) = D(ITH+(IK-1)*NTH)
+          END DO
+        END DO
+#endif
 !
-!/T0      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG, '  ', 1.,    &
-!/T0                         0.0, 0.001, 'Diag Sdb', ' ', 'NONAME')
+#ifdef W3_T0
+      CALL PRT2DS (NDST, NK, NK, NTH, DOUT, SIG, '  ', 1.,    &
+                         0.0, 0.001, 'Diag Sdb', ' ', 'NONAME')
+#endif
 !     
-!/T1      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sdb')
+#ifdef W3_T1
+      CALL OUTMAT (NDST, D, NTH, NTH, NK, 'diag Sdb')
+#endif
 !  
       RETURN
 !
@@ -259,7 +285,9 @@
  1001 FORMAT(/' *** WAVEWATCH III ERROR IN W3SVEG1MD : '/   &
               '     ',A,' IS NOT DEFINED IN ww3_shel.inp.')
 !
-!/T 9000 FORMAT (' TEST W3SDB1 : PARAMETERS :',2F7.3,L4)
+#ifdef W3_T
+ 9000 FORMAT (' TEST W3SDB1 : PARAMETERS :',2F7.3,L4)
+#endif
 !/
 !/ End of W3SVEG1 ----------------------------------------------------- /
 !/

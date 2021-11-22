@@ -166,11 +166,15 @@
       USE W3CSPCMD, ONLY: W3CSPC
       USE W3SERVMD, ONLY: EXTCDE
       USE W3PARALL, ONLY: INIT_GET_JSEA_ISPROC
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -181,19 +185,29 @@
 !/ Local parameters
 !/
       INTEGER                 :: J, I, IOFF, ISEA, JSEA, IS
-!/DIST      INTEGER                 :: ISPROC
-!/MPI      INTEGER                 :: IP, IT0, ITAG, IERR_MPI
-!/MPI      INTEGER, POINTER        :: NRQ, IRQ(:)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_DIST
+      INTEGER                 :: ISPROC
+#endif
+#ifdef W3_MPI
+      INTEGER                 :: IP, IT0, ITAG, IERR_MPI
+      INTEGER, POINTER        :: NRQ, IRQ(:)
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       REAL, POINTER           :: SBPI(:,:), TSTORE(:,:)
 !/
-!/S      CALL STRACE (IENT, 'WMIOBS')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMIOBS')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 0.  Initializations
 !
-!/T      WRITE (MDST,9000) IMOD
-!/T      WRITE (MDST,9001) NBI2G(:,IMOD)
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD
+      WRITE (MDST,9001) NBI2G(:,IMOD)
+#endif
 !
       IF ( SUM(NBI2G(:,IMOD)) .EQ. 0 ) RETURN
 !
@@ -217,75 +231,101 @@
             IOFF   = SUM(NBI2G(J,1:IMOD-1))
           END IF
 !
-!/T        WRITE (MDST,9010) NBI2G(J,IMOD),IMOD,J,IOFF+1,RESPEC(J,IMOD)
+#ifdef W3_T
+        WRITE (MDST,9010) NBI2G(J,IMOD),IMOD,J,IOFF+1,RESPEC(J,IMOD)
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Allocate arrays
 !
-!/SHRD        IF ( BPSTGE(J,IMOD)%INIT ) THEN
-!/SHRD            IF ( SIZE(BPSTGE(J,IMOD)%SBPI(:,1)) .NE. NSPEC .OR. &
-!/SHRD                 SIZE(BPSTGE(J,IMOD)%SBPI(1,:))                 &
-!/SHRD                                   .NE. NBI2G(J,IMOD) ) THEN
-!/SHRD                DEALLOCATE ( BPSTGE(J,IMOD)%SBPI )
-!/SHRD                BPSTGE(J,IMOD)%INIT = .FALSE.
-!/SHRD              END IF
-!/SHRD          END IF
+#ifdef W3_SHRD
+        IF ( BPSTGE(J,IMOD)%INIT ) THEN
+            IF ( SIZE(BPSTGE(J,IMOD)%SBPI(:,1)) .NE. NSPEC .OR. &
+                 SIZE(BPSTGE(J,IMOD)%SBPI(1,:))                 &
+                                   .NE. NBI2G(J,IMOD) ) THEN
+                DEALLOCATE ( BPSTGE(J,IMOD)%SBPI )
+                BPSTGE(J,IMOD)%INIT = .FALSE.
+              END IF
+          END IF
+#endif
 !
-!/SHRD        IF ( .NOT. BPSTGE(J,IMOD)%INIT ) THEN
-!/SHRD            NSPEC  => SGRDS(J)%NSPEC
-!/SHRD            ALLOCATE ( BPSTGE(J,IMOD)%SBPI(NSPEC,NBI2G(J,IMOD)) )
-!/SHRD            NSPEC  => SGRDS(IMOD)%NSPEC
-!/SHRD            BPSTGE(J,IMOD)%INIT  = .TRUE.
-!/SHRD          END IF
+#ifdef W3_SHRD
+        IF ( .NOT. BPSTGE(J,IMOD)%INIT ) THEN
+            NSPEC  => SGRDS(J)%NSPEC
+            ALLOCATE ( BPSTGE(J,IMOD)%SBPI(NSPEC,NBI2G(J,IMOD)) )
+            NSPEC  => SGRDS(IMOD)%NSPEC
+            BPSTGE(J,IMOD)%INIT  = .TRUE.
+          END IF
+#endif
 !
-!/SHRD        IF ( RESPEC(J,IMOD) ) THEN
-!/SHRD            ALLOCATE ( TSTORE(NSPEC,NBI2G(J,IMOD)) )
-!/SHRD            SBPI   => TSTORE
-!/SHRD          ELSE
-!/SHRD            SBPI   => BPSTGE(J,IMOD)%SBPI
-!/SHRD          END IF
+#ifdef W3_SHRD
+        IF ( RESPEC(J,IMOD) ) THEN
+            ALLOCATE ( TSTORE(NSPEC,NBI2G(J,IMOD)) )
+            SBPI   => TSTORE
+          ELSE
+            SBPI   => BPSTGE(J,IMOD)%SBPI
+          END IF
+#endif
 !
-!/MPI        NAPROC => OUTPTS(J)%NAPROC
-!/MPI        ALLOCATE ( IRQ(NBI2G(J,IMOD)*NAPROC+NAPROC) )
-!/MPI        ALLOCATE ( BPSTGE(J,IMOD)%TSTORE(NSPEC,NBI2G(J,IMOD)) )
-!/MPI        NAPROC => OUTPTS(IMOD)%NAPROC
+#ifdef W3_MPI
+        NAPROC => OUTPTS(J)%NAPROC
+        ALLOCATE ( IRQ(NBI2G(J,IMOD)*NAPROC+NAPROC) )
+        ALLOCATE ( BPSTGE(J,IMOD)%TSTORE(NSPEC,NBI2G(J,IMOD)) )
+        NAPROC => OUTPTS(IMOD)%NAPROC
+#endif
 !
-!/MPI        NRQ    => BPSTGE(J,IMOD)%NRQBPS
-!/MPI        SBPI   => BPSTGE(J,IMOD)%TSTORE
+#ifdef W3_MPI
+        NRQ    => BPSTGE(J,IMOD)%NRQBPS
+        SBPI   => BPSTGE(J,IMOD)%TSTORE
+#endif
 !
-!/MPI        NRQ    = 0
-!/MPI        IRQ    = 0
+#ifdef W3_MPI
+        NRQ    = 0
+        IRQ    = 0
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 3.  Set the time
 !     Note that with MPI the send needs to be posted to the local
 !     processor too to make time management possible.
 !
-!/T        WRITE (MDST,9030) TIME
-!/MPIT        WRITE (MDST,9080)
+#ifdef W3_T
+        WRITE (MDST,9030) TIME
+#endif
+#ifdef W3_MPIT
+        WRITE (MDST,9080)
+#endif
 !
-!/SHRD        BPSTGE(J,IMOD)%VTIME = TIME
+#ifdef W3_SHRD
+        BPSTGE(J,IMOD)%VTIME = TIME
+#endif
 !
-!/MPI        IF ( IAPROC .EQ. 1 ) THEN
-!/MPI            BPSTGE(J,IMOD)%STIME = TIME
-!/MPI            ITAG   = MTAG0 + IMOD + (J-1)*NRGRD
-!/MPI            IF ( ITAG .GT. MTAG1 ) THEN
-!/MPI                WRITE (MDSE,1001)
-!/MPI                CALL EXTCDE (1001) 
-!/MPI              END IF
-!/MPI            DO IP=1, NMPROC
-!/MPI              IF ( ALLPRC(IP,J) .NE. 0 .AND.                 &
-!/MPI                   ALLPRC(IP,J) .LE. OUTPTS(J)%NAPROC ) THEN
-!/MPI                  NRQ    = NRQ + 1
-!/MPI                  CALL MPI_ISEND ( BPSTGE(J,IMOD)%STIME, 2,  &
-!/MPI                                   MPI_INTEGER, IP-1, ITAG,  &
-!/MPI                                   MPI_COMM_MWAVE, IRQ(NRQ), &
-!/MPI                                   IERR_MPI )
-!/MPIT                  WRITE (MDST,9081) NRQ, IP, ITAG-MTAG0,     &
-!/MPIT                                    IRQ(NRQ), IERR_MPI
-!/MPI                END IF
-!/MPI              END DO
-!/MPI          END IF
+#ifdef W3_MPI
+        IF ( IAPROC .EQ. 1 ) THEN
+            BPSTGE(J,IMOD)%STIME = TIME
+            ITAG   = MTAG0 + IMOD + (J-1)*NRGRD
+            IF ( ITAG .GT. MTAG1 ) THEN
+                WRITE (MDSE,1001)
+                CALL EXTCDE (1001) 
+              END IF
+            DO IP=1, NMPROC
+              IF ( ALLPRC(IP,J) .NE. 0 .AND.                 &
+                   ALLPRC(IP,J) .LE. OUTPTS(J)%NAPROC ) THEN
+                  NRQ    = NRQ + 1
+                  CALL MPI_ISEND ( BPSTGE(J,IMOD)%STIME, 2,  &
+                                   MPI_INTEGER, IP-1, ITAG,  &
+                                   MPI_COMM_MWAVE, IRQ(NRQ), &
+                                   IERR_MPI )
+#endif
+#ifdef W3_MPIT
+                  WRITE (MDST,9081) NRQ, IP, ITAG-MTAG0,     &
+                                    IRQ(NRQ), IERR_MPI
+#endif
+#ifdef W3_MPI
+                END IF
+              END DO
+          END IF
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 4.  Stage the spectral data
@@ -293,58 +333,78 @@
         DO I=1, NBI2G(J,IMOD)
 !
           ISEA   = NBI2S(IOFF+I,2)
-!/SHRD          JSEA   = ISEA
-!/DIST          CALL INIT_GET_JSEA_ISPROC(ISEA, JSEA, ISPROC)
-!/DIST          IF ( ISPROC .NE. IAPROC ) CYCLE
-!/MPI          IT0    = MTAG0 + NRGRD**2 + SUM(NBI2G(1:J-1,:)) +      &
-!/MPI                                      SUM(NBI2G(J,1:IMOD-1))
+#ifdef W3_SHRD
+          JSEA   = ISEA
+#endif
+#ifdef W3_DIST
+          CALL INIT_GET_JSEA_ISPROC(ISEA, JSEA, ISPROC)
+          IF ( ISPROC .NE. IAPROC ) CYCLE
+#endif
+#ifdef W3_MPI
+          IT0    = MTAG0 + NRGRD**2 + SUM(NBI2G(1:J-1,:)) +      &
+                                      SUM(NBI2G(J,1:IMOD-1))
+#endif
 !
           DO IS=1, NSPEC
             SBPI(IS,I) = VA(IS,JSEA) * SIG2(IS) / CG(1+(IS-1)/NTH,ISEA)
             END DO
 !
-!/MPI          DO IP=1, NMPROC
-!/MPI            IF ( ALLPRC(IP,J) .NE. 0 .AND.                   &    
-!/MPI                 ALLPRC(IP,J) .LE. OUTPTS(J)%NAPROC ) THEN
-!/MPI                NRQ    = NRQ + 1
-!/MPI                ITAG   = IT0 + I
-!/MPI                IF ( ITAG .GT. MTAG1 ) THEN
-!/MPI                    WRITE (MDSE,1001)
-!/MPI                    CALL EXTCDE (1001) 
-!/MPI                  END IF
-!/MPI                CALL MPI_ISEND ( SBPI(1,I), NSPEC, MPI_REAL, &
-!/MPI                                 IP-1, ITAG, MPI_COMM_MWAVE, &
-!/MPI                                 IRQ(NRQ), IERR_MPI )
-!/MPIT                WRITE (MDST,9082) NRQ, JSEA, IP, ITAG-MTAG0, &
-!/MPIT                                  IRQ(NRQ), IERR_MPI
-!/MPI              END IF
-!/MPI            END DO
+#ifdef W3_MPI
+          DO IP=1, NMPROC
+            IF ( ALLPRC(IP,J) .NE. 0 .AND.                   &    
+                 ALLPRC(IP,J) .LE. OUTPTS(J)%NAPROC ) THEN
+                NRQ    = NRQ + 1
+                ITAG   = IT0 + I
+                IF ( ITAG .GT. MTAG1 ) THEN
+                    WRITE (MDSE,1001)
+                    CALL EXTCDE (1001) 
+                  END IF
+                CALL MPI_ISEND ( SBPI(1,I), NSPEC, MPI_REAL, &
+                                 IP-1, ITAG, MPI_COMM_MWAVE, &
+                                 IRQ(NRQ), IERR_MPI )
+#endif
+#ifdef W3_MPIT
+                WRITE (MDST,9082) NRQ, JSEA, IP, ITAG-MTAG0, &
+                                  IRQ(NRQ), IERR_MPI
+#endif
+#ifdef W3_MPI
+              END IF
+            END DO
+#endif
 !
           END DO
 !
-!/MPIT        WRITE (MDST,9083)
-!/MPIT        WRITE (MDST,9084) NRQ
+#ifdef W3_MPIT
+        WRITE (MDST,9083)
+        WRITE (MDST,9084) NRQ
+#endif
 !
-!/MPI        IF ( NRQ .GT. 0 ) THEN
-!/MPI            ALLOCATE ( BPSTGE(J,IMOD)%IRQBPS(NRQ) )
-!/MPI            BPSTGE(J,IMOD)%IRQBPS = IRQ(:NRQ)
-!/MPI          ELSE
-!/MPI            DEALLOCATE ( BPSTGE(J,IMOD)%TSTORE )
-!/MPI          END IF
+#ifdef W3_MPI
+        IF ( NRQ .GT. 0 ) THEN
+            ALLOCATE ( BPSTGE(J,IMOD)%IRQBPS(NRQ) )
+            BPSTGE(J,IMOD)%IRQBPS = IRQ(:NRQ)
+          ELSE
+            DEALLOCATE ( BPSTGE(J,IMOD)%TSTORE )
+          END IF
+#endif
 !
-!/MPI        DEALLOCATE ( IRQ )
+#ifdef W3_MPI
+        DEALLOCATE ( IRQ )
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 5.  Convert spectra ( !/SHRD only )
 !
-!/SHRD        IF ( RESPEC(J,IMOD) ) THEN
-!/SHRD            SBPI   => BPSTGE(J,IMOD)%SBPI
-!/SHRD            CALL W3CSPC ( TSTORE, NK, NTH, XFR, FR1, TH(1),     &
-!/SHRD                 SBPI, SGRDS(J)%NK, SGRDS(J)%NTH, SGRDS(J)%XFR, &
-!/SHRD                 SGRDS(J)%FR1, SGRDS(J)%TH(1), NBI2G(J,IMOD),   &
-!/SHRD                 MDST, MDSE, SGRDS(J)%FACHFE )
-!/SHRD            DEALLOCATE ( TSTORE )
-!/SHRD          END IF
+#ifdef W3_SHRD
+        IF ( RESPEC(J,IMOD) ) THEN
+            SBPI   => BPSTGE(J,IMOD)%SBPI
+            CALL W3CSPC ( TSTORE, NK, NTH, XFR, FR1, TH(1),     &
+                 SBPI, SGRDS(J)%NK, SGRDS(J)%NTH, SGRDS(J)%XFR, &
+                 SGRDS(J)%FR1, SGRDS(J)%TH(1), NBI2G(J,IMOD),   &
+                 MDST, MDSE, SGRDS(J)%FACHFE )
+            DEALLOCATE ( TSTORE )
+          END IF
+#endif
 !
 ! ... End of loop over grids
 !
@@ -354,27 +414,37 @@
 !
 ! Formats
 !
-!/MPI 1001 FORMAT (/' *** ERROR WMIOBS : REQUESTED MPI TAG EXCEEDS', &
-!/MPI                                    ' UPPER BOUND (MTAG1) ***')
-!/T 9000 FORMAT ( ' TEST WMIOBS : STAGING DATA FROM GRID ',I3)
-!/T 9001 FORMAT ( ' TEST WMIOBS : NR. OF SPECTRA PER GRID : '/        &
-!/T               '             ',25I4)
+#ifdef W3_MPI
+ 1001 FORMAT (/' *** ERROR WMIOBS : REQUESTED MPI TAG EXCEEDS', &
+                                    ' UPPER BOUND (MTAG1) ***')
+#endif
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMIOBS : STAGING DATA FROM GRID ',I3)
+ 9001 FORMAT ( ' TEST WMIOBS : NR. OF SPECTRA PER GRID : '/        &
+               '             ',25I4)
+#endif
 !
-!/T 9010 FORMAT ( ' TEST WMIOBS : STAGING',I4,' SPECTRA FROM GRID ',  &
-!/T                 I3,' TO GRID ',I3/                                &
-!/T               '               STARTING WITH SPECTRUM ',I4,        &
-!/T               ', RESPEC =',L2)
+#ifdef W3_T
+ 9010 FORMAT ( ' TEST WMIOBS : STAGING',I4,' SPECTRA FROM GRID ',  &
+                 I3,' TO GRID ',I3/                                &
+               '               STARTING WITH SPECTRUM ',I4,        &
+               ', RESPEC =',L2)
+#endif
 !
-!/T 9030 FORMAT ( ' TEST WMIOBS : TIME :',I10.8,I7.6)
+#ifdef W3_T
+ 9030 FORMAT ( ' TEST WMIOBS : TIME :',I10.8,I7.6)
+#endif
 !
-!/MPIT 9080 FORMAT (/' MPIT WMIOBS: COMMUNICATION CALLS            '/ &
-!/MPIT               ' +------+------+------+------+--------------+'/ &
-!/MPIT               ' |  IH  |  ID  | TARG |  TAG |   handle err |'/ &
-!/MPIT               ' +------+------+------+------+--------------+')
-!/MPIT 9081 FORMAT ( ' |',I5,' | TIME |',2(I5,' |'),I9,I4,' |')
-!/MPIT 9082 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
-!/MPIT 9083 FORMAT ( ' +------+------+------+------+--------------+')
-!/MPIT 9084 FORMAT ( ' MPIT WMIOBS: NRQBPT:',I10/)
+#ifdef W3_MPIT
+ 9080 FORMAT (/' MPIT WMIOBS: COMMUNICATION CALLS            '/ &
+               ' +------+------+------+------+--------------+'/ &
+               ' |  IH  |  ID  | TARG |  TAG |   handle err |'/ &
+               ' +------+------+------+------+--------------+')
+ 9081 FORMAT ( ' |',I5,' | TIME |',2(I5,' |'),I9,I4,' |')
+ 9082 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
+ 9083 FORMAT ( ' +------+------+------+------+--------------+')
+ 9084 FORMAT ( ' MPIT WMIOBS: NRQBPT:',I10/)
+#endif
 !/
 !/ End of WMIOBS ----------------------------------------------------- /
 !/
@@ -479,11 +549,15 @@
       USE W3IOBCMD, ONLY: W3IOBC
       USE W3SERVMD, ONLY: EXTCDE
 !      USE W3PARALL, ONLY: INIT_GET_JSEA_ISPROC_GLOB
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -495,30 +569,48 @@
 !/ Local parameters
 !/
       INTEGER                 :: J, I, IOFF, TTEST(2), ITEST
-!/MPI      INTEGER                 :: IERR_MPI, IT0, ITAG, IFROM,     &
-!/MPI                                 ISEA, JSEA, ISPROC
-!/MPIT      INTEGER                 :: ICOUNT
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                 :: IERR_MPI, IT0, ITAG, IFROM,     &
+                                 ISEA, JSEA, ISPROC
+#endif
+#ifdef W3_MPIT
+      INTEGER                 :: ICOUNT
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       INTEGER, POINTER        :: VTIME(:)
-!/MPI      INTEGER, POINTER        :: NRQ, IRQ(:)
-!/MPI      INTEGER, ALLOCATABLE    :: STATUS(:,:)
+#ifdef W3_MPI
+      INTEGER, POINTER        :: NRQ, IRQ(:)
+      INTEGER, ALLOCATABLE    :: STATUS(:,:)
+#endif
       REAL                    :: DTTST, DT1, DT2, W1, W2
       REAL, POINTER           :: SBPI(:,:)
-!/MPI      REAL, ALLOCATABLE       :: TSTORE(:,:)
-!/MPI      LOGICAL                 :: FLAGOK
-!/MPIT      LOGICAL                 :: FLAG
+#ifdef W3_MPI
+      REAL, ALLOCATABLE       :: TSTORE(:,:)
+      LOGICAL                 :: FLAGOK
+#endif
+#ifdef W3_MPIT
+      LOGICAL                 :: FLAG
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMIOBG')
-!/DEBUGIOBC      WRITE(740+IAPROC,*)  'Begin of W3IOBG'
-!/DEBUGIOBC      FLUSH(740+IAPROC)
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMIOBG')
+#endif
+#ifdef W3_DEBUGIOBC
+      WRITE(740+IAPROC,*)  'Begin of W3IOBG'
+      FLUSH(740+IAPROC)
+#endif
 
 
 !
 ! -------------------------------------------------------------------- /
 ! 0.  Initializations
 !
-!/T      WRITE (MDST,9000) IMOD
-!/T      WRITE (MDST,9001) NBI2G(IMOD,:)
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD
+      WRITE (MDST,9001) NBI2G(IMOD,:)
+#endif
 !
       IF ( PRESENT(DONE) ) DONE = .FALSE.
 !
@@ -526,13 +618,17 @@
 !
       IF ( IAPROC .GT. NAPROC ) THEN
           IF ( PRESENT(DONE) ) DONE = .TRUE.
-!/T          WRITE (MDST,9002)
+#ifdef W3_T
+          WRITE (MDST,9002)
+#endif
           RETURN
         END IF
 !
       IF ( SUM(NBI2G(IMOD,:)) .EQ. 0 ) THEN
           IF ( PRESENT(DONE) ) DONE = .TRUE.
-!/T          WRITE (MDST,9003)
+#ifdef W3_T
+          WRITE (MDST,9003)
+#endif
           RETURN
         END IF
 !
@@ -543,7 +639,9 @@
       IF ( TBPIN(1) .NE. -1 ) THEN
           IF ( DSEC21(TIME,TBPIN) .GT. 0. ) THEN
               IF ( PRESENT(DONE) ) DONE = .TRUE.
-!/T              WRITE (MDST,9004)
+#ifdef W3_T
+              WRITE (MDST,9004)
+#endif
               RETURN
             END IF
         END IF
@@ -551,233 +649,357 @@
 ! -------------------------------------------------------------------- /
 ! 1.  Testing / gathering data in staging arrays 
 !
-!/T      WRITE (MDST,9010)
+#ifdef W3_T
+      WRITE (MDST,9010)
+#endif
 !
 ! 1.a Shared memory version, test valid times. - - - - - - - - - - - - /
 !
-!/SHRD      DO J=1, NRGRD
+#ifdef W3_SHRD
+      DO J=1, NRGRD
+#endif
 !
-!/SHRD        IF ( NBI2G(IMOD,J) .EQ. 0 ) CYCLE
-!/SHRD        VTIME  => BPSTGE(IMOD,J)%VTIME
+#ifdef W3_SHRD
+        IF ( NBI2G(IMOD,J) .EQ. 0 ) CYCLE
+        VTIME  => BPSTGE(IMOD,J)%VTIME
+#endif
 !
-!/SHRD        IF ( VTIME(1) .EQ. -1 ) THEN
-!/SHRD            IF ( NMPROC .EQ. NMPERR ) WRITE (MDSE,1001)
-!/SHRD            CALL EXTCDE ( 1001 )
-!/SHRD          END IF
+#ifdef W3_SHRD
+        IF ( VTIME(1) .EQ. -1 ) THEN
+            IF ( NMPROC .EQ. NMPERR ) WRITE (MDSE,1001)
+            CALL EXTCDE ( 1001 )
+          END IF
+#endif
 !
-!/SHRD        DTTST  = DSEC21 ( TIME, VTIME )
-!/SHRD        IF ( DTTST.LE.0. .AND. TBPIN(1).NE.-1 ) RETURN
+#ifdef W3_SHRD
+        DTTST  = DSEC21 ( TIME, VTIME )
+        IF ( DTTST.LE.0. .AND. TBPIN(1).NE.-1 ) RETURN
+#endif
 !
-!/SHRD        END DO
+#ifdef W3_SHRD
+        END DO
+#endif
 !
 ! 1.b Distributed memory version - - - - - - - - - - - - - - - - - - - /
 !
-!/MPIT        WRITE (MDST,9011) NBISTA(IMOD)
+#ifdef W3_MPIT
+        WRITE (MDST,9011) NBISTA(IMOD)
+#endif
 ! 
 ! 1.b.1 NBISTA = 0
 !       Check if staging arrays are initialized.
 !       Post the proper receives.
 !
-!/MPI      IF ( NBISTA(IMOD) .EQ. 0 ) THEN
+#ifdef W3_MPI
+      IF ( NBISTA(IMOD) .EQ. 0 ) THEN
+#endif
 !
-!/MPI          NRQ    => MDATAS(IMOD)%NRQBPG
-!/MPI          NRQ    = NRGRD + SUM(NBI2G(IMOD,:))
-!/MPI          ALLOCATE ( MDATAS(IMOD)%IRQBPG(NRQ) )
-!/MPI          IRQ    => MDATAS(IMOD)%IRQBPG
-!/MPI          IRQ    = 0
-!/MPI          NRQ    = 0
+#ifdef W3_MPI
+          NRQ    => MDATAS(IMOD)%NRQBPG
+          NRQ    = NRGRD + SUM(NBI2G(IMOD,:))
+          ALLOCATE ( MDATAS(IMOD)%IRQBPG(NRQ) )
+          IRQ    => MDATAS(IMOD)%IRQBPG
+          IRQ    = 0
+          NRQ    = 0
+#endif
 !
-!/MPI          DO J=1, NRGRD
-!/MPI            IF ( NBI2G(IMOD,J) .EQ. 0 ) CYCLE
+#ifdef W3_MPI
+          DO J=1, NRGRD
+            IF ( NBI2G(IMOD,J) .EQ. 0 ) CYCLE
+#endif
 !
 ! ..... Staging arrays
 !
-!/MPI            IF ( BPSTGE(IMOD,J)%INIT ) THEN
-!/MPI                IF ( RESPEC(IMOD,J) ) THEN
-!/MPI                    DEALLOCATE ( BPSTGE(IMOD,J)%SBPI )
-!/MPI                    BPSTGE(IMOD,J)%INIT  = .FALSE.
-!/MPIT                    WRITE (MDST,9012) J, 'RESET'
-!/MPI                  ELSE
-!/MPI                    IF ( SIZE(BPSTGE(IMOD,J)%SBPI(:,1)) .NE.     &
-!/MPI                                             SGRDS(J)%NSPEC .OR. &
-!/MPI                         SIZE(BPSTGE(IMOD,J)%SBPI(1,:)) .NE.     &
-!/MPI                                             NBI2G(IMOD,J) ) THEN
-!/MPI                        IF ( IMPROC .EQ. NMPERR ) WRITE (MDSE,1003)
-!/MPI                        CALL EXTCDE (1003) 
-!/MPI                      END IF
-!/MPIT                    WRITE (MDST,9012) J, 'TESTED'
-!/MPI                  END IF
-!/MPI              END IF
+#ifdef W3_MPI
+            IF ( BPSTGE(IMOD,J)%INIT ) THEN
+                IF ( RESPEC(IMOD,J) ) THEN
+                    DEALLOCATE ( BPSTGE(IMOD,J)%SBPI )
+                    BPSTGE(IMOD,J)%INIT  = .FALSE.
+#endif
+#ifdef W3_MPIT
+                    WRITE (MDST,9012) J, 'RESET'
+#endif
+#ifdef W3_MPI
+                  ELSE
+                    IF ( SIZE(BPSTGE(IMOD,J)%SBPI(:,1)) .NE.     &
+                                             SGRDS(J)%NSPEC .OR. &
+                         SIZE(BPSTGE(IMOD,J)%SBPI(1,:)) .NE.     &
+                                             NBI2G(IMOD,J) ) THEN
+                        IF ( IMPROC .EQ. NMPERR ) WRITE (MDSE,1003)
+                        CALL EXTCDE (1003) 
+                      END IF
+#endif
+#ifdef W3_MPIT
+                    WRITE (MDST,9012) J, 'TESTED'
+#endif
+#ifdef W3_MPI
+                  END IF
+              END IF
+#endif
 !
-!/MPI            IF ( .NOT. BPSTGE(IMOD,J)%INIT ) THEN
-!/MPI                NSPEC  => SGRDS(J)%NSPEC
-!/MPI                ALLOCATE (BPSTGE(IMOD,J)%SBPI(NSPEC,NBI2G(IMOD,J)))
-!/MPI                NSPEC  => SGRDS(IMOD)%NSPEC
-!/MPI                BPSTGE(IMOD,J)%INIT  = .TRUE.
-!/MPIT                WRITE (MDST,9012) J, 'INITIALIZED'
-!/MPI              END IF
+#ifdef W3_MPI
+            IF ( .NOT. BPSTGE(IMOD,J)%INIT ) THEN
+                NSPEC  => SGRDS(J)%NSPEC
+                ALLOCATE (BPSTGE(IMOD,J)%SBPI(NSPEC,NBI2G(IMOD,J)))
+                NSPEC  => SGRDS(IMOD)%NSPEC
+                BPSTGE(IMOD,J)%INIT  = .TRUE.
+#endif
+#ifdef W3_MPIT
+                WRITE (MDST,9012) J, 'INITIALIZED'
+#endif
+#ifdef W3_MPI
+              END IF
+#endif
 !
 ! ..... Check valid time to determine staging.
 !
-!/MPI            VTIME  => BPSTGE(IMOD,J)%VTIME
-!/MPI            IF ( VTIME(1) .EQ. -1 ) THEN
-!/MPI                DTTST  = 0.
-!/MPI              ELSE
-!/MPI                DTTST  = DSEC21 ( TIME, VTIME )
-!/MPI              END IF
-!/MPIT            WRITE (MDST,9013) VTIME, DTTST
+#ifdef W3_MPI
+            VTIME  => BPSTGE(IMOD,J)%VTIME
+            IF ( VTIME(1) .EQ. -1 ) THEN
+                DTTST  = 0.
+              ELSE
+                DTTST  = DSEC21 ( TIME, VTIME )
+              END IF
+#endif
+#ifdef W3_MPIT
+            WRITE (MDST,9013) VTIME, DTTST
+#endif
 !
 ! ..... Post receives for data gather
 !
-!/MPI            IF ( DTTST .LE. 0. ) THEN
-!/MPIT                WRITE (MDST,9014) J
+#ifdef W3_MPI
+            IF ( DTTST .LE. 0. ) THEN
+#endif
+#ifdef W3_MPIT
+                WRITE (MDST,9014) J
+#endif
 !
 ! ..... Time
 !
-!/MPI                ITAG   = MTAG0 + J + (IMOD-1)*NRGRD
-!/MPI                IFROM  = MDATAS(J)%CROOT - 1
-!/MPI                NRQ    = NRQ + 1
-!/MPI                CALL MPI_IRECV ( BPSTGE(IMOD,J)%VTIME, 2,        &
-!/MPI                                 MPI_INTEGER, IFROM, ITAG,       &
-!/MPI                                 MPI_COMM_MWAVE, IRQ(NRQ),       &
-!/MPI                                 IERR_MPI )
-!/MPIT                WRITE (MDST,9015) NRQ, IFROM+1, ITAG-MTAG0,      &
-!/MPIT                                      IRQ(NRQ), IERR_MPI
+#ifdef W3_MPI
+                ITAG   = MTAG0 + J + (IMOD-1)*NRGRD
+                IFROM  = MDATAS(J)%CROOT - 1
+                NRQ    = NRQ + 1
+                CALL MPI_IRECV ( BPSTGE(IMOD,J)%VTIME, 2,        &
+                                 MPI_INTEGER, IFROM, ITAG,       &
+                                 MPI_COMM_MWAVE, IRQ(NRQ),       &
+                                 IERR_MPI )
+#endif
+#ifdef W3_MPIT
+                WRITE (MDST,9015) NRQ, IFROM+1, ITAG-MTAG0,      &
+                                      IRQ(NRQ), IERR_MPI
+#endif
 !
 ! ..... Spectra
 !
-!/MPI                IF ( J .EQ. 1 ) THEN
-!/MPI                    IOFF   = 0
-!/MPI                  ELSE
-!/MPI                    IOFF   = SUM(NBI2G(IMOD,1:J-1))
-!/MPI                  END IF
+#ifdef W3_MPI
+                IF ( J .EQ. 1 ) THEN
+                    IOFF   = 0
+                  ELSE
+                    IOFF   = SUM(NBI2G(IMOD,1:J-1))
+                  END IF
+#endif
 !
-!/MPI                IT0 = MTAG0 + NRGRD**2 + SUM(NBI2G(1:IMOD-1,:))  &
-!/MPI                                       + SUM(NBI2G(IMOD,1:J-1))
+#ifdef W3_MPI
+                IT0 = MTAG0 + NRGRD**2 + SUM(NBI2G(1:IMOD-1,:))  &
+                                       + SUM(NBI2G(IMOD,1:J-1))
+#endif
 !
-!/MPI                SBPI  => BPSTGE(IMOD,J)%SBPI
+#ifdef W3_MPI
+                SBPI  => BPSTGE(IMOD,J)%SBPI
+#endif
 !
-!/MPI                NAPROC => OUTPTS(J)%NAPROC
-!/MPI                NSPEC  => SGRDS(J)%NSPEC
-!/MPI                DO I=1, NBI2G(IMOD,J)
-!/MPI                  ISEA   = NBI2S(IOFF+I,2)
-!/MPI                  CALL INIT_GET_JSEA_ISPROC_GLOB(ISEA, J, JSEA, ISPROC)
-!/MPI                  NRQ    = NRQ + 1
-!/MPI                  ITAG   = IT0 + I
-!/MPI                  CALL MPI_IRECV ( SBPI(1,I), NSPEC,             &
-!/MPI                                   MPI_REAL, ISPROC-1,           &
-!/MPI                                   ITAG, MPI_COMM_MWAVE,         &
-!/MPI                                   IRQ(NRQ), IERR_MPI )
-!/MPIT                WRITE (MDST,9016) NRQ, JSEA, ISPROC,             &
-!/MPIT                       ITAG-MTAG0, IRQ(NRQ), IERR_MPI
-!/MPI                  END DO
-!/MPI                NSPEC  => SGRDS(IMOD)%NSPEC
-!/MPI                NAPROC => OUTPTS(IMOD)%NAPROC
+#ifdef W3_MPI
+                NAPROC => OUTPTS(J)%NAPROC
+                NSPEC  => SGRDS(J)%NSPEC
+                DO I=1, NBI2G(IMOD,J)
+                  ISEA   = NBI2S(IOFF+I,2)
+                  CALL INIT_GET_JSEA_ISPROC_GLOB(ISEA, J, JSEA, ISPROC)
+                  NRQ    = NRQ + 1
+                  ITAG   = IT0 + I
+                  CALL MPI_IRECV ( SBPI(1,I), NSPEC,             &
+                                   MPI_REAL, ISPROC-1,           &
+                                   ITAG, MPI_COMM_MWAVE,         &
+                                   IRQ(NRQ), IERR_MPI )
+#endif
+#ifdef W3_MPIT
+                WRITE (MDST,9016) NRQ, JSEA, ISPROC,             &
+                       ITAG-MTAG0, IRQ(NRQ), IERR_MPI
+#endif
+#ifdef W3_MPI
+                  END DO
+                NSPEC  => SGRDS(IMOD)%NSPEC
+                NAPROC => OUTPTS(IMOD)%NAPROC
+#endif
 !
 ! ..... End IF for posting receives 1.b.1
 !
-!/MPIT                WRITE (MDST,9017)
-!/MPI              END IF
+#ifdef W3_MPIT
+                WRITE (MDST,9017)
+#endif
+#ifdef W3_MPI
+              END IF
+#endif
 !
 ! ..... End grid loop J in 1.b.1
 !
-!/MPI            END DO
-!/MPIT          WRITE (MDST,9018) NRQ
+#ifdef W3_MPI
+            END DO
+#endif
+#ifdef W3_MPIT
+          WRITE (MDST,9018) NRQ
+#endif
 !
 ! ..... Reset status
 !       NOTE: if NBI.EQ.0 all times are already OK, skip to section 2
 !
-!/MPI          IF ( NBI .GT. 0 ) THEN
-!/MPI              NBISTA(IMOD) = 1
-!/MPIT              WRITE (MDST,9011) NBISTA(IMOD)
-!/MPI            END IF
+#ifdef W3_MPI
+          IF ( NBI .GT. 0 ) THEN
+              NBISTA(IMOD) = 1
+#endif
+#ifdef W3_MPIT
+              WRITE (MDST,9011) NBISTA(IMOD)
+#endif
+#ifdef W3_MPI
+            END IF
+#endif
 !
 ! ..... End IF in 1.b.1
 !
-!/MPI        END IF
+#ifdef W3_MPI
+        END IF
+#endif
 ! 
 ! 1.b.2 NBISTA = 1
 !       Wait for communication to finish.
 !       If DONE defined, check if done, otherwise wait.
 !
-!/MPI      IF ( NBISTA(IMOD) .EQ. 1 ) THEN
+#ifdef W3_MPI
+      IF ( NBISTA(IMOD) .EQ. 1 ) THEN
+#endif
 !
-!/MPI          NRQ    => MDATAS(IMOD)%NRQBPG
-!/MPI          IRQ    => MDATAS(IMOD)%IRQBPG
-!/MPI          ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
+#ifdef W3_MPI
+          NRQ    => MDATAS(IMOD)%NRQBPG
+          IRQ    => MDATAS(IMOD)%IRQBPG
+          ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
+#endif
 !
 ! ..... Test communication if DONE is present, wait otherwise
 !
-!/MPI          IF ( PRESENT(DONE) ) THEN
+#ifdef W3_MPI
+          IF ( PRESENT(DONE) ) THEN
+#endif
 !
-!/MPI              CALL MPI_TESTALL ( NRQ, IRQ, FLAGOK, STATUS,       &
-!/MPI                                 IERR_MPI )
+#ifdef W3_MPI
+              CALL MPI_TESTALL ( NRQ, IRQ, FLAGOK, STATUS,       &
+                                 IERR_MPI )
+#endif
 !
-!/MPIT              ICOUNT = 0
-!/MPIT              DO I=1, NRQ
-!/MPIT                CALL MPI_TEST ( IRQ(I), FLAG, STATUS(1,1),      &
-!/MPIT                                IERR_MPI )
-!/MPIT                FLAGOK = FLAGOK .AND. FLAG
-!/MPIT                IF ( FLAG ) ICOUNT = ICOUNT + 1
-!/MPIT                END DO
-!/MPIT              WRITE (MDST,9019) 100. * REAL(ICOUNT) / REAL(NRQ)
+#ifdef W3_MPIT
+              ICOUNT = 0
+              DO I=1, NRQ
+                CALL MPI_TEST ( IRQ(I), FLAG, STATUS(1,1),      &
+                                IERR_MPI )
+                FLAGOK = FLAGOK .AND. FLAG
+                IF ( FLAG ) ICOUNT = ICOUNT + 1
+                END DO
+              WRITE (MDST,9019) 100. * REAL(ICOUNT) / REAL(NRQ)
+#endif
 !
-!/MPI            ELSE
+#ifdef W3_MPI
+            ELSE
+#endif
 !
-!/MPI              CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
-!/MPI              FLAGOK = .TRUE.
+#ifdef W3_MPI
+              CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
+              FLAGOK = .TRUE.
+#endif
 !
-!/MPI            END IF
+#ifdef W3_MPI
+            END IF
+#endif
 !
-!/MPI              DEALLOCATE ( STATUS )
+#ifdef W3_MPI
+              DEALLOCATE ( STATUS )
+#endif
 !
 ! ..... Go on based on FLAGOK
 !
-!/MPI          IF ( FLAGOK ) THEN
-!/MPI              DEALLOCATE ( MDATAS(IMOD)%IRQBPG )
-!/MPI              NRQ    = 0
-!/MPI            ELSE
-!/MPI              RETURN
-!/MPI            END IF
+#ifdef W3_MPI
+          IF ( FLAGOK ) THEN
+              DEALLOCATE ( MDATAS(IMOD)%IRQBPG )
+              NRQ    = 0
+            ELSE
+              RETURN
+            END IF
+#endif
 !
-!/MPI          NBISTA(IMOD) = 2
-!/MPIT          WRITE (MDST,9011) NBISTA(IMOD)
+#ifdef W3_MPI
+          NBISTA(IMOD) = 2
+#endif
+#ifdef W3_MPIT
+          WRITE (MDST,9011) NBISTA(IMOD)
+#endif
 ! 
 ! 1.b.3 Convert spectra if needed
 !
-!/MPI          DO J=1, NRGRD
+#ifdef W3_MPI
+          DO J=1, NRGRD
+#endif
 !
-!/MPI            IF ( RESPEC(IMOD,J) .AND. NBI2G(IMOD,J).NE.0 ) THEN
+#ifdef W3_MPI
+            IF ( RESPEC(IMOD,J) .AND. NBI2G(IMOD,J).NE.0 ) THEN
+#endif
 !
-!/MPIT                WRITE (MDST,9100) J
-!/MPI                NSPEC  => SGRDS(J)%NSPEC
-!/MPI                ALLOCATE ( TSTORE(NSPEC,NBI2G(IMOD,J)))
-!/MPI                NSPEC  => SGRDS(IMOD)%NSPEC
-!/MPI                TSTORE = BPSTGE(IMOD,J)%SBPI
-!/MPI                DEALLOCATE ( BPSTGE(IMOD,J)%SBPI )
-!/MPI                ALLOCATE (BPSTGE(IMOD,J)%SBPI(NSPEC,NBI2G(IMOD,J)))
+#ifdef W3_MPIT
+                WRITE (MDST,9100) J
+#endif
+#ifdef W3_MPI
+                NSPEC  => SGRDS(J)%NSPEC
+                ALLOCATE ( TSTORE(NSPEC,NBI2G(IMOD,J)))
+                NSPEC  => SGRDS(IMOD)%NSPEC
+                TSTORE = BPSTGE(IMOD,J)%SBPI
+                DEALLOCATE ( BPSTGE(IMOD,J)%SBPI )
+                ALLOCATE (BPSTGE(IMOD,J)%SBPI(NSPEC,NBI2G(IMOD,J)))
+#endif
 !
-!/MPI                SBPI   => BPSTGE(IMOD,J)%SBPI
-!/MPI                CALL W3CSPC ( TSTORE, SGRDS(J)%NK, SGRDS(J)%NTH, &
-!/MPI                     SGRDS(J)%XFR, SGRDS(J)%FR1, SGRDS(J)%TH(1), &
-!/MPI                     SBPI, NK, NTH, XFR, FR1, TH(1),             &
-!/MPI                     NBI2G(IMOD,J), MDST, MDSE, SGRDS(IMOD)%FACHFE)
+#ifdef W3_MPI
+                SBPI   => BPSTGE(IMOD,J)%SBPI
+                CALL W3CSPC ( TSTORE, SGRDS(J)%NK, SGRDS(J)%NTH, &
+                     SGRDS(J)%XFR, SGRDS(J)%FR1, SGRDS(J)%TH(1), &
+                     SBPI, NK, NTH, XFR, FR1, TH(1),             &
+                     NBI2G(IMOD,J), MDST, MDSE, SGRDS(IMOD)%FACHFE)
+#endif
 !
-!/MPI                DEALLOCATE ( TSTORE )
+#ifdef W3_MPI
+                DEALLOCATE ( TSTORE )
+#endif
 !
-!/MPI              END IF
+#ifdef W3_MPI
+              END IF
+#endif
 !
-!/MPI            END DO
+#ifdef W3_MPI
+            END DO
+#endif
 !
-!/MPI          NBISTA(IMOD) = 0
-!/MPIT          WRITE (MDST,9011) NBISTA(IMOD)
+#ifdef W3_MPI
+          NBISTA(IMOD) = 0
+#endif
+#ifdef W3_MPIT
+          WRITE (MDST,9011) NBISTA(IMOD)
+#endif
 !
-!/MPI        END IF
+#ifdef W3_MPI
+        END IF
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Update arrays ABPI0/N and data times
 !
-!/T      WRITE (MDST,9020)
+#ifdef W3_T
+      WRITE (MDST,9020)
+#endif
 !
 ! 2.a Determine next valid time
 !
@@ -793,7 +1015,9 @@
           END IF
         END DO
 !
-!/T      WRITE (MDST,9021) TTEST
+#ifdef W3_T
+      WRITE (MDST,9021) TTEST
+#endif
 !
 ! 2.b Shift data
 !
@@ -832,7 +1056,9 @@
             W2     = DT2 / DT1
             W1     = 1. - W2
           END IF
-!/T        WRITE (MDST,9022) NBI2G(IMOD,J), J, IOFF+1, W1, W2
+#ifdef W3_T
+        WRITE (MDST,9022) NBI2G(IMOD,J), J, IOFF+1, W1, W2
+#endif
 !
         ABPIN(:,IOFF+1:IOFF+NBI2G(IMOD,J)) =                          &
                     W1 * ABPI0(:,IOFF+1:IOFF+NBI2G(IMOD,J)) +         &
@@ -848,14 +1074,18 @@
 ! 3.  Dump data to file if requested
 !
       IF ( IAPROC.EQ.NAPBPT .AND. BCDUMP(IMOD) ) THEN
-!/T          WRITE (MDST,9030)
+#ifdef W3_T
+          WRITE (MDST,9030)
+#endif
           CALL W3IOBC ( 'DUMP', NDS(9), TBPIN, TBPIN, ITEST, IMOD )
         END IF
 !
 ! -------------------------------------------------------------------- /
 ! 4.  Update arrays BBPI0/N
 !
-!/T      WRITE (MDST,9040)
+#ifdef W3_T
+      WRITE (MDST,9040)
+#endif
 !
       CALL W3UBPT
 !
@@ -863,51 +1093,69 @@
 ! 5.  Successful update
 !
       IF ( PRESENT(DONE) ) DONE = .TRUE.
-!/DEBUGIOBC      WRITE(740+IAPROC,*)  'End of W3IOBG'
-!/DEBUGIOBC      FLUSH(740+IAPROC)
+#ifdef W3_DEBUGIOBC
+      WRITE(740+IAPROC,*)  'End of W3IOBG'
+      FLUSH(740+IAPROC)
+#endif
 !
       RETURN
 !
 ! Formats
 !
-!/SHRD 1001 FORMAT (/' *** ERROR WMIOBG : NO DATA IN STAGING ARRAY ***'/    &
-!/SHRD               '                    CALL WMIOBS FIRST '/)
+#ifdef W3_SHRD
+ 1001 FORMAT (/' *** ERROR WMIOBG : NO DATA IN STAGING ARRAY ***'/    &
+               '                    CALL WMIOBS FIRST '/)
+#endif
  1002 FORMAT (/' *** ERROR WMIOBG : INITIAL DATA NOT AT INITAL ',     &
                                    'MODEL TIME ***'/)
-!/MPI 1003 FORMAT (/' *** ERROR WMIOBG : UNEXPECTED SIZE OF STAGING', &
-!/MPI                                   ' ARRAY ***')
+#ifdef W3_MPI
+ 1003 FORMAT (/' *** ERROR WMIOBG : UNEXPECTED SIZE OF STAGING', &
+                                   ' ARRAY ***')
+#endif
 !
-!/T 9000 FORMAT ( ' TEST WMIOBG : GATHERING DATA FOR GRID ',I3)
-!/T 9001 FORMAT ( ' TEST WMIOBG : NR. OF SPECTRA PER SOURCE GRID : '/ &
-!/T               '             ',25I4)
-!/T 9002 FORMAT ( ' TEST WMIOBG : NO DATA NEEDED ON PROCESSOR')
-!/T 9003 FORMAT ( ' TEST WMIOBG : NO DATA TO BE GATHERED')
-!/T 9004 FORMAT ( ' TEST WMIOBG : DATA UP TO DATE')
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMIOBG : GATHERING DATA FOR GRID ',I3)
+ 9001 FORMAT ( ' TEST WMIOBG : NR. OF SPECTRA PER SOURCE GRID : '/ &
+               '             ',25I4)
+ 9002 FORMAT ( ' TEST WMIOBG : NO DATA NEEDED ON PROCESSOR')
+ 9003 FORMAT ( ' TEST WMIOBG : NO DATA TO BE GATHERED')
+ 9004 FORMAT ( ' TEST WMIOBG : DATA UP TO DATE')
+#endif
 !
-!/T 9010 FORMAT ( ' TEST WMIOBG : TEST DATA AVAILABILITY')
-!/MPIT 9011 FORMAT ( ' MPIT WMIOBG : NBISTA =',I2)
-!/MPIT 9012 FORMAT ( '               STAGING ARRAY FROM',I4,1X,A)
-!/MPIT 9013 FORMAT ( '               VTIME, DTTST :',I9.8,I7.6,1X,F8.1)
-!/MPIT 9014 FORMAT (/' MPIT WMIOBG : RECEIVE FROM GRID',I4/           &
-!/MPIT               ' +------+------+------+------+--------------+'/ &
-!/MPIT               ' |  IH  |  ID  | FROM |  TAG |   handle err |'/ &
-!/MPIT               ' +------+------+------+------+--------------+')
-!/MPIT 9015 FORMAT ( ' |',I5,' | TIME |',2(I5,' |'),I9,I4,' |')
-!/MPIT 9016 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
-!/MPIT 9017 FORMAT ( ' +------+------+------+------+--------------+'/)
-!/MPIT 9018 FORMAT ( ' MPIT WMIOBG : NRQHGH:',I10/)
-!/MPIT 9019 FORMAT ( ' MPIT WMIOBG : RECEIVES FINISHED :',F6.1,'%')
-!/MPIT 9100 FORMAT ( ' MPIT WMIOBG : CONVERTING SPECTRA FROM GRID',I3)
+#ifdef W3_T
+ 9010 FORMAT ( ' TEST WMIOBG : TEST DATA AVAILABILITY')
+#endif
+#ifdef W3_MPIT
+ 9011 FORMAT ( ' MPIT WMIOBG : NBISTA =',I2)
+ 9012 FORMAT ( '               STAGING ARRAY FROM',I4,1X,A)
+ 9013 FORMAT ( '               VTIME, DTTST :',I9.8,I7.6,1X,F8.1)
+ 9014 FORMAT (/' MPIT WMIOBG : RECEIVE FROM GRID',I4/           &
+               ' +------+------+------+------+--------------+'/ &
+               ' |  IH  |  ID  | FROM |  TAG |   handle err |'/ &
+               ' +------+------+------+------+--------------+')
+ 9015 FORMAT ( ' |',I5,' | TIME |',2(I5,' |'),I9,I4,' |')
+ 9016 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
+ 9017 FORMAT ( ' +------+------+------+------+--------------+'/)
+ 9018 FORMAT ( ' MPIT WMIOBG : NRQHGH:',I10/)
+ 9019 FORMAT ( ' MPIT WMIOBG : RECEIVES FINISHED :',F6.1,'%')
+ 9100 FORMAT ( ' MPIT WMIOBG : CONVERTING SPECTRA FROM GRID',I3)
+#endif
 !
-!/T 9020 FORMAT ( ' TEST WMIOBG : FILLING ABPI0/N AND TIMES')
-!/T 9021 FORMAT ( ' TEST WMIOBG : NEXT VALID TIME FOR ABPIN:',I9.8,I7.6)
-!/T 9022 FORMAT ( ' TEST WMIOBG : GETTING',I4,' SPECTRA FROM GRID ',  &
-!/T                               I3,' STORING AT ',I3/               &
-!/T               '               WEIGHTS : ',2F6.3)
+#ifdef W3_T
+ 9020 FORMAT ( ' TEST WMIOBG : FILLING ABPI0/N AND TIMES')
+ 9021 FORMAT ( ' TEST WMIOBG : NEXT VALID TIME FOR ABPIN:',I9.8,I7.6)
+ 9022 FORMAT ( ' TEST WMIOBG : GETTING',I4,' SPECTRA FROM GRID ',  &
+                               I3,' STORING AT ',I3/               &
+               '               WEIGHTS : ',2F6.3)
+#endif
 !
-!/T 9030 FORMAT ( ' TEST WMIOBG : DUMP DATA TO FILE')
+#ifdef W3_T
+ 9030 FORMAT ( ' TEST WMIOBG : DUMP DATA TO FILE')
+#endif
 !
-!/T 9040 FORMAT ( ' TEST WMIOBG : FILLING BBPI0/N')
+#ifdef W3_T
+ 9040 FORMAT ( ' TEST WMIOBG : FILLING BBPI0/N')
+#endif
 !/
 !/ End of WMIOBG ----------------------------------------------------- /
 !/
@@ -984,11 +1232,15 @@
 !
       USE WMMDATMD
 !
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -999,43 +1251,61 @@
 !/ Local parameters
 !/
       INTEGER                 :: J
-!/MPI      INTEGER                 :: IERR_MPI
-!/MPI      INTEGER, POINTER        :: NRQ, IRQ(:)
-!/MPI      INTEGER, ALLOCATABLE    :: STATUS(:,:)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                 :: IERR_MPI
+      INTEGER, POINTER        :: NRQ, IRQ(:)
+      INTEGER, ALLOCATABLE    :: STATUS(:,:)
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMIOBF')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMIOBF')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 0.  Initializations
 !
-!/T      WRITE (MDST,9000) IMOD
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Loop over grids
 !
       DO J=1, NRGRD
 !
-!/MPI        NRQ    => BPSTGE(J,IMOD)%NRQBPS
+#ifdef W3_MPI
+        NRQ    => BPSTGE(J,IMOD)%NRQBPS
+#endif
 !
 ! 1.a Nothing to finalize
 !
-!/MPI        IF ( NRQ .EQ. 0 ) CYCLE
-!/MPI        IRQ    => BPSTGE(J,IMOD)%IRQBPS
+#ifdef W3_MPI
+        IF ( NRQ .EQ. 0 ) CYCLE
+        IRQ    => BPSTGE(J,IMOD)%IRQBPS
+#endif
 !
 ! 1.b Wait for communication to end
 !
-!/MPI        ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
-!/MPI        CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
-!/MPI        DEALLOCATE ( STATUS )
+#ifdef W3_MPI
+        ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
+        CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
+        DEALLOCATE ( STATUS )
+#endif
 !
 ! 1.c Reset arrays and counter
 !
-!/MPI        NRQ    = 0
-!/MPI        DEALLOCATE ( BPSTGE(J,IMOD)%IRQBPS ,                     &
-!/MPI                     BPSTGE(J,IMOD)%TSTORE )
+#ifdef W3_MPI
+        NRQ    = 0
+        DEALLOCATE ( BPSTGE(J,IMOD)%IRQBPS ,                     &
+                     BPSTGE(J,IMOD)%TSTORE )
+#endif
 !
-!/T        WRITE (MDST,9010) J
+#ifdef W3_T
+        WRITE (MDST,9010) J
+#endif
 !
         END DO
 !
@@ -1043,8 +1313,10 @@
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST WMIOBF : FINALIZE STAGING DATA FROM GRID ',I3)
-!/T 9010 FORMAT ( ' TEST WMIOBF : FINISHED WITH TARGET ',I3)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMIOBF : FINALIZE STAGING DATA FROM GRID ',I3)
+ 9010 FORMAT ( ' TEST WMIOBF : FINISHED WITH TARGET ',I3)
+#endif
 !/
 !/ End of WMIOBF ----------------------------------------------------- /
 !/
@@ -1129,13 +1401,17 @@
       USE WMMDATMD
 !
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3TIMEMD, ONLY: DSEC21
       USE W3PARALL, ONLY: INIT_GET_ISEA
 !
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -1146,26 +1422,44 @@
 !/ Local parameters
 !/
       INTEGER                 :: J, NR, I, JSEA, ISEA, IS
-!/MPI      INTEGER                 :: ITAG, IP, IT0, IERR_MPI
+#ifdef W3_MPI
+      INTEGER                 :: ITAG, IP, IT0, IERR_MPI
+#endif
       INTEGER                 :: I1, I2
-!/S      INTEGER, SAVE           :: IENT = 0
-!/MPI      INTEGER, POINTER        :: NRQ, IRQ(:), NRQOUT, OUTDAT(:,:)
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_MPI
+      INTEGER, POINTER        :: NRQ, IRQ(:), NRQOUT, OUTDAT(:,:)
+#endif
       REAL                    :: DTOUTP
-!/SHRD      REAL, POINTER           :: SHGH(:,:,:)
-!/MPI      REAL, POINTER           :: SHGH(:,:)
+#ifdef W3_SHRD
+      REAL, POINTER           :: SHGH(:,:,:)
+#endif
+#ifdef W3_MPI
+      REAL, POINTER           :: SHGH(:,:)
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMIOHS')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMIOHS')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 0.  Initializations
 ! 
-!/T      WRITE (MDST,9000) IMOD, FLGHG1
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD, FLGHG1
+#endif
 !
       IF ( .NOT. FLGHG1 ) THEN
-!/T          WRITE (MDST,9001) HGSTGE(:,IMOD)%NSND
+#ifdef W3_T
+          WRITE (MDST,9001) HGSTGE(:,IMOD)%NSND
+#endif
           IF ( SUM(HGSTGE(:,IMOD)%NSND) .EQ. 0 ) RETURN
         ELSE
-!/T          WRITE (MDST,9001) HGSTGE(:,IMOD)%NSN1
+#ifdef W3_T
+          WRITE (MDST,9001) HGSTGE(:,IMOD)%NSN1
+#endif
           IF ( SUM(HGSTGE(:,IMOD)%NSN1) .EQ. 0 ) RETURN
         END IF
 !
@@ -1198,11 +1492,13 @@
               END IF
           END IF
 !
-!/T        IF ( NR .EQ. 0 ) THEN
-!/T            WRITE (MDST,9010) J, NR
-!/T          ELSE
-!/T            WRITE (MDST,9011) J, NR, DSEC21(TIME,TSYNC(:,J)), DTOUTP
-!/T          END IF
+#ifdef W3_T
+        IF ( NR .EQ. 0 ) THEN
+            WRITE (MDST,9010) J, NR
+          ELSE
+            WRITE (MDST,9011) J, NR, DSEC21(TIME,TSYNC(:,J)), DTOUTP
+          END IF
+#endif
 !
         IF ( NR .EQ. 0 ) CYCLE
         IF ( DSEC21(TIME,TSYNC(:,J)) .NE. 0. ) CYCLE
@@ -1210,72 +1506,104 @@
 ! -------------------------------------------------------------------- /
 ! 2.  Allocate arrays and/or point pointers
 !
-!/SHRD        SHGH   => HGSTGE(J,IMOD)%SHGH
-!/MPI        ALLOCATE ( HGSTGE(J,IMOD)%TSTORE(NSPEC,NR) )
-!/MPI        SHGH   => HGSTGE(J,IMOD)%TSTORE
+#ifdef W3_SHRD
+        SHGH   => HGSTGE(J,IMOD)%SHGH
+#endif
+#ifdef W3_MPI
+        ALLOCATE ( HGSTGE(J,IMOD)%TSTORE(NSPEC,NR) )
+        SHGH   => HGSTGE(J,IMOD)%TSTORE
+#endif
 !
-!/MPI        ALLOCATE ( HGSTGE(J,IMOD)%IRQHGS(NR) )
-!/MPI        ALLOCATE ( HGSTGE(J,IMOD)%OUTDAT(NR,3) )
+#ifdef W3_MPI
+        ALLOCATE ( HGSTGE(J,IMOD)%IRQHGS(NR) )
+        ALLOCATE ( HGSTGE(J,IMOD)%OUTDAT(NR,3) )
+#endif
 !
-!/MPI        NRQ    => HGSTGE(J,IMOD)%NRQHGS
-!/MPI        NRQOUT => HGSTGE(J,IMOD)%NRQOUT
-!/MPI        IRQ    => HGSTGE(J,IMOD)%IRQHGS
-!/MPI        OUTDAT => HGSTGE(J,IMOD)%OUTDAT
-!/MPI        NRQ    = 0
-!/MPI        NRQOUT = 0
-!/MPI        IRQ    = 0
+#ifdef W3_MPI
+        NRQ    => HGSTGE(J,IMOD)%NRQHGS
+        NRQOUT => HGSTGE(J,IMOD)%NRQOUT
+        IRQ    => HGSTGE(J,IMOD)%IRQHGS
+        OUTDAT => HGSTGE(J,IMOD)%OUTDAT
+        NRQ    = 0
+        NRQOUT = 0
+        IRQ    = 0
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 3.  Set the time
 !     !/SHRD only.
 !
-!/T        WRITE (MDST,9030) TIME
+#ifdef W3_T
+        WRITE (MDST,9030) TIME
+#endif
 !
-!/SHRD        HGSTGE(J,IMOD)%VTIME = TIME
+#ifdef W3_SHRD
+        HGSTGE(J,IMOD)%VTIME = TIME
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 4.  Stage the spectral data
 !
-!/MPIT        WRITE (MDST,9080)
-!/MPI        IT0    = MTAG1 + 1
+#ifdef W3_MPIT
+        WRITE (MDST,9080)
+#endif
+#ifdef W3_MPI
+        IT0    = MTAG1 + 1
+#endif
 !
         DO I=1, NR
 !
           JSEA   = HGSTGE(J,IMOD)%ISEND(I,1)
           CALL INIT_GET_ISEA(ISEA, JSEA)
-!/DIST          IP     = HGSTGE(J,IMOD)%ISEND(I,2)
+#ifdef W3_DIST
+          IP     = HGSTGE(J,IMOD)%ISEND(I,2)
+#endif
           I1     = HGSTGE(J,IMOD)%ISEND(I,3)
           I2     = HGSTGE(J,IMOD)%ISEND(I,4)
-!/MPI          ITAG   = HGSTGE(J,IMOD)%ISEND(I,5) + IT0
-!/MPI          IF ( ITAG .GT. MTAG2 ) THEN
-!/MPI              WRITE (MDSE,1001)
-!/MPI              CALL EXTCDE (1001) 
-!/MPI            END IF
+#ifdef W3_MPI
+          ITAG   = HGSTGE(J,IMOD)%ISEND(I,5) + IT0
+          IF ( ITAG .GT. MTAG2 ) THEN
+              WRITE (MDSE,1001)
+              CALL EXTCDE (1001) 
+            END IF
+#endif
 !
           DO IS=1, NSPEC
-!/SHRD            SHGH(IS,I2,I1) = VA(IS,JSEA) * SIG2(IS)             &
-!/SHRD                                 / CG(1+(IS-1)/NTH,ISEA)
-!/MPI            SHGH(  IS,I  ) = VA(IS,JSEA) * SIG2(IS)             &
-!/MPI                                 / CG(1+(IS-1)/NTH,ISEA)
+#ifdef W3_SHRD
+            SHGH(IS,I2,I1) = VA(IS,JSEA) * SIG2(IS)             &
+                                 / CG(1+(IS-1)/NTH,ISEA)
+#endif
+#ifdef W3_MPI
+            SHGH(  IS,I  ) = VA(IS,JSEA) * SIG2(IS)             &
+                                 / CG(1+(IS-1)/NTH,ISEA)
+#endif
             END DO
 !
-!/MPI          IF ( IP .NE. IMPROC ) THEN
-!/MPI              NRQ    = NRQ + 1
-!/MPI              CALL MPI_ISEND ( SHGH(1,I), NSPEC, MPI_REAL, IP-1, &
-!/MPI                       ITAG, MPI_COMM_MWAVE, IRQ(NRQ), IERR_MPI )
-!/MPIT              WRITE (MDST,9082) NRQ, JSEA, IP, ITAG-MTAG1,       &
-!/MPIT                                IRQ(NRQ), IERR_MPI
-!/MPI            ELSE
-!/MPI              NRQOUT = NRQOUT + 1
-!/MPI              OUTDAT(NRQOUT,1) = I
-!/MPI              OUTDAT(NRQOUT,2) = I2
-!/MPI              OUTDAT(NRQOUT,3) = I1
-!/MPI            END IF
+#ifdef W3_MPI
+          IF ( IP .NE. IMPROC ) THEN
+              NRQ    = NRQ + 1
+              CALL MPI_ISEND ( SHGH(1,I), NSPEC, MPI_REAL, IP-1, &
+                       ITAG, MPI_COMM_MWAVE, IRQ(NRQ), IERR_MPI )
+#endif
+#ifdef W3_MPIT
+              WRITE (MDST,9082) NRQ, JSEA, IP, ITAG-MTAG1,       &
+                                IRQ(NRQ), IERR_MPI
+#endif
+#ifdef W3_MPI
+            ELSE
+              NRQOUT = NRQOUT + 1
+              OUTDAT(NRQOUT,1) = I
+              OUTDAT(NRQOUT,2) = I2
+              OUTDAT(NRQOUT,3) = I1
+            END IF
+#endif
 !
           END DO
 !
-!/MPIT        WRITE (MDST,9083)
-!/MPIT        WRITE (MDST,9084) NRQ
+#ifdef W3_MPIT
+        WRITE (MDST,9083)
+        WRITE (MDST,9084) NRQ
+#endif
 !
         END DO
 !
@@ -1283,27 +1611,37 @@
 !
 ! Formats
 !
-!/MPI 1001 FORMAT (/' *** ERROR WMIOHS : REQUESTED MPI TAG EXCEEDS', &
-!/MPI                                    ' UPPER BOUND (MTAG2) ***')
-!/T 9000 FORMAT ( ' TEST WMIOHS : STAGING DATA FROM GRID ',I3,        &
-!/T               '   FLGHG1 = ',L1)
-!/T 9001 FORMAT ( ' TEST WMIOHS : NR. OF SPECTRA PER GRID : '/        &
-!/T               '             ',15I6)
+#ifdef W3_MPI
+ 1001 FORMAT (/' *** ERROR WMIOHS : REQUESTED MPI TAG EXCEEDS', &
+                                    ' UPPER BOUND (MTAG2) ***')
+#endif
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMIOHS : STAGING DATA FROM GRID ',I3,        &
+               '   FLGHG1 = ',L1)
+ 9001 FORMAT ( ' TEST WMIOHS : NR. OF SPECTRA PER GRID : '/        &
+               '             ',15I6)
+#endif
 !
-!/T 9010 FORMAT ( ' TEST WMIOHS : POSTING DATA TO GRID ',I3,          &
-!/T               '   NR = ',I6)
-!/T 9011 FORMAT ( ' TEST WMIOHS : POSTING DATA TO GRID ',I3,          &
-!/T               '   NR = ',I6,'   TIME GAP = ',2F8.1)
+#ifdef W3_T
+ 9010 FORMAT ( ' TEST WMIOHS : POSTING DATA TO GRID ',I3,          &
+               '   NR = ',I6)
+ 9011 FORMAT ( ' TEST WMIOHS : POSTING DATA TO GRID ',I3,          &
+               '   NR = ',I6,'   TIME GAP = ',2F8.1)
+#endif
 !
-!/T 9030 FORMAT ( ' TEST WMIOHS : TIME :',I10.8,I7.6)
+#ifdef W3_T
+ 9030 FORMAT ( ' TEST WMIOHS : TIME :',I10.8,I7.6)
+#endif
 !
-!/MPIT 9080 FORMAT (/' MPIT WMIOHS: COMMUNICATION CALLS            '/ &
-!/MPIT               ' +------+------+------+------+--------------+'/ &
-!/MPIT               ' |  IH  |  ID  | TARG |  TAG |   handle err |'/ &
-!/MPIT               ' +------+------+------+------+--------------+')
-!/MPIT 9082 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
-!/MPIT 9083 FORMAT ( ' +------+------+------+------+--------------+')
-!/MPIT 9084 FORMAT ( ' MPIT WMIOHS: NRQHGS:',I10/)
+#ifdef W3_MPIT
+ 9080 FORMAT (/' MPIT WMIOHS: COMMUNICATION CALLS            '/ &
+               ' +------+------+------+------+--------------+'/ &
+               ' |  IH  |  ID  | TARG |  TAG |   handle err |'/ &
+               ' +------+------+------+------+--------------+')
+ 9082 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
+ 9083 FORMAT ( ' +------+------+------+------+--------------+')
+ 9084 FORMAT ( ' MPIT WMIOHS: NRQHGS:',I10/)
+#endif
 !/
 !/ End of WMIOHS ----------------------------------------------------- /
 !/
@@ -1393,14 +1731,20 @@
       USE W3CSPCMD, ONLY: W3CSPC
       USE W3TIMEMD, ONLY: DSEC21
 !     USE W3SERVMD, ONLY: EXTCDE
-!/PDLIB      use yowNodepool, only: npa
-!/PDLIB      USE yowExchangeModule, only : PDLIB_exchange2Dreal
+#ifdef W3_PDLIB
+      use yowNodepool, only: npa
+      USE yowExchangeModule, only : PDLIB_exchange2Dreal
+#endif
       USE W3PARALL, ONLY : INIT_GET_ISEA
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -1412,20 +1756,34 @@
 !/ Local parameters
 !/
       INTEGER                 :: NTOT, J, IS, NA, IA, JSEA, ISEA, I
-!/MPI      INTEGER                 :: ITAG, IT0, IFROM, ILOC, NLOC,   &
-!/MPI                                 ISPROC, IERR_MPI, ICOUNT,       &
-!/MPI                                 I0, I1, I2
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                 :: ITAG, IT0, IFROM, ILOC, NLOC,   &
+                                 ISPROC, IERR_MPI, ICOUNT,       &
+                                 I0, I1, I2
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
       INTEGER, POINTER        :: VTIME(:)
-!/MPI      INTEGER, POINTER        :: NRQ, IRQ(:), STATUS(:,:)
+#ifdef W3_MPI
+      INTEGER, POINTER        :: NRQ, IRQ(:), STATUS(:,:)
+#endif
       REAL                    :: DTTST, WGTH
       REAL, POINTER           :: SPEC1(:,:), SPEC2(:,:), SPEC(:,:)
-!/MPI      REAL, POINTER           :: SHGH(:,:,:)
+#ifdef W3_MPI
+      REAL, POINTER           :: SHGH(:,:,:)
+#endif
       LOGICAL                 :: FLGALL
-!/MPI      LOGICAL                 :: FLAGOK
-!/MPIT      LOGICAL                 :: FLAG
+#ifdef W3_MPI
+      LOGICAL                 :: FLAGOK
+#endif
+#ifdef W3_MPIT
+      LOGICAL                 :: FLAG
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMIOHG')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMIOHG')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 0.  Initializations
@@ -1446,13 +1804,19 @@
           FLGALL = .FALSE.
        END IF
 !
-!/T      WRITE (MDST,9000) IMOD, DTTST, FLGALL
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD, DTTST, FLGALL
+#endif
 !
       IF ( FLGALL ) THEN
-!/T          WRITE (MDST,9001) HGSTGE(IMOD,:)%NREC
+#ifdef W3_T
+          WRITE (MDST,9001) HGSTGE(IMOD,:)%NREC
+#endif
           NTOT   = SUM(HGSTGE(IMOD,:)%NREC)
         ELSE
-!/T          WRITE (MDST,9001) HGSTGE(IMOD,:)%NRC1
+#ifdef W3_T
+          WRITE (MDST,9001) HGSTGE(IMOD,:)%NRC1
+#endif
           NTOT   = SUM(HGSTGE(IMOD,:)%NRC1)
         END IF
 !
@@ -1460,7 +1824,9 @@
 !
       IF ( NTOT .EQ. 0 ) THEN
           IF ( PRESENT(DONE) ) DONE = .TRUE.
-!/T          WRITE (MDST,9003)
+#ifdef W3_T
+          WRITE (MDST,9003)
+#endif
           RETURN
         END IF
 !
@@ -1472,191 +1838,281 @@
 ! -------------------------------------------------------------------- /
 ! 1.  Testing / gathering data in staging arrays 
 ! 
-!/T      WRITE (MDST,9010) TIME
+#ifdef W3_T
+      WRITE (MDST,9010) TIME
+#endif
 !
 ! 1.a Shared memory version, test valid times. - - - - - - - - - - - - /
 ! 
-!/SHRD      DO J=1, NRGRD
+#ifdef W3_SHRD
+      DO J=1, NRGRD
+#endif
 !
-!/SHRD        IF ( FLGALL ) THEN
-!/SHRD            NTOT   = HGSTGE(IMOD,J)%NREC
-!/SHRD          ELSE
-!/SHRD            NTOT   = HGSTGE(IMOD,J)%NRC1
-!/SHRD          END IF
-!/SHRD        IF ( NTOT .EQ. 0 ) CYCLE
+#ifdef W3_SHRD
+        IF ( FLGALL ) THEN
+            NTOT   = HGSTGE(IMOD,J)%NREC
+          ELSE
+            NTOT   = HGSTGE(IMOD,J)%NRC1
+          END IF
+        IF ( NTOT .EQ. 0 ) CYCLE
+#endif
 !
-!/SHRD        VTIME  => HGSTGE(IMOD,J)%VTIME
-!/SHRD        IF ( VTIME(1) .EQ. -1 ) RETURN
-!/SHRD        DTTST  = DSEC21 ( TIME, VTIME )
-!/SHRD        IF ( DTTST .NE. 0. ) RETURN
+#ifdef W3_SHRD
+        VTIME  => HGSTGE(IMOD,J)%VTIME
+        IF ( VTIME(1) .EQ. -1 ) RETURN
+        DTTST  = DSEC21 ( TIME, VTIME )
+        IF ( DTTST .NE. 0. ) RETURN
+#endif
 !
-!/SHRD        END DO
+#ifdef W3_SHRD
+        END DO
+#endif
 !
 ! 1.b Distributed memory version - - - - - - - - - - - - - - - - - - - /
 !
-!/MPIT        WRITE (MDST,9011) HGHSTA(IMOD)
+#ifdef W3_MPIT
+        WRITE (MDST,9011) HGHSTA(IMOD)
+#endif
 !
 ! 1.b.1 HGHSTA = 0
 !       Check if staging arrays are initialized.
 !       Post the proper receives.
 !
-!/MPI      IF ( HGHSTA(IMOD) .EQ. 0 ) THEN
+#ifdef W3_MPI
+      IF ( HGHSTA(IMOD) .EQ. 0 ) THEN
+#endif
 !
-!/MPI          NRQ    => MDATAS(IMOD)%NRQHGG
-!/MPI          NRQ    = 0
-!/MPI          DO J=1, NRGRD
-!/MPI            IF ( FLGALL ) THEN
-!/MPI                NRQ    = NRQ + HGSTGE(IMOD,J)%NREC *             &
-!/MPI                               HGSTGE(IMOD,J)%NSMX
-!/MPI              ELSE
-!/MPI                NRQ    = NRQ + HGSTGE(IMOD,J)%NRC1 *             &
-!/MPI                               HGSTGE(IMOD,J)%NSMX
-!/MPI              END IF
-!/MPI            END DO
-!/MPI          NRQ    = MAX(1,NRQ)
-!/MPI          ALLOCATE ( IRQ(NRQ) )
-!/MPI          IRQ    = 0
-!/MPI          NRQ    = 0
+#ifdef W3_MPI
+          NRQ    => MDATAS(IMOD)%NRQHGG
+          NRQ    = 0
+          DO J=1, NRGRD
+            IF ( FLGALL ) THEN
+                NRQ    = NRQ + HGSTGE(IMOD,J)%NREC *             &
+                               HGSTGE(IMOD,J)%NSMX
+              ELSE
+                NRQ    = NRQ + HGSTGE(IMOD,J)%NRC1 *             &
+                               HGSTGE(IMOD,J)%NSMX
+              END IF
+            END DO
+          NRQ    = MAX(1,NRQ)
+          ALLOCATE ( IRQ(NRQ) )
+          IRQ    = 0
+          NRQ    = 0
+#endif
 !
-!/MPI          DO J=1, NRGRD
-!/MPI            IF ( HGSTGE(IMOD,J)%NTOT .EQ. 0 ) CYCLE
+#ifdef W3_MPI
+          DO J=1, NRGRD
+            IF ( HGSTGE(IMOD,J)%NTOT .EQ. 0 ) CYCLE
+#endif
 !
 ! ..... Check valid time to determine staging.
 !
-!/MPI            VTIME  => HGSTGE(IMOD,J)%VTIME
-!/MPI            IF ( VTIME(1) .EQ. -1 ) THEN
-!/MPI                DTTST  = 1.
-!/MPI              ELSE
-!/MPI                DTTST  = DSEC21 ( TIME, VTIME )
-!/MPI              END IF
-!/MPIT            WRITE (MDST,9013) VTIME, DTTST
+#ifdef W3_MPI
+            VTIME  => HGSTGE(IMOD,J)%VTIME
+            IF ( VTIME(1) .EQ. -1 ) THEN
+                DTTST  = 1.
+              ELSE
+                DTTST  = DSEC21 ( TIME, VTIME )
+              END IF
+#endif
+#ifdef W3_MPIT
+            WRITE (MDST,9013) VTIME, DTTST
+#endif
 !
 ! ..... Post receives for data gather
 !
-!/MPI            IF ( DTTST .NE. 0. ) THEN
-!/MPIT                WRITE (MDST,9014) J
+#ifdef W3_MPI
+            IF ( DTTST .NE. 0. ) THEN
+#endif
+#ifdef W3_MPIT
+                WRITE (MDST,9014) J
+#endif
 !
 ! ..... Spectra
 !
-!/MPI                IT0 = MTAG1 + 1
-!/MPI                SHGH  => HGSTGE(IMOD,J)%SHGH 
+#ifdef W3_MPI
+                IT0 = MTAG1 + 1
+                SHGH  => HGSTGE(IMOD,J)%SHGH 
+#endif
 !
-!/MPI                IF ( FLGALL ) THEN
-!/MPI                    NTOT   = HGSTGE(IMOD,J)%NREC
-!/MPI                  ELSE
-!/MPI                    NTOT   = HGSTGE(IMOD,J)%NRC1
-!/MPI                  END IF
+#ifdef W3_MPI
+                IF ( FLGALL ) THEN
+                    NTOT   = HGSTGE(IMOD,J)%NREC
+                  ELSE
+                    NTOT   = HGSTGE(IMOD,J)%NRC1
+                  END IF
+#endif
 !
-!/MPI                DO I=1, NTOT
-!/MPIT                  JSEA   = HGSTGE(IMOD,J)%LJSEA(I)
-!/MPI                  NLOC   = HGSTGE(IMOD,J)%NRAVG(I)
-!/MPI                  DO ILOC=1, NLOC
-!/MPI                    ISPROC = HGSTGE(IMOD,J)%IMPSRC(I,ILOC)
-!/MPI                    ITAG   = HGSTGE(IMOD,J)%ITAG(I,ILOC) + IT0
-!/MPI                    IF ( ISPROC .NE. IMPROC ) THEN
-!/MPI                        NRQ    = NRQ + 1
-!/MPI                        CALL MPI_IRECV ( SHGH(1,ILOC,I),         &
-!/MPI                             SGRDS(J)%NSPEC, MPI_REAL,           &
-!/MPI                             ISPROC-1, ITAG, MPI_COMM_MWAVE,     &
-!/MPI                             IRQ(NRQ), IERR_MPI )
-!/MPIT                        WRITE (MDST,9016) NRQ, JSEA, ISPROC,     &
-!/MPIT                               ITAG-MTAG1, IRQ(NRQ), IERR_MPI
-!/MPI                      END IF
-!/MPI                    END DO
-!/MPI                  END DO
+#ifdef W3_MPI
+                DO I=1, NTOT
+#endif
+#ifdef W3_MPIT
+                  JSEA   = HGSTGE(IMOD,J)%LJSEA(I)
+#endif
+#ifdef W3_MPI
+                  NLOC   = HGSTGE(IMOD,J)%NRAVG(I)
+                  DO ILOC=1, NLOC
+                    ISPROC = HGSTGE(IMOD,J)%IMPSRC(I,ILOC)
+                    ITAG   = HGSTGE(IMOD,J)%ITAG(I,ILOC) + IT0
+                    IF ( ISPROC .NE. IMPROC ) THEN
+                        NRQ    = NRQ + 1
+                        CALL MPI_IRECV ( SHGH(1,ILOC,I),         &
+                             SGRDS(J)%NSPEC, MPI_REAL,           &
+                             ISPROC-1, ITAG, MPI_COMM_MWAVE,     &
+                             IRQ(NRQ), IERR_MPI )
+#endif
+#ifdef W3_MPIT
+                        WRITE (MDST,9016) NRQ, JSEA, ISPROC,     &
+                               ITAG-MTAG1, IRQ(NRQ), IERR_MPI
+#endif
+#ifdef W3_MPI
+                      END IF
+                    END DO
+                  END DO
+#endif
 !
 ! ..... End IF for posting receives 1.b.1
 !
-!/MPIT                WRITE (MDST,9017) 
-!/MPI              END IF
+#ifdef W3_MPIT
+                WRITE (MDST,9017) 
+#endif
+#ifdef W3_MPI
+              END IF
+#endif
 !
 ! ..... End grid loop J in 1.b.1
 !
-!/MPI            END DO
-!/MPIT          WRITE (MDST,9018) NRQ
+#ifdef W3_MPI
+            END DO
+#endif
+#ifdef W3_MPIT
+          WRITE (MDST,9018) NRQ
+#endif
 !
-!/MPI          ALLOCATE ( MDATAS(IMOD)%IRQHGG(NRQ) )
-!/MPI          MDATAS(IMOD)%IRQHGG = IRQ(1:NRQ)
-!/MPI          DEALLOCATE ( IRQ )
+#ifdef W3_MPI
+          ALLOCATE ( MDATAS(IMOD)%IRQHGG(NRQ) )
+          MDATAS(IMOD)%IRQHGG = IRQ(1:NRQ)
+          DEALLOCATE ( IRQ )
+#endif
 !
 ! ..... Reset status
 ! 
-!/MPI          IF ( NRQ .GT. 0 ) THEN
-!/MPI              HGHSTA(IMOD) = 1
-!/MPIT              WRITE (MDST,9011) HGHSTA(IMOD)
-!/MPI            END IF
+#ifdef W3_MPI
+          IF ( NRQ .GT. 0 ) THEN
+              HGHSTA(IMOD) = 1
+#endif
+#ifdef W3_MPIT
+              WRITE (MDST,9011) HGHSTA(IMOD)
+#endif
+#ifdef W3_MPI
+            END IF
+#endif
 !
 ! ..... End IF in 1.b.1
 !
-!/MPI        END IF
+#ifdef W3_MPI
+        END IF
+#endif
 !
 ! 1.b.2 HGHSTA = 1
 !       Wait for communication to finish.
 !       If DONE defined, check if done, otherwise wait.
 !
-!/MPI      IF ( HGHSTA(IMOD) .EQ. 1 ) THEN
+#ifdef W3_MPI
+      IF ( HGHSTA(IMOD) .EQ. 1 ) THEN
+#endif
 !
-!/MPI          NRQ    => MDATAS(IMOD)%NRQHGG
-!/MPI          IRQ    => MDATAS(IMOD)%IRQHGG
-!/MPI          ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
+#ifdef W3_MPI
+          NRQ    => MDATAS(IMOD)%NRQHGG
+          IRQ    => MDATAS(IMOD)%IRQHGG
+          ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
+#endif
 !
 ! ..... Test communication if DONE is present, wait otherwise
 !
-!/MPI          IF ( PRESENT(DONE) ) THEN
+#ifdef W3_MPI
+          IF ( PRESENT(DONE) ) THEN
+#endif
 !
-!/MPI              CALL MPI_TESTALL ( NRQ, IRQ, FLAGOK, STATUS,       &
-!/MPI                                 IERR_MPI )
+#ifdef W3_MPI
+              CALL MPI_TESTALL ( NRQ, IRQ, FLAGOK, STATUS,       &
+                                 IERR_MPI )
+#endif
 !
-!/MPIT              ICOUNT = 0
-!/MPIT              DO I=1, NRQ
-!/MPIT                CALL MPI_TEST ( IRQ(I), FLAG, STATUS(1,1),      &
-!/MPIT                                IERR_MPI )
-!/MPIT                FLAGOK = FLAGOK .AND. FLAG
-!/MPIT                IF ( FLAG ) ICOUNT = ICOUNT + 1
-!/MPIT                END DO
-!/MPIT              WRITE (MDST,9019) 100. * REAL(ICOUNT) / REAL(NRQ)
+#ifdef W3_MPIT
+              ICOUNT = 0
+              DO I=1, NRQ
+                CALL MPI_TEST ( IRQ(I), FLAG, STATUS(1,1),      &
+                                IERR_MPI )
+                FLAGOK = FLAGOK .AND. FLAG
+                IF ( FLAG ) ICOUNT = ICOUNT + 1
+                END DO
+              WRITE (MDST,9019) 100. * REAL(ICOUNT) / REAL(NRQ)
+#endif
 !
-!/MPI            ELSE
+#ifdef W3_MPI
+            ELSE
+#endif
 !
-!/MPI              CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
-!/MPI              FLAGOK = .TRUE.
-!/MPIT              WRITE (MDST,9019) 100.
+#ifdef W3_MPI
+              CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
+              FLAGOK = .TRUE.
+#endif
+#ifdef W3_MPIT
+              WRITE (MDST,9019) 100.
+#endif
 !
-!/MPI            END IF
+#ifdef W3_MPI
+            END IF
+#endif
 !
-!/MPI          DEALLOCATE ( STATUS )
+#ifdef W3_MPI
+          DEALLOCATE ( STATUS )
+#endif
 !
 ! ..... Go on based on FLAGOK
 !
-!/MPI          IF ( FLAGOK ) THEN
-!/MPI              NRQ    = 0
-!/MPI              DEALLOCATE ( MDATAS(IMOD)%IRQHGG )
-!/MPI            ELSE
-!/MPI              RETURN
-!/MPI            END IF
+#ifdef W3_MPI
+          IF ( FLAGOK ) THEN
+              NRQ    = 0
+              DEALLOCATE ( MDATAS(IMOD)%IRQHGG )
+            ELSE
+              RETURN
+            END IF
+#endif
 !
-!/MPI          HGHSTA(IMOD) = 0
-!/MPIT          WRITE (MDST,9011) HGHSTA(IMOD)
+#ifdef W3_MPI
+          HGHSTA(IMOD) = 0
+#endif
+#ifdef W3_MPIT
+          WRITE (MDST,9011) HGHSTA(IMOD)
+#endif
 !
-!/MPI        END IF
+#ifdef W3_MPI
+        END IF
+#endif
 !
 ! ..... process locally stored data
 !
-!/MPI      DO J=1, NRGRD
-!/MPI        HGSTGE(IMOD,J)%VTIME = TIME
-!/MPI        IF ( J .EQ. IMOD ) CYCLE
-!/MPI        DO IS=1, HGSTGE(IMOD,J)%NRQOUT
-!/MPI          I0     = HGSTGE(IMOD,J)%OUTDAT(IS,1)
-!/MPI          I2     = HGSTGE(IMOD,J)%OUTDAT(IS,2)
-!/MPI          I1     = HGSTGE(IMOD,J)%OUTDAT(IS,3)
-!/MPI          HGSTGE(IMOD,J)%SHGH(:,I2,I1) = HGSTGE(IMOD,J)%TSTORE(:,I0)
-!/MPI          END DO
-!/MPI      END DO
+#ifdef W3_MPI
+      DO J=1, NRGRD
+        HGSTGE(IMOD,J)%VTIME = TIME
+        IF ( J .EQ. IMOD ) CYCLE
+        DO IS=1, HGSTGE(IMOD,J)%NRQOUT
+          I0     = HGSTGE(IMOD,J)%OUTDAT(IS,1)
+          I2     = HGSTGE(IMOD,J)%OUTDAT(IS,2)
+          I1     = HGSTGE(IMOD,J)%OUTDAT(IS,3)
+          HGSTGE(IMOD,J)%SHGH(:,I2,I1) = HGSTGE(IMOD,J)%TSTORE(:,I0)
+          END DO
+      END DO
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Data available, process grid by grid
 ! 
-!/T      WRITE (MDST,9020)
+#ifdef W3_T
+      WRITE (MDST,9020)
+#endif
 !
 ! 2.a Loop over grids
 !
@@ -1669,7 +2125,9 @@
           END IF
         IF ( NTOT .EQ. 0 ) CYCLE
 !
-!/T        WRITE (MDST,9021) J, NTOT
+#ifdef W3_T
+        WRITE (MDST,9021) J, NTOT
+#endif
 !
 ! 2.b Set up temp data structures
 !
@@ -1683,7 +2141,9 @@
 !
 ! 2.c Average spectra to temp storage
 !
-!/T        WRITE (MDST,9022)
+#ifdef W3_T
+        WRITE (MDST,9022)
+#endif
 !
         DO IS=1, NTOT
           NA     = HGSTGE(IMOD,J)%NRAVG(IS)
@@ -1699,7 +2159,9 @@
 !
         IF ( RESPEC(IMOD,J) ) THEN
 !
-!/T            WRITE (MDST,9023)
+#ifdef W3_T
+            WRITE (MDST,9023)
+#endif
 !
             CALL W3CSPC ( SPEC1, SGRDS(J)%NK, SGRDS(J)%NTH,           &
                           SGRDS(J)%XFR, SGRDS(J)%FR1, SGRDS(J)%TH(1), &
@@ -1711,7 +2173,9 @@
 !
 ! 2.e Move spectra to model
 !
-!/T        WRITE (MDST,9024)
+#ifdef W3_T
+        WRITE (MDST,9024)
+#endif
 !
         DO IS=1, NTOT
           JSEA   = HGSTGE(IMOD,J)%LJSEA(IS)
@@ -1730,33 +2194,43 @@
 ! 
       IF ( PRESENT(DONE) ) DONE = .TRUE.
 !
-!/PDLIB      CALL PDLIB_exchange2Dreal(VA(:,1:NPA))
+#ifdef W3_PDLIB
+      CALL PDLIB_exchange2Dreal(VA(:,1:NPA))
+#endif
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST WMIOHG : GATHERING DATA FOR GRID ',I3/       &
-!/T               '               DTOUTP, FLGALL :',F8.1,L4)
-!/T 9001 FORMAT ( ' TEST WMIOHG : NR. OF SPECTRA PER SOURCE GRID : '/ &
-!/T               '             ',25I4)
-!/T 9003 FORMAT ( ' TEST WMIOHG : NO DATA TO BE GATHERED')
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMIOHG : GATHERING DATA FOR GRID ',I3/       &
+               '               DTOUTP, FLGALL :',F8.1,L4)
+ 9001 FORMAT ( ' TEST WMIOHG : NR. OF SPECTRA PER SOURCE GRID : '/ &
+               '             ',25I4)
+ 9003 FORMAT ( ' TEST WMIOHG : NO DATA TO BE GATHERED')
+#endif
 !
-!/T 9010 FORMAT ( ' TEST WMIOHG : TEST DATA AVAILABILITY FOR',I9.8,I7.6)
-!/MPIT 9011 FORMAT ( ' MPIT WMIOHG : HGHSTA =',I2)
-!/MPIT 9013 FORMAT ( '               VTIME, DTTST :',I9.8,I7.6,1X,F8.1)
-!/MPIT 9014 FORMAT (/' MPIT WMIOHG : RECEIVE FROM GRID',I4/           &
-!/MPIT               ' +------+------+------+------+--------------+'/ &
-!/MPIT               ' |  IH  |  ID  | FROM |  TAG |   handle err |'/ &
-!/MPIT               ' +------+------+------+------+--------------+')
-!/MPIT 9016 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
-!/MPIT 9017 FORMAT ( ' +------+------+------+------+--------------+'/)
-!/MPIT 9018 FORMAT ( ' MPIT WMIOHG : NRQBPT:',I10/)
-!/MPIT 9019 FORMAT ( ' MPIT WMIOHG : RECEIVES FINISHED :',F6.1,'%')
+#ifdef W3_T
+ 9010 FORMAT ( ' TEST WMIOHG : TEST DATA AVAILABILITY FOR',I9.8,I7.6)
+#endif
+#ifdef W3_MPIT
+ 9011 FORMAT ( ' MPIT WMIOHG : HGHSTA =',I2)
+ 9013 FORMAT ( '               VTIME, DTTST :',I9.8,I7.6,1X,F8.1)
+ 9014 FORMAT (/' MPIT WMIOHG : RECEIVE FROM GRID',I4/           &
+               ' +------+------+------+------+--------------+'/ &
+               ' |  IH  |  ID  | FROM |  TAG |   handle err |'/ &
+               ' +------+------+------+------+--------------+')
+ 9016 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
+ 9017 FORMAT ( ' +------+------+------+------+--------------+'/)
+ 9018 FORMAT ( ' MPIT WMIOHG : NRQBPT:',I10/)
+ 9019 FORMAT ( ' MPIT WMIOHG : RECEIVES FINISHED :',F6.1,'%')
+#endif
 !
-!/T 9020 FORMAT ( ' TEST WMIOHG : PROCESSING DATA GRID BY GRID')
-!/T 9021 FORMAT ( '               FROM GRID ',I3,'   NR OF SPECTRA :',I6)
-!/T 9022 FORMAT ( '               AVERAGE SPECTRA TO TEMP STORAGE')
-!/T 9023 FORMAT ( '               CONVERT SPECTRAL GRID')
-!/T 9024 FORMAT ( '               MOVE SPECTRA TO PERMANENT STORAGE')
+#ifdef W3_T
+ 9020 FORMAT ( ' TEST WMIOHG : PROCESSING DATA GRID BY GRID')
+ 9021 FORMAT ( '               FROM GRID ',I3,'   NR OF SPECTRA :',I6)
+ 9022 FORMAT ( '               AVERAGE SPECTRA TO TEMP STORAGE')
+ 9023 FORMAT ( '               CONVERT SPECTRAL GRID')
+ 9024 FORMAT ( '               MOVE SPECTRA TO PERMANENT STORAGE')
+#endif
 !/
 !/ End of WMIOHG ----------------------------------------------------- /
 !/
@@ -1828,11 +2302,15 @@
 !
       USE WMMDATMD
 !
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -1843,44 +2321,62 @@
 !/ Local parameters
 !/
       INTEGER                 :: J
-!/MPI      INTEGER                 :: IERR_MPI
-!/MPI      INTEGER, POINTER        :: NRQ, IRQ(:)
-!/MPI      INTEGER, ALLOCATABLE    :: STATUS(:,:)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                 :: IERR_MPI
+      INTEGER, POINTER        :: NRQ, IRQ(:)
+      INTEGER, ALLOCATABLE    :: STATUS(:,:)
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMIOHF')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMIOHF')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 0.  Initializations
 !
-!/T      WRITE (MDST,9000) IMOD
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Loop over grids
 !
       DO J=1, NRGRD
 !
-!/MPI        NRQ    => HGSTGE(J,IMOD)%NRQHGS
+#ifdef W3_MPI
+        NRQ    => HGSTGE(J,IMOD)%NRQHGS
+#endif
 !
 ! 1.a Nothing to finalize
 !
-!/MPI        IF ( NRQ .EQ. 0 ) CYCLE
-!/MPI        IRQ    => HGSTGE(J,IMOD)%IRQHGS
+#ifdef W3_MPI
+        IF ( NRQ .EQ. 0 ) CYCLE
+        IRQ    => HGSTGE(J,IMOD)%IRQHGS
+#endif
 !
 ! 1.b Wait for communication to end
 !
-!/MPI        ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
-!/MPI        CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
-!/MPI        DEALLOCATE ( STATUS )
+#ifdef W3_MPI
+        ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
+        CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
+        DEALLOCATE ( STATUS )
+#endif
 !
 ! 1.c Reset arrays and counter
 !
-!/MPI        NRQ    = 0
-!/MPI        DEALLOCATE ( HGSTGE(J,IMOD)%IRQHGS,                      &
-!/MPI                     HGSTGE(J,IMOD)%TSTORE,                      &
-!/MPI                     HGSTGE(J,IMOD)%OUTDAT )
+#ifdef W3_MPI
+        NRQ    = 0
+        DEALLOCATE ( HGSTGE(J,IMOD)%IRQHGS,                      &
+                     HGSTGE(J,IMOD)%TSTORE,                      &
+                     HGSTGE(J,IMOD)%OUTDAT )
+#endif
 !
-!/T        WRITE (MDST,9010) J
+#ifdef W3_T
+        WRITE (MDST,9010) J
+#endif
 !
         END DO
 !
@@ -1888,8 +2384,10 @@
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST WMIOHF : FINALIZE STAGING DATA FROM GRID ',I3)
-!/T 9010 FORMAT ( ' TEST WMIOHF : FINISHED WITH TARGET ',I3)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMIOHF : FINALIZE STAGING DATA FROM GRID ',I3)
+ 9010 FORMAT ( ' TEST WMIOHF : FINISHED WITH TARGET ',I3)
+#endif
 !/
 !/ End of WMIOHF ----------------------------------------------------- /
 !/
@@ -1975,12 +2473,16 @@
       USE WMMDATMD
 !
       USE W3SERVMD, ONLY: EXTCDE
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
       USE W3TIMEMD, ONLY: DSEC21
 !
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -1991,19 +2493,33 @@
 !/ Local parameters
 !/
       INTEGER                 :: J, NR, I, ISEA, JSEA, IS, I1, I2
-!/MPI      INTEGER                 :: IT0, ITAG, IP, IERR_MPI
-!/S      INTEGER, SAVE           :: IENT = 0
-!/MPI      INTEGER, POINTER        :: NRQ, IRQ(:), NRQOUT, OUTDAT(:,:)
-!/SHRD      REAL, POINTER           :: SEQL(:,:,:)
-!/MPI      REAL, POINTER           :: SEQL(:,:)
+#ifdef W3_MPI
+      INTEGER                 :: IT0, ITAG, IP, IERR_MPI
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_MPI
+      INTEGER, POINTER        :: NRQ, IRQ(:), NRQOUT, OUTDAT(:,:)
+#endif
+#ifdef W3_SHRD
+      REAL, POINTER           :: SEQL(:,:,:)
+#endif
+#ifdef W3_MPI
+      REAL, POINTER           :: SEQL(:,:)
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMIOES')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMIOES')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 0.  Initializations
 ! 
-!/T      WRITE (MDST,9000) IMOD
-!/T      WRITE (MDST,9001) EQSTGE(:,IMOD)%NSND
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD
+      WRITE (MDST,9001) EQSTGE(:,IMOD)%NSND
+#endif
 !
       CALL W3SETO ( IMOD, MDSE, MDST )
       CALL W3SETG ( IMOD, MDSE, MDST )
@@ -2018,11 +2534,13 @@
         IF ( J .EQ. IMOD ) CYCLE
         NR     = EQSTGE(J,IMOD)%NSND
 !
-!/T        IF ( NR .EQ. 0 ) THEN
-!/T            WRITE (MDST,9010) J, NR
-!/T          ELSE
-!/T            WRITE (MDST,9011) J, NR, DSEC21(TIME,TSYNC(:,J))
-!/T          END IF
+#ifdef W3_T
+        IF ( NR .EQ. 0 ) THEN
+            WRITE (MDST,9010) J, NR
+          ELSE
+            WRITE (MDST,9011) J, NR, DSEC21(TIME,TSYNC(:,J))
+          END IF
+#endif
 !
         IF ( NR .EQ. 0 ) CYCLE
         IF ( DSEC21(TIME,TSYNC(:,J)) .NE. 0. ) STOP
@@ -2033,35 +2551,51 @@
 ! -------------------------------------------------------------------- /
 ! 2.  Allocate arrays and/or point pointers
 !
-!/SHRD        SEQL   => EQSTGE(J,IMOD)%SEQL
-!/MPI        ALLOCATE ( EQSTGE(J,IMOD)%TSTORE(NSPEC,NR) )
-!/MPI        SEQL   => EQSTGE(J,IMOD)%TSTORE
+#ifdef W3_SHRD
+        SEQL   => EQSTGE(J,IMOD)%SEQL
+#endif
+#ifdef W3_MPI
+        ALLOCATE ( EQSTGE(J,IMOD)%TSTORE(NSPEC,NR) )
+        SEQL   => EQSTGE(J,IMOD)%TSTORE
+#endif
 !
-!/MPI        ALLOCATE ( EQSTGE(J,IMOD)%IRQEQS(NR)   ,                 &
-!/MPI                   EQSTGE(J,IMOD)%OUTDAT(NR,3) )
+#ifdef W3_MPI
+        ALLOCATE ( EQSTGE(J,IMOD)%IRQEQS(NR)   ,                 &
+                   EQSTGE(J,IMOD)%OUTDAT(NR,3) )
+#endif
 !
-!/MPI        NRQ    => EQSTGE(J,IMOD)%NRQEQS
-!/MPI        NRQOUT => EQSTGE(J,IMOD)%NRQOUT
-!/MPI        IRQ    => EQSTGE(J,IMOD)%IRQEQS
-!/MPI        OUTDAT => EQSTGE(J,IMOD)%OUTDAT
-!/MPI        NRQ    = 0
-!/MPI        NRQOUT = 0
-!/MPI        IRQ    = 0
+#ifdef W3_MPI
+        NRQ    => EQSTGE(J,IMOD)%NRQEQS
+        NRQOUT => EQSTGE(J,IMOD)%NRQOUT
+        IRQ    => EQSTGE(J,IMOD)%IRQEQS
+        OUTDAT => EQSTGE(J,IMOD)%OUTDAT
+        NRQ    = 0
+        NRQOUT = 0
+        IRQ    = 0
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 3.  Set the time
 !     Note that with MPI the send needs to be posted to the local
 !     processor too to make time management possible.
 !
-!/T        WRITE (MDST,9030) TIME
+#ifdef W3_T
+        WRITE (MDST,9030) TIME
+#endif
 !
-!/SHRD        EQSTGE(J,IMOD)%VTIME = TIME
+#ifdef W3_SHRD
+        EQSTGE(J,IMOD)%VTIME = TIME
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 4.  Stage the spectral data
 !
-!/MPIT        WRITE (MDST,9080)
-!/MPI        IT0 = MTAG2 + 1
+#ifdef W3_MPIT
+        WRITE (MDST,9080)
+#endif
+#ifdef W3_MPI
+        IT0 = MTAG2 + 1
+#endif
 !
         DO I=1, NR
 !
@@ -2069,42 +2603,66 @@
           JSEA   = EQSTGE(J,IMOD)%SJS(I)
           I1     = EQSTGE(J,IMOD)%SI1(I)
           I2     = EQSTGE(J,IMOD)%SI2(I)
-!/MPI          IP     = EQSTGE(J,IMOD)%SIP(I)
-!/MPI          ITAG   = EQSTGE(J,IMOD)%STG(I) + IT0
-!/MPI          IF ( ITAG .GT. MTAG_UB ) THEN
-!/MPI              WRITE (MDSE,1001)
-!/MPI              CALL EXTCDE (1001) 
-!/MPI            END IF
+#ifdef W3_MPI
+          IP     = EQSTGE(J,IMOD)%SIP(I)
+          ITAG   = EQSTGE(J,IMOD)%STG(I) + IT0
+          IF ( ITAG .GT. MTAG_UB ) THEN
+              WRITE (MDSE,1001)
+              CALL EXTCDE (1001) 
+            END IF
+#endif
 !
-!/SMC !!  Equal ranked SMC grids simply pass the wave action.  JGLi16Dec2020
-!/MPI!/SMC          IF( GTYPE .EQ. SMCTYPE ) THEN
-!/MPI!/SMC             SEQL(:, I) = VA(:, JSEA) 
-!/MPI!/SMC          ELSE 
+#ifdef W3_SMC
+ !!  Equal ranked SMC grids simply pass the wave action.  JGLi16Dec2020
+#endif
+#ifdef W3_MPI
+#ifdef W3_SMC
+          IF( GTYPE .EQ. SMCTYPE ) THEN
+             SEQL(:, I) = VA(:, JSEA) 
+          ELSE 
+#endif
+#endif
           DO IS=1, NSPEC
-!/SHRD            SEQL(IS,I1,I2) = VA(IS,JSEA) * SIG2(IS)             &
-!/SHRD                                 / CG(1+(IS-1)/NTH,ISEA)
-!/MPI            SEQL(  IS,I  ) = VA(IS,JSEA) * SIG2(IS)             &
-!/MPI                                 / CG(1+(IS-1)/NTH,ISEA)
+#ifdef W3_SHRD
+            SEQL(IS,I1,I2) = VA(IS,JSEA) * SIG2(IS)             &
+                                 / CG(1+(IS-1)/NTH,ISEA)
+#endif
+#ifdef W3_MPI
+            SEQL(  IS,I  ) = VA(IS,JSEA) * SIG2(IS)             &
+                                 / CG(1+(IS-1)/NTH,ISEA)
+#endif
             END DO
-!/MPI!/SMC          ENDIF 
+#ifdef W3_MPI
+#ifdef W3_SMC
+          ENDIF 
+#endif
+#endif
 !
-!/MPI          IF ( IP .NE. IMPROC ) THEN
-!/MPI              NRQ    = NRQ + 1
-!/MPI              CALL MPI_ISEND ( SEQL(1,I), NSPEC, MPI_REAL, IP-1, &
-!/MPI                       ITAG, MPI_COMM_MWAVE, IRQ(NRQ), IERR_MPI )
-!/MPIT              WRITE (MDST,9082) NRQ, JSEA, IP, ITAG-MTAG2,      &
-!/MPIT                                IRQ(NRQ), IERR_MPI
-!/MPI            ELSE 
-!/MPI              NRQOUT = NRQOUT + 1
-!/MPI              OUTDAT(NRQOUT,1) = I
-!/MPI              OUTDAT(NRQOUT,2) = I1
-!/MPI              OUTDAT(NRQOUT,3) = I2
-!/MPI            END IF
+#ifdef W3_MPI
+          IF ( IP .NE. IMPROC ) THEN
+              NRQ    = NRQ + 1
+              CALL MPI_ISEND ( SEQL(1,I), NSPEC, MPI_REAL, IP-1, &
+                       ITAG, MPI_COMM_MWAVE, IRQ(NRQ), IERR_MPI )
+#endif
+#ifdef W3_MPIT
+              WRITE (MDST,9082) NRQ, JSEA, IP, ITAG-MTAG2,      &
+                                IRQ(NRQ), IERR_MPI
+#endif
+#ifdef W3_MPI
+            ELSE 
+              NRQOUT = NRQOUT + 1
+              OUTDAT(NRQOUT,1) = I
+              OUTDAT(NRQOUT,2) = I1
+              OUTDAT(NRQOUT,3) = I2
+            END IF
+#endif
 !
           END DO
 !
-!/MPIT        WRITE (MDST,9083)
-!/MPIT        WRITE (MDST,9084) NRQ
+#ifdef W3_MPIT
+        WRITE (MDST,9083)
+        WRITE (MDST,9084) NRQ
+#endif
 !
         END DO
 !
@@ -2112,26 +2670,36 @@
 !
 ! Formats
 !
-!/MPI 1001 FORMAT (/' *** ERROR WMIOES : REQUESTED MPI TAG EXCEEDS', &
-!/MPI                                  ' UPPER BOUND (MTAG_UB) ***')
-!/T 9000 FORMAT ( ' TEST WMIOES : STAGING DATA FROM GRID ',I3)
-!/T 9001 FORMAT ( ' TEST WMIOES : NR. OF SPECTRA PER GRID : '/        &
-!/T               '             ',15I6)
+#ifdef W3_MPI
+ 1001 FORMAT (/' *** ERROR WMIOES : REQUESTED MPI TAG EXCEEDS', &
+                                  ' UPPER BOUND (MTAG_UB) ***')
+#endif
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMIOES : STAGING DATA FROM GRID ',I3)
+ 9001 FORMAT ( ' TEST WMIOES : NR. OF SPECTRA PER GRID : '/        &
+               '             ',15I6)
+#endif
 !
-!/T 9010 FORMAT ( ' TEST WMIOES : POSTING DATA TO GRID ',I3,          &
-!/T               '   NR = ',I6)
-!/T 9011 FORMAT ( ' TEST WMIOES : POSTING DATA TO GRID ',I3,          &
-!/T               '   NR = ',I6,'   TIME GAP = ',F8.1)
+#ifdef W3_T
+ 9010 FORMAT ( ' TEST WMIOES : POSTING DATA TO GRID ',I3,          &
+               '   NR = ',I6)
+ 9011 FORMAT ( ' TEST WMIOES : POSTING DATA TO GRID ',I3,          &
+               '   NR = ',I6,'   TIME GAP = ',F8.1)
+#endif
 !
-!/T 9030 FORMAT ( ' TEST WMIOES : TIME :',I10.8,I7.6)
+#ifdef W3_T
+ 9030 FORMAT ( ' TEST WMIOES : TIME :',I10.8,I7.6)
+#endif
 !/
-!/MPIT 9080 FORMAT (/' MPIT WMIOES: COMMUNICATION CALLS            '/ &
-!/MPIT               ' +------+------+------+------+--------------+'/ &
-!/MPIT               ' |  IH  |  ID  | TARG |  TAG |   handle err |'/ &
-!/MPIT               ' +------+------+------+------+--------------+')
-!/MPIT 9082 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
-!/MPIT 9083 FORMAT ( ' +------+------+------+------+--------------+')
-!/MPIT 9084 FORMAT ( ' MPIT WMIOES: NRQEQS:',I10/)
+#ifdef W3_MPIT
+ 9080 FORMAT (/' MPIT WMIOES: COMMUNICATION CALLS            '/ &
+               ' +------+------+------+------+--------------+'/ &
+               ' |  IH  |  ID  | TARG |  TAG |   handle err |'/ &
+               ' +------+------+------+------+--------------+')
+ 9082 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
+ 9083 FORMAT ( ' +------+------+------+------+--------------+')
+ 9084 FORMAT ( ' MPIT WMIOES: NRQEQS:',I10/)
+#endif
 !/
 !/ End of WMIOES ----------------------------------------------------- /
 !/
@@ -2222,13 +2790,19 @@
       USE W3CSPCMD, ONLY: W3CSPC
       USE W3TIMEMD, ONLY: DSEC21
       USE W3SERVMD, ONLY: EXTCDE
-!/PDLIB      use yowNodepool, only: npa
-!/PDLIB      USE yowExchangeModule, only : PDLIB_exchange2Dreal
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_PDLIB
+      use yowNodepool, only: npa
+      USE yowExchangeModule, only : PDLIB_exchange2Dreal
+#endif
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -2240,31 +2814,47 @@
 !/ Local parameters
 !/
       INTEGER                 :: J, I, ISEA, JSEA, IA, IS
-!/S      INTEGER, SAVE           :: IENT = 0
-!/MPI      INTEGER                 :: IT0, ITAG, IFROM, IERR_MPI,     &
-!/MPI                                 NA, IP, I1, I2
-!/MPIT      INTEGER                 :: ICOUNT
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+#ifdef W3_MPI
+      INTEGER                 :: IT0, ITAG, IFROM, IERR_MPI,     &
+                                 NA, IP, I1, I2
+#endif
+#ifdef W3_MPIT
+      INTEGER                 :: ICOUNT
+#endif
       INTEGER, POINTER        :: VTIME(:)
-!/MPI      INTEGER, POINTER        :: NRQ, IRQ(:), STATUS(:,:)
+#ifdef W3_MPI
+      INTEGER, POINTER        :: NRQ, IRQ(:), STATUS(:,:)
+#endif
       REAL                    :: DTTST, WGHT
       REAL, POINTER           :: SPEC1(:,:), SPEC2(:,:), SPEC(:,:)
-!/MPI      REAL, POINTER           :: SEQL(:,:,:)
-!/MPI      LOGICAL                 :: FLAGOK
-!/MPI      LOGICAL                 :: FLAG
+#ifdef W3_MPI
+      REAL, POINTER           :: SEQL(:,:,:)
+      LOGICAL                 :: FLAGOK
+      LOGICAL                 :: FLAG
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMIOEG')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMIOEG')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 0.  Initializations
 !
-!/T      WRITE (MDST,9000) IMOD
-!/T      WRITE (MDST,9001) 'NREC', EQSTGE(IMOD,:)%NREC
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD
+      WRITE (MDST,9001) 'NREC', EQSTGE(IMOD,:)%NREC
+#endif
 !
       IF ( PRESENT(DONE) ) DONE = .FALSE.
 !
       IF ( EQSTGE(IMOD,IMOD)%NREC .EQ. 0 ) THEN
           IF ( PRESENT(DONE) ) DONE = .TRUE.
-!/T          WRITE (MDST,9002)
+#ifdef W3_T
+          WRITE (MDST,9002)
+#endif
           RETURN
         END IF
 !
@@ -2276,184 +2866,272 @@
 ! -------------------------------------------------------------------- /
 ! 1.  Testing / gathering data in staging arrays
 !
-!/T      WRITE (MDST,9010) TIME
+#ifdef W3_T
+      WRITE (MDST,9010) TIME
+#endif
 !
 ! 1.a Shared memory version, test valid times. - - - - - - - - - - - - /
 !
-!/SHRD      DO J=1, NRGRD
+#ifdef W3_SHRD
+      DO J=1, NRGRD
+#endif
 !
-!/SHRD        IF ( IMOD .EQ. J ) CYCLE
-!/SHRD        IF ( EQSTGE(IMOD,J)%NREC .EQ. 0 ) CYCLE
+#ifdef W3_SHRD
+        IF ( IMOD .EQ. J ) CYCLE
+        IF ( EQSTGE(IMOD,J)%NREC .EQ. 0 ) CYCLE
+#endif
 !
-!/SHRD        VTIME  => EQSTGE(IMOD,J)%VTIME
-!/SHRD        IF ( VTIME(1) .EQ. -1 ) RETURN
-!/SHRD        DTTST  = DSEC21 ( TIME, VTIME )
-!/SHRD        IF ( DTTST .NE. 0. ) RETURN
+#ifdef W3_SHRD
+        VTIME  => EQSTGE(IMOD,J)%VTIME
+        IF ( VTIME(1) .EQ. -1 ) RETURN
+        DTTST  = DSEC21 ( TIME, VTIME )
+        IF ( DTTST .NE. 0. ) RETURN
+#endif
 !
-!/SHRD        END DO
+#ifdef W3_SHRD
+        END DO
+#endif
 !
 ! 1.b Distributed memory version - - - - - - - - - - - - - - - - - - - /
 !
-!/MPIT        WRITE (MDST,9011) EQLSTA(IMOD)
+#ifdef W3_MPIT
+        WRITE (MDST,9011) EQLSTA(IMOD)
+#endif
 !
 ! 1.b.1 EQLSTA = 0
 !       Check if staging arrays are initialized.
 !       Post the proper receives.
 !
-!/MPI      IF ( EQLSTA(IMOD) .EQ. 0 ) THEN
+#ifdef W3_MPI
+      IF ( EQLSTA(IMOD) .EQ. 0 ) THEN
+#endif
 !
-!/MPI          NRQ    => MDATAS(IMOD)%NRQEQG
-!/MPI          NRQ    = 0
-!/MPI          DO J=1, NRGRD
-!/MPI            IF ( J .EQ. IMOD ) CYCLE
-!/MPI            NRQ    = NRQ + EQSTGE(IMOD,J)%NREC *                 &
-!/MPI                           EQSTGE(IMOD,J)%NAVMAX
-!/MPI            END DO
-!/MPI          ALLOCATE ( IRQ(NRQ) )
-!/MPI          IRQ    = 0
-!/MPI          NRQ    = 0
+#ifdef W3_MPI
+          NRQ    => MDATAS(IMOD)%NRQEQG
+          NRQ    = 0
+          DO J=1, NRGRD
+            IF ( J .EQ. IMOD ) CYCLE
+            NRQ    = NRQ + EQSTGE(IMOD,J)%NREC *                 &
+                           EQSTGE(IMOD,J)%NAVMAX
+            END DO
+          ALLOCATE ( IRQ(NRQ) )
+          IRQ    = 0
+          NRQ    = 0
+#endif
 !
-!/MPI          DO J=1, NRGRD
-!/MPI            IF ( IMOD .EQ. J ) CYCLE
-!/MPI            IF ( EQSTGE(IMOD,J)%NREC .EQ. 0 ) CYCLE
+#ifdef W3_MPI
+          DO J=1, NRGRD
+            IF ( IMOD .EQ. J ) CYCLE
+            IF ( EQSTGE(IMOD,J)%NREC .EQ. 0 ) CYCLE
+#endif
 !
 ! ..... Check valid time to determine staging.
 !
-!/MPI            VTIME  => EQSTGE(IMOD,J)%VTIME
-!/MPI            IF ( VTIME(1) .EQ. -1 ) THEN
-!/MPI                DTTST  = 1.
-!/MPI              ELSE
-!/MPI                DTTST  = DSEC21 ( TIME, VTIME )
-!/MPI              END IF
-!/MPIT            WRITE (MDST,9013) VTIME, DTTST
+#ifdef W3_MPI
+            VTIME  => EQSTGE(IMOD,J)%VTIME
+            IF ( VTIME(1) .EQ. -1 ) THEN
+                DTTST  = 1.
+              ELSE
+                DTTST  = DSEC21 ( TIME, VTIME )
+              END IF
+#endif
+#ifdef W3_MPIT
+            WRITE (MDST,9013) VTIME, DTTST
+#endif
 !
 ! ..... Post receives for data gather
 ! 
-!/MPI            IF ( DTTST .NE. 0. ) THEN
-!/MPIT                WRITE (MDST,9014) J
+#ifdef W3_MPI
+            IF ( DTTST .NE. 0. ) THEN
+#endif
+#ifdef W3_MPIT
+                WRITE (MDST,9014) J
+#endif
 !
 ! ..... Spectra
 ! 
-!/MPI                IT0 = MTAG2 + 1
-!/MPI                SEQL  => EQSTGE(IMOD,J)%SEQL
+#ifdef W3_MPI
+                IT0 = MTAG2 + 1
+                SEQL  => EQSTGE(IMOD,J)%SEQL
+#endif
 !
-!/MPI                DO I=1, EQSTGE(IMOD,J)%NREC
-!/MPI                  JSEA   = EQSTGE(IMOD,J)%JSEA(I)
-!/MPI                  NA     = EQSTGE(IMOD,J)%NAVG(I)
-!/MPI                  DO IA=1, NA
-!/MPI                    IP     = EQSTGE(IMOD,J)%RIP(I,IA)
-!/MPI                    ITAG   = EQSTGE(IMOD,J)%RTG(I,IA) + IT0
-!/MPI                    IF ( IP .NE. IMPROC ) THEN
-!/MPI                        NRQ    = NRQ + 1
-!/MPI                        CALL MPI_IRECV ( SEQL(1,I,IA),           &
-!/MPI                             SGRDS(J)%NSPEC, MPI_REAL,           &
-!/MPI                             IP-1, ITAG, MPI_COMM_MWAVE,         &
-!/MPI                             IRQ(NRQ), IERR_MPI )
-!/MPIT                        WRITE (MDST,9016) NRQ, JSEA, IP,         &
-!/MPIT                               ITAG-MTAG2, IRQ(NRQ), IERR_MPI
-!/MPI                      END IF
-!/MPI                    END DO
-!/MPI                  END DO
+#ifdef W3_MPI
+                DO I=1, EQSTGE(IMOD,J)%NREC
+                  JSEA   = EQSTGE(IMOD,J)%JSEA(I)
+                  NA     = EQSTGE(IMOD,J)%NAVG(I)
+                  DO IA=1, NA
+                    IP     = EQSTGE(IMOD,J)%RIP(I,IA)
+                    ITAG   = EQSTGE(IMOD,J)%RTG(I,IA) + IT0
+                    IF ( IP .NE. IMPROC ) THEN
+                        NRQ    = NRQ + 1
+                        CALL MPI_IRECV ( SEQL(1,I,IA),           &
+                             SGRDS(J)%NSPEC, MPI_REAL,           &
+                             IP-1, ITAG, MPI_COMM_MWAVE,         &
+                             IRQ(NRQ), IERR_MPI )
+#endif
+#ifdef W3_MPIT
+                        WRITE (MDST,9016) NRQ, JSEA, IP,         &
+                               ITAG-MTAG2, IRQ(NRQ), IERR_MPI
+#endif
+#ifdef W3_MPI
+                      END IF
+                    END DO
+                  END DO
+#endif
 !
 ! ..... End IF for posting receives 1.b.1
 !
-!/MPIT                WRITE (MDST,9017)
-!/MPI              END IF
+#ifdef W3_MPIT
+                WRITE (MDST,9017)
+#endif
+#ifdef W3_MPI
+              END IF
+#endif
 !
 ! ..... End grid loop J in 1.b.1
 !
-!/MPI            END DO
-!/MPIT          WRITE (MDST,9018) NRQ
+#ifdef W3_MPI
+            END DO
+#endif
+#ifdef W3_MPIT
+          WRITE (MDST,9018) NRQ
+#endif
 !
-!/MPI          IF ( NRQ .NE. 0 ) THEN
-!/MPI              ALLOCATE ( MDATAS(IMOD)%IRQEQG(NRQ) )
-!/MPI              MDATAS(IMOD)%IRQEQG = IRQ(1:NRQ)
-!/MPI            END IF
+#ifdef W3_MPI
+          IF ( NRQ .NE. 0 ) THEN
+              ALLOCATE ( MDATAS(IMOD)%IRQEQG(NRQ) )
+              MDATAS(IMOD)%IRQEQG = IRQ(1:NRQ)
+            END IF
+#endif
 !
-!/MPI          DEALLOCATE ( IRQ )
+#ifdef W3_MPI
+          DEALLOCATE ( IRQ )
+#endif
 !
 ! ..... Reset status
 ! 
-!/MPI          IF ( NRQ .GT. 0 ) THEN
-!/MPI              EQLSTA(IMOD) = 1
-!/MPIT              WRITE (MDST,9011) EQLSTA(IMOD)
-!/MPI            END IF
+#ifdef W3_MPI
+          IF ( NRQ .GT. 0 ) THEN
+              EQLSTA(IMOD) = 1
+#endif
+#ifdef W3_MPIT
+              WRITE (MDST,9011) EQLSTA(IMOD)
+#endif
+#ifdef W3_MPI
+            END IF
+#endif
 !
 ! ..... End IF in 1.b.1
 !
-!/MPI        END IF
+#ifdef W3_MPI
+        END IF
+#endif
 !
 ! 1.b.2 EQLSTA = 1
 !       Wait for communication to finish.
 !       If DONE defined, check if done, otherwise wait.
 !
-!/MPI      IF ( EQLSTA(IMOD) .EQ. 1 ) THEN
+#ifdef W3_MPI
+      IF ( EQLSTA(IMOD) .EQ. 1 ) THEN
+#endif
 !
-!/MPI          NRQ    => MDATAS(IMOD)%NRQEQG
-!/MPI          IRQ    => MDATAS(IMOD)%IRQEQG
-!/MPI          ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
+#ifdef W3_MPI
+          NRQ    => MDATAS(IMOD)%NRQEQG
+          IRQ    => MDATAS(IMOD)%IRQEQG
+          ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
+#endif
 !
 ! ..... Test communication if DONE is present, wait otherwise
 !
-!/MPI          IF ( PRESENT(DONE) ) THEN
+#ifdef W3_MPI
+          IF ( PRESENT(DONE) ) THEN
+#endif
 !
-!/MPI              CALL MPI_TESTALL ( NRQ, IRQ, FLAGOK, STATUS,       &
-!/MPI                                 IERR_MPI )
+#ifdef W3_MPI
+              CALL MPI_TESTALL ( NRQ, IRQ, FLAGOK, STATUS,       &
+                                 IERR_MPI )
+#endif
 !
-!/MPIT              ICOUNT = 0
-!/MPIT              DO I=1, NRQ
-!/MPIT                CALL MPI_TEST ( IRQ(I), FLAG, STATUS(1,1),      &
-!/MPIT                                IERR_MPI )
-!/MPIT                FLAGOK = FLAGOK .AND. FLAG
-!/MPIT                IF ( FLAG ) ICOUNT = ICOUNT + 1
-!/MPIT                END DO
-!/MPIT              WRITE (MDST,9019) 100. * REAL(ICOUNT) / REAL(NRQ)
+#ifdef W3_MPIT
+              ICOUNT = 0
+              DO I=1, NRQ
+                CALL MPI_TEST ( IRQ(I), FLAG, STATUS(1,1),      &
+                                IERR_MPI )
+                FLAGOK = FLAGOK .AND. FLAG
+                IF ( FLAG ) ICOUNT = ICOUNT + 1
+                END DO
+              WRITE (MDST,9019) 100. * REAL(ICOUNT) / REAL(NRQ)
+#endif
 !
-!/MPI            ELSE
+#ifdef W3_MPI
+            ELSE
+#endif
 !
-!/MPI              CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
-!/MPI              FLAGOK = .TRUE.
-!/MPIT              WRITE (MDST,9019) 100.
+#ifdef W3_MPI
+              CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
+              FLAGOK = .TRUE.
+#endif
+#ifdef W3_MPIT
+              WRITE (MDST,9019) 100.
+#endif
 !
-!/MPI            END IF
+#ifdef W3_MPI
+            END IF
+#endif
 !
-!/MPI          DEALLOCATE ( STATUS )
+#ifdef W3_MPI
+          DEALLOCATE ( STATUS )
+#endif
 !
 ! ..... Go on based on FLAGOK
 !
-!/MPI          IF ( FLAGOK ) THEN
-!/MPI              IF ( NRQ.NE.0 ) DEALLOCATE ( MDATAS(IMOD)%IRQEQG )
-!/MPI              NRQ    = 0
-!/MPI            ELSE
-!/MPI              RETURN
-!/MPI            END IF
+#ifdef W3_MPI
+          IF ( FLAGOK ) THEN
+              IF ( NRQ.NE.0 ) DEALLOCATE ( MDATAS(IMOD)%IRQEQG )
+              NRQ    = 0
+            ELSE
+              RETURN
+            END IF
+#endif
 !
-!/MPI          EQLSTA(IMOD) = 0
-!/MPIT          WRITE (MDST,9011) EQLSTA(IMOD)
+#ifdef W3_MPI
+          EQLSTA(IMOD) = 0
+#endif
+#ifdef W3_MPIT
+          WRITE (MDST,9011) EQLSTA(IMOD)
+#endif
 !
-!/MPI        END IF
+#ifdef W3_MPI
+        END IF
+#endif
 !
 ! ..... process locally stored data
 !
-!/MPI      DO J=1, NRGRD
-!/MPI        EQSTGE(IMOD,J)%VTIME = TIME
-!/MPI        IF ( J .EQ. IMOD ) CYCLE
-!/MPI        DO IS=1, EQSTGE(IMOD,J)%NRQOUT
-!/MPI          I      = EQSTGE(IMOD,J)%OUTDAT(IS,1)
-!/MPI          I1     = EQSTGE(IMOD,J)%OUTDAT(IS,2)
-!/MPI          I2     = EQSTGE(IMOD,J)%OUTDAT(IS,3)
-!/MPI          EQSTGE(IMOD,J)%SEQL(:,I1,I2) = EQSTGE(IMOD,J)%TSTORE(:,I)
-!/MPI          END DO
-!/MPI      END DO
+#ifdef W3_MPI
+      DO J=1, NRGRD
+        EQSTGE(IMOD,J)%VTIME = TIME
+        IF ( J .EQ. IMOD ) CYCLE
+        DO IS=1, EQSTGE(IMOD,J)%NRQOUT
+          I      = EQSTGE(IMOD,J)%OUTDAT(IS,1)
+          I1     = EQSTGE(IMOD,J)%OUTDAT(IS,2)
+          I2     = EQSTGE(IMOD,J)%OUTDAT(IS,3)
+          EQSTGE(IMOD,J)%SEQL(:,I1,I2) = EQSTGE(IMOD,J)%TSTORE(:,I)
+          END DO
+      END DO
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 2.  Data available, process grid by grid
 !
-!/T      WRITE (MDST,9020)
+#ifdef W3_T
+      WRITE (MDST,9020)
+#endif
 !
 ! 2.a Do 'native' grid IMOD
 !
-!/T      WRITE (MDST,9021) IMOD, EQSTGE(IMOD,IMOD)%NREC
+#ifdef W3_T
+      WRITE (MDST,9021) IMOD, EQSTGE(IMOD,IMOD)%NREC
+#endif
 !
       DO I=1, EQSTGE(IMOD,IMOD)%NREC
         JSEA   = EQSTGE(IMOD,IMOD)%JSEA(I)
@@ -2466,20 +3144,26 @@
       DO J=1, NRGRD
         IF ( IMOD.EQ.J .OR. EQSTGE(IMOD,J)%NREC.EQ.0 ) CYCLE
 !
-!/T        WRITE (MDST,9022) J, EQSTGE(IMOD,J)%NREC
+#ifdef W3_T
+        WRITE (MDST,9022) J, EQSTGE(IMOD,J)%NREC
+#endif
 !
-!/SMC !! Use 1-1 full boundary spectra without modification. JGLi16Dec2020
-!/SMC        IF( GTYPE .EQ. SMCTYPE ) THEN
-!/SMC          DO I=1, EQSTGE(IMOD,J)%NREC
-!/SMC             JSEA   = EQSTGE(IMOD,J)%JSEA(I)
-!/SMC             VA(:,JSEA) = EQSTGE(IMOD,J)%SEQL(:,I,1) 
-!/SMC          END DO
-!/SMC        ELSE
-!/SMC !! Other grid boundary spectra may need conversion.   JGLi12Apr2021
+#ifdef W3_SMC
+ !! Use 1-1 full boundary spectra without modification. JGLi16Dec2020
+        IF( GTYPE .EQ. SMCTYPE ) THEN
+          DO I=1, EQSTGE(IMOD,J)%NREC
+             JSEA   = EQSTGE(IMOD,J)%JSEA(I)
+             VA(:,JSEA) = EQSTGE(IMOD,J)%SEQL(:,I,1) 
+          END DO
+        ELSE
+ !! Other grid boundary spectra may need conversion.   JGLi12Apr2021
+#endif
 !
 ! 2.c Average spectra
 !
-!/T        WRITE (MDST,9023)
+#ifdef W3_T
+        WRITE (MDST,9023)
+#endif
         ALLOCATE ( SPEC1(SGRDS(J)%NSPEC,EQSTGE(IMOD,J)%NREC) )
         SPEC1  = 0.
 !
@@ -2493,7 +3177,9 @@
 ! 2.d Convert spectra
 !
         IF ( RESPEC(IMOD,J) ) THEN
-!/T            WRITE (MDST,9024)
+#ifdef W3_T
+            WRITE (MDST,9024)
+#endif
             ALLOCATE ( SPEC2(NSPEC,EQSTGE(IMOD,J)%NREC) )
 !
             CALL W3CSPC ( SPEC1, SGRDS(J)%NK, SGRDS(J)%NTH,           &
@@ -2512,15 +3198,19 @@
           ISEA   = EQSTGE(IMOD,J)%ISEA(I)
           JSEA   = EQSTGE(IMOD,J)%JSEA(I)
           WGHT   = EQSTGE(IMOD,J)%WGHT(I)
-!/SMC !!  Regular grid in same ranked SMC group uses 1-1 mapping. JGLi12Apr2021
-!/SMC          IF( NGRPSMC .GT. 0 ) THEN
-!/SMC             VA(:,JSEA) = SPEC(:,I)
-!/SMC          ELSE 
+#ifdef W3_SMC
+ !!  Regular grid in same ranked SMC group uses 1-1 mapping. JGLi12Apr2021
+          IF( NGRPSMC .GT. 0 ) THEN
+             VA(:,JSEA) = SPEC(:,I)
+          ELSE 
+#endif
           DO IS=1, NSPEC
             VA(IS,JSEA) = VA(IS,JSEA) + WGHT *                        &
                SPEC(IS,I) / SIG2(IS) * CG(1+(IS-1)/NTH,ISEA)
             END DO
-!/SMC          ENDIF !! NGRPSMC .GT. 0
+#ifdef W3_SMC
+          ENDIF !! NGRPSMC .GT. 0
+#endif
           END DO
 !
 ! 2.f Final clean up
@@ -2528,8 +3218,10 @@
         DEALLOCATE ( SPEC1 )
         IF ( RESPEC(IMOD,J) ) DEALLOCATE ( SPEC2 )
 
-!/SMC !!  End GTYPE .EQ. SMCTYPE 
-!/SMC        ENDIF    
+#ifdef W3_SMC
+ !!  End GTYPE .EQ. SMCTYPE 
+        ENDIF    
+#endif
 
 !!  End 2.b J grid loop.
         END DO
@@ -2539,32 +3231,42 @@
 !
       IF ( PRESENT(DONE) ) DONE = .TRUE.
 !       
-!/PDLIB  CALL PDLIB_exchange2Dreal(VA(:,1:NPA))
+#ifdef W3_PDLIB
+  CALL PDLIB_exchange2Dreal(VA(:,1:NPA))
+#endif
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST WMIOEG : GATHERING DATA FOR GRID ',I4)
-!/T 9001 FORMAT ( ' TEST WMIOEG : ',A,' PER SOURCE GRID : '/13X,20I5)
-!/T 9002 FORMAT ( ' TEST WMIOEG : NO DATA TO BE GATHERED')
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMIOEG : GATHERING DATA FOR GRID ',I4)
+ 9001 FORMAT ( ' TEST WMIOEG : ',A,' PER SOURCE GRID : '/13X,20I5)
+ 9002 FORMAT ( ' TEST WMIOEG : NO DATA TO BE GATHERED')
+#endif
 !
-!/T 9010 FORMAT ( ' TEST WMIOEG : TEST DATA AVAILABILITY FOR',I9.8,I7.6)
-!/MPIT 9011 FORMAT ( ' MPIT WMIOEG : EQLSTA =',I2)
-!/MPIT 9012 FORMAT ( '               STAGING ARRAY FROM',I4,1X,A)
-!/MPIT 9013 FORMAT ( '               VTIME, DTTST :',I9.8,I7.6,1X,F8.1)
-!/MPIT 9014 FORMAT (/' MPIT WMIOEG : RECEIVE FROM GRID',I4/           &
-!/MPIT               ' +------+------+------+------+--------------+'/ &
-!/MPIT               ' |  IH  |  ID  | FROM |  TAG |   handle err |'/ &
-!/MPIT               ' +------+------+------+------+--------------+')
-!/MPIT 9016 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
-!/MPIT 9017 FORMAT ( ' +------+------+------+------+--------------+'/)
-!/MPIT 9018 FORMAT ( ' MPIT WMIOEG : NRQBPT:',I10/)
-!/MPIT 9019 FORMAT ( ' MPIT WMIOEG : RECEIVES FINISHED :',F6.1,'%')
+#ifdef W3_T
+ 9010 FORMAT ( ' TEST WMIOEG : TEST DATA AVAILABILITY FOR',I9.8,I7.6)
+#endif
+#ifdef W3_MPIT
+ 9011 FORMAT ( ' MPIT WMIOEG : EQLSTA =',I2)
+ 9012 FORMAT ( '               STAGING ARRAY FROM',I4,1X,A)
+ 9013 FORMAT ( '               VTIME, DTTST :',I9.8,I7.6,1X,F8.1)
+ 9014 FORMAT (/' MPIT WMIOEG : RECEIVE FROM GRID',I4/           &
+               ' +------+------+------+------+--------------+'/ &
+               ' |  IH  |  ID  | FROM |  TAG |   handle err |'/ &
+               ' +------+------+------+------+--------------+')
+ 9016 FORMAT ( ' |',I5,' |',I5,' |',2(I5,' |'),I9,I4,' |')
+ 9017 FORMAT ( ' +------+------+------+------+--------------+'/)
+ 9018 FORMAT ( ' MPIT WMIOEG : NRQBPT:',I10/)
+ 9019 FORMAT ( ' MPIT WMIOEG : RECEIVES FINISHED :',F6.1,'%')
+#endif
 !
-!/T 9020 FORMAT ( ' TEST WMIOEG : PROCESSING DATA GRID BY GRID')
-!/T 9021 FORMAT ( '               NATIVE    GRID ',I3,'   DATA :',I6)
-!/T 9022 FORMAT ( '               RECEIVING GRID ',I3,'   DATA :',I6)
-!/T 9023 FORMAT ( '                  AVERAGE SPECTRA')
-!/T 9024 FORMAT ( '                  CONVERTING SPECTRA')
+#ifdef W3_T
+ 9020 FORMAT ( ' TEST WMIOEG : PROCESSING DATA GRID BY GRID')
+ 9021 FORMAT ( '               NATIVE    GRID ',I3,'   DATA :',I6)
+ 9022 FORMAT ( '               RECEIVING GRID ',I3,'   DATA :',I6)
+ 9023 FORMAT ( '                  AVERAGE SPECTRA')
+ 9024 FORMAT ( '                  CONVERTING SPECTRA')
+#endif
 !/
 !/ End of WMIOEG ----------------------------------------------------- /
 !/
@@ -2636,11 +3338,15 @@
 !
       USE WMMDATMD
 !
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !
       IMPLICIT NONE
 !
-!/MPI      INCLUDE "mpif.h"
+#ifdef W3_MPI
+      INCLUDE "mpif.h"
+#endif
 !/
 !/ ------------------------------------------------------------------- /
 !/ Parameter list
@@ -2651,44 +3357,62 @@
 !/ Local parameters
 !/
       INTEGER                 :: J
-!/MPI      INTEGER                 :: IERR_MPI
-!/MPI      INTEGER, POINTER        :: NRQ, IRQ(:)
-!/MPI      INTEGER, ALLOCATABLE    :: STATUS(:,:)
-!/S      INTEGER, SAVE           :: IENT = 0
+#ifdef W3_MPI
+      INTEGER                 :: IERR_MPI
+      INTEGER, POINTER        :: NRQ, IRQ(:)
+      INTEGER, ALLOCATABLE    :: STATUS(:,:)
+#endif
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
 !/
-!/S      CALL STRACE (IENT, 'WMIOEF')
+#ifdef W3_S
+      CALL STRACE (IENT, 'WMIOEF')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 0.  Initializations
 !
-!/T      WRITE (MDST,9000) IMOD
+#ifdef W3_T
+      WRITE (MDST,9000) IMOD
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Loop over grids
 !
       DO J=1, NRGRD
 !
-!/MPI        NRQ    => EQSTGE(J,IMOD)%NRQEQS
+#ifdef W3_MPI
+        NRQ    => EQSTGE(J,IMOD)%NRQEQS
+#endif
 !
 ! 1.a Nothing to finalize
 !
-!/MPI        IF ( NRQ .EQ. 0 ) CYCLE
-!/MPI        IRQ    => EQSTGE(J,IMOD)%IRQEQS
+#ifdef W3_MPI
+        IF ( NRQ .EQ. 0 ) CYCLE
+        IRQ    => EQSTGE(J,IMOD)%IRQEQS
+#endif
 !
 ! 1.b Wait for communication to end
 !
-!/MPI        ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
-!/MPI        CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
-!/MPI        DEALLOCATE ( STATUS )
+#ifdef W3_MPI
+        ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQ) )
+        CALL MPI_WAITALL ( NRQ, IRQ, STATUS, IERR_MPI )
+        DEALLOCATE ( STATUS )
+#endif
 !
 ! 1.c Reset arrays and counter
 !
-!/MPI        DEALLOCATE ( EQSTGE(J,IMOD)%IRQEQS,                      &
-!/MPI                     EQSTGE(J,IMOD)%TSTORE,                      &
-!/MPI                     EQSTGE(J,IMOD)%OUTDAT )
-!/MPI        NRQ    = 0
+#ifdef W3_MPI
+        DEALLOCATE ( EQSTGE(J,IMOD)%IRQEQS,                      &
+                     EQSTGE(J,IMOD)%TSTORE,                      &
+                     EQSTGE(J,IMOD)%OUTDAT )
+        NRQ    = 0
+#endif
 !
-!/T        WRITE (MDST,9010) J
+#ifdef W3_T
+        WRITE (MDST,9010) J
+#endif
 !
         END DO
 !
@@ -2696,8 +3420,10 @@
 !
 ! Formats
 !
-!/T 9000 FORMAT ( ' TEST WMIOEF : FINALIZE STAGING DATA FROM GRID ',I3)
-!/T 9010 FORMAT ( ' TEST WMIOEF : FINISHED WITH TARGET ',I3)
+#ifdef W3_T
+ 9000 FORMAT ( ' TEST WMIOEF : FINALIZE STAGING DATA FROM GRID ',I3)
+ 9010 FORMAT ( ' TEST WMIOEF : FINISHED WITH TARGET ',I3)
+#endif
 !/
 !/ End of WMIOEF ----------------------------------------------------- /
 !/

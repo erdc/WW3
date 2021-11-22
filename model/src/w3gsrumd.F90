@@ -234,7 +234,9 @@
 #ifdef ENABLE_WW3
       USE W3SERVMD, ONLY: EXTCDE
 #endif
-!/S      USE W3SERVMD, ONLY: STRACE
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
 !/
 !/ Specify default data typing
 !/
@@ -635,8 +637,10 @@
 
 !     Local parameters
       INTEGER :: LB(2), UB(2)
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GSUC_PTR_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GSUC_PTR_R4')
+#endif
 !
       LB(1) = LBOUND(XG,1); LB(2) = LBOUND(XG,2)
       UB(1) = UBOUND(XG,1); UB(2) = UBOUND(XG,2)
@@ -662,8 +666,10 @@
 
 !     Local parameters
       INTEGER :: LB(2), UB(2)
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GSUC_PTR_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GSUC_PTR_R4')
+#endif
 !
       LB(1) = LBOUND(XG,1); LB(2) = LBOUND(XG,2)
       UB(1) = UBOUND(XG,1); UB(2) = UBOUND(XG,2)
@@ -690,8 +696,10 @@
       LOGICAL, INTENT(IN), OPTIONAL :: DEBUG
 
 !     Local parameters
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GSUC_TGT_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GSUC_TGT_R4')
+#endif
 !
       GSU = GSU_CREATE( IJG, LLG, ICLO, LB, UB, XG4=XG, YG4=YG, &
                         NCB=NCB, NNP=NNP, DEBUG=DEBUG)
@@ -716,8 +724,10 @@
       LOGICAL, INTENT(IN), OPTIONAL :: DEBUG
 
 !     Local parameters
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GSUC_TGT_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GSUC_TGT_R8')
+#endif
 !
       GSU = GSU_CREATE( IJG, LLG, ICLO, LB, UB, XG8=XG, YG8=YG, &
                         NCB=NCB, NNP=NNP, DEBUG=DEBUG)
@@ -781,8 +791,10 @@
 
 !     Local parameters
       INTEGER :: IB, JB
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GSUD')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GSUD')
+#endif
 !
       IF ( ASSOCIATED(GSU%PTR) ) THEN
 !
@@ -879,8 +891,10 @@
       INTEGER, PARAMETER :: NBYTE_INT=4
       TYPE(CLASS_GSU), POINTER :: PTR
       INTEGER :: NDST, K, IB, JB, NBYTE
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GSUP')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GSUP')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
@@ -1070,8 +1084,10 @@
       REAL(8), INTENT(OUT)    :: XMIN, YMIN, XMAX, YMAX
 
 !     Local parameters
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3BBOX_GSU')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3BBOX_GSU')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
@@ -1106,8 +1122,10 @@
 !     Local parameters
       TYPE(T_GSU) :: GSU
       INTEGER :: LB(2), UB(2)
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3BBOX_GRD_PTR_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3BBOX_GRD_PTR_R4')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Set bounding box
@@ -1137,8 +1155,10 @@
 !     Local parameters
       TYPE(T_GSU) :: GSU
       INTEGER :: LB(2), UB(2)
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3BBOX_GRD_PTR_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3BBOX_GRD_PTR_R8')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Set bounding box
@@ -1168,8 +1188,10 @@
 
 !     Local parameters
       TYPE(T_GSU) :: GSU
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3BBOX_GRD_TGT_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3BBOX_GRD_TGT_R4')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Set bounding box
@@ -1197,8 +1219,10 @@
 
 !     Local parameters
       TYPE(T_GSU) :: GSU
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3BBOX_GRD_TGT_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3BBOX_GRD_TGT_R8')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Set bounding box
@@ -1317,8 +1341,10 @@
 
 !     Local parameters
       REAL(8) :: XT8, YT8, XS8(4), YS8(4), EPS8
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GFCL_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GFCL_R4')
+#endif
 !
 !-----set inputs
       XT8 = XT; YT8 = YT;
@@ -1371,8 +1397,10 @@
       INTEGER :: NLEVEL, LVL, LVL1, N1, IB0, JB0, IB1, JB1, K1
       INTEGER :: IS1(4), JS1(4)
       REAL(8) :: XS1(4), YS1(4), XSM, YSM, DD, DD1
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GFCL_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GFCL_R8')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
@@ -1739,8 +1767,10 @@
 
 !     Local parameters
       REAL(8) :: XT8, YT8, XS8(4), YS8(4), EPS8
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GFCD_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GFCD_R4')
+#endif
 !
 !-----set inputs
       XT8 = XT; YT8 = YT;
@@ -1785,8 +1815,10 @@
       INTEGER :: LXC, LYC, UXC, UYC
       REAL(4), POINTER :: XG4(:,:), YG4(:,:)
       REAL(8), POINTER :: XG8(:,:), YG8(:,:)
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GFCD_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GFCD_R8')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
@@ -2017,8 +2049,10 @@
 
 !     Local parameters
       REAL(8) :: XT8, YT8, EPS8, DCIN8
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GFPT_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GFPT_R4')
+#endif
 !
 !-----set inputs
       XT8 = XTIN; YT8 = YTIN;
@@ -2063,8 +2097,10 @@
       REAL(8) :: XTC, YTC, XSC(4), YSC(4)
       REAL(8) :: IXR, JXR, DD, LON0, LAT0, DMIN
       LOGICAL :: IJG, LLG
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GFPT_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GFPT_R8')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
@@ -2252,8 +2288,10 @@
 
 !     Local parameters
       REAL(8) :: XT8, YT8, IX8, JX8, EPS8, DCIN8
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GFIJ_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GFIJ_R4')
+#endif
 !
 !-----set inputs
       XT8 = XTIN; YT8 = YTIN;
@@ -2300,8 +2338,10 @@
       REAL(8) :: XT, YT, XS(4), YS(4)
       REAL(8) :: XTC, YTC, XSC(4), YSC(4)
       REAL(8) :: IXR, JXR, DD, LON0, LAT0
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GFIJ_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GFIJ_R8')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
@@ -2497,8 +2537,10 @@
 
 !     Local parameters
       REAL(8) :: XT8, YT8, RW8(4), EPS8, DCIN8
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GRMP_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GRMP_R4')
+#endif
 !
 !-----set inputs
       XT8 = XTIN; YT8 = YTIN;
@@ -2559,8 +2601,10 @@
       REAL(4), POINTER :: XG4(:,:), YG4(:,:)
       REAL(8), POINTER :: XG8(:,:), YG8(:,:)
       TYPE(T_NNS), POINTER :: NNP
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GRMP_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GRMP_R8')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
@@ -2969,8 +3013,10 @@
       REAL(8) :: LEPS, LDCIN, LWDTH=ZERO
       REAL(8) :: XT, YT
       REAL(8), POINTER :: CS8(:) => NULL()
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GRMC_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GRMC_R4')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
@@ -3076,8 +3122,10 @@
       LOGICAL :: IJG, LLG, LCLO
       INTEGER :: ICLO, GKIND
       INTEGER :: LBX, LBY, UBX, UBY, NX, NY
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GRMC_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GRMC_R8')
+#endif
 !
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
@@ -3539,8 +3587,10 @@
 
 !     Local parameters
       REAL(8) :: XT8, YT8, XS8(NS), YS8(NS), EPS8
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3CKCL_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3CKCL_R4')
+#endif
 !
 !-----set inputs
       XT8 = XT;  XS8 = XS;
@@ -3583,8 +3633,10 @@
       REAL(8) :: V1X, V1Y, V2X, V2Y, S90
       REAL(8) :: CROSS
       REAL(8) :: SIGN1
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3CKCL_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3CKCL_R8')
+#endif
 
       INCELL = .TRUE.
 !
@@ -4019,8 +4071,10 @@
       REAL(8) :: DXDPL, DYDPL, DXDQL, DYDQL
       REAL(8) :: DPDXL, DPDYL, DQDXL, DQDYL
       REAL(8) :: COSAL, SINAL, COSTP, SINTP, COSCL, SINCL, ANGLL
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3CGDM_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3CGDM_R4')
+#endif
 ! -------------------------------------------------------------------- /
 ! 1.  Check and setup inputs
 !
@@ -4370,8 +4424,10 @@
       REAL(8) :: DXDPL, DYDPL, DXDQL, DYDQL
       REAL(8) :: DPDXL, DPDYL, DQDXL, DQDYL
       REAL(8) :: COSAL, SINAL, COSTP, SINTP, COSCL, SINCL, ANGLL
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3CGDM_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3CGDM_R8')
+#endif
 ! -------------------------------------------------------------------- /
 ! 1.  Check and setup inputs
 !
@@ -4778,8 +4834,10 @@
       INTEGER :: K(0:NFD,0:NFD,1:NFD)
       REAL(8) :: C(0:NFD,0:NFD,1:NFD)
       REAL(8) :: DFDP, DFDQ
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GRD0_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GRD0_R4')
+#endif
 ! -------------------------------------------------------------------- /
 ! 1.  Check and setup inputs
 !
@@ -4897,8 +4955,10 @@
       INTEGER :: K(0:NFD,0:NFD,1:NFD)
       REAL(8) :: C(0:NFD,0:NFD,1:NFD)
       REAL(8) :: DFDP, DFDQ
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GRD0_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GRD0_R8')
+#endif
 ! -------------------------------------------------------------------- /
 ! 1.  Check and setup inputs
 !
@@ -5106,8 +5166,10 @@
       REAL(8) :: C(0:NFD,0:NFD,1:NFD)
       REAL(8) :: DVXDP, DVXDQ, DVYDP, DVYDQ
       REAL(8) :: DVXDX, DVYDY
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3DIV1_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3DIV1_R4')
+#endif
 ! -------------------------------------------------------------------- /
 ! 1.  Check and setup inputs
 !
@@ -5228,8 +5290,10 @@
       REAL(8) :: C(0:NFD,0:NFD,1:NFD)
       REAL(8) :: DVXDP, DVXDQ, DVYDP, DVYDQ
       REAL(8) :: DVXDX, DVYDY
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3DIV1_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3DIV1_R8')
+#endif
 ! -------------------------------------------------------------------- /
 ! 1.  Check and setup inputs
 !
@@ -5444,8 +5508,10 @@
       REAL(8) :: C(0:NFD,0:NFD,1:NFD)
       REAL(8) :: DXXDP, DXXDQ, DYYDP, DYYDQ, DXYDP, DXYDQ
       REAL(8) :: DXXDX, DYYDY, DXYDX, DXYDY
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3DIV2_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3DIV2_R4')
+#endif
 ! -------------------------------------------------------------------- /
 ! 1.  Check and setup inputs
 !
@@ -5572,8 +5638,10 @@
       REAL(8) :: C(0:NFD,0:NFD,1:NFD)
       REAL(8) :: DXXDP, DXXDQ, DYYDP, DYYDQ, DXYDP, DXYDQ
       REAL(8) :: DXXDX, DYYDY, DXYDX, DXYDY
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3DIV2_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3DIV2_R8')
+#endif
 ! -------------------------------------------------------------------- /
 ! 1.  Check and setup inputs
 !
@@ -5740,8 +5808,10 @@
 
 !     Local parameters
       REAL(8) :: XT8, YT8, XS8, YS8
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3DIST_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3DIST_R4')
+#endif
 !
 !-----set inputs
       XT8 = XT; YT8 = YT;
@@ -5765,8 +5835,10 @@
 
 !     Local parameters
       REAL(8) :: DX, DY, SLAM, SPHI, ARGD
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3DIST_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3DIST_R8')
+#endif
 !
 !-----compute displacements
       DX = XT - XS
@@ -5876,8 +5948,10 @@
 
 !     Local parameters
       REAL(8) :: K, K0, CLAM, SLAM, CPHI0, CPHI, SPHI0, SPHI
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPLX_0D_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPLX_0D_R4')
+#endif
 
       CLAM  = COS((LAM-LAM0)*D2R)
       SLAM  = SIN((LAM-LAM0)*D2R)
@@ -5902,8 +5976,10 @@
 
 !     Local parameters
       REAL(8) :: K, K0, CLAM, SLAM, CPHI0, CPHI, SPHI0, SPHI
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPLX_0D_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPLX_0D_R8')
+#endif
 
       CLAM  = COS((LAM-LAM0)*D2R)
       SLAM  = SIN((LAM-LAM0)*D2R)
@@ -5928,8 +6004,10 @@
 
 !     Local parameters
       INTEGER :: I
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPLX_1D_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPLX_1D_R4')
+#endif
 
       DO I = LBOUND(LAM,1),UBOUND(LAM,1)
           CALL W3SPLX( LAM0, PHI0, C0, LAM(I), PHI(I), X(I), Y(I) )
@@ -5947,8 +6025,10 @@
 
 !     Local parameters
       INTEGER :: I
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPLX_1D_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPLX_1D_R8')
+#endif
 
       DO I = LBOUND(LAM,1),UBOUND(LAM,1)
           CALL W3SPLX( LAM0, PHI0, C0, LAM(I), PHI(I), X(I), Y(I) )
@@ -5966,8 +6046,10 @@
 
 !     Local parameters
       INTEGER :: I, J
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPLX_2D_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPLX_2D_R4')
+#endif
 
       DO J = LBOUND(LAM,2),UBOUND(LAM,2)
       DO I = LBOUND(LAM,1),UBOUND(LAM,1)
@@ -5987,8 +6069,10 @@
 
 !     Local parameters
       INTEGER :: I, J
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPLX_2D_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPLX_2D_R8')
+#endif
 
       DO J = LBOUND(LAM,2),UBOUND(LAM,2)
       DO I = LBOUND(LAM,1),UBOUND(LAM,1)
@@ -6070,8 +6154,10 @@
 
 !     Local parameters
       REAL(8) :: K0, RHO, C, COSC, SINC, CPHI0, SPHI0
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPXL_0D_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPXL_0D_R4')
+#endif
 
       K0    = COS(HALF*C0*D2R)**2
       RHO   = SQRT(X*X+Y*Y)
@@ -6095,8 +6181,10 @@
 
 !     Local parameters
       REAL(8) :: K0, RHO, C, COSC, SINC, CPHI0, SPHI0
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPXL_0D_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPXL_0D_R8')
+#endif
 
       K0    = COS(HALF*C0*D2R)**2
       RHO   = SQRT(X*X+Y*Y)
@@ -6120,8 +6208,10 @@
 
 !     Local parameters
       INTEGER :: I
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPXL_1D_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPXL_1D_R4')
+#endif
 
       DO I = LBOUND(X,1),UBOUND(X,1)
           CALL W3SPXL( LAM0, PHI0, C0, X(I), Y(I), LAM(I), PHI(I) )
@@ -6139,8 +6229,10 @@
 
 !     Local parameters
       INTEGER :: I
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPXL_1D_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPXL_1D_R8')
+#endif
 
       DO I = LBOUND(X,1),UBOUND(X,1)
           CALL W3SPXL( LAM0, PHI0, C0, X(I), Y(I), LAM(I), PHI(I) )
@@ -6158,8 +6250,10 @@
 
 !     Local parameters
       INTEGER :: I, J
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPXL_2D_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPXL_2D_R4')
+#endif
 
       DO J = LBOUND(X,2),UBOUND(X,2)
       DO I = LBOUND(X,1),UBOUND(X,1)
@@ -6179,8 +6273,10 @@
 
 !     Local parameters
       INTEGER :: I, J
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SPXL_2D_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SPXL_2D_R8')
+#endif
 
       DO J = LBOUND(X,2),UBOUND(X,2)
       DO I = LBOUND(X,1),UBOUND(X,1)
@@ -6259,8 +6355,10 @@
 
 !     Local parameters
       REAL(8) :: CLAM, SLAM, CALP, SALP, CPHI, SPHI
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3TRLL_0D_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3TRLL_0D_R4')
+#endif
 
       CLAM  = COS((LAM1-LAM0)*D2R)
       SLAM  = SIN((LAM1-LAM0)*D2R)
@@ -6283,8 +6381,10 @@
 
 !     Local parameters
       REAL(8) :: CLAM, SLAM, CALP, SALP, CPHI, SPHI
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3TRLL_0D_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3TRLL_0D_R8')
+#endif
 
       CLAM  = COS((LAM1-LAM0)*D2R)
       SLAM  = SIN((LAM1-LAM0)*D2R)
@@ -6307,8 +6407,10 @@
 
 !     Local parameters
       INTEGER :: I
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3TRLL_1D_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3TRLL_1D_R4')
+#endif
 
       DO I = LBOUND(LAM1,1),UBOUND(LAM1,1)
           CALL W3TRLL( LAM0, PHI0, LAM1(I), PHI1(I), LAM(I), PHI(I) )
@@ -6326,8 +6428,10 @@
 
 !     Local parameters
       INTEGER :: I
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3TRLL_1D_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3TRLL_1D_R8')
+#endif
 
       DO I = LBOUND(LAM1,1),UBOUND(LAM1,1)
           CALL W3TRLL( LAM0, PHI0, LAM1(I), PHI1(I), LAM(I), PHI(I) )
@@ -6345,8 +6449,10 @@
 
 !     Local parameters
       INTEGER :: I, J
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3TRLL_2D_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3TRLL_2D_R4')
+#endif
 
       DO J = LBOUND(LAM1,2),UBOUND(LAM1,2)
       DO I = LBOUND(LAM1,1),UBOUND(LAM1,1)
@@ -6366,8 +6472,10 @@
 
 !     Local parameters
       INTEGER :: I, J
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3TRLL_2D_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3TRLL_2D_R8')
+#endif
 
       DO J = LBOUND(LAM1,2),UBOUND(LAM1,2)
       DO I = LBOUND(LAM1,1),UBOUND(LAM1,1)
@@ -6448,8 +6556,10 @@
 
 !     Local parameters
       REAL(8) :: CLAM, SLAM, CPH1, SPH1, CPH2, SPH2
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3LLAZ_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3LLAZ_R4')
+#endif
 
       CLAM = COS((LAM2-LAM1)*D2R)
       SLAM = SIN((LAM2-LAM1)*D2R)
@@ -6471,8 +6581,10 @@
 
 !     Local parameters
       REAL(8) :: CLAM, SLAM, CPH1, SPH1, CPH2, SPH2
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3LLAZ_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3LLAZ_R8')
+#endif
 
       CLAM = COS((LAM2-LAM1)*D2R)
       SLAM = SIN((LAM2-LAM1)*D2R)
@@ -6556,8 +6668,10 @@
 !     Local parameters
       INTEGER :: I, J, K, MN
       REAL(8) :: C1, C2, C3, C4, C5
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3FDWT_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3FDWT_R4')
+#endif
 
       C1 = ONE
       C4 = X(0)-Z
@@ -6599,8 +6713,10 @@
 !     Local parameters
       INTEGER :: I, J, K, MN
       REAL(8) :: C1, C2, C3, C4, C5
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3FDWT_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3FDWT_R4')
+#endif
 
       C1 = ONE
       C4 = X(0)-Z
@@ -6706,8 +6822,10 @@
 
 !     Local parameters
       INTEGER :: I, J, L, N
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3NNSC')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3NNSC')
+#endif
 !
 !-----allocate object
       ALLOCATE(NNS)
@@ -6813,8 +6931,10 @@
       TYPE(T_NNS), POINTER :: NNS
 
 !     Local parameters
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3NNSD')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3NNSD')
+#endif
 !
       IF ( ASSOCIATED(NNS) ) THEN
           NNS%NLVL = 0
@@ -6894,8 +7014,10 @@
 
 !     Local parameters
       INTEGER :: NDST, L, N
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3NNSP')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3NNSP')
+#endif
 !
       IF ( PRESENT(IUNIT) ) THEN
           NDST = IUNIT
@@ -6971,8 +7093,10 @@
 !     Local parameters
       INTEGER :: K, L, IM, JM
       REAL(4) :: DM
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SORT_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SORT_R4')
+#endif
 
       DO K=1, N-1
           DO L=K+1, N
@@ -6998,8 +7122,10 @@
 !     Local parameters
       INTEGER :: K, L, IM, JM
       REAL(8) :: DM
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3SORT_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3SORT_R8')
+#endif
 
       DO K=1, N-1
           DO L=K+1, N
@@ -7074,8 +7200,10 @@
 
 !     Local parameters
       INTEGER :: K, L
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3ISRT_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3ISRT_R4')
+#endif
 
       K_LOOP: DO K=1,N
           IF ( DD .LT. D(K) ) THEN
@@ -7105,8 +7233,10 @@
 
 !     Local parameters
       INTEGER :: K, L
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3ISRT_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3ISRT_R8')
+#endif
 
       K_LOOP: DO K=1,N
           IF ( DD .LT. D(K) ) THEN
@@ -7177,8 +7307,10 @@
       REAL(4), INTENT(IN) :: X
 
 !     Local parameters
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3INAN_R4')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3INAN_R4')
+#endif
 
 !-----return true if X is NaN or +Inf or -Inf
       INAN = .NOT. ( X .GE. -HUGE(X) .AND. X .LE. HUGE(X) )
@@ -7193,8 +7325,10 @@
       REAL(8), INTENT(IN) :: X
 
 !     Local parameters
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3INAN_R8')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3INAN_R8')
+#endif
 
 !-----return true if X is NaN or +Inf or -Inf
       INAN = .NOT. ( X .GE. -HUGE(X) .AND. X .LE. HUGE(X) )
@@ -7245,8 +7379,10 @@
       INTEGER :: NS, IB1(2), IB2(2), JB1(2), JB2(2), IBC(4), JBC(4)
       INTEGER :: ISTEP, ISTAT
       REAL(8) :: XC(4), YC(4)
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'W3GSUC')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'W3GSUC')
+#endif
 ! -------------------------------------------------------------------- /
 ! 1.  Test input
 !
@@ -7734,8 +7870,10 @@
       INTEGER :: K, ITER
       REAL(8) :: DXT, DX1, DX2, DX3, DXP, DYT, DY1, DY2, DY3, DYP
       REAL(8) :: MAT1, MAT2, MAT3, MAT4, DELP, DELQ, DET
-!/S      INTEGER, SAVE           :: IENT = 0
-!/S      CALL STRACE (IENT, 'GETPQR')
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+      CALL STRACE (IENT, 'GETPQR')
+#endif
 
       IF ( PRESENT(EPS) ) THEN
           IF ( EPS .LT. ZERO ) THEN
