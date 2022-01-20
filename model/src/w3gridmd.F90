@@ -469,8 +469,6 @@
 !     !/DB1   Battjes-Janssen depth-limited breaking.
 !     !/MLIM  Mich-style limiter.
 !
-!     !/VEG0   No dissipation by vegetation included.
-!
 !     !/TR0   No triad interactions included.
 !
 !     !/BS0   No bottom scattering included.
@@ -1510,13 +1508,8 @@
       NRDB   = NRDB + 1
 #endif
 !
-#ifdef W3_VEG0
+! VEG is on
       NRVG   = NRVG + 1
-      FLVG   = .FALSE.
-#endif
-#ifdef W3_VEG1
-      NRVG   = NRVG + 1
-#endif
 !
 #ifdef W3_TR0
       NRTR   = NRTR + 1
@@ -1541,13 +1534,13 @@
       IF ( .NOT.FLLIN .AND.  .NOT.FLINDS .AND.  .NOT.FLNL .AND.        &
            .NOT.FLBT  .AND.  .NOT.FLIC   .AND.  .NOT.FLIS .AND.        &
            .NOT.FLDB  .AND.  .NOT.FLTR   .AND.  .NOT.FLBS .AND.        &
-           .NOT.FLREF .AND.  .NOT.FLVG  .AND.  FLSOU) THEN
+           .NOT.FLREF .AND.  FLSOU) THEN
           WRITE (NDSE,1020)
           CALL EXTCDE ( 10 )
         END IF
 !
       IF ( ( FLLIN .OR. FLINDS .OR. FLNL .OR. FLBT .OR. FLDB .OR.     &
-             FLTR .OR. FLBS .OR. FLREF .OR. FLIC .OR. FLVG )          &
+             FLTR .OR. FLBS .OR. FLREF .OR. FLIC )                    &
              .AND. .NOT.FLSOU ) THEN
           WRITE (NDSE,1021)
         END IF
@@ -2389,12 +2382,7 @@
       WRITE (NDSO,932)
 #endif
 !
-! 6.k Define Sveg.
-#ifdef W3_VEG0
-      WRITE (NDSO,933)
-#endif
-!
-! 6.l Define Sxx and Sic.
+! 6.k Define Sxx and Sic.
 !
 #ifdef W3_IC1
       WRITE (NDSO,935)
@@ -6594,9 +6582,6 @@
                ', BJFLAG = ',A,' /')
 #endif
 !
-#ifdef W3_VEG0
-  933 FORMAT (/'  dissipation by vegetation not defined.'/)
-#endif
 !
 #ifdef W3_TR0
   930 FORMAT (/'  Triad interactions not defined.'/)

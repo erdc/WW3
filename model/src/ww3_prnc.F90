@@ -292,7 +292,7 @@
       CHARACTER               :: COMSTR*1, IDFLD*3, IDTYPE*2,         &
                                  IDTIME*23, FROMLL*4, FORMLL*16,      &
                                  NAMELL*80, NAMEF*80, IDTIME2*23
-      CHARACTER*14            :: IDSTR1(-9:7)
+      CHARACTER*14            :: IDSTR1(-7:8)
       CHARACTER*15            :: IDSTR3(3)
       CHARACTER*32            :: FORMT(2), FORMF(2)
       CHARACTER*20            :: IDSTR2(6)
@@ -348,15 +348,14 @@
 !/
 !/ ------------------------------------------------------------------- /
 !/
-      DATA IDSTR1 / 'veg params    ' , 'veg cdrag    ' ,              &
-                    'ice thickness ' , 'ice viscosity' ,              &
+      DATA IDSTR1 / 'ice thickness ' , 'ice viscosity' ,              &
                     'ice density   ' , 'ice modulus  ' ,              &
                     'ice flow diam.' , 'mud density  ' ,              &
                     'mud thickness ' , 'mud viscosity ',              &
                     'ice conc.     ' , 'water levels ' ,              &
                     'winds         ' , 'currents     ' ,              &
                     'data          ' , 'momentum     ' ,              &
-                    'air density   ' /
+                    'air density   ' , 'vegetation   '/
       DATA IDSTR2 / 'pre-processed file  ' , 'long.-lat. grid     ' , &
                     'grid from file (1)  ' , 'grid from file (2)  ' , &
                     'data (assimilation) ' , 'pre-pro. file + tide'  /
@@ -464,16 +463,16 @@
          ! Read namelist
          CALL W3NMLPRNC (NDSI, TRIM(FNMPRE)//'ww3_prnc.nml', NML_FORCING, NML_FILE, IERR)
          ! Check field
-         IF      (NML_FORCING%FIELD%VEG_PARAMS) THEN
-           IDFLD = 'VG1'
-           IFLD = -9
-           FLSTAB = .TRUE.
-           NFIELDS = 3
-         ELSE IF (NML_FORCING%FIELD%VEG_CDRAG ) THEN
-           IDFLD = 'VG2'
-           IFLD = -8
-           NFIELDS = 1
-         ELSE IF (NML_FORCING%FIELD%ICE_PARAM1) THEN
+!TJH         IF      (NML_FORCING%FIELD%VEG_PARAMS) THEN
+!           IDFLD = 'VG1'
+!           IFLD = -9
+!           FLSTAB = .TRUE.
+!           NFIELDS = 3
+!         ELSE IF (NML_FORCING%FIELD%VEG_CDRAG ) THEN
+!           IDFLD = 'VG2'
+!           IFLD = -8
+!           NFIELDS = 1
+         IF      (NML_FORCING%FIELD%ICE_PARAM1) THEN
            IDFLD = 'IC1'
            IFLD = -7
            NFIELDS = 1
@@ -544,6 +543,11 @@
            IDFLD = 'RHO'
            IFLD = 7
            NFIELDS = 1
+         ELSE IF (NML_FORCING%FIELD%VEG_PARAMS) THEN
+           IDFLD = 'VEG'
+           IFLD = 8
+           FLSTAB = .TRUE.
+           NFIELDS = 4
          ELSE
             GOTO 810
          END IF ! NML_FORCING
@@ -614,11 +618,11 @@
         ! Check field
         FLSTAB = IDFLD .EQ. 'WNS' .OR. IDFLD .EQ. 'VG1'
         FLBERG = IDFLD .EQ. 'ISI'
-        IF        ( IDFLD.EQ.'VG1' ) THEN
-            IFLD    = -9
-          ELSE IF ( IDFLD.EQ.'VG2' ) THEN
-            IFLD    = -8
-          ELSE IF ( IDFLD.EQ.'IC1' ) THEN
+!TJH        IF        ( IDFLD.EQ.'VG1' ) THEN
+!            IFLD    = -9
+!          ELSE IF ( IDFLD.EQ.'VG2' ) THEN
+!            IFLD    = -8
+        IF        ( IDFLD.EQ.'IC1' ) THEN
             IFLD    = -7
           ELSE IF ( IDFLD.EQ.'IC2' ) THEN
             IFLD    = -6
@@ -648,6 +652,8 @@
             IFLD    = 6
           ELSE IF ( IDFLD.EQ.'RHO' ) THEN
             IFLD    = 7
+          ELSE IF ( IDFLD.EQ.'VEG' ) THEN
+            IFLD    = 8
           ELSE
             WRITE (NDSE,1030) IDFLD
             CALL EXTCDE ( 30 )

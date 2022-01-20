@@ -130,7 +130,7 @@
 !       IDFLD   C*3  I/O ID string for field type, valid are: 'IC1',
 !                        'IC2', 'IC3', 'IC4', 'IC5', 'MDN', 'MTH',
 !                        'MVS', 'LEV', 'CUR', 'WND', 'WNS', 'ICE',
-!                        'TAU', 'RHO', 'ISI', and 'DTn'.
+!                        'TAU', 'RHO', 'VEG', 'ISI', and 'DTn'.
 !       NDS     Int.  I  Dataset number for fields file.
 !       NDST    Int.  I  Dataset number for test output.
 !       NDSE    Int.  I  Dataset number for error output.
@@ -262,17 +262,16 @@
         END IF
 
       IF (INXOUT.NE.'READ' .AND. INXOUT.NE.'WRITE') GOTO 801
-      IF ( IDFLD.NE.'VG1' .AND. IDFLD.NE.'VG2' .AND.                  &
-           IDFLD.NE.'IC1' .AND. IDFLD.NE.'IC2' .AND.                  &
+      IF ( IDFLD.NE.'IC1' .AND. IDFLD.NE.'IC2' .AND.                  &
            IDFLD.NE.'IC3' .AND. IDFLD.NE.'IC4' .AND.                  &
            IDFLD.NE.'IC5' .AND. IDFLD.NE.'MDN' .AND.                  &
            IDFLD.NE.'MTH' .AND. IDFLD.NE.'MVS' .AND.                  &
            IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
            IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
            IDFLD.NE.'ICE' .AND. IDFLD.NE.'TAU' .AND.                  &
-           IDFLD.NE.'RHO' .AND. IDFLD.NE.'DT0' .AND.                  &
-           IDFLD.NE.'DT1' .AND. IDFLD.NE.'DT2' .AND.                  &
-           IDFLD.NE.'ISI' )    GOTO 802
+           IDFLD.NE.'RHO' .AND. IDFLD.NE.'VEG' .AND.                  &
+           IDFLD.NE.'DT0' .AND. IDFLD.NE.'DT1' .AND.                  &
+           IDFLD.NE.'DT2' .AND. IDFLD.NE.'ISI' )    GOTO 802
 !
       IF ( PRESENT(FEXT) ) THEN
           TEMPXT = FEXT
@@ -293,13 +292,16 @@
           I     = I + 6
         ELSE IF ( IDFLD.EQ.'CUR' ) THEN
           FNAME = 'current.' // TEMPXT(:I)
-          I     = I + 8
+          I     = I + 8   
         ELSE IF ( IDFLD.EQ.'WND' .OR. IDFLD.EQ.'WNS' ) THEN
           FNAME = 'wind.' // TEMPXT(:I)
           I     = I + 5
         ELSE IF ( IDFLD.EQ.'ICE' .OR. IDFLD.EQ.'ISI' ) THEN
           FNAME = 'ice.' // TEMPXT(:I)
           I     = I + 4
+        ELSE IF ( IDFLD.EQ.'VEG' ) THEN
+          FNAME = 'vegetation.' // TEMPXT(:I)
+          I     = I + 10
         ELSE IF ( IDFLD.EQ.'TAU' ) THEN
           FNAME = 'momentum.' // TEMPXT(:I)
           I     = I + 9
@@ -339,12 +341,6 @@
         ELSE IF ( IDFLD.EQ.'IC5' ) THEN
           FNAME = 'ice5.' // TEMPXT(:I)
           I     = I + 5
-        ELSE IF ( IDFLD.EQ.'VG1' ) THEN
-          FNAME = 'veg1.' // TEMPXT(:I)
-          I     = I + 9
-        ELSE IF ( IDFLD.EQ.'VG2' ) THEN
-          FNAME = 'veg2.' // TEMPXT(:I)
-          I     = I + 9
         END IF
 !
       WRITE  = INXOUT .EQ. 'WRITE'
@@ -601,7 +597,7 @@
 !                        'READ' and 'WRITE'.
 !       IDFLD   C*3  I/O ID string for field type, valid are:
 !                        'LEV', 'CUR', 'WND', 'WNS', 'ICE', 'ISI', 
-!                        'TAU', 'RHO', and 'DTn'.
+!                        'TAU', 'RHO', 'VEG', and 'DTn'.
 !       NDS     Int.  I  Dataset number for fields file.
 !       NDST    Int.  I  Dataset number for test output.
 !       NDSE    Int.  I  Dataset number for error output.
@@ -693,10 +689,11 @@
       IF (INXOUT.NE.'READ' .AND. INXOUT.NE.'WRITE') GOTO 801
       IF ( IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
            IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
-           IDFLD.NE.'ICE' .AND. IDFLD.NE.'TAU' .AND.                  &
-           IDFLD.NE.'RHO' .AND. IDFLD.NE.'DT0' .AND.                  &
-           IDFLD.NE.'DT1' .AND. IDFLD.NE.'DT2' .AND.                  &
-           IDFLD.NE.'ISI' )    GOTO 802
+           IDFLD.NE.'ICE' .AND. IDFLD.NE.'VEG' .AND.                  &
+           IDFLD.NE.'TAU' .AND. IDFLD.NE.'RHO' .AND.                  &
+           IDFLD.NE.'VEG' .AND. IDFLD.NE.'ISI' .AND'                  &
+           IDFLD.NE.'DT0' .AND. IDFLD.NE.'DT1' .AND.                  &
+           IDFLD.NE.'DT2' )    GOTO 802
       WRITE  = INXOUT .EQ. 'WRITE'
 
 #ifdef W3_TIDE
@@ -792,7 +789,7 @@
 !                        'READ' and 'WRITE'.
 !       IDFLD   C*3  I/O ID string for field type, valid are:
 !                        'LEV', 'CUR', 'WND', 'WNS', 'ICE', 'ISI',
-!                        'TAU', 'RHO',  and 'DTn'.
+!                        'TAU', 'RHO', 'VEG',  and 'DTn'.
 !       NDS     Int.  I  Dataset number for fields file.
 !       NDST    Int.  I  Dataset number for test output.
 !       NDSE    Int.  I  Dataset number for error output.
@@ -885,10 +882,10 @@
       IF (INXOUT.NE.'READ' .AND. INXOUT.NE.'WRITE') GOTO 801
       IF ( IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
            IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
-           IDFLD.NE.'ICE' .AND. IDFLD.NE.'TAU' .AND.                  &
-           IDFLD.NE.'RHO' .AND. IDFLD.NE.'DT0' .AND.                  &
-           IDFLD.NE.'DT1' .AND. IDFLD.NE.'DT2' .AND.                  &
-           IDFLD.NE.'ISI' )    GOTO 802
+           IDFLD.NE.'ICE' .AND. IDFLD.NE.'ISI' .AND.                  &
+           IDFLD.NE.'TAU' .AND. IDFLD.NE.'RHO' .AND.                  &
+           IDFLD.NE.'VEG' .AND. IDFLD.NE.'DT0' .AND.                  &
+           IDFLD.NE.'DT1' .AND. IDFLD.NE.'DT2' )    GOTO 802
       WRITE  = INXOUT .EQ. 'WRITE'
 
 #ifdef W3_TIDE
@@ -1041,7 +1038,7 @@
 !       IDFLD   C*3    I   ID string for field type, valid are: 'IC1',
 !                          'IC2', 'IC3', 'IC4', 'IC5', 'MDN', 'MTH', 'MVS', 
 !                          'LEV', 'CUR', 'WND', 'WNS', 'ICE', 'ISI',
-!                          'TAU', and 'RHO'.
+!                          'TAU', 'RHO', and 'VEG'.
 !       NDS     Int.   I   Dataset number for fields file.
 !       NDST    Int.   I   Dataset number for test output.
 !       NDSE    Int.   I   Dataset number for error output.
@@ -1179,15 +1176,15 @@
 ! test input parameters ---------------------------------------------- *
 !
       IF (INXOUT.NE.'READ' .AND. INXOUT.NE.'WRITE') GOTO 801
-      IF ( IDFLD.NE.'VG1' .AND. IDFLD.NE.'VG2' .AND.                  &
-           IDFLD.NE.'IC1' .AND. IDFLD.NE.'IC2' .AND.                  & 
+      IF ( IDFLD.NE.'IC1' .AND. IDFLD.NE.'IC2' .AND.                  & 
            IDFLD.NE.'IC3' .AND. IDFLD.NE.'IC4' .AND.                  &
            IDFLD.NE.'IC5' .AND. IDFLD.NE.'MDN' .AND.                  &
            IDFLD.NE.'MTH' .AND. IDFLD.NE.'MVS' .AND.                  &
            IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
            IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
            IDFLD.NE.'ICE' .AND. IDFLD.NE.'ISI' .AND.                  &
-           IDFLD.NE.'TAU' .AND. IDFLD.NE.'RHO' )    GOTO 802
+           IDFLD.NE.'TAU' .AND. IDFLD.NE.'RHO' .AND.                  &
+           IDFLD.NE.'VEG' )    GOTO 802
 !
 ! Set internal variables --------------------------------------------- *
 !
@@ -2200,8 +2197,8 @@
       END SUBROUTINE W3FLDP
 !/ ------------------------------------------------------------------- /
       SUBROUTINE W3FLDH (J, NDST, NDSE, MX, MY, NX, NY, T0, TN,       &
-                         NH, NHM, THO, HA, HD, HS, TF0, FX0, FY0, FS0,&
-                         TFN, FXN, FYN, FSN, IERR)
+                         NH, NHM, THO, HA, HD, HS, HR,  TF0, FX0, FY0,&
+                         FS0, TFN, FXN, FYN, FSN, FRN , IERR)
 !/
 !/                  +-----------------------------------+
 !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -2232,8 +2229,6 @@
 !     Parameter list
 !     ----------------------------------------------------------------
 !       J       Int    I   Field number of input field as in shell.
-!                          -9 : veg parameters
-!                          -8 : veg drag
 !                          -7 : ice parameter 1
 !                          -6 : ice parameter 2
 !                          -5 : ice parameter 3
@@ -2248,6 +2243,7 @@
 !                           4 : ice
 !                           5 : atmospheric momentum
 !                           6 : air density
+!                           7 : vegetation
 !                          10 : moving grid
 !       NDST    Int.   I   Unit number test output.
 !       NDSE    Int.   I   Unit number error messages.
@@ -2261,6 +2257,7 @@
 !       HA      R.A.  I/O  Id. amplitude.
 !       HD      R.A.  I/O  Id. direction (degr., Naut.).
 !       HS      R.A.  I/O  Id. air-sea temperature difference (degr.).
+!       HR      R.A.  I/O  Id. vegetation Cd 
 !       TF0-N   I.A.  I/O  Times of input fields
 !       Fxx     R.A.  I/O  Input fields (X, Y, Scalar)
 !       IERR    Int.   O   Error indicator,
@@ -2320,11 +2317,13 @@
 !/
       INTEGER, INTENT(IN)     :: J, NDST, NDSE, MX, MY, NX, NY,       &
                                  T0(2), TN(2), NHM
-      INTEGER, INTENT(INOUT)  :: NH, THO(2,-9:10,NHM), TF0(2), TFN(2)
+      INTEGER, INTENT(INOUT)  :: NH, THO(2,-7:10,NHM), TF0(2), TFN(2)
       INTEGER, INTENT(OUT)    :: IERR
-      REAL, INTENT(INOUT)     :: HA(NHM,-9:10), HD(NHM,-9:10), HS(NHM,-9:10), &
+      REAL, INTENT(INOUT)     :: HA(NHM,-7:10), HD(NHM,-7:10),        &
+                                 HS(NHM,-7:10), HR(NHM,-7:10),        &
                                  FX0(MX,MY), FY0(MX,MY), FS0(MX,MY),  &
-                                 FXN(MX,MY), FYN(MX,MY), FSN(MX,MY)
+                                 FXN(MX,MY), FYN(MX,MY), FSN(MX,MY),  &
+                                 FRN(MX,MY)
 !/
 !/ ------------------------------------------------------------------- /
 !/ Local parameters
@@ -2354,7 +2353,7 @@
 !
 ! Test field ID number for validity
 !
-      IF ( J.LT.-9 .OR. J .GT.10 ) GOTO 801
+      IF ( J.LT.-7 .OR. J .GT.10 ) GOTO 801
       FLFRST = TFN(1) .EQ. -1
 !
 #ifdef W3_T
@@ -2446,12 +2445,13 @@
 #endif
               END IF
 ! veg
-            IF ( J .EQ. -9 ) THEN
+            IF ( J .EQ. 7 ) THEN
                DO IX = 1, NX
                  DO IY = 1, NY
                    FXN(IX,IY) = HA(1,J)
                    FYN(IX,IY) = HD(1,J)
                    FSN(IX,IY) = HS(1,J)
+                   FRN(IX,IY) = HR(1,J)
                  END DO
                END DO
             END IF

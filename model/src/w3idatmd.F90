@@ -54,6 +54,7 @@
 !      TIN       I.A.  Public   Time for ice field. (concentration)
 !      TU0/N     I.A.  Public   Times for momentum fields.
 !      TR0/N     I.A.  Public   Times for air density fields.
+!      TPN       I.A.  Public   Times for vegetation fields
 !      TI1N      I.A.  Public   Time for ice field. (parameter 1)
 !      TI2N      I.A.  Public   Time for ice field. (parameter 2)
 !      TI3N      I.A.  Public   Time for ice field. (parameter 3)
@@ -156,7 +157,7 @@
 !/ Data structure INPUT
 !/
       TYPE INPUT
-        INTEGER               :: TFN(2,-9:10), TC0(2), TW0(2),        &
+        INTEGER               :: TFN(2,-7:11), TC0(2), TW0(2),        &
                                  TU0(2), TR0(2), TDN(2), TG0(2)
         REAL                  :: GA0, GD0, GAN, GDN
 #ifdef W3_WRST
@@ -183,8 +184,8 @@
 #endif
 ! note that if size of INFLAGS1 is changed, then TFLAGS in wminitmd.ftn
 !    also must be resized.
-        LOGICAL               :: INFLAGS1(-9:14), FLAGSC(-9:14),      &
-                                 INFLAGS2(-9:14)
+        LOGICAL               :: INFLAGS1(-7:15), FLAGSC(-7:15),      &
+                                 INFLAGS2(-7:15)
       END TYPE INPUT
 !/
 !/ Data storage
@@ -199,7 +200,7 @@
                                  T1N(:), T2N(:), TDN(:), TG0(:),      &
                                  TGN(:), TTN(:), TVN(:), TZN(:),      &
                                  TI1(:), TI2(:), TI3(:), TI4(:),      &
-                                 TI5(:), TV1(:), TV2(:) 
+                                 TI5(:), TPN(:), TV1(:), TV2(:) 
       REAL, POINTER           :: GA0, GD0, GAN, GDN
       REAL, POINTER           :: WX0(:,:), WY0(:,:), DT0(:,:),        &
                                  WXN(:,:), WYN(:,:), DTN(:,:),        &
@@ -504,8 +505,8 @@
         END IF
 #endif
 
-      FLVG1  => INPUTS(IMOD)%INFLAGS1(-9)
-      FLVG2  => INPUTS(IMOD)%INFLAGS1(-8)
+!      FLVG1  => INPUTS(IMOD)%INFLAGS1(-9)
+!      FLVG2  => INPUTS(IMOD)%INFLAGS1(-8)
 
       FLIC1  => INPUTS(IMOD)%INFLAGS1(-7)
       FLIC2  => INPUTS(IMOD)%INFLAGS1(-6)
@@ -535,20 +536,21 @@
       FLICE  => INPUTS(IMOD)%INFLAGS1(4)
       FLTAUA => INPUTS(IMOD)%INFLAGS1(5)
       FLRHOA => INPUTS(IMOD)%INFLAGS1(6)
+      FLVEG  => INPUTS(IMOD)%INFLAGS1(7)
 !
 ! notes: future improvement: flags for ICEPx should be 
 !     "all or nothing" rather than 5 individual flags
 
-      IF ( FLVG1  ) THEN
-          ALLOCATE ( INPUTS(IMOD)%VEGLS(NX,NY),            &
-                     INPUTS(IMOD)%VEGBV(NX,NY),            &
-                     INPUTS(IMOD)%VEGN(NX,NY), STAT=ISTAT )
-          CHECK_ALLOC_STATUS ( ISTAT )
-        END IF
-      IF ( FLVG2 ) THEN
-          ALLOCATE ( INPUTS(IMOD)%VEGCD(NX,NY), STAT=ISTAT )
-          CHECK_ALLOC_STATUS ( ISTAT )
-        END IF
+!TJH      IF ( FLVG1  ) THEN
+!          ALLOCATE ( INPUTS(IMOD)%VEGLS(NX,NY),            &
+!                     INPUTS(IMOD)%VEGBV(NX,NY),            &
+!                     INPUTS(IMOD)%VEGN(NX,NY), STAT=ISTAT )
+!          CHECK_ALLOC_STATUS ( ISTAT )
+!        END IF
+!      IF ( FLVG2 ) THEN
+!          ALLOCATE ( INPUTS(IMOD)%VEGCD(NX,NY), STAT=ISTAT )
+!          CHECK_ALLOC_STATUS ( ISTAT )
+!        END IF
 
       IF ( FLIC1  ) THEN
           ALLOCATE ( INPUTS(IMOD)%ICEP1(NX,NY), STAT=ISTAT )
@@ -696,6 +698,25 @@
           CHECK_ALLOC_STATUS ( ISTAT )
         END IF
 !
+      IF ( FLVEG  ) THEN
+#ifdef W3_SMC
+       IF( FSWND ) THEN
+          ALLOCATE ( INPUTS(IMOD)%VEGLS(NX,NY),            &
+!                    INPUTS(IMOD)%VEGBV(NX,NY),            &
+!                    INPUTS(IMOD)%VEGN(NX,NY),             &
+                     INPUTS(IMOD)%VEGCD(NX,NY), STAT=ISTAT )
+       ELSE
+#endif
+          ALLOCATE ( INPUTS(IMOD)%VEGLS(NX,NY),            &
+                     INPUTS(IMOD)%VEGBV(NX,NY),            &
+                     INPUTS(IMOD)%VEGN(NX,NY),             &
+                     INPUTS(IMOD)%VEGCD(NX,NY), STAT=ISTAT )
+#ifdef W3_SMC
+       ENDIF
+#endif
+          CHECK_ALLOC_STATUS ( ISTAT )
+        END IF   
+
       INPUTS(IMOD)%IINIT  = .TRUE.
 !
 #ifdef W3_T
@@ -879,8 +900,8 @@
       TG0    => INPUTS(IMOD)%TG0
       TDN    => INPUTS(IMOD)%TDN
 !
-      TV1    => INPUTS(IMOD)%TFN(:,-9)
-      TV2    => INPUTS(IMOD)%TFN(:,-8)
+!TJH      TV1    => INPUTS(IMOD)%TFN(:,-9)
+!      TV2    => INPUTS(IMOD)%TFN(:,-8)
 
       TI1    => INPUTS(IMOD)%TFN(:,-7)
       TI2    => INPUTS(IMOD)%TFN(:,-6)
@@ -898,10 +919,11 @@
       TIN    => INPUTS(IMOD)%TFN(:,4)
       TUN    => INPUTS(IMOD)%TFN(:,5)
       TRN    => INPUTS(IMOD)%TFN(:,6)
-      T0N    => INPUTS(IMOD)%TFN(:,7)
-      T1N    => INPUTS(IMOD)%TFN(:,8)
-      T2N    => INPUTS(IMOD)%TFN(:,9)
-      TGN    => INPUTS(IMOD)%TFN(:,10)
+      TPN    => INPUTS(IMOD)%TPN(:,7)
+      T0N    => INPUTS(IMOD)%TFN(:,8)
+      T1N    => INPUTS(IMOD)%TFN(:,9)
+      T2N    => INPUTS(IMOD)%TFN(:,10)
+      TGN    => INPUTS(IMOD)%TFN(:,11)
 !
       GA0    => INPUTS(IMOD)%GA0
       GD0    => INPUTS(IMOD)%GD0
@@ -913,8 +935,8 @@
       INFLAGS2  => INPUTS(IMOD)%INFLAGS2
       FLAGSC => INPUTS(IMOD)%FLAGSC
 !
-      FLVG1  => INPUTS(IMOD)%INFLAGS1(-9)
-      FLVG2  => INPUTS(IMOD)%INFLAGS1(-8)
+!TJH      FLVG1  => INPUTS(IMOD)%INFLAGS1(-9)
+!      FLVG2  => INPUTS(IMOD)%INFLAGS1(-8)
 !
       FLIC1  => INPUTS(IMOD)%INFLAGS1(-7)
       FLIC2  => INPUTS(IMOD)%INFLAGS1(-6)
@@ -939,6 +961,7 @@
       FLICE  => INPUTS(IMOD)%INFLAGS1(4)
       FLTAUA => INPUTS(IMOD)%INFLAGS1(5)
       FLRHOA => INPUTS(IMOD)%INFLAGS1(6)
+      FLVEG  => INPUTS(IMOD)%INFLAGS1(7)
 !
       IF ( IINIT ) THEN
 !
@@ -968,14 +991,14 @@
               MUDV   => INPUTS(IMOD)%MUDV
           END IF
 !
-          IF ( FLVG1  ) THEN
-              VEGLS  => INPUTS(IMOD)%VEGLS
-              VEGBV  => INPUTS(IMOD)%VEGBV
-              VEGN   => INPUTS(IMOD)%VEGN
-          END IF
-          IF ( FLVG2  ) THEN
-              VEGCD  => INPUTS(IMOD)%VEGCD
-          END IF
+!TJH          IF ( FLVG1  ) THEN
+!              VEGLS  => INPUTS(IMOD)%VEGLS
+!              VEGBV  => INPUTS(IMOD)%VEGBV
+!              VEGN   => INPUTS(IMOD)%VEGN
+!          END IF
+!          IF ( FLVG2  ) THEN
+!              VEGCD  => INPUTS(IMOD)%VEGCD
+!          END IF
 !
           IF ( FLLEV  ) THEN
               WLEV   => INPUTS(IMOD)%WLEV
@@ -1016,14 +1039,14 @@
               BERGI  => INPUTS(IMOD)%BERGI
             END IF
 !
-          IF ( FLVG1  ) THEN
-              VEGLS  => INPUTS(IMOD)%VEGLS
-              VEGBV  => INPUTS(IMOD)%VEGBV
-              VEGN   => INPUTS(IMOD)%VEGN
-          END IF
-          IF ( FLVG2  ) THEN
-              VEGCD  => INPUTS(IMOD)%VEGCD
-          END IF
+!TJH          IF ( FLVG1  ) THEN
+!              VEGLS  => INPUTS(IMOD)%VEGLS
+!              VEGBV  => INPUTS(IMOD)%VEGBV
+!              VEGN   => INPUTS(IMOD)%VEGN
+!          END IF
+!          IF ( FLVG2  ) THEN
+!              VEGCD  => INPUTS(IMOD)%VEGCD
+!          END IF
 !
           IF ( FLTAUA  ) THEN
               UX0    => INPUTS(IMOD)%UX0
@@ -1037,7 +1060,13 @@
               RHN    => INPUTS(IMOD)%RHN
             END IF
 !
-        END IF
+          IF ( FLVEG  ) THEN
+              VEGLS  => INPUTS(IMOD)%VEGLS
+              VEGBV  => INPUTS(IMOD)%VEGBV
+              VEGN   => INPUTS(IMOD)%VEGN
+              VEGCD  => INPUTS(IMOD)%VEGCD
+          END IF
+!
 !
       RETURN
 !
