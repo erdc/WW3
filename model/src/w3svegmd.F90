@@ -59,7 +59,8 @@
 !/                  |           A. Abdolali             |
 !/                  |           T. Hesser               |
 !/                  |           J. Smith                |
-!/                  | Last update :         08-Jun-2018 |
+!/                  |           M. Bryant               |
+!/                  | Last update :         20-Jan-2021 |
 !/                  +-----------------------------------+
 !/
 !/    19-Sep-2019 : Origination of module.              ( version 3.11 )
