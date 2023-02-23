@@ -1,0 +1,72 @@
+#############################################################################
+#                                                                           #
+# ww3_tp2.19 Test script for WW-III, unstructured grid with Neumann Boundary# 
+# condition along flume lateral walls, depth-induced breaking and three-wave#
+# nonlinear interaction source term w/ Domain Decomposoyion Parallelization.#
+# Lab Case: Boers 1996:                                                     #
+# This experiment was carried out at Delft University of Tech. in 1993      #
+# The bathymetry represents an immovable (concrete) profile of a typical    #
+# barred beach along the western Dutch coastline. The Boer experiment       #
+# features three test cases, 1A, 1B and 1C, in which 1A and 1B represent    #
+# violently-breaking, locally-generated wind waves, and 1C represents a     #
+# mildly-breaking swell. The depth-induced breaking and three-wave nonlinear#
+# interaction, using the source term formulations of, respectively, Battjes #
+# and Janssen (1978) and Eldeberky and Battjes (1996).                      #
+#                                                                           #
+#                              Boers 1996                                   #                             
+#===========================================================================#
+#                 | Wave condition |  Hs [m]  |  Tp [s] |                   #
+#---------------------------------------------------------------------------#
+#                 |       1A       |  0.157   |  2.05   |                   #
+#---------------------------------------------------------------------------#
+#                 |       1B       |  0.206   |  2.03   |                   #
+#---------------------------------------------------------------------------#
+#                 |       1C       |  0.103   |  3.33   |                   #
+#---------------------------------------------------------------------------#
+#                                                                           #
+#  > Neumann boundary condtion along lateral flume walls (meshbnd.msh)      #
+#  > Lateral Forcing: open boundary condtion (netcdf)                       #
+#    > Single peak spectrum at wavemaker  (ww3_bounc.inp)                   #
+#       > boundary1A.nc                                                     #
+#       > boundary1B.nc                                                     #
+#       > boundary1C.nc                                                     #
+#  > Implicit Scheme (Domain Decomposition dt = 0.1 s)                      #
+#                                                                           #
+# Grid:                                                                     # 
+# Boers.msh Dimension: 30.0 x 3 m^2, x0 = 0.0 m, xend = 30.0 m              #
+# Triangular Unstructured Grid:                                             #
+#===========================================================================#
+# Grid No  | #of Nodes | # of Elements | lowest res | # of open bndry nodes #
+#---------------------------------------------------------------------------#
+#    1     |  1,887    |    3,511      |   25  cm   |         13            #
+#---------------------------------------------------------------------------#
+#                                                                           #
+#                                                                           #
+# Model should be compiled with the switches :                              #
+#                                                                           #
+# F90 PDLIB NOGRB NC4 DIST MPI PR3 UQ FLX0 LN0 ST0 NL0 BT0 DB1 MLIM TR1 BS0 #
+# IC0 IS0 VEG0 REF0 XX0 WNT1 WNX1 CRT1 CRX1 SEC1 O0 O1 O2 O3 O4 O5 O6 O7    #
+#                                                                           #
+#  -the domain decomposition and implicit scheme need PDLIB switch          #
+#                                                                           #
+#   The choice of propagation schemes for unstructured grids is done via    #
+#   namelists.                                                              #
+#                                                                           #
+# Remarks :                                                                 #
+#                                                                           #
+# - No other optional switches should be used.                              #
+#                                                                           #
+#  Sample run_test commands :                                               #
+#  Homogeneous vegetation field                                             #                      
+#                                                                           #
+# ./bin/run_test -b slurm -c Intel -S -T -s PDLIB -w work_1A  -f -p srun    #
+#                   -n  24 -i input_Case1A ../model -o netcdf ww3_tp2.19    #
+# ./bin/run_test -b slurm -c Intel -S -T -s PDLIB -w work_1B  -f -p srun    #
+#                   -n  24 -i input_Case1B ../model -o netcdf ww3_tp2.19    #
+# ./bin/run_test -b slurm -c Intel -S -T -s PDLIB -w work_1C  -f -p srun    #
+#                   -n  24 -i input_Case1C ../model -o netcdf ww3_tp2.19    #
+#                                                                           #
+#                       Ali Abdolali, Tyler Hesser,Aron Roland March 2020   #
+#                                                                           #
+#                                                                           #
+#############################################################################
