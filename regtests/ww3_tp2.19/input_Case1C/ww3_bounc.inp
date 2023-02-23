@@ -16,7 +16,7 @@ $ List of spectra files. These NetCDF files use the WAVEWATCH III
 $ format as described in the ww3_ounp.inp file. The files are 
 $ defined relative to the directory in which the program is run.
 $
-../input_Case1C/boundary1C.nc
+../input/boundary1C.nc
 'STOPSTRING'
 $
 $ -------------------------------------------------------------------- $
