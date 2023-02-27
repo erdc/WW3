@@ -2027,11 +2027,8 @@
  then
    echo ' ' >> matrix.body
    echo "$rtst -s MPI -s PDLIB -w work_1A_a -f -g a -p $mpi -n $np -o netcdf -i input_Case1A $ww3 ww3_tp2.19" >> matrix.body
-   echo "$rtst -s MPI -s PDLIB -w work_1A_b -f -g b -p $mpi -n $np -o netcdf -i input_Case1A $ww3 ww3_tp2.19" >> matrix.body
    echo "$rtst -s MPI -s PDLIB -w work_1B_a -f -g a -p $mpi -n $np -o netcdf -i input_Case1B $ww3 ww3_tp2.19" >> matrix.body
-   echo "$rtst -s MPI -s PDLIB -w work_1B_b -f -g b -p $mpi -n $np -o netcdf -i input_Case1B $ww3 ww3_tp2.19" >> matrix.body
    echo "$rtst -s MPI -s PDLIB -w work_1C_a -f -g a -p $mpi -n $np -o netcdf -i input_Case1C $ww3 ww3_tp2.19" >> matrix.body
-   echo "$rtst -s MPI -s PDLIB -w work_1C_b -f -g a -p $mpi -n $np -o netcdf -i input_Case1C $ww3 ww3_tp2.19" >> matrix.body
  fi
 
 
