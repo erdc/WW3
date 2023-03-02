@@ -387,6 +387,7 @@ CONTAINS
     !/    08-Jun-2018 : use INIT_GET_ISEA                   ( version 6.04 )
     !/    22-Feb-2023 : Extend to domain decomposition      ( version 7.xx ) 
     !/    01-Mar-2023 : Work on HYCOM part 
+    !/                  (A. Roland & H. Michaud) 
     !/
     !  1. Purpose :
     !
@@ -925,14 +926,14 @@ CONTAINS
         ID_NB_RCV=ID_NB_RCV+1
         RCV(ID_NB_RCV)%CL_FIELD_NAME='WW3__SSH'
         !
-      CASE('CUR')
-        ! uz : sea surface zonal currents (m.s-1)
-        ID_NB_RCV=ID_NB_RCV+1
-        RCV(ID_NB_RCV)%CL_FIELD_NAME='WW3_OSSU'
-        !
-        ! vz : sea surface meridional currents (m.s-1)
-        ID_NB_RCV=ID_NB_RCV+1
-        RCV(ID_NB_RCV)%CL_FIELD_NAME='WW3_OSSV'
+!      CASE('CUR')
+!        ! uz : sea surface zonal currents (m.s-1)
+!        ID_NB_RCV=ID_NB_RCV+1
+!        RCV(ID_NB_RCV)%CL_FIELD_NAME='WW3_OSSU'
+!        !
+!        ! vz : sea surface meridional currents (m.s-1)
+!        ID_NB_RCV=ID_NB_RCV+1
+!        RCV(ID_NB_RCV)%CL_FIELD_NAME='WW3_OSSV'
 #endif
         !
         !
