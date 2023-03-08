@@ -386,6 +386,7 @@ CONTAINS
     !/    April-2016 : Add comments (J. Pianezze)           ( version 5.07 )
     !/    08-Jun-2018 : use INIT_GET_ISEA                   ( version 6.04 )
     !/    22-Feb-2023 : Extend to domain decomposition      ( version 7.xx ) 
+    !/    01-Mar-2023 : More work ...
     !/
     !  1. Purpose :
     !
@@ -426,7 +427,6 @@ CONTAINS
     USE W3GDATMD, ONLY: NSEAL,NSEA, NX, NY, MAPSTA, MAPSF, GTYPE, &
          & UNGTYPE, RLGTYPE, CLGTYPE, SMCTYPE
     USE W3ODATMD, ONLY: NAPROC, IAPROC
-    USE W3ADATMD, ONLY: MPI_COMM_WAVE
 #ifdef W3_PDLIB
     USE W3PARALL, ONLY : INIT_GET_ISEA 
     USE YOWNODEPOOL, ONLY: NPA, NP, IPLG 
@@ -746,7 +746,6 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/ Parameter list
     !/
-    USE W3ADATMD, ONLY: MPI_COMM_WAVE
     USE W3ODATMD,  ONLY: NAPROC, IAPROC, UNDEF
     USE W3GDATMD, ONLY: NSEAL, NSEA, NX
     IMPLICIT NONE
