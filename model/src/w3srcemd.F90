@@ -2220,24 +2220,37 @@ CONTAINS
            REFLEC, REFLED, TRNX, TRNY,  &
            BERG, DTG, IX, IY, JSEA, VREF )
       IF (GTYPE.EQ.UNGTYPE.AND.REFPARS(3).LT.0.5) THEN
-#ifdef W3_PDLIB
-        IF (IOBP_LOC(JSEA).EQ.0) THEN
-#else
-        IF (IOBP(IX).EQ.0) THEN
-#endif
-          DO IK=1, NK
-            DO ITH=1, NTH
-              ISP = ITH+(IK-1)*NTH
-#ifdef W3_PDLIB
-              IF (IOBPD_LOC(ITH,JSEA).EQ.0) SPEC(ISP) = DTG*VREF(ISP)
-#else
-              IF (IOBPD(ITH,IX).EQ.0) SPEC(ISP) = DTG*VREF(ISP)
-#endif
+        IF (FIMPTOTAL) THEN
+          IF (IOBP_LOC(JSEA).EQ.0) THEN
+            DO IK=1, NK
+              DO ITH=1, NTH
+                ISP = ITH+(IK-1)*NTH
+                IF (IOBPD_LOC(ITH,JSEA).EQ.0) BJAC(ISP,JSEA) = BJAC(ISP,JSEA) + VREF(ISP)
+              END DO
             END DO
-          END DO
+          ELSE
+            BJAC(:,JSEA) = BJAC(:,JSEA) +  VREF(:)
+          ENDIF
         ELSE
-          SPEC(:) = SPEC(:) + DTG * VREF(:)
-        ENDIF
+#ifdef W3_PDLIB
+          IF (IOBP_LOC(JSEA).EQ.0) THEN
+#else
+          IF (IOBP(IX).EQ.0) THEN
+#endif
+            DO IK=1, NK
+              DO ITH=1, NTH
+                ISP = ITH+(IK-1)*NTH
+#ifdef W3_PDLIB
+                IF (IOBPD_LOC(ITH,JSEA).EQ.0) SPEC(ISP) = DTG*VREF(ISP)
+#else
+                IF (IOBPD(ITH,IX).EQ.0) SPEC(ISP) = DTG*VREF(ISP)
+#endif
+              END DO
+            END DO
+          ELSE
+            SPEC(:) = SPEC(:) + DTG * VREF(:)
+          ENDIF
+        ENDIF 
       ELSE
         SPEC(:) = SPEC(:) + DTG * VREF(:)
       END IF
