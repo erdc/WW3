@@ -196,7 +196,7 @@ CONTAINS
     USE W3GDATMD, ONLY : CLATS, HPFAC, HQFAC, SX, SY, SI
 #ifdef W3_PDLIB
     USE YOWNODEPOOL, ONLY: PDLIB_SI
-    USE W3GDATMD, ONLY: IOBP_LOC, IOBPD_LOC, IOBPA_LOC, IOBDP_LOC
+    USE W3GDATMD, ONLY: IOBP_LOC, IOBPD_LOC, IOBPA_LOC, IOBDP_LOC, FSSOURCE
 #endif
 #ifdef W3_IG1
     USE W3GDATMD, ONLY : IGPARS
@@ -399,6 +399,8 @@ CONTAINS
           ENDIF
           !
         ELSEIF (NINT(IGPARS(3)).EQ.2) THEN   ! Empirical source of IG energy
+
+          STOP 'TEST TEST TEST' 
           !
           ! This empirical source was adjusted to Waimea and Duck data
           ! When applied to deep water the 1/Depth must be replaced with k/Cg

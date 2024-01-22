@@ -2220,16 +2220,16 @@ CONTAINS
            REFLEC, REFLED, TRNX, TRNY,  &
            BERG, DTG, IX, IY, JSEA, VREF )
       IF (GTYPE.EQ.UNGTYPE.AND.REFPARS(3).LT.0.5) THEN
-        IF (FIMPTOTAL) THEN
+        IF (FSSOURCE) THEN
           IF (IOBP_LOC(JSEA).EQ.0) THEN
             DO IK=1, NK
               DO ITH=1, NTH
                 ISP = ITH+(IK-1)*NTH
-                IF (IOBPD_LOC(ITH,JSEA).EQ.0) BJAC(ISP,JSEA) = BJAC(ISP,JSEA) + VREF(ISP)
+                IF (IOBPD_LOC(ITH,JSEA).EQ.0) B_JAC(ISP,JSEA) = B_JAC(ISP,JSEA) + VREF(ISP)
               END DO
             END DO
           ELSE
-            BJAC(:,JSEA) = BJAC(:,JSEA) +  VREF(:)
+            B_JAC(:,JSEA) = B_JAC(:,JSEA) +  VREF(:)
           ENDIF
         ELSE
 #ifdef W3_PDLIB
