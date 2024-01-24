@@ -1476,6 +1476,10 @@ CONTAINS
 
             CALL INIT_GET_ISEA(ISEA, JSEA)
 
+            IF ((IOBP_LOC(JSEA).eq.1..or.IOBP_LOC(JSEA).eq. 3).and.IOBDP_LOC(JSEA).eq.1.and.IOBPA_LOC(JSEA).eq.0) THEN
+            !IF ((IOBP_LOC(JSEA).eq.1.).and.IOBDP_LOC(JSEA).eq.1.and.IOBPA_LOC(JSEA).eq.0) THEN
+
+
             IX     = MAPSF(ISEA,1)
             IY     = MAPSF(ISEA,2)
             DELA=1.
@@ -1548,6 +1552,7 @@ CONTAINS
             WRITE(740+IAPROC,*) '     SHAVETOT=', SHAVETOT(JSEA)
             FLUSH(740+IAPROC)
 #endif
+          ENDIF 
           END DO ! JSEA
         END IF ! PDLIB
 #endif
