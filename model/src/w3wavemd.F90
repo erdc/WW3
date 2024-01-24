@@ -1454,20 +1454,16 @@ CONTAINS
         !
 #ifdef W3_PDLIB
         IF (LPDLIB .and. FLSOU .and. FSSOURCE) THEN
-#endif
 
 #ifdef W3_OMP0
           !$OMP PARALLEL DO PRIVATE (JSEA,ISEA,IX,IY) SCHEDULE (DYNAMIC,1)
 #endif
 
-#ifdef W3_PDLIB
           D50=0.0002
           REFLEC(:)=0.
           REFLED(:)=0
           PSIC=0.
-#endif
 
-#ifdef W3_PDLIB
           IF (LSLOC) THEN
             B_JAC     = 0.
             ASPAR_JAC = 0.
@@ -1475,10 +1471,6 @@ CONTAINS
             VSTOT = 0.
             VDTOT = 0.
           ENDIF
-#endif
-
-
-#ifdef W3_PDLIB
 
           DO JSEA = 1, NP
 
@@ -1502,9 +1494,9 @@ CONTAINS
               DELY=HQFAC(IY,IX)/ FACX
               DELA=DELX*DELY
             END IF
-            REFLEC=REFLC(:,ISEA)
-            REFLEC(4)=BERG(ISEA)*REFLEC(4)
-            REFLED=REFLD(:,ISEA)
+            REFLEC = REFLC(:,ISEA)
+            REFLEC(4) = BERG(ISEA)*REFLEC(4)
+            REFLED = REFLD(:,ISEA)
 #endif
 
 #ifdef W3_BT4

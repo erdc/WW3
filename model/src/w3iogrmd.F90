@@ -1257,6 +1257,7 @@ CONTAINS
 #ifdef W3_REF1
       WRITE (NDSM)                                               &
            RREF, REFPARS, REFLC, REFLD
+
 #ifdef W3_ASCII
       WRITE (NDSA,*)                                             &
            'RREF, REFPARS, REFLC, REFLD:',                       &

@@ -247,6 +247,7 @@ CONTAINS
     !
     ! 0.  Initializations ------------------------------------------------ *
     !
+
 #ifdef W3_IG1
     IGBCOVERWRITE =(MOD( NINT(IGPARS(4)),2).EQ.1)
     IGSWELLMAX =( NINT(IGPARS(4)).GE.2)
@@ -400,7 +401,6 @@ CONTAINS
           !
         ELSEIF (NINT(IGPARS(3)).EQ.2) THEN   ! Empirical source of IG energy
 
-          STOP 'TEST TEST TEST' 
           !
           ! This empirical source was adjusted to Waimea and Duck data
           ! When applied to deep water the 1/Depth must be replaced with k/Cg

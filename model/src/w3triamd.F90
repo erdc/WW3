@@ -2916,6 +2916,7 @@ CONTAINS
 #ifdef W3_S
     CALL STRACE (IENT, 'SETUGIOBP')
 #endif
+
     !
     !--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ! 2.  Searches for boundary points
@@ -2965,7 +2966,8 @@ CONTAINS
             x2 = - DXP1
             y2 = - DYP1
             IP =   I2
-          END IF
+
+         END IF
           IF (I.eq.3) THEN
             x1 =   DXP3
             y1 =   DYP3
@@ -3010,7 +3012,8 @@ CONTAINS
     !
     ! Finds the shoreline direction from IOBPD
     !
-    REFLC(1,:)= 0.
+    REFLC(1,:)= REFPARS(1)
+!AR: To be checked with Fabrice 
     REFLD(:,:)= 1
     DO IP=1,NX
       IF (IOBP(IP).EQ.0.AND.MAPSTA(1,IP).EQ.1) THEN
@@ -3025,13 +3028,12 @@ CONTAINS
         DIRCOAST=ATAN2(SINSUM, COSSUM)
         REFLD(1,MAPFS(1,IP)) = 1+MOD(NTH+NINT(DIRCOAST/DTH),NTH)
         REFLD(2,MAPFS(1,IP)) = 4-MAX(2,NINT(4.*REAL(NDIRSUM)/REAL(NTH)))
-        REFLC(1,MAPFS(1,IP))= REFPARS(1)
+        REFLC(1,MAPFS(1,IP)) = REFPARS(1)
       END IF
     END DO
 #endif
     !
     ! Recomputes the angles used in the gradients estimation
-    !
     !
     RETURN
   END SUBROUTINE SET_UG_IOBP
