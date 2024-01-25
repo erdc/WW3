@@ -1814,7 +1814,7 @@ CONTAINS
             IF (FLCX .or. FLCY) THEN
               IF (.NOT. FSTOTALIMP .AND. .NOT. FSTOTALEXP) THEN
                 DO ISPEC=1,NSPEC
-                  CALL PDLIB_W3XYPUG ( ISPEC, IT, FACX, FACX, DTG, VGX, VGY, UGDTUPDATE )
+                  CALL PDLIB_W3XYPUG ( ISPEC, ITIME, FACX, FACX, DTG, VGX, VGY, UGDTUPDATE )
                 END DO
               END IF
             END IF

@@ -664,6 +664,9 @@ CONTAINS
         END DO
       END IF
     ENDDO ! ICALC = 1,2
+
+    !WRITE(*,*) SUM(S), SUM(A), SUM(ATMP), SUM(ATMP2)
+
     A(1:NSPECIG)=ATMP2(1:NSPECIG)   ! removes bound IG components ...
 #endif
     !/
