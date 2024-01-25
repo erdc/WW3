@@ -628,7 +628,7 @@ CONTAINS
     !/
   END SUBROUTINE PDLIB_IOBP_INIT
   !/ ------------------------------------------------------------------- /
-  SUBROUTINE PDLIB_W3XYPUG ( ISP, FACX, FACY, DTG, VGX, VGY, LCALC )
+  SUBROUTINE PDLIB_W3XYPUG ( ISP, IT, FACX, FACY, DTG, VGX, VGY, LCALC )
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -710,7 +710,7 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/ Parameter list
     !/
-    INTEGER, INTENT(IN)     :: ISP
+    INTEGER, INTENT(IN)     :: ISP, IT
     REAL, INTENT(IN)        :: FACX, FACY, DTG, VGX, VGY
     LOGICAL, INTENT(IN)     :: LCALC
     LOGICAL                 :: SCHEME
@@ -755,6 +755,15 @@ CONTAINS
     VLCFLX = 0.
     VLCFLY = 0.
     AC     = 0.
+
+    IF (IT == 1) THEN
+      DO JSEA = 1, NSEAL
+        IF (IOBP_LOC(JSEA) == 1 .OR. IOBP_LOC(JSEA) == 3 .OR. IOBP_LOC(JSEA) == 0) THEN
+          VA(ISP,JSEA) = 0.
+        ENDIF
+      ENDDO
+    ENDIF
+
     !
     ! 2.  Calculate velocities ---------------- *
     !
