@@ -248,9 +248,12 @@ CONTAINS
     ! 0.  Initializations ------------------------------------------------ *
     !
 
+    ! WRITE(*,*) 'IGPARS', IGPARS
+    ! IGPARS   2. 0. 2. 3. 1. 34.  1. 0.  1.10 0.0  1.5625000E-06  0.0
+
 #ifdef W3_IG1
-    IGBCOVERWRITE =(MOD( NINT(IGPARS(4)),2).EQ.1)
-    IGSWELLMAX =( NINT(IGPARS(4)).GE.2)
+    IGBCOVERWRITE = (MOD( NINT(IGPARS(4)),2).EQ.1)
+    IGSWELLMAX = ( NINT(IGPARS(4)).GE.2)
     ! This following line is a quick fix before the bug is understood ....
     ! AR: which bug? 
     IF (GTYPE.EQ.UNGTYPE) IGSWELLMAX =.FALSE.
@@ -322,6 +325,7 @@ CONTAINS
     STMP2 = 0.
 #endif
     HS=4.*SQRT(EMEANA)
+    WRITE(*,*) HS, IK1, EMEANA , SUM(A) , IGPARS(5)
 #ifdef W3_IG1
     ATMP(:) = A(:)      ! the IG energy will be added to this ATMP
     ATMP2(:) = A(:)     ! this is really to keep in memory the original spectrum
@@ -355,7 +359,7 @@ CONTAINS
         ATMP(1:NSPECIGSTART) = 0.             ! flat bottom approximation (Hasselmann 1962), is not valid for long waves (long?)
         IF (NINT(IGPARS(3)).EQ.1) THEN        ! IGPARS(3) = IGSOURCE
           IF (NINT(IGPARS(8)).EQ.1) THEN      ! in this case, uses depth at break point
-            DEPTHIG=MAX(1.,HS/0.3)            ! to be modified later with a proper gamma. AR: Strange stuff ...  0.3? 
+            DEPTHIG=MAX(1.,HS/0.3)            ! to be modified later with a proper gamma. AR: Check with Fabrice the 0.3 
           ELSE
             DEPTHIG=DEPTH
           END IF
@@ -401,7 +405,8 @@ CONTAINS
           !
         ELSEIF (NINT(IGPARS(3)).EQ.2) THEN   ! Empirical source of IG energy
 
-          !
+          ! STOP 'EMPIRICAL SOURCE OF ENERGY'
+
           ! This empirical source was adjusted to Waimea and Duck data
           ! When applied to deep water the 1/Depth must be replaced with k/Cg
           ! Hence the proper coefficient is WN(IK)/CG(IK)*GRAV**2/SIG(IK)
@@ -430,6 +435,7 @@ CONTAINS
             ! Conversion to action spectral density A(k,theta), assuming isotropic dir.
             !
             A(1+(IK-1)*NTH:IK*NTH)=EFIG1*CG(IK)/((SIG(IK)*TPI)*TPI)
+            !WRITE(*,*) HS, HIG, EFIG, EFIG1, CG(IK), SIG(IK)
             HIG2 = HIG2 + EFIG1*DSII(IK)*TPIINV
           END DO
         ELSE
@@ -483,6 +489,7 @@ CONTAINS
           ! Special treatment for unstructured grids when not using source term
           !
           IF (GTYPE.EQ.UNGTYPE.AND.REFPARS(3).LT.0.5) THEN
+
             IF (LPDLIB) THEN
 #ifdef W3_PDLIB
               IOBPDIP = IOBPD_LOC(:,JSEA)
@@ -526,6 +533,7 @@ CONTAINS
                         ! RECT CASE:
                         !  S(ISPEC)=S(ISPEC)+    &
                         !    REAL(REFLD(3))*R2*CG(IK)*ABS(ECOS(ITH2X)/DELX)*FAC1   &
+
                         !   +REAL(REFLD(4))*R2*CG(IK)*ABS(ESIN(ITH2Y)/DELY)*FAC1
 
 
@@ -542,7 +550,12 @@ CONTAINS
                 END DO ! ITH2=1,NTH
               END IF  ! (R1.GT.0.AND.R2.GT.0)
             END DO  ! ITH=1, NTH
+
           ELSE ! (GTYPE.NE.UNGTYPE)
+
+            IF (GTYPE.EQ.UNGTYPE) THEN
+              STOP 'I SHOULD NOT BE THERE This is for structured grids'
+            ENDIF
             !
             ! This is for structured grids ....
             !
@@ -609,6 +622,10 @@ CONTAINS
       !
       IF (    ((REFPARS(2).GT.0.).AND.((TRNX+TRNY).LT.2))     &
            .OR.((REFPARS(4).GT.0.).AND.(BERG.GT.0)       )   ) THEN
+
+        IF (GTYPE .EQ. UNGTYPE) THEN 
+          STOP 'I SHOULD NOT BE HERE this feature is not supported for unstructured grids'
+        ENDIF
         !
         ! Includes frequency dependence (see Elgar et al. JPO 1994)
         !
@@ -661,6 +678,7 @@ CONTAINS
         STMP2 = S
         DO ISPEC = 1, NSPEC
           S(ISPEC) = MAX(STMP2(ISPEC),STMP1(ISPEC))
+          !IF (ABS(S(ISPEC)) .gt. 0) write(*,*) ISPEC, S(ISPEC), STMP2(ISPEC), STMP1(ISPEC)
         END DO
       END IF
     ENDDO ! ICALC = 1,2

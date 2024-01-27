@@ -420,6 +420,9 @@ CONTAINS
     ! ... reading
     !
     IF ( INXOUT.EQ.'READ' .AND. FILER ) THEN
+
+
+      STOP 'TEST TEST TEST'
       !
       READ (NDSB,ERR=803,IOSTAT=IERR)                             &
            IDTST, VERTST, NKI, NTHI, XFRI, FR1I, TH1I, NBI

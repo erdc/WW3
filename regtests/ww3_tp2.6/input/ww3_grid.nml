@@ -7,7 +7,7 @@
 ! -------------------------------------------------------------------- !
 &SPECTRUM_NML
   SPECTRUM%XFR       =  1.1
-  SPECTRUM%FREQ1     =  0.05
+  SPECTRUM%FREQ1     =  0.01
   SPECTRUM%NK        =  36
   SPECTRUM%NTH       =  36
 /

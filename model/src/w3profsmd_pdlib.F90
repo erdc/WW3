@@ -368,6 +368,7 @@ CONTAINS
 #endif
     !
     CALL ComputeListNP_ListNPA_ListIPLG
+
     ALLOCATE(COFRM4(NK))
     DO IK=1,NK
       eSIG=SIG(IK)
