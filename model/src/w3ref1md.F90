@@ -244,6 +244,7 @@ CONTAINS
     INTEGER, SAVE           :: IENT = 0
     CALL STRACE (IENT, 'W3SREF')
 #endif
+
     !
     ! 0.  Initializations ------------------------------------------------ *
     !
@@ -255,7 +256,7 @@ CONTAINS
     IGBCOVERWRITE = (MOD( NINT(IGPARS(4)),2).EQ.1)
     IGSWELLMAX = ( NINT(IGPARS(4)).GE.2)
     ! This following line is a quick fix before the bug is understood ....
-    ! AR: which bug? 
+    ! AR: Check bug with fabrice 
     IF (GTYPE.EQ.UNGTYPE) IGSWELLMAX =.FALSE.
     IGFAC1 = 0.25
     IGFAC2 = 0.25
@@ -263,6 +264,9 @@ CONTAINS
     EMEANA  = 0.
     FMEANA  = 0.
     FMEAN2  = 0.
+    S       = 0.
+
+    !WRITE(*,*) 'BEFORE', SUM(S), SUM(A)
 
     DELX=1.
     DELY=1.
@@ -325,7 +329,7 @@ CONTAINS
     STMP2 = 0.
 #endif
     HS=4.*SQRT(EMEANA)
-    WRITE(*,*) HS, IK1, EMEANA , SUM(A) , IGPARS(5)
+    !WRITE(*,*) HS, IK1, EMEANA , SUM(A) , IGPARS(5)
 #ifdef W3_IG1
     ATMP(:) = A(:)      ! the IG energy will be added to this ATMP
     ATMP2(:) = A(:)     ! this is really to keep in memory the original spectrum
@@ -553,8 +557,9 @@ CONTAINS
 
           ELSE ! (GTYPE.NE.UNGTYPE)
 
+
             IF (GTYPE.EQ.UNGTYPE) THEN
-              STOP 'I SHOULD NOT BE THERE This is for structured grids'
+              !STOP 'I SHOULD NOT BE THERE This is for structured grids'
             ENDIF
             !
             ! This is for structured grids ....
@@ -683,10 +688,11 @@ CONTAINS
       END IF
     ENDDO ! ICALC = 1,2
 
-    !WRITE(*,*) SUM(S), SUM(A), SUM(ATMP), SUM(ATMP2)
-
     A(1:NSPECIG)=ATMP2(1:NSPECIG)   ! removes bound IG components ...
 #endif
+    S = 0.d0
+
+    !WRITE(*,*) 'AFTER', SUM(S), SUM(A)
     !/
     !/ End of W3SREF ----------------------------------------------------- /
     !/

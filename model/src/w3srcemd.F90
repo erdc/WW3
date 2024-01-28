@@ -1244,7 +1244,7 @@ CONTAINS
       IF (.NOT. FSSOURCE .or. LSLOC) THEN
 #endif
 #ifdef W3_TR1
-        CALL W3STR1 ( SPEC, SPECOLD, CG1, WN1, DEPTH, IX,        VSTR, VDTR )
+        CALL W3STR1 ( SPEC, CG1, WN1, DEPTH, IX, VSTR, VDTR )
 #endif
 #ifdef W3_PDLIB
       ENDIF
@@ -2239,7 +2239,7 @@ CONTAINS
               END DO
             END DO
           ELSE
-            B_JAC(:,JSEA) = B_JAC(:,JSEA) +  VREF(:)
+            B_JAC(:,JSEA) = B_JAC(:,JSEA) + VREF(:)
           ENDIF
         ELSE
 #ifdef W3_PDLIB
@@ -2251,9 +2251,9 @@ CONTAINS
               DO ITH=1, NTH
                 ISP = ITH+(IK-1)*NTH
 #ifdef W3_PDLIB
-                IF (IOBPD_LOC(ITH,JSEA).EQ.0) SPEC(ISP) = DTG*VREF(ISP)
+                IF (IOBPD_LOC(ITH,JSEA).EQ.0) SPEC(ISP) = DTG * VREF(ISP)
 #else
-                IF (IOBPD(ITH,IX).EQ.0) SPEC(ISP) = DTG*VREF(ISP)
+                IF (IOBPD(ITH,IX).EQ.0) SPEC(ISP) = DTG * VREF(ISP)
 #endif
               END DO
             END DO
@@ -2262,7 +2262,17 @@ CONTAINS
           ENDIF
         ENDIF 
       ELSE
-        SPEC(:) = SPEC(:) + DTG * VREF(:)
+        IF (IOBP_LOC(JSEA).EQ.1) THEN
+          IF (FSSOURCE) THEN
+            SPEC(:) = SPEC(:) + B_JAC(:,JSEA) + VREF(:) * IOBDP_LOC(IX)
+          ELSE
+#ifdef W3_PDLIB 
+            SPEC(:) = SPEC(:) + DTG * VREF(:) * IOBDP_LOC(IX)
+#else
+            SPEC(:) = SPEC(:) + DTG * VREF(:) * IOBDP(IX)
+#endif
+          ENDIF 
+        ENDIF 
       END IF
     END IF
 #endif
