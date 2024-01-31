@@ -690,7 +690,8 @@ CONTAINS
 
     A(1:NSPECIG)=ATMP2(1:NSPECIG)   ! removes bound IG components ...
 #endif
-    S = 0.d0
+
+    !S = 0
 
     !WRITE(*,*) 'AFTER', SUM(S), SUM(A)
     !/

@@ -644,7 +644,7 @@ CONTAINS
     USE PDLIB_W3PROFSMD, ONLY : B_JAC, ASPAR_JAC, ASPAR_DIAG_ALL
     USE yowNodepool, ONLY: PDLIB_I_DIAG, PDLIB_SI
     USE W3GDATMD, ONLY: B_JGS_LIMITER, FSSOURCE, optionCall
-    USE W3GDATMD, ONLY: IOBP_LOC, IOBPD_LOC, B_JGS_LIMITER_FUNC
+    USE W3GDATMD, ONLY: IOBP_LOC, IOBPD_LOC, B_JGS_LIMITER_FUNC, IOBDP_LOC
     USE W3WDATMD, ONLY: VA
     USE W3PARALL, ONLY: IMEM, LSLOC
 #endif
@@ -2223,11 +2223,15 @@ CONTAINS
     !WRITE(*,*) 'REFLEC', REFLEC, (REFLEC(1).GT.0.OR.REFLEC(2).GT.0.OR.(REFLEC(4).GT.0.AND.BERG.GT.0))
     !WRITE(*,*) 'BERG', BERG
     !WRITE(*,*) 'REFPARS', REFPARS 
-    IF (REFLEC(1).GT.0.OR.REFLEC(2).GT.0.OR.(REFLEC(4).GT.0.AND.BERG.GT.0)) THEN
+    IF (REFLEC(1).GT. 0 .OR. REFLEC(2) .GT. 0 .OR. (REFLEC(4).GT.0.AND.BERG.GT.0) ) THEN
       !WRITE(*,*) 'BEFORE', SUM(SPEC), SUM(VREF) 
+      IF (IOBP_LOC(IX) .EQ. 1) THEN
       CALL W3SREF ( SPEC, CG1, WN1, EMEAN, FMEAN, DEPTH, CX, CY,   &
            REFLEC, REFLED, TRNX, TRNY,  &
            BERG, DTG, IX, IY, JSEA, VREF )
+      ELSE
+        VREF = 0
+      ENDIF
       !WRITE(*,*) 'AFTER', SUM(SPEC), SUM(VREF) 
       IF (GTYPE.EQ.UNGTYPE.AND.REFPARS(3).LT.0.5) THEN
         IF (FSSOURCE) THEN
@@ -2264,13 +2268,13 @@ CONTAINS
       ELSE
         IF (IOBP_LOC(JSEA).EQ.1) THEN
           IF (FSSOURCE) THEN
-            SPEC(:) = SPEC(:) + B_JAC(:,JSEA) + VREF(:) * IOBDP_LOC(IX)
+            SPEC(:) = SPEC(:) + B_JAC(:,JSEA) + VREF(:) 
           ELSE
-#ifdef W3_PDLIB 
-            SPEC(:) = SPEC(:) + DTG * VREF(:) * IOBDP_LOC(IX)
-#else
-            SPEC(:) = SPEC(:) + DTG * VREF(:) * IOBDP(IX)
-#endif
+!#ifdef W3_PDLIB 
+            SPEC(:) = SPEC(:) + DTG * VREF(:) 
+!#else
+            SPEC(:) = SPEC(:) + DTG * VREF(:)
+!#endif
           ENDIF 
         ENDIF 
       END IF

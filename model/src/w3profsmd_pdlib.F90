@@ -607,6 +607,11 @@ CONTAINS
     if(istat /= 0) CALL PDLIB_ABORT(9)
     ALLOCATE(GRIDS(IMOD)%IOBPA_LOC(NPA), stat=istat)
     if(istat /= 0) CALL PDLIB_ABORT(9)
+  
+    GRIDS(IMOD)%IOBP_LOC = 1
+    GRIDS(IMOD)%IOBPA_LOC = 1
+    GRIDS(IMOD)%IOBPD_LOC = 1
+    GRIDS(IMOD)%IOBDP_LOC = 1
 
     IOBP_loc  => GRIDS(IMOD)%IOBP_LOC
     IOBPA_loc => GRIDS(IMOD)%IOBPA_LOC
@@ -619,10 +624,16 @@ CONTAINS
       IOBPD_loc(:,IP) = IOBPD(:,IP_glob)
     END DO
 
-    IOBDP_loc = 0
+    IOBDP_loc = 1
+    !DO IP = 1, NPA
+    !  WRITE(3000+IAPROC,*) IAPROC, IP, IOBDP_loc(IP)
+    !ENDDO 
+!AR: The below line breaks the compiler ... 
+    WRITE(*,*) IAPROC, SUM(IOBDP_loc), SIZE(IOBDP_loc), MINVAL(IOBDP_loc), MAXVAL(IOBDP_loc)
+    WRITE(*,*) '------------------ IOBDP_loc -------------------------'
     IOBP => NULL()
     IOBPD => NULL()
-    DEALLOCATE(GRIDS(IMOD)%IOBP,GRIDS(IMOD)%IOBPD)
+    !DEALLOCATE(GRIDS(IMOD)%IOBP,GRIDS(IMOD)%IOBPD)
     CALL SET_IOBPA_PDLIB
     !/
     !/ End of W3SPR4 ----------------------------------------------------- /
@@ -6913,6 +6924,9 @@ CONTAINS
 #ifdef W3_S
     CALL STRACE (IENT, 'SETDEPTH_PDLIB')
 #endif
+    IOBDP_LOC = 1
+    !WRITE(*,*) 'IOBDP_LOC', SUM(IOBDP_LOC) 
+    !pause
     DO JSEA=1,NPA
       IP = JSEA
       IP_glob = iplg(IP)
