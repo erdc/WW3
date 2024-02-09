@@ -1305,6 +1305,9 @@ CONTAINS
 #ifdef W3_S
     USE W3SERVMD, ONLY: STRACE
 #endif
+#ifdef W3_PDLIB
+    USE YOWNODEPOOL, ONLY: PDLIB_SI, IPLG, IPGL
+#endif
     !
     USE W3PARALL, ONLY : INIT_GET_ISEA
     IMPLICIT NONE
@@ -1543,7 +1546,12 @@ CONTAINS
         EBD(IK,JSEA) = AB(JSEA) * FACTOR            ! this is E(f)*df
         ET (JSEA)    = ET (JSEA) + EBD(IK,JSEA)
 #ifdef W3_IG1
-        IF (IK.EQ.NINT(IGPARS(5))) HSIG(JSEA) = 4*SQRT(ET(JSEA))
+        IF (IK.EQ.NINT(IGPARS(5))) THEN
+          HSIG(JSEA) = 4*SQRT(ET(JSEA))
+          IF (IPLG(JSEA) == DEBUG_NODE) THEN
+            WRITE(*,*) IPLG(JSEA), HSIG(JSEA)
+          ENDIF
+        ENDIF
 #endif
         ETF(JSEA)  = ETF(JSEA) + EBD(IK,JSEA) * CG(IK,ISEA)
         EWN(JSEA)  = EWN(JSEA) + EBD(IK,JSEA) / WN(IK,ISEA)

@@ -96,7 +96,7 @@ MODULE CONSTANTS
   INTEGER, PARAMETER :: srce_direct = 0  !< srce_direct
   INTEGER, PARAMETER :: srce_imp_post = 1 !< srce_imp_post
   INTEGER, PARAMETER :: srce_imp_pre = 2 !< srce_imp_pre
-  INTEGER, PARAMETER :: DEBUG_NODE = 1014 !< DEBUG_NODE Node number used for debugging.
+  INTEGER, PARAMETER :: DEBUG_NODE = 32424 !< DEBUG_NODE Node number used for debugging.
   INTEGER, PARAMETER :: DEBUG_ELEMENT = 50 !< DEBUG_ELEMENT Element number used for debug.
   LOGICAL            :: LPDLIB = .FALSE. !< LPDLIB Logical for using the PDLIB library.
   LOGICAL            :: LSETUP = .FALSE. !< LSETUP Logical LSETUP is not used.

@@ -2225,10 +2225,10 @@ CONTAINS
     !WRITE(*,*) 'REFPARS', REFPARS 
     IF (REFLEC(1).GT. 0 .OR. REFLEC(2) .GT. 0 .OR. (REFLEC(4).GT.0.AND.BERG.GT.0) ) THEN
       !WRITE(*,*) 'BEFORE', SUM(SPEC), SUM(VREF) 
-      IF (IOBP_LOC(IX) .EQ. 1) THEN
+      IF (IOBP_LOC(JSEA) .EQ. 1) THEN
       CALL W3SREF ( SPEC, CG1, WN1, EMEAN, FMEAN, DEPTH, CX, CY,   &
            REFLEC, REFLED, TRNX, TRNY,  &
-           BERG, DTG, IX, IY, JSEA, VREF )
+           BERG, DTG, IX, IY, ISEA, JSEA, VREF )
       ELSE
         VREF = 0
       ENDIF

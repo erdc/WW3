@@ -109,7 +109,7 @@ CONTAINS
   !> @date   11-Jun-2014
   !>
   SUBROUTINE W3SREF(A, CG, WN, EMEAN, FMEAN, DEPTH, CX1, CY1, REFLC, REFLD,     &
-       TRNX, TRNY, BERG, DT, IX, IY, JSEA, S)
+       TRNX, TRNY, BERG, DT, IX, IY, ISEA, JSEA, S)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -195,14 +195,15 @@ CONTAINS
          SIG2, DSII, IOBPD, GTYPE, UNGTYPE, MAPFS, CLGTYPE, RLGTYPE
     USE W3GDATMD, ONLY : CLATS, HPFAC, HQFAC, SX, SY, SI
 #ifdef W3_PDLIB
-    USE YOWNODEPOOL, ONLY: PDLIB_SI
+    USE YOWNODEPOOL, ONLY: PDLIB_SI, IPLG, IPGL
     USE W3GDATMD, ONLY: IOBP_LOC, IOBPD_LOC, IOBPA_LOC, IOBDP_LOC, FSSOURCE
+    USE W3ODATMD, ONLY: NDSE, NDST, NDSO, NAPROC, IAPROC
 #endif
 #ifdef W3_IG1
     USE W3GDATMD, ONLY : IGPARS
     USE W3GIG1MD
     USE W3CANOMD, ONLY : W3ADD2NDORDER
-    USE W3DISPMD, ONLY: NAR1D, DFAC, N1MAX, ECG1, EWN1, DSIE
+    USE W3DISPMD, ONLY: NAR1D, DFAC, N1MAX, ECG1, EWN1, DSIE, WAVNU3
 #endif
 #ifdef W3_S
     USE W3SERVMD, ONLY: STRACE
@@ -217,7 +218,7 @@ CONTAINS
     REAL, INTENT(IN)        :: CG(NK), WN(NK), DEPTH, EMEAN, FMEAN
     REAL, INTENT(INOUT)     :: A(NSPEC)
     REAL, INTENT(IN)        :: CX1, CY1, DT
-    INTEGER, INTENT(IN)     :: REFLD(6), IX, IY, JSEA
+    INTEGER, INTENT(IN)     :: REFLD(6), IX, IY, JSEA, ISEA
     REAL, INTENT(IN)        :: REFLC(4), TRNX, &
          TRNY, BERG
     REAL, INTENT(OUT)       :: S(NSPEC)
@@ -236,7 +237,7 @@ CONTAINS
     REAL             :: HS, HIG, HIG1, HIG2, EB, SB, EMEANA, FMEAN2,   &
          FMEANA, FREQIG, EFIG, EFIG1, SQRTH, SMEANA
 #ifdef W3_IG1
-    INTEGER        :: NKIG,NSPECIG,NSPECIGSTART, I1, I2
+    INTEGER        :: NKIG,NSPECIG,NSPECIGSTART, I1, I2, DEBUG_NODE_LOCAL
     REAL           :: ATMP(NSPEC),ATMP2(NSPEC), STMP1(NSPEC),      &
          STMP2(NSPEC), WNB(NK), CGB(NK), SIX, IGFAC1, IGFAC2
 #endif
@@ -277,7 +278,11 @@ CONTAINS
       FACX   =  1.
     END IF
 
-    ISEA = MAPFS (IY,IX)
+#ifndef W3_PDLIB
+!    ISEA = iplg(JSEA)
+!#else
+!    ISEA = MAPFS (IY,IX)
+!#endif
     !!Li  SMCTYPE shares info with RLGTYPE.  JGLi12Oct2020
     IF (GTYPE.EQ.RLGTYPE .OR. GTYPE.EQ.SMCTYPE) THEN
       DELX=SX*CLATS(ISEA)/FACX
@@ -331,7 +336,7 @@ CONTAINS
     HS=4.*SQRT(EMEANA)
     !WRITE(*,*) HS, IK1, EMEANA , SUM(A) , IGPARS(5)
 #ifdef W3_IG1
-    ATMP(:) = A(:)      ! the IG energy will be added to this ATMP
+    ATMP(:)  = A(:)      ! the IG energy will be added to this ATMP
     ATMP2(:) = A(:)     ! this is really to keep in memory the original spectrum
     IF (IGBCOVERWRITE.AND.REFLC(1).GT.0) THEN
       IGFAC1 = 1.
@@ -371,6 +376,10 @@ CONTAINS
           !
           !/ --- INLINED WAVNU1 (START) ---------------------------------------- /
           !
+!#ifdef W3_PDLIB
+!          CALL WAVNU3(SIG(IK),DEPTHIG,WNB(IK),CGB(IK))
+!#else
+
           DO IK=1, NK
             SQRTH  = SQRT(DEPTHIG)
             SIX    = SIG(IK) * SQRTH
@@ -386,6 +395,8 @@ CONTAINS
               CGB(IK) = 0.5 * GRAV / SIG(IK)
             END IF
           END DO
+!#endif
+
           !
           !/ --- INLINED WAVNU1 (END) ------------------------------------------ /
           !
@@ -439,8 +450,12 @@ CONTAINS
             ! Conversion to action spectral density A(k,theta), assuming isotropic dir.
             !
             A(1+(IK-1)*NTH:IK*NTH)=EFIG1*CG(IK)/((SIG(IK)*TPI)*TPI)
+            IF (IK == 1) write(740+IAPROC,*) JSEA, IPLG(JSEA), IPLG(JSEA)==DEBUG_NODE 
+            IF (JSEA == DEBUG_NODE) THEN
+              WRITE(*,*) JSEA, SUM(A(1+(IK-1)*NTH:IK*NTH)), EFIG1, CG(IK), SIG(IK)
+            ENDIF
             !WRITE(*,*) HS, HIG, EFIG, EFIG1, CG(IK), SIG(IK)
-            HIG2 = HIG2 + EFIG1*DSII(IK)*TPIINV
+            HIG2 = HIG2 + EFIG1 * DSII(IK) * TPIINV
           END DO
         ELSE
           NSPECIG=0
@@ -682,7 +697,7 @@ CONTAINS
       ELSE
         STMP2 = S
         DO ISPEC = 1, NSPEC
-          S(ISPEC) = MAX(STMP2(ISPEC),STMP1(ISPEC))
+          !S(ISPEC) = MAX(STMP2(ISPEC),STMP1(ISPEC))
           !IF (ABS(S(ISPEC)) .gt. 0) write(*,*) ISPEC, S(ISPEC), STMP2(ISPEC), STMP1(ISPEC)
         END DO
       END IF
