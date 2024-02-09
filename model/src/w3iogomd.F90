@@ -1548,9 +1548,6 @@ CONTAINS
 #ifdef W3_IG1
         IF (IK.EQ.NINT(IGPARS(5))) THEN
           HSIG(JSEA) = 4*SQRT(ET(JSEA))
-          IF (IPLG(JSEA) == DEBUG_NODE) THEN
-            WRITE(*,*) IPLG(JSEA), HSIG(JSEA)
-          ENDIF
         ENDIF
 #endif
         ETF(JSEA)  = ETF(JSEA) + EBD(IK,JSEA) * CG(IK,ISEA)
