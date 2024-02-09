@@ -228,7 +228,7 @@ CONTAINS
     !/
     INTEGER         :: ISPECI, ISPEC, IK, ITH, ITH2, ITH3, ITH2X, ITH2Y, &
          NRS, IK1
-    INTEGER         :: ISEA, ICALC, IOBPDIP(NTH)
+    INTEGER         :: ICALC, IOBPDIP(NTH)
     LOGICAL         :: IGBCOVERWRITE, IGSWELLMAX
     REAL            :: R1, R2, R3, R4, R2X, R2Y, DEPTHIG
     REAL            :: DELA, DELX, DELY, FACX
@@ -237,7 +237,7 @@ CONTAINS
     REAL             :: HS, HIG, HIG1, HIG2, EB, SB, EMEANA, FMEAN2,   &
          FMEANA, FREQIG, EFIG, EFIG1, SQRTH, SMEANA
 #ifdef W3_IG1
-    INTEGER        :: NKIG,NSPECIG,NSPECIGSTART, I1, I2, DEBUG_NODE_LOCAL
+    INTEGER        :: NKIG,NSPECIG,NSPECIGSTART, I1, I2
     REAL           :: ATMP(NSPEC),ATMP2(NSPEC), STMP1(NSPEC),      &
          STMP2(NSPEC), WNB(NK), CGB(NK), SIX, IGFAC1, IGFAC2
 #endif
@@ -278,11 +278,6 @@ CONTAINS
       FACX   =  1.
     END IF
 
-#ifndef W3_PDLIB
-!    ISEA = iplg(JSEA)
-!#else
-!    ISEA = MAPFS (IY,IX)
-!#endif
     !!Li  SMCTYPE shares info with RLGTYPE.  JGLi12Oct2020
     IF (GTYPE.EQ.RLGTYPE .OR. GTYPE.EQ.SMCTYPE) THEN
       DELX=SX*CLATS(ISEA)/FACX
@@ -450,10 +445,10 @@ CONTAINS
             ! Conversion to action spectral density A(k,theta), assuming isotropic dir.
             !
             A(1+(IK-1)*NTH:IK*NTH)=EFIG1*CG(IK)/((SIG(IK)*TPI)*TPI)
-            IF (IK == 1) write(740+IAPROC,*) JSEA, IPLG(JSEA), IPLG(JSEA)==DEBUG_NODE 
-            IF (JSEA == DEBUG_NODE) THEN
-              WRITE(*,*) JSEA, SUM(A(1+(IK-1)*NTH:IK*NTH)), EFIG1, CG(IK), SIG(IK)
-            ENDIF
+            !IF (IK == 1) write(740+IAPROC,*) JSEA, IPLG(JSEA), IPLG(JSEA)==DEBUG_NODE 
+            !IF (JSEA == DEBUG_NODE) THEN
+            !  WRITE(*,*) JSEA, SUM(A(1+(IK-1)*NTH:IK*NTH)), EFIG1, CG(IK), SIG(IK)
+            !ENDIF
             !WRITE(*,*) HS, HIG, EFIG, EFIG1, CG(IK), SIG(IK)
             HIG2 = HIG2 + EFIG1 * DSII(IK) * TPIINV
           END DO
@@ -697,8 +692,7 @@ CONTAINS
       ELSE
         STMP2 = S
         DO ISPEC = 1, NSPEC
-          !S(ISPEC) = MAX(STMP2(ISPEC),STMP1(ISPEC))
-          !IF (ABS(S(ISPEC)) .gt. 0) write(*,*) ISPEC, S(ISPEC), STMP2(ISPEC), STMP1(ISPEC)
+          S(ISPEC) = MAX(STMP2(ISPEC),STMP1(ISPEC))
         END DO
       END IF
     ENDDO ! ICALC = 1,2

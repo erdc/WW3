@@ -628,9 +628,9 @@ CONTAINS
     !DO IP = 1, NPA
     !  WRITE(3000+IAPROC,*) IAPROC, IP, IOBDP_loc(IP)
     !ENDDO 
-!AR: The below line breaks the compiler ... 
-    WRITE(*,*) IAPROC, SUM(IOBDP_loc), SIZE(IOBDP_loc), MINVAL(IOBDP_loc), MAXVAL(IOBDP_loc)
-    WRITE(*,*) '------------------ IOBDP_loc -------------------------'
+!AR: The below line breaks the compiler ... since INTEL is not able to sum integer arrays with less than 4 byte precission ...
+!    WRITE(*,*) IAPROC, SUM(IOBDP_loc), SIZE(IOBDP_loc), MINVAL(IOBDP_loc), MAXVAL(IOBDP_loc)
+!    WRITE(*,*) '------------------ IOBDP_loc -------------------------'
     IOBP => NULL()
     IOBPD => NULL()
     !DEALLOCATE(GRIDS(IMOD)%IOBP,GRIDS(IMOD)%IOBPD)
