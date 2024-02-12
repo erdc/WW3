@@ -785,6 +785,7 @@ CONTAINS
              FSBCCFL, FSREFRACTION, FSFREQSHIFT, FSSOURCE,    &
              DO_CHANGE_WLV, SOLVERTHR_STP, CRIT_DEP_STP,      &
              NTRI,COUNTOT, COUNTRI, NNZ,                      &
+             LWEIGHTS,                                        & 
              B_JGS_TERMINATE_MAXITER,                         &
              B_JGS_TERMINATE_DIFFERENCE,                      &
              B_JGS_TERMINATE_NORM,                            &
@@ -803,6 +804,7 @@ CONTAINS
              FSBCCFL, FSREFRACTION, FSFREQSHIFT, FSSOURCE,    &
              DO_CHANGE_WLV, SOLVERTHR_STP, CRIT_DEP_STP,      &
              NTRI,COUNTOT, COUNTRI, NNZ,                      &
+             LWEIGHTS,                                        & 
              B_JGS_TERMINATE_MAXITER,                         &
              B_JGS_TERMINATE_DIFFERENCE,                      &
              B_JGS_TERMINATE_NORM,                            &
@@ -819,6 +821,7 @@ CONTAINS
              FSBCCFL, FSREFRACTION, FSFREQSHIFT, FSSOURCE,    &
              DO_CHANGE_WLV, SOLVERTHR_STP, CRIT_DEP_STP,      &
              NTRI,COUNTOT, COUNTRI, NNZ,                      &
+             LWEIGHTS,                                        & 
              B_JGS_TERMINATE_MAXITER,                         &
              B_JGS_TERMINATE_DIFFERENCE,                      &
              B_JGS_TERMINATE_NORM,                            &
@@ -984,6 +987,7 @@ CONTAINS
              FSBCCFL, FSREFRACTION, FSFREQSHIFT, FSSOURCE,    &
              DO_CHANGE_WLV, SOLVERTHR_STP, CRIT_DEP_STP,      &
              NTRI,COUNTOT, COUNTRI, NNZ,                      &
+             LWEIGHTS,                                        & 
              B_JGS_TERMINATE_MAXITER,                         &
              B_JGS_TERMINATE_DIFFERENCE,                      &
              B_JGS_TERMINATE_NORM,                            &

@@ -495,10 +495,9 @@ contains
     ncon = 1
     ! wgtflag: 0: none (vwgt and adjwgt are NULL); 1: edges (vwgt is NULL); 2: vertices (adjwgt is NULL); 3: both vertices & edges;
 
-#ifdef WEIGHTS
-    wgtflag = 2
     INQUIRE ( FILE='weights.ww3', EXIST = lexist )
     IF (lexist) THEN
+      wgtflag = 2
       OPEN(100001,FILE='weights.ww3',FORM='FORMATTED',status='unknown')
       allocate(iweights(np_global)); iweights = 0
       do i = 1, np_global
@@ -508,9 +507,6 @@ contains
     ELSE
       wgtflag = 0
     ENDIF
-#else
-    wgtflag = 0
-#endif
 
     ! Create weights
     allocate(vwgt(np*ncon), stat=stat)

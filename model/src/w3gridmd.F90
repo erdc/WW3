@@ -907,6 +907,7 @@ MODULE W3GRIDMD
 #ifdef W3_PR3
   REAL                    :: WDTHCG, WDTHTH
 #endif
+  LOGICAL :: LUSEWEIGHTS 
   LOGICAL :: JGS_TERMINATE_MAXITER
   LOGICAL :: JGS_TERMINATE_DIFFERENCE
   LOGICAL :: JGS_TERMINATE_NORM
@@ -1088,6 +1089,7 @@ MODULE W3GRIDMD
        IMPFSN, IMPTOTAL, EXPTOTAL,                &
        IMPREFRACTION, IMPFREQSHIFT,               &
        IMPSOURCE,                                 &
+       LUSEWEIGHTS,                               & 
        JGS_TERMINATE_MAXITER,                     &
        JGS_TERMINATE_DIFFERENCE,                  &
        JGS_TERMINATE_NORM,                        &
@@ -2444,6 +2446,7 @@ CONTAINS
     SETUP_APPLY_WLV = .TRUE.
     SOLVERTHR_SETUP=1E-6
     CRIT_DEP_SETUP=0.1
+    LUSEWEIGHTS = .FALSE. 
     JGS_TERMINATE_MAXITER = .TRUE.
     JGS_TERMINATE_DIFFERENCE = .TRUE.
     JGS_TERMINATE_NORM = .FALSE.
@@ -2460,6 +2463,7 @@ CONTAINS
     ! read data from the unstructured devoted namelist
     CALL READNL ( NDSS, 'UNST', STATUS )
 
+    LWEIGHTS         = LUSEWEIGHTS 
     B_JGS_USE_JACOBI = JGS_USE_JACOBI
     B_JGS_TERMINATE_MAXITER = JGS_TERMINATE_MAXITER
     B_JGS_TERMINATE_DIFFERENCE = JGS_TERMINATE_DIFFERENCE
@@ -3321,7 +3325,7 @@ CONTAINS
       WRITE (NDSO,2956) UGBCCFL, UGOBCAUTO, UGOBCDEPTH,TRIM(UGOBCFILE), &
            EXPFSN, EXPFSPSI, EXPFSFCT, IMPFSN, EXPTOTAL,&
            IMPTOTAL, IMPREFRACTION, IMPFREQSHIFT,      &
-           IMPSOURCE, SETUP_APPLY_WLV,                 &
+           IMPSOURCE, SETUP_APPLY_WLV, LUSEWEIGHTS,    &
            JGS_TERMINATE_MAXITER,                      &
            JGS_TERMINATE_DIFFERENCE,                   &
            JGS_TERMINATE_NORM,                         &
@@ -6648,6 +6652,7 @@ CONTAINS
          ',  IMPTOTAL=',L3,',IMPREFRACTION=', L3,               &
          ',  IMPFREQSHIFT=', L3,', IMPSOURCE=', L3,             &
          ',  SETUP_APPLY_WLV=', L3,                             &
+         ',  LUSEWEIGHTS=', L3                                  & 
          ',  JGS_TERMINATE_MAXITER=', L3,                       &
          ',  JGS_TERMINATE_DIFFERENCE=', L3,                    &
          ',  JGS_TERMINATE_NORM=', L3,                          &

@@ -5568,9 +5568,7 @@ CONTAINS
     REAL*8  :: eVA, eVO, CG2, NEWDAC, NEWAC, OLDAC, MAXDAC
     REAL  :: CG1(0:NK+1), WN1(0:NK+1)
     LOGICAL :: LCONVERGED(NSEAL), lexist, LLWS(NSPEC)
-#ifdef WEIGHTS
     INTEGER :: ipiter(nseal), ipitergl(np_global), ipiterout(np_global)
-#endif
 #ifdef W3_DEBUGSRC
     REAL :: IntDiff, eVA_w3srce, eVAsolve, SumACout
     REAL :: SumVAin, SumVAout, SumVAw3srce, SumVS, SumVD, VS_w3srce
@@ -5744,7 +5742,7 @@ CONTAINS
     nbIter=0
     do ip = 1, np
       Lconverged(ip) = .false.
-#ifdef WEIGHTS
+#ifdef W3_WEIGHTS
       ipiter(ip) = 0
 #endif
     enddo
@@ -5780,9 +5778,7 @@ CONTAINS
         ACLOC = VA(:,JSEA)
 
         IF (.NOT. LCONVERGED(IP)) THEN
-#ifdef WEIGHTS
           ipiter(ip) = ipiter(ip) + 1
-#endif
 #ifdef W3_DEBUGFREQSHIFT
           WRITE(740+IAPROC,*) 'Begin loop'
           WRITE(740+IAPROC,*) 'IP/IP_glob/ISEA/JSEA=', IP, IP_glob, ISEA, JSEA
@@ -6292,7 +6288,6 @@ CONTAINS
       ENDIF  ! FLSOU
     END DO ! JSEA
 
-#ifdef WEIGHTS
     INQUIRE ( FILE='weights.ww3', EXIST = lexist )
     if (.not. lexist) then
       ipitergl = 0
@@ -6302,14 +6297,13 @@ CONTAINS
       END DO
       call mpi_reduce(ipitergl,ipiterout,NP_GLOBAL,MPI_INT,MPI_SUM,0,MPI_COMM_WCMP,ierr)
       if (myrank == 0) tHEN
-        OPEN(100001,FILE='weights.ww3',FORM='FORMATTED',STATUS='unknown')
+        OPEN(10001,FILE='weights.ww3',FORM='FORMATTED',STATUS='unknown')
         do ip = 1, np_global
-          write(100001,*) ipiterout(ip)
+          write(10001,*) ipiterout(ip)
         enddo
-        CLOSE(100001)
+        CLOSE(10001)
       endif
     endif
-#endif
     !
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_PROP SECTION LOOP 7')
     !
