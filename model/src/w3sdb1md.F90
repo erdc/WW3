@@ -233,9 +233,6 @@ CONTAINS
     !
     ! 0.  Initialzations ------------------------------------------------- /
     !     Never touch this 4 lines below ... otherwise my exceptionhandling will not work.
-    S = 0.
-    D = 0.
-
     IF (EMEAN .LT. TINY(1.d0)) THEN
       S = 0 
       D = 0 
