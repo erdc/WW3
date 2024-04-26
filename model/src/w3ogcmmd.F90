@@ -13,6 +13,7 @@ MODULE W3OGCMMD
   !/               For upgrades see subroutines.
   !/    Apr-2016 : Add comments (J. Pianezze)         ( version 5.07 )
   !/ 22-Mar-2021 : Add extra coupling variables       ( version 7.13 )
+  !/  1-Mar-2023 : Adaptation to Hycom (H. Michaud)              
   !/
   !/    Copyright 2009-2012 National Weather Service (NWS),
   !/       National Oceanic and Atmospheric Administration.  All rights
@@ -591,7 +592,7 @@ CONTAINS
 
           IF (LL_ACTION) THEN
             !AR: todo: double check the masking at this place 
-            TMP(1:NSEALL) = RLA_OASIS_RCV(1:NSEALL,1) * MASKT(1:NSEALL)
+            TMP(1:NSEALL) = RLA_OASIS_RCV(1:NSEALL,1) !* MASKT(1:NSEALL)
             SND_BUFF(1:NSEA) = 0.0
 #ifdef W3_PDLIB
             DO IB_I = 1, NSEALL
@@ -629,7 +630,8 @@ CONTAINS
         IF (RCV_FLD(IB_DO)%CL_FIELD_NAME == 'WW3_OSSU') THEN
           CALL CPL_OASIS_RCV(IB_DO, ID_OASIS_TIME, RLA_OASIS_RCV, LL_ACTION)
           IF (LL_ACTION) THEN
-            TMP(1:NSEALL) = RLA_OASIS_RCV(1:NSEALL,1) * MASKU(1:NSEALL)
+!            TMP(1:NSEALL) = RLA_OASIS_RCV(1:NSEALL,1) * MASKU(1:NSEALL)
+            TMP(1:NSEALL) = RLA_OASIS_RCV(1:NSEALL,1) * MASKT(1:NSEALL)
             SND_BUFF(1:NSEA) = 0.0
 #ifdef W3_PDLIB
             DO IB_I = 1, NSEALL
@@ -662,7 +664,8 @@ CONTAINS
         IF (RCV_FLD(IB_DO)%CL_FIELD_NAME == 'WW3_OSSV') THEN
           CALL CPL_OASIS_RCV(IB_DO, ID_OASIS_TIME, RLA_OASIS_RCV, LL_ACTION)
           IF (LL_ACTION) THEN
-            TMP(1:NSEALL) = RLA_OASIS_RCV(1:NSEALL,1) * MASKV(1:NSEALL)
+!            TMP(1:NSEALL) = RLA_OASIS_RCV(1:NSEALL,1) * MASKV(1:NSEALL)
+            TMP(1:NSEALL) = RLA_OASIS_RCV(1:NSEALL,1) * MASKT(1:NSEALL)
             SND_BUFF(1:NSEA) = 0.0
 #ifdef W3_PDLIB
             DO IB_I = 1, NSEALL
