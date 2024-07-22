@@ -6,9 +6,9 @@
 ! Define the spectrum parameterization via SPECTRUM_NML namelist
 ! -------------------------------------------------------------------- !
 &SPECTRUM_NML
-  SPECTRUM%XFR       =  1.1
-  SPECTRUM%FREQ1     =  0.04118
-  SPECTRUM%NK        =  25
+  SPECTRUM%XFR       =  1.10
+  SPECTRUM%FREQ1     =  0.0485
+  SPECTRUM%NK        =  36
   SPECTRUM%NTH       =  24
 /
 
@@ -16,62 +16,53 @@
 ! Define the run parameterization via RUN_NML namelist
 ! -------------------------------------------------------------------- !
 &RUN_NML
-  RUN%FLCX         =  T
-  RUN%FLCY         =  T
-  RUN%FLCTH        =  T
-  RUN%FLCK         =  T
+  RUN%FLSOU        =  T
 /
 
 ! -------------------------------------------------------------------- !
 ! Define the timesteps parameterization via TIMESTEPS_NML namelist
 ! -------------------------------------------------------------------- !
 &TIMESTEPS_NML
-  TIMESTEPS%DTMAX        =  450.
-  TIMESTEPS%DTXY         =  60.
-  TIMESTEPS%DTKTH        =  60.
-  TIMESTEPS%DTMIN        =  60.
+  TIMESTEPS%DTMAX        =  900.
+  TIMESTEPS%DTXY         =  900.
+  TIMESTEPS%DTKTH        =  900.
+  TIMESTEPS%DTMIN        =  15.
 /
 
 ! -------------------------------------------------------------------- !
 ! Define the grid to preprocess via GRID_NML namelist
 ! -------------------------------------------------------------------- !
 &GRID_NML
-  GRID%NAME         =  'SMC0512 Grid'
-  GRID%NML          =  '../input/namelists_SMC0512.nml'
-  GRID%TYPE         =  'SMCG'
+  GRID%NAME         =  'HOMOGENEOUS SOURCE TERM TEST'
+  GRID%NML          =  '../input_capcha/namelists_CAPCHA.nml'
+  GRID%TYPE         =  'RECT'
   GRID%COORD        =  'SPHE'
   GRID%CLOS         =  'NONE'
-  GRID%ZLIM         =  -0.1
-  GRID%DMIN         =  10.0
+  GRID%ZLIM         =  -5.
+  GRID%DMIN         =  5.75
 /
 
 ! -------------------------------------------------------------------- !
 ! Define the rectilinear grid type via RECT_NML namelist
 ! -------------------------------------------------------------------- !
 &RECT_NML
-  RECT%NX           =  256
-  RECT%NY           =  128
-  RECT%SX           =  0.02000
-  RECT%SY           =  0.01600
-  RECT%X0           =  276.41000
-  RECT%Y0           =  41.02800
+  RECT%NX           =  3
+  RECT%NY           =  3
+  RECT%SX           =  1.
+  RECT%SY           =  1.
+  RECT%SF           =  1.E-2
+  RECT%X0           =  -1.
+  RECT%Y0           =  -1.
+  RECT%SF0          =  1.E-2
 /
 
 ! -------------------------------------------------------------------- !
-! Define the spherical multiple-cell grid via SMC_NML namelist
-! -------------------------------------------------------------------- !
-&SMC_NML
-  SMC%MCELS%FILENAME        =  '../input/ErieSMCel.dat'
-  SMC%ISIDE%FILENAME        =  '../input/ErieISide.dat'
-  SMC%JSIDE%FILENAME        =  '../input/ErieJSide.dat'
-  SMC%SUBTR%FILENAME        =  '../input/ErieObstr.dat'
-/
-
-! -------------------------------------------------------------------- !
-! Scaling factor for depth input file
+! Define the depth to preprocess via DEPTH_NML namelist
 ! -------------------------------------------------------------------- !
 &DEPTH_NML
-  DEPTH%SF = -1.0
+  DEPTH%SF        =  -2500.
+  DEPTH%FILENAME  =  '../input/HOMOGENEOUS.depth'
+  DEPTH%IDLA      =  3
 /
 
 ! -------------------------------------------------------------------- !
