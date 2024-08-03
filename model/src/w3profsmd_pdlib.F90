@@ -7722,7 +7722,7 @@ CONTAINS
     INTEGER NB_ITER, iIter, ip_global
     REAL*8 DeltaTmax, eDeltaT, CLATSMN, DFAC, RFAC, eDiffNorm
     REAL*8 eNorm, DTquot, diffc, dcell, XWIND, DIFFTOT
-    REAL*8 DVDX(NPA), DVDY(NPA), DV2DXX(NPA), DV2DXY(NPA), KH, SWFAC
+    REAL*8 DVDX(NPA), DVDY(NPA), DV2DXX(NPA), DV2DXY(NPA), KH, SWFAC(NPA)
     REAL eRealA(1), eRealB(1)
 
 
@@ -7747,23 +7747,26 @@ CONTAINS
       DFAC = 1.
     END IF
     CLATMN = COS ( 70 * DERA )
-
+   
     DO ITH = 1, NTH
       DO IK = 1, NK
         ISP    = ITH + (IK-1)*NTH
         DO JSEA = 1, NPA
           CALL INIT_GET_ISEA(ISEA, JSEA)
-          TFAC  = MIN ( 1. , (CLATS(ISEA)/CLATMN)**2 )
-          CGD   = 0.5 * GRAV / SIG(IK) * IOBDP_LOC(JSEA)
-          DSS   = ( CGD * (XFR-1.))**2 * DTME / 12.! * TFAC
-          DNN   = ( CGD * DTH )**2 * DTME / 12.! * TFAC 
-          DCELL = CGD / 10.0 ! -> CELLP needs probably redifinition ...
-          KH    = WN(IK,ISEA)*DW(JSEA) 
-          IF (DW(JSEA) .gt. 1000.) THEN
-            SWFAC = 1.
+          IF (DW(ISEA) .gt. 1000.) THEN
+            SWFAC(JSEA) = 1.
           ELSE
-            SWFAC = 0.!(1.-0.5*(1+(2*KH/SINH(MIN(20.d0,2*KH)))))**8
+            SWFAC(JSEA) = 0.!(1.-0.5*(1+(2*KH/SINH(MIN(20.d0,2*KH)))))**8
           ENDIF
+          IF (SWFAC(JSEA) .LT. TINY(1.)) THEN
+            DIFFVEC(:,JSEA) = 0.
+            CYCLE
+          ENDIF
+          CGD   = 0.5 * GRAV / SIG(IK) * IOBDP_LOC(JSEA)
+          DSS   = ( CGD * (XFR-1.))**2 * DTME / 12.
+          DNN   = ( CGD * DTH )**2 * DTME / 12.
+          DCELL = CGD / 10.0 ! -> CELLP needs probably redifinition ...
+          KH    = WN(IK,ISEA)*DW(ISEA) 
           XWIND = 3.3 * U10(ISEA)*WN(IK,ISEA)/SIG(IK) - 2.3
           XWIND = MAX ( 0. , MIN ( 1. , XWIND ) )
 #ifdef W3_XW0
@@ -7773,16 +7776,16 @@ CONTAINS
           XWIND = 1.
 #endif
           TFAC  = MIN ( 1. , (CLATS(ISEA)/CLATMN)**2 )
-          DSS   = SWFAC * (XWIND * DCELL + (1.-XWIND) * DSS * TFAC) 
+          DSS   = SWFAC(JSEA) * (XWIND * DCELL + (1.-XWIND) * DSS * TFAC) 
 #ifdef W3_DSS0
           DSS   = 0.
 #endif
-          DNN   = SWFAC * (XWIND * DCELL + (1.-XWIND) * DNN * TFAC)
+          DNN   = SWFAC(JSEA) * (XWIND * DCELL + (1.-XWIND) * DNN * TFAC)
 
           DIFFVEC(1,JSEA) = (DSS*ECOS(ITH)**2+DNN*ESIN(ITH)**2) 
           DIFFVEC(2,JSEA) = (DSS*ESIN(ITH)**2+DNN*ECOS(ITH)**2) / CLATS(ISEA)**2
           DIFFVEC(3,JSEA) = ((DSS-DNN) * ESIN(ITH)*ECOS(ITH)) / CLATS(ISEA)
-          !write(3000+myrank,'(I10,20F20.10)') IK, SIG(IK), CGD, CLATS(ISEA), DSS, DNN, DIFFVEC(1,JSEA), DIFFVEC(2,JSEA)
+          !IF (DW(ISEA) .gt. 1000.) write(3000+myrank,'(I10,20F20.10)') IK, SIG(IK), CGD, CLATS(ISEA), DSS, DNN, DIFFVEC(1,JSEA), DIFFVEC(2,JSEA), DCELL, XWIND
         END DO
 
         CALL DIFFERENTIATE_XYDIR(DBLE(VA(ISP,:)),DVDX,DVDY) ! AR: this two lines can be optimized, however seems fast enough by now. 
@@ -7791,7 +7794,10 @@ CONTAINS
         DeltaTmax = 1./TINY(1.)
         DO IE=1,NE
           NI = INE(:,IE)
-          eDet = 2. * PDLIB_TRIA(IE)
+          IF (SUM(SWFAC(NI)) .EQ. 0) THEN
+            CYCLE
+          ENDIF
+          eDet = 2. * PDLIB_TRIA(IE) 
           DO IDX=1,3
             V(1) = PDLIB_IEN(2*IDX-1,IE)
             V(2) = PDLIB_IEN(2*IDX  ,IE)
@@ -7819,12 +7825,15 @@ CONTAINS
         DT_DIFF = DTG/NB_ITER
         PHI_V = 0.
  
-        !WRITE(5000+myrank,*) 'NUMBER OF SUB ITERATIONS', ITH, IK, NB_ITER, DT_DIFF, DeltaTmax
+        WRITE(5000+myrank,*) 'NUMBER OF SUB ITERATIONS', ITH, IK, NB_ITER, DT_DIFF, DeltaTmax
         !CALL FLUSH(5000+myrank)
 
         DO IT = 1, NB_ITER
           DO IE = 1, NE
              NI = INE(:,IE)
+             IF (SUM(SWFAC(NI)) .EQ. 0) THEN
+               CYCLE
+             ENDIF
              eDet = 2. * PDLIB_TRIA(IE)
              DEDX(1) = PDLIB_IEN(1,IE)
              DEDX(2) = PDLIB_IEN(3,IE)
@@ -7847,7 +7856,11 @@ CONTAINS
           END DO
           CALL PDLIB_exchange1DREAL(PHI_V)
           DO JSEA =1, NSEAL
-            VA(ISP,JSEA) = MAX(0.,VA(ISP,JSEA) - (DT_DIFF * PHI_V(JSEA) / PDLIB_SI(JSEA) + 2 * DV2DXY(JSEA) * DIFFVEC(3,JSEA)) * DFAC * IOBDP_LOC(JSEA))
+            DIFFTOT      = - (DT_DIFF * PHI_V(JSEA) / PDLIB_SI(JSEA) + DT_DIFF * 2 * DV2DXY(JSEA) * DIFFVEC(3,JSEA)) * DFAC * IOBDP_LOC(JSEA)
+            VA(ISP,JSEA) = MAX(0.,VA(ISP,JSEA) + DIFFTOT )
+            !IF (ABS(DIFFTOT) .GT. 0.) THEN
+            !  WRITE(50000+myrank,'(2I10,10F20.10)') JSEA, ISP, VA(ISP,JSEA), DT_DIFF, PHI_V(JSEA), PDLIB_SI(JSEA), DV2DXY(JSEA), DIFFVEC(3,JSEA), DFAC, IOBDP_LOC(JSEA)
+            !ENDIF 
           END DO       
         END DO 
       END DO 
@@ -7865,6 +7878,7 @@ CONTAINS
          USE yowExchangeModule, only : PDLIB_exchange1DREAL
          USE yowNodepool, only : PDLIB_IEN, PDLIB_TRIA, NP, NPA
          USE yowElementpool, only : NE, INE
+         USE W3PARALL, only: INIT_GET_ISEA
          IMPLICIT NONE
          REAL*8, INTENT(IN)    :: VAR(NPA)
          REAL*8, INTENT(INOUT) :: DVDX(NPA), DVDY(NPA)
@@ -7873,7 +7887,7 @@ CONTAINS
          REAL*8                :: DVDXIE, DVDYIE
          REAL*8                :: WEI(NPA)
          INTEGER               :: NI(3)
-         INTEGER               :: IE, JSEA
+         INTEGER               :: IE, JSEA, ISEA
 
          WEI(:)  = 0.d0
          DVDX(:) = 0.d0
@@ -7905,7 +7919,8 @@ CONTAINS
          DVDY = DVDY/WEI
 
          DO JSEA = 1, NP
-           IF (DW(JSEA) .LT. DMIN) THEN
+           CALL INIT_GET_ISEA(ISEA, JSEA)
+           IF (DW(ISEA) .LT. DMIN) THEN
              DVDX(JSEA) = 0.
              DVDY(JSEA) = 0.
            END IF

@@ -1812,6 +1812,10 @@ CONTAINS
           END IF
 
           IF (LPDLIB) THEN
+
+           !WRITE(*,*) B_JGS_LGSE, FSTOTALIMP, FSTOTALEXP
+           !STOP 'TEST TEST TEST'
+
             !
 #ifdef W3_PDLIB
             IF (FLCX .or. FLCY) THEN

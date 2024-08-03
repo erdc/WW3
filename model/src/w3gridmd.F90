@@ -2467,8 +2467,9 @@ CONTAINS
     JGS_NLEVEL = 0
     JGS_SOURCE_NONLINEAR = .FALSE.
     ! read data from the unstructured devoted namelist
-    CALL READNL ( NDSS, 'UNST', STATUS )
 
+    CALL READNL ( NDSS, 'UNST', STATUS )
+     
     B_JGS_USE_JACOBI = JGS_USE_JACOBI
     B_JGS_TERMINATE_MAXITER = JGS_TERMINATE_MAXITER
     B_JGS_TERMINATE_DIFFERENCE = JGS_TERMINATE_DIFFERENCE
@@ -3346,7 +3347,10 @@ CONTAINS
            JGS_DIFF_THR,                               &
            JGS_NORM_THR,                               &
            JGS_NLEVEL,                                 &
-           JGS_SOURCE_NONLINEAR
+           JGS_SOURCE_NONLINEAR,                       & 
+           JGS_LGSE,                                   & 
+           JGS_GSE_METHOD,                             & 
+           JGS_GSE_TS                        
       !
       WRITE (NDSO,2976)    P2SF, I1P2SF, I2P2SF,                    &
            US3D, I1US3D, I2US3D,                    &
@@ -6672,7 +6676,10 @@ CONTAINS
          ',  JGS_DIFF_THR=', F8.3,                              &
          ',  JGS_NORM_THR=', F8.3,                              &
          ',  JGS_NLEVEL=', I3,                                  &
-         ',  JGS_SOURCE_NONLINEAR=', L3 / )
+         ',  JGS_SOURCE_NONLINEAR=', L3,                        &  
+         ',  JGS_LGSE=', L3,                                    &
+         ',  JGS_GSE_METHOD=', I3,                              &
+         ',  JGS_GSE_TS=', F15.3/)
     !
 960 FORMAT (/'  Miscellaneous ',A/                                   &
          ' --------------------------------------------------')
