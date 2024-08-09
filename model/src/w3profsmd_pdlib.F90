@@ -7847,7 +7847,7 @@ CONTAINS
             IP = INE(IDX,IE)
             eDiffNorm = HYPOT(DIFFVEC(1,IP), DIFFVEC(2,IP))
             if (eDiffNorm .gt. tiny(1.)) then
-              eDeltaT = min(DTG, PDLIB_SI(IP) / (eDiffNorm * dfac * eNorm /(4. * eDet))) ! modified for diffusion vector
+              eDeltaT = min(DTG, 0.8 * PDLIB_SI(IP) / (eDiffNorm * dfac * eNorm /(4. * eDet))) ! modified for diffusion vector
             else
               eDeltaT = DTG
             endif
@@ -7868,7 +7868,7 @@ CONTAINS
         PHI_V = 0.
  
         WRITE(5000+myrank,*) 'NUMBER OF SUB ITERATIONS', ITH, IK, NB_ITER, DT_DIFF, DeltaTmax
-        !CALL FLUSH(5000+myrank)
+        CALL FLUSH(5000+myrank)
 
         DO IT = 1, NB_ITER
           DO IE = 1, NE
@@ -7893,12 +7893,16 @@ CONTAINS
                 V(2) = 0.5 * PDLIB_IEN(2*IDX  ,IE)
                 eScal = DOT_PRODUCT(V, GRAD(1:2))
                 IP = INE(IDX,IE)
-                PHI_V(IP) = PHI_V(IP) + eScal
+                PHI_V(IP) = PHI_V(IP) + eScal !+ 1./3. * 2 * DV2DXY(IP) * DIFFVEC(3,IP)
              END DO
           END DO
           CALL PDLIB_exchange1DREAL(PHI_V)
           DO JSEA =1, NSEAL
-            DIFFTOT      = - (DT_DIFF * PHI_V(JSEA) / PDLIB_SI(JSEA) + DT_DIFF * 2 * DV2DXY(JSEA) * DIFFVEC(3,JSEA)) * DFAC * IOBDP_LOC(JSEA)
+            IF (IOBP_LOC(JSEA) .EQ. 1) THEN
+              DIFFTOT      = - DT_DIFF * DFAC * ( PHI_V(JSEA) / PDLIB_SI(JSEA) + 2 * DV2DXY(IP) * DIFFVEC(3,IP) ) 
+            ELSE
+              DIFFTOT      = 0
+            ENDIF
             VA(ISP,JSEA) = MAX(0.,VA(ISP,JSEA) + DIFFTOT )
             !IF (ABS(DIFFTOT) .GT. 0.) THEN
             !  WRITE(50000+myrank,'(2I10,10F20.10)') JSEA, ISP, VA(ISP,JSEA), DT_DIFF, PHI_V(JSEA), PDLIB_SI(JSEA), DV2DXY(JSEA), DIFFVEC(3,JSEA), DFAC, IOBDP_LOC(JSEA)
