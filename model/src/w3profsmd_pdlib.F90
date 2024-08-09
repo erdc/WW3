@@ -676,7 +676,7 @@ CONTAINS
     !              make the interface between the WAVEWATCH and the WWM code.
     !
     !  8. Structure :
-    !
+    !PDLIB_W3XYPUG
     !
     !  9. Switches :
     !
@@ -718,17 +718,20 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/ Local PARAMETERs
     !/
-    INTEGER                 :: ITH, IK, ISEA
+    INTEGER                 :: ITH, IK, ISEA, ITHL, ITHR
     INTEGER                 :: I, J, IE, IBND_MAP
     INTEGER                 :: IP_glob
     REAL                    :: CCOS, CSIN, CCURX, CCURY, WN1, CG1
-    REAL                    :: C(npa,2)
+    REAL                    :: CCOSL, CSINL, CCOSR, CSINR
+    REAL                    :: C(npa,2), CL(npa,2), CR(npa,2)
     REAL                    :: RD1, RD2
     !/
     !/ Automatic work arrays
     !/
     REAL                    :: VLCFLX(npa), VLCFLY(npa)
-    REAL                    :: AC(npa)
+    REAL                    :: VLCFLXL(npa), VLCFLYL(npa)
+    REAL                    :: VLCFLXR(npa), VLCFLYR(npa)
+    REAL                    :: AC(npa), ACL(npa), ACM(npa), ACR(npa)
     REAL                    :: AC_MAP(NBND_MAP)
     INTEGER                 :: JSEA, IP
     !/ ------------------------------------------------------------------- /
@@ -745,8 +748,29 @@ CONTAINS
 #endif
     ITH    = 1 + MOD(ISP-1,NTH)
     IK     = 1 + (ISP-1)/NTH
+
+    IF (ITH == 1) THEN ! Compute indices for computation of ith,isp for gse
+      ITHL = NTH 
+    ELSE IF (ITH == NTH) THEN
+      ITHR = 1 
+    ELSE
+      ITHL = ITH - 1 
+      ITHR = ITH + 1
+    ENDIF 
+
     CCOS   = FACX * ECOS(ITH)
     CSIN   = FACY * ESIN(ITH)
+
+    CCOSL  = FACX * ECOS(ITHL)
+    CSINL  = FACY * ESIN(ITHL)
+    CCOSR  = FACX * ECOS(ITHR)
+    CSINR  = FACY * ESIN(ITHR)
+
+    CCOSL  = 0.5 * (CCOSL + CCOS)
+    CSINL  = 0.5 * (CSINL + CSIN)
+    CCOSR  = 0.5 * (CCOSR + CCOS)
+    CSINR  = 0.5 * (CSINR + CSIN)
+
     CCURX  = FACX
     CCURY  = FACY
     !
@@ -771,6 +795,11 @@ CONTAINS
       AC(IP)  = VA(ISP,JSEA) / CG(IK,ISEA) * CLATS(ISEA)
       VLCFLX(IP) = CCOS * CG(IK,ISEA) / CLATS(ISEA)
       VLCFLY(IP) = CSIN * CG(IK,ISEA)
+
+      VLCFLXL(IP) = CCOSL * CG(IK,ISEA) / CLATS(ISEA)
+      VLCFLYL(IP) = CSINR * CG(IK,ISEA)
+      VLCFLXR(IP) = CCOSL * CG(IK,ISEA) / CLATS(ISEA)
+      VLCFLYR(IP) = CSINR * CG(IK,ISEA)
 #endif
 #ifdef W3_MGP
       VLCFLX(IP) = VLCFLX(IP) - CCURX*VGX/CLATS(ISEA)
@@ -802,6 +831,12 @@ CONTAINS
 
     C(:,1) = VLCFLX(:) * IOBDP_LOC
     C(:,2) = VLCFLY(:) * IOBDP_LOC
+
+    CL(:,1) = VLCFLXL(:) * IOBDP_LOC
+    CL(:,2) = VLCFLYL(:) * IOBDP_LOC
+
+    CR(:,1) = VLCFLXR(:) * IOBDP_LOC
+    CR(:,2) = VLCFLYR(:) * IOBDP_LOC
     !
     ! 4. Prepares boundary update
     !
@@ -833,7 +868,10 @@ CONTAINS
     ELSE IF (FSPSI) THEN
       CALL PDLIB_W3XYPFSPSI2(ISP, C, LCALC, RD1, RD2, DTG, AC)
     ELSE IF (FSFCT) THEN
-      CALL PDLIB_W3XYPFSFCT2(ISP, C, LCALC, RD1, RD2, DTG, AC)
+      CALL PDLIB_W3XYPFSFCT2(ISP, CL, LCALC, RD1, RD2, DTG, 0.25 * AC, ACL)
+      CALL PDLIB_W3XYPFSFCT2(ISP, C, LCALC, RD1, RD2, DTG, 0.5 * AC, ACM)
+      CALL PDLIB_W3XYPFSFCT2(ISP, CR, LCALC, RD1, RD2, DTG, 0.25 * AC, ACR)
+      AC = ACL + ACM + ACR
     ELSE IF (FSNIMP) THEN
       STOP 'For PDLIB and FSNIMP, no function has been programmed yet'
     ENDIF
@@ -1492,7 +1530,7 @@ CONTAINS
 
   END SUBROUTINE PDLIB_W3XYPFSPSI2
   !/ ------------------------------------------------------------------- /
-  SUBROUTINE PDLIB_W3XYPFSFCT2 ( ISP, C, LCALC, RD10, RD20, DT, AC)
+  SUBROUTINE PDLIB_W3XYPFSFCT2 ( ISP, C, LCALC, RD10, RD20, DT, ACIN, ACOUT)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -1568,7 +1606,9 @@ CONTAINS
                                          ! for the given velocity field
     REAL,    INTENT(IN)    :: C(npa,2)   ! Velocity field in it's
                                          ! X- and Y- Components,
-    REAL,    INTENT(INOUT) :: AC(npa)    ! Wave Action before and
+    REAL,    INTENT(IN)  :: ACIN(npa)    ! Wave Action before and
+                                         ! after advection
+    REAL,    INTENT(OUT) :: ACOUT(npa)    ! Wave Action before and
                                          ! after advection
     REAL,    INTENT(IN)    :: RD10, RD20 ! Time interpolation
                                          ! coefficients for boundary
@@ -1616,7 +1656,7 @@ CONTAINS
 #ifdef W3_DEBUGSOLVER
     WRITE(740+IAPROC,*) 'PDLIB_W3XYPFSN2, step 1'
     FLUSH(740+IAPROC)
-    CALL SCAL_INTEGRAL_PRINT_R4(AC, "AC in input")
+    CALL SCAL_INTEGRAL_PRINT_R4(ACIN, "AC in input")
 #endif
 
     ITH    = 1 + MOD(ISP-1,NTH)
@@ -1699,9 +1739,11 @@ CONTAINS
       DTSI(IP) = DBLE(DT)/DBLE(ITER(IK,ITH))/PDLIB_SI(IP) ! Some precalculations for the time integration.
     END DO
 
+    ACOUT = ACIN
+
     DO IT = 1, ITER(IK,ITH)
 
-      U  = DBLE(AC)
+      U  = DBLE(ACOUT)
       ST = ZERO
       PM = ZERO
       PP = ZERO
@@ -1791,7 +1833,7 @@ CONTAINS
 #endif
       END DO
 
-      AC = REAL(U)
+      ACOUT = REAL(U)
 
 #ifdef W3_DEBUGSOLVER
       IF (testWrite) THEN
@@ -1823,10 +1865,10 @@ CONTAINS
           IP_glob = MAPSF(ISBPI(IBI),1)
           JX=IPGL_npa(IP_glob)
           IF (JX .gt. 0) THEN
-            AC(JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )   &
+            ACOUT(JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )   &
                  / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))
 #ifdef W3_DEBUGSOLVER
-            sumAC=sumAC + AC(JX)
+            sumAC=sumAC + ACOUT(JX)
             sumBPI0=sumBPI0 + BBPI0(ISP,IBI)
             sumBPIN=sumBPIN + BBPIN(ISP,IBI)
             sumCG=sumCG + CG(IK,ISBPI(IBI))
@@ -1846,7 +1888,7 @@ CONTAINS
       WRITE(740+IAPROC,*) 'ISP=', ISP, 'sumCLATS=', sumCLATS
       FLUSH(740+IAPROC)
 #endif
-      CALL PDLIB_exchange1DREAL(AC)
+      CALL PDLIB_exchange1DREAL(ACOUT)
 
 #ifdef W3_DEBUGSOLVER
       IF (testWrite) THEN
