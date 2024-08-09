@@ -7825,8 +7825,8 @@ CONTAINS
         DT_DIFF = DTG/NB_ITER
         PHI_V = 0.
  
-        !WRITE(5000+myrank,*) 'NUMBER OF SUB ITERATIONS', ITH, IK, NB_ITER, DT_DIFF, DeltaTmax
-        !CALL FLUSH(5000+myrank)
+        WRITE(5000+myrank,*) 'NUMBER OF SUB ITERATIONS', ITH, IK, NB_ITER, DT_DIFF, DeltaTmax
+        CALL FLUSH(5000+myrank)
 
         DO IT = 1, NB_ITER
           DO IE = 1, NE
@@ -7851,13 +7851,13 @@ CONTAINS
                 V(2) = 0.5 * PDLIB_IEN(2*IDX  ,IE)
                 eScal = DOT_PRODUCT(V, GRAD(1:2))
                 IP = INE(IDX,IE)
-                PHI_V(IP) = PHI_V(IP) + eScal + 1./3. * 2 * DV2DXY(IP) * DIFFVEC(3,IP)
+                PHI_V(IP) = PHI_V(IP) + eScal !+ 1./3. * 2 * DV2DXY(IP) * DIFFVEC(3,IP)
              END DO
           END DO
           CALL PDLIB_exchange1DREAL(PHI_V)
           DO JSEA =1, NSEAL
             IF (IOBP_LOC(JSEA) .EQ. 1) THEN
-              DIFFTOT      = - DT_DIFF * PHI_V(JSEA) / PDLIB_SI(JSEA) * DFAC 
+              DIFFTOT      = - DT_DIFF * DFAC * ( PHI_V(JSEA) / PDLIB_SI(JSEA) + 2 * DV2DXY(IP) * DIFFVEC(3,IP) ) 
             ELSE
               DIFFTOT      = 0
             ENDIF
