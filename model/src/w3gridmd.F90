@@ -7153,7 +7153,7 @@ CONTAINS
          '       Number of longitudes      :',I10/              &
          '       Number of latitudes       :',I10/              &
          '       Number of grid points     :',I10/              &
-         '       Number of sea points      :',I10,' (',F4.1,'%)'/&
+         '       Number of sea points      :',I10,' (',F15.4,'%)'/&
          '       Number of input b. points :',I10/              &
          '       Number of land points     :',I10/              &
          '       Number of excluded points :',I10/)
@@ -7162,7 +7162,7 @@ CONTAINS
          '       Number of longitudes      :',I10/              &
          '       Number of latitudes       :',I10/              &
          '       Number of grid points     :',I10/              &
-         '       Number of sea points      :',I10,' (100%)'/    &
+         '       Number of sea points      :',I10,' (test)'/    &
          '       Number of input b. points :',I10/              &
          '       Number of land points     :',I10/              &
          '       Number of excluded points :',I10/)

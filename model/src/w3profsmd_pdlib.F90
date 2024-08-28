@@ -751,7 +751,9 @@ CONTAINS
 
     IF (ITH == 1) THEN ! Compute indices for computation of ith,isp for gse
       ITHL = NTH 
+      ITHR = 2
     ELSE IF (ITH == NTH) THEN
+      ITHL = NTH - 1
       ITHR = 1 
     ELSE
       ITHL = ITH - 1 
@@ -765,11 +767,6 @@ CONTAINS
     CSINL  = FACY * ESIN(ITHL)
     CCOSR  = FACX * ECOS(ITHR)
     CSINR  = FACY * ESIN(ITHR)
-
-    CCOSL  = 0.5 * (CCOSL + CCOS)
-    CSINL  = 0.5 * (CSINL + CSIN)
-    CCOSR  = 0.5 * (CCOSR + CCOS)
-    CSINR  = 0.5 * (CSINR + CSIN)
 
     CCURX  = FACX
     CCURY  = FACY
@@ -837,6 +834,10 @@ CONTAINS
 
     CR(:,1) = VLCFLXR(:) * IOBDP_LOC
     CR(:,2) = VLCFLYR(:) * IOBDP_LOC
+
+    CL      = 0.5 * (C + CL)
+    CR      = 0.5 * (C + CR) 
+
     !
     ! 4. Prepares boundary update
     !
@@ -868,10 +869,11 @@ CONTAINS
     ELSE IF (FSPSI) THEN
       CALL PDLIB_W3XYPFSPSI2(ISP, C, LCALC, RD1, RD2, DTG, AC)
     ELSE IF (FSFCT) THEN
-      CALL PDLIB_W3XYPFSFCT2(ISP, CL, LCALC, RD1, RD2, DTG, 0.25 * AC, ACL)
-      CALL PDLIB_W3XYPFSFCT2(ISP, C, LCALC, RD1, RD2, DTG, 0.5 * AC, ACM)
-      CALL PDLIB_W3XYPFSFCT2(ISP, CR, LCALC, RD1, RD2, DTG, 0.25 * AC, ACR)
-      AC = ACL + ACM + ACR
+      !CALL PDLIB_W3XYPFSFCT2(ISP, CL, LCALC, RD1, RD2, DTG, 0.25 * AC, ACL)
+      !CALL PDLIB_W3XYPFSFCT2(ISP, C, LCALC, RD1, RD2, DTG, 0.5 * AC, ACM)
+      !CALL PDLIB_W3XYPFSFCT2(ISP, CR, LCALC, RD1, RD2, DTG, 0.25 * AC, ACR)
+      !AC = ACL + ACM + ACR
+      CALL PDLIB_W3XYPFSFCT2(ISP, C, LCALC, RD1, RD2, DTG, AC, AC)
     ELSE IF (FSNIMP) THEN
       STOP 'For PDLIB and FSNIMP, no function has been programmed yet'
     ENDIF
@@ -7867,8 +7869,8 @@ CONTAINS
         DT_DIFF = DTG/NB_ITER
         PHI_V = 0.
  
-        WRITE(5000+myrank,*) 'NUMBER OF SUB ITERATIONS', ITH, IK, NB_ITER, DT_DIFF, DeltaTmax
-        CALL FLUSH(5000+myrank)
+        !WRITE(5000+myrank,*) 'NUMBER OF SUB ITERATIONS', ITH, IK, NB_ITER, DT_DIFF, DeltaTmax
+        !CALL FLUSH(5000+myrank)
 
         DO IT = 1, NB_ITER
           DO IE = 1, NE
@@ -7899,7 +7901,7 @@ CONTAINS
           CALL PDLIB_exchange1DREAL(PHI_V)
           DO JSEA =1, NSEAL
             IF (IOBP_LOC(JSEA) .EQ. 1) THEN
-              DIFFTOT      = - DT_DIFF * DFAC * ( PHI_V(JSEA) / PDLIB_SI(JSEA) + 2 * DV2DXY(IP) * DIFFVEC(3,IP) ) 
+              DIFFTOT      = - DT_DIFF * DFAC * ( PHI_V(JSEA) / PDLIB_SI(JSEA) + 2 * DV2DXY(JSEA) * DIFFVEC(3,JSEA) ) 
             ELSE
               DIFFTOT      = 0
             ENDIF
