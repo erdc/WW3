@@ -2265,6 +2265,7 @@ CONTAINS
 
 #ifdef W3_SETUP
        IF (DO_CHANGE_WLV) THEN
+         !write(*,*) 'CHECK WAVE SETUP', WLV(ISEA), ZETA_SETUP(ISEA), DW(ISEA), ZB(ISEA) 
          WLVeff    = WLVeff + ZETA_SETUP(ISEA)
          WLV(ISEA) = WLVeff
        END IF

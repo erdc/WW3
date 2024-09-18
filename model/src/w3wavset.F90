@@ -5,6 +5,7 @@
 !> @author Aron Roland
 !> @author Mathieu Dutour-Sikiric
 !> @date 1-Jun-2018
+#define W3_DEBUGSTP
 !>
 !     ----------------------------------------------------------------
 !>
@@ -1360,7 +1361,7 @@
           V_P(IP)=V_Z(IP) + beta * V_P(IP)
         END DO
       END DO
-      TheOut=V_X
+      TheOut = 2 * V_X
 #ifdef W3_DEBUGSTP
       WRITE(740+IAPROC,*) 'TRIG_WAVE_SETUP_SOLVE_POISSON_NEUMANN_DIR, max/min=', maxval(TheOut), minval(TheOut)
       FLUSH(740+IAPROC)
@@ -1644,11 +1645,11 @@
 #endif
 !
       USE yowNodepool, only: PDLIB_NNZ, PDLIB_IA, PDLIB_JA, iplg, npa, np
-      USE W3GDATMD, only : MAPFS
+      USE W3GDATMD, only : MAPFS, ZB
       USE W3PARALL, only : SYNCHRONIZE_GLOBAL_ARRAY
       USE W3ADATMD, ONLY: DW
       USE W3GDATMD, ONLY: NSEAL, NSEA, NX
-      USE W3WDATMD, ONLY: ZETA_SETUP
+      USE W3WDATMD, ONLY: ZETA_SETUP, WLV
       USE W3ODATMD, only : IAPROC, NAPROC, NTPROC
       USE W3PARALL, only: INIT_GET_ISEA
       use yowExchangeModule, only : PDLIB_exchange1Dreal
@@ -1674,7 +1675,7 @@
       REAL(rkind) :: ASPAR(PDLIB_NNZ), B(npa)
       INTEGER I, ISEA, JSEA, IX, IP, IP_glob
       INTEGER :: ACTIVE(npa), ACTIVESEC(npa)
-      REAL(rkind) max_val, min_val
+      REAL(rkind) max_val, min_val, WLVeff
 #ifdef W3_S
       CALL STRACE (IENT, 'VA_SETUP_IOBPD')
 #endif
@@ -1721,11 +1722,9 @@
       WRITE(740+IAPROC,*) 'After,B,min=', minval(B), ' max=', maxval(B)
       FLUSH(740+IAPROC)
 #endif
-
-
       CALL TRIG_WAVE_SETUP_SOLVE_POISSON_NEUMANN_DIR(ASPAR, B, ZETA_WORK, ACTIVE, ACTIVESEC)
 
-      CALL TRIG_SET_MEANVALUE_TO_ZERO(ZETA_WORK)
+      !CALL TRIG_SET_MEANVALUE_TO_ZERO(ZETA_WORK)
 #ifdef W3_DEBUGSTP
       WRITE(740+IAPROC,*) 'After SET_MEAN ZETA_WORK(min/max)=', minval(ZETA_WORK), maxval(ZETA_WORK)
       FLUSH(740+IAPROC)
@@ -1754,11 +1753,20 @@
       CALL SYNCHRONIZE_GLOBAL_ARRAY(ZETA_WORK_ALL)
       DO IX = 1, NX
         ZETA_SETUP(IX) = ZETA_WORK_ALL(IX)
+        !WLVeff    = WLV(ISEA) + ZETA_SETUP(ISEA)
+        !WLV(ISEA) = WLVeff 
+        WRITE(*,*) DW (IX), MAX ( 0. ,ZETA_WORK_ALL(IX)-ZB(IX) ), ZETA_WORK_ALL(IX), ZB(IX)
+        !DW (ISEA) = MAX ( 0. , WLVeff-ZB(ISEA) )
+        DW (IX) = MAX ( 0. , ZETA_WORK_ALL(IX) - ZB(IX) )
       END DO
+      PAUSE
       IF (IAPROC .EQ. 1) THEN
         write(6666)  1. 
+        write(6667)  1. 
         write(6666)  (ZETA_WORK_ALL(IX), ZETA_WORK_ALL(IX), ZETA_WORK_ALL(IX), IX = 1, NX)
+        write(6667)  (ZETA_WORK_ALL(IX), ZETA_WORK_ALL(IX), DW(IX), IX = 1, NX)
       ENDIF
+      WRITE(*,*) SUM(ZETA_WORK_ALL), SUM(ZETA_SETUP), SUM(ZETA_WORK_ALL), SUM(ZETA_WORK), MAXVAL(ZETA_SETUP), MINVAL(ZETA_SETUP), MAXVAL(DW), MINVAL(DW)
 #ifdef W3_DEBUGSTP
       WRITE(740+IAPROC,*) 'Now exiting TRIG_WAVE_SETUP_COMPUTATION'
       FLUSH(740+IAPROC)

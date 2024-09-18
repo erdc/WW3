@@ -189,7 +189,6 @@ MODULE W3WAVEMD
   !
   !/ ------------------------------------------------------------------- /
   use w3servmd, only : print_memcheck
->>>>>>> ww3_hycom
 #ifdef W3_MPI
   USE W3ADATMD, ONLY: MPIBUF
 #endif
@@ -454,6 +453,9 @@ CONTAINS
     USE W3PARALL, only : PDLIB_NSEAL, PDLIB_NSEALM
     USE yowNodepool, only: npa, iplg, np
 #endif
+#ifdef W3_SETUP
+    
+#endif
     !/
     USE W3SERVMD
     USE W3TIMEMD
@@ -600,6 +602,9 @@ CONTAINS
     !Li   Temperature spectra for Arctic boundary update.
     REAL, ALLOCATABLE       :: BACSPEC(:)
     REAL                    :: BACANGL
+#endif
+#ifdef W3_SETUP
+    REAL    :: WLVeff
 #endif
     integer :: memunit
     !/ ------------------------------------------------------------------- /
@@ -1356,6 +1361,19 @@ CONTAINS
             FLDDIR = FLDDIR .OR. FLCTH .OR. FSREFRACTION .OR. FLCK .OR. FSFREQSHIFT
           END IF
         END IF
+
+#ifdef W3_SETUP
+       IF (DO_CHANGE_WLV) THEN
+         DO ISEA = 1, NSEA
+           !write(*,*) 'CHECK WAVE SETUP', WLV(ISEA) + ZETA_SETUP(ISEA), DW(ISEA), ZB(ISEA)
+           !WLVeff    = WLV(ISEA) + ZETA_SETUP(ISEA)
+           !WLV(ISEA) = WLVeff
+           !DW (ISEA) = MAX ( 0. , WLVeff-ZB(ISEA) )
+         ENDDO 
+         !pause
+       END IF
+#endif
+
 #ifdef W3_DEBUGCOH
         CALL ALL_VA_INTEGRAL_PRINT(IMOD, "After FFLEV and DTL0", 1)
 #endif

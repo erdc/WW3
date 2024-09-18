@@ -203,7 +203,7 @@ CONTAINS
     !/ Parameter list
     !/
     INTEGER, INTENT(IN)     :: IX ! Local grid number
-    REAL, INTENT(IN)        :: A(NSPEC)
+    REAL, INTENT(INOUT)        :: A(NSPEC)
     REAL, INTENT(INOUT)     :: EMEAN, FMEAN, WNMEAN, DEPTH
     REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC)
     REAL, INTENT(IN)        :: CG(NK)
@@ -219,7 +219,7 @@ CONTAINS
 #endif
     REAL*8                    :: HM, BB, ARG, Q0, QB, B, CBJ, HRMS, EB(NK)
     REAL*8                    :: AUX, CBJ2, RATIO, S0, S1, THR, BR1, BR2, FAK
-    REAL                      :: ETOT, FMEAN2
+    REAL                      :: ETOT, FMEAN2, EM
 #ifdef W3_T0
     REAL                    :: DOUT(NK,NTH)
 #endif
@@ -318,9 +318,9 @@ CONTAINS
     IF (IWB == 1) THEN
       IF ( ( BB .GT. THR) .AND. ( ABS ( BB - QB ) .GT. THR) ) THEN
         IF ( BB .LT. 1.0) THEN
-          CBJ = 2 * DBLE(SDBC1) * QB * DBLE(FMEAN) / BB
+          CBJ = 0!2 * DBLE(SDBC1) * QB * DBLE(FMEAN) / BB
         ELSE
-          CBJ = 2 * DBLE(SDBC1) * DBLE(FMEAN) * BB ! AR: degenerative regime, all waves must be .le. Hmax, we just smoothly let the excessive energy vanish by * BB.
+          CBJ = 0!2 * DBLE(SDBC1) * DBLE(FMEAN) * BB ! AR: degenerative regime, all waves must be .le. Hmax, we just smoothly let the excessive energy vanish by * BB.
         END IF
       ELSE
         CBJ = 0.d0
@@ -344,6 +344,15 @@ CONTAINS
     ELSE
       LBREAK = .FALSE.
     ENDIF
+
+    !AR: For testing wave setup 
+    HM     = 0.82* DEPTH*SQRT(2.)
+    EM     = HM * HM / 16.
+    IF ( ETOT.GT.EM .AND. ETOT.GT.1.E-30 ) THEN
+      A   = A / ETOT  * EM
+      ETOT  = EM
+    END IF
+
 
 #ifdef W3_DEBUGRUN
     IF (IX == DEBUG_NODE) THEN
