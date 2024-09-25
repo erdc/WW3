@@ -1361,7 +1361,7 @@
           V_P(IP)=V_Z(IP) + beta * V_P(IP)
         END DO
       END DO
-      TheOut = 2 * V_X
+      TheOut =  V_X
 #ifdef W3_DEBUGSTP
       WRITE(740+IAPROC,*) 'TRIG_WAVE_SETUP_SOLVE_POISSON_NEUMANN_DIR, max/min=', maxval(TheOut), minval(TheOut)
       FLUSH(740+IAPROC)
