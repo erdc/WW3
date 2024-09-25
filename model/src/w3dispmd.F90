@@ -343,6 +343,115 @@ CONTAINS
     !/
   END SUBROUTINE WAVNU2
   !/
+  PURE SUBROUTINE WAVNU4 (A, SI,H,K,CG)
+    !/
+    !/                  +-----------------------------------+
+    !/                  | WAVEWATCH III           NOAA/NCEP |
+    !/                  |           Aron Roland             |
+    !/                  |                        FORTRAN 90 |
+    !/                  | Last update :         20-05-17    |
+    !/                  +-----------------------------------+
+    !/
+    !/    20.05.17 : Initial Version, Aron Roland based on WAVNU1
+    !/
+    !  1. Purpose :
+    !
+    !     Calculate wavenumber and group velocity from the improved
+    !     Eckard's formula by Beji (2003)
+    !
+    !  2. Method :
+    !
+    !     Direct computation by approximation
+    !
+    !  3. Parameters used :
+    !
+    !     Parameter list
+    !     ----------------------------------------------------------------
+    !       SI      Real   I   Intrinsic frequency (moving frame)  (rad/s)
+    !       H       Real   I   Waterdepth                            (m)
+    !       K       Real   O   Wavenumber                          (rad/m)
+    !       CG      Real   O   Group velocity                       (m/s)
+    !     ----------------------------------------------------------------
+    !
+    !  4. Error messages :
+    !
+    !     - None.
+    !
+    !  5. Called by :
+    !
+    !     - Any main program
+    !
+    !  6. Subroutines used :
+    !
+    !     - None
+    !
+    !  7. Remarks :
+    !
+    !     - Calculated si* is always made positive without checks : check in
+    !       main program assumed !
+    !     - Depth is unlimited.
+    !
+    !  8. Structure :
+    !
+    !     +---------------------------------------------+
+    !     | calculate non-dimensional frequency         |
+    !     |---------------------------------------------|
+    !     | T            si* in range ?               F |
+    !     |----------------------|----------------------|
+    !     | calculate k* and cg* | deep water approx.   |
+    !     | calculate output     |                      |
+    !     |      parameters      |                      |
+    !     +---------------------------------------------+
+    !
+    !  9. Switches :
+    !
+    !     !/S  Enable subroutine tracing.
+    !
+    ! 10. Source code :
+    !
+    !/ ------------------------------------------------------------------- /
+    !/
+    USE CONSTANTS, ONLY : GRAV, PI
+    !!/S      USE W3SERVMD, ONLY: STRACE
+    !
+    IMPLICIT NONE
+    !/
+    !/ ------------------------------------------------------------------- /
+    !/ Parameter list
+    !/
+    REAL, INTENT(IN)        :: SI, H, A(:) 
+    REAL, INTENT(OUT)       :: K, CG
+    !/
+    !/ ------------------------------------------------------------------- /
+    !/ Local parameters
+    !/
+    INTEGER                 :: I1, I2
+    !!/S      INTEGER, SAVE           :: IENT = 0
+    REAL                    :: KH0, KH, TMP, TP, CP, L
+    REAL, PARAMETER         :: BETA1 = 1.55
+    REAL, PARAMETER         :: BETA2 = 1.3
+    REAL, PARAMETER         :: BETA3 = 0.216
+    REAL, PARAMETER         :: ZPI   = 2 * PI
+    REAL, PARAMETER         :: KDMAX = 20.
+    !/
+    !/ ------------------------------------------------------------------- /
+    !/
+    ! IENT does not work with PURE subroutines
+    !!/S      CALL STRACE (IENT, 'WAVNU1')
+    !
+    TP  = SI/ZPI
+    KH0 = ZPI*ZPI*H/GRAV*TP*TP
+    TMP = 1.55 + 1.3*KH0 + 0.216*KH0*KH0
+    KH  = KH0 * (1 + KH0**1.09 * 1./EXP(MIN(KDMAX,TMP))) / SQRT(TANH(MIN(KDMAX,KH0)))
+    K   = KH/H
+    CG  = 0.5*(1+(2*KH/SINH(MIN(KDMAX,2*KH))))*SI/K
+    !
+    RETURN
+    !/
+    !/ End of WAVNU3 ----------------------------------------------------- /
+    !/
+  END SUBROUTINE WAVNU4
+
   PURE SUBROUTINE WAVNU3 (SI,H,K,CG)
     !/
     !/                  +-----------------------------------+
@@ -451,6 +560,7 @@ CONTAINS
     !/ End of WAVNU3 ----------------------------------------------------- /
     !/
   END SUBROUTINE WAVNU3
+
 
   PURE SUBROUTINE WAVNU_LOCAL (SIG,DW,WNL,CGL)
     !/
