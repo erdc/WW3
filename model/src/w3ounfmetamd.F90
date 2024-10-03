@@ -2750,7 +2750,7 @@ CONTAINS
     META(1)%FSC    = 1.
     META(1)%UNITS  = 'm'
     META(1)%ENAME  = '.zet'
-    META(1)%VARNM='ZET'
+    META(1)%VARNM='zet'
     META(1)%VARNL='wave_setup'
     !META(1)%VARNS='sediment_grain_size'
     META(1)%VARNS=''
