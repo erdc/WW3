@@ -1286,9 +1286,9 @@ CONTAINS
       !Li     IF ( ISEA .NE. 0) THEN
       WLVeff=WLV(ISEA)
 #ifdef W3_SETUP
-      IF (DO_CHANGE_WLV) THEN
-        WLVeff=WLVeff + ZETA_SETUP(ISEA)
-      END IF
+!      IF (DO_CHANGE_WLV) THEN
+!        WLVeff=WLVeff + ZETA_SETUP(ISEA)
+!      END IF
 #endif
 #ifdef W3_DEBUGSTP
       max_val = MAX(max_val, WLVeff)
@@ -1315,9 +1315,9 @@ CONTAINS
       CALL INIT_GET_ISEA(ISEA, JSEA)
       WLVeff=WLV(ISEA)
 #ifdef W3_SETUP
-      IF (DO_CHANGE_WLV) THEN
-        WLVeff=WLVeff + ZETA_SETUP(ISEA)
-      END IF
+!      IF (DO_CHANGE_WLV) THEN
+!        WLVeff=WLVeff + ZETA_SETUP(ISEA)
+!      END IF
 #endif
 #ifdef W3_DEBUGSTP
       max_val = MAX(max_val, WLVeff)
