@@ -1363,15 +1363,15 @@ CONTAINS
         END IF
 
 #ifdef W3_SETUP
-       IF (DO_CHANGE_WLV) THEN
-         DO ISEA = 1, NSEA
+       !IF (DO_CHANGE_WLV) THEN
+         !DO ISEA = 1, NSEA
            !write(*,*) 'CHECK WAVE SETUP', WLV(ISEA) + ZETA_SETUP(ISEA), DW(ISEA), ZB(ISEA)
            !WLVeff    = WLV(ISEA) + ZETA_SETUP(ISEA)
            !WLV(ISEA) = WLVeff
            !DW (ISEA) = MAX ( 0. , WLVeff-ZB(ISEA) )
-         ENDDO 
+         !ENDDO 
          !pause
-       END IF
+       !END IF
 #endif
 
 #ifdef W3_DEBUGCOH
