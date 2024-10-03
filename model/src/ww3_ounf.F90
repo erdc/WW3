@@ -946,6 +946,7 @@ CONTAINS
 #ifdef W3_RTD
     USE W3SERVMD, ONLY : W3THRTN, W3XYRTN, W3EQTOLL
 #endif
+    USE W3WDATMD, ONLY : ZETA_SETUP
     USE W3ARRYMD, ONLY : OUTA2I, PRTBLK
     USE W3GDATMD, ONLY : SIG, GTYPE, FLAGLL, MAPSTA, MAPST2
     USE W3GDATMD, ONLY : NK, UNGTYPE, MAPSF, NTRI, CLGTYPE, RLGTYPE, &
@@ -957,6 +958,7 @@ CONTAINS
 #ifdef W3_T
     USE W3ODATMD, ONLY : NDST
 #endif
+
     USE NETCDF
     IMPLICIT NONE
 
@@ -1304,6 +1306,12 @@ CONTAINS
             NFIELD=1
 #endif
 
+#ifdef W3_SETUP
+            ! Wave Setup
+          ELSE IF (IFI .EQ. 1 .AND. IFJ .EQ. 13 ) THEN
+            CALL S2GRID(ZETA_SETUP(1:NSEA), X1)
+            NFIELD=1
+#endif 
             ! Significant wave height
           ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 1 ) THEN
             IF (NCVARTYPEI.EQ.3) NCVARTYPE=2

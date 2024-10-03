@@ -843,6 +843,11 @@ CONTAINS
       I = 1
       J = 12
 #endif
+#ifdef W3_SETUP
+    CASE('ZET')
+      I = 1
+      J = 13
+#endif
       ! Group 2
       !
 #ifdef W3_OASACM
