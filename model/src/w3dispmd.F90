@@ -343,115 +343,6 @@ CONTAINS
     !/
   END SUBROUTINE WAVNU2
   !/
-  PURE SUBROUTINE WAVNU4 (A, SI,H,K,CG)
-    !/
-    !/                  +-----------------------------------+
-    !/                  | WAVEWATCH III           NOAA/NCEP |
-    !/                  |           Aron Roland             |
-    !/                  |                        FORTRAN 90 |
-    !/                  | Last update :         20-05-17    |
-    !/                  +-----------------------------------+
-    !/
-    !/    20.05.17 : Initial Version, Aron Roland based on WAVNU1
-    !/
-    !  1. Purpose :
-    !
-    !     Calculate wavenumber and group velocity from the improved
-    !     Eckard's formula by Beji (2003)
-    !
-    !  2. Method :
-    !
-    !     Direct computation by approximation
-    !
-    !  3. Parameters used :
-    !
-    !     Parameter list
-    !     ----------------------------------------------------------------
-    !       SI      Real   I   Intrinsic frequency (moving frame)  (rad/s)
-    !       H       Real   I   Waterdepth                            (m)
-    !       K       Real   O   Wavenumber                          (rad/m)
-    !       CG      Real   O   Group velocity                       (m/s)
-    !     ----------------------------------------------------------------
-    !
-    !  4. Error messages :
-    !
-    !     - None.
-    !
-    !  5. Called by :
-    !
-    !     - Any main program
-    !
-    !  6. Subroutines used :
-    !
-    !     - None
-    !
-    !  7. Remarks :
-    !
-    !     - Calculated si* is always made positive without checks : check in
-    !       main program assumed !
-    !     - Depth is unlimited.
-    !
-    !  8. Structure :
-    !
-    !     +---------------------------------------------+
-    !     | calculate non-dimensional frequency         |
-    !     |---------------------------------------------|
-    !     | T            si* in range ?               F |
-    !     |----------------------|----------------------|
-    !     | calculate k* and cg* | deep water approx.   |
-    !     | calculate output     |                      |
-    !     |      parameters      |                      |
-    !     +---------------------------------------------+
-    !
-    !  9. Switches :
-    !
-    !     !/S  Enable subroutine tracing.
-    !
-    ! 10. Source code :
-    !
-    !/ ------------------------------------------------------------------- /
-    !/
-    USE CONSTANTS, ONLY : GRAV, PI
-    !!/S      USE W3SERVMD, ONLY: STRACE
-    !
-    IMPLICIT NONE
-    !/
-    !/ ------------------------------------------------------------------- /
-    !/ Parameter list
-    !/
-    REAL, INTENT(IN)        :: SI, H, A(:) 
-    REAL, INTENT(OUT)       :: K, CG
-    !/
-    !/ ------------------------------------------------------------------- /
-    !/ Local parameters
-    !/
-    INTEGER                 :: I1, I2
-    !!/S      INTEGER, SAVE           :: IENT = 0
-    REAL                    :: KH0, KH, TMP, TP, CP, L
-    REAL, PARAMETER         :: BETA1 = 1.55
-    REAL, PARAMETER         :: BETA2 = 1.3
-    REAL, PARAMETER         :: BETA3 = 0.216
-    REAL, PARAMETER         :: ZPI   = 2 * PI
-    REAL, PARAMETER         :: KDMAX = 20.
-    !/
-    !/ ------------------------------------------------------------------- /
-    !/
-    ! IENT does not work with PURE subroutines
-    !!/S      CALL STRACE (IENT, 'WAVNU1')
-    !
-    TP  = SI/ZPI
-    KH0 = ZPI*ZPI*H/GRAV*TP*TP
-    TMP = 1.55 + 1.3*KH0 + 0.216*KH0*KH0
-    KH  = KH0 * (1 + KH0**1.09 * 1./EXP(MIN(KDMAX,TMP))) / SQRT(TANH(MIN(KDMAX,KH0)))
-    K   = KH/H
-    CG  = 0.5*(1+(2*KH/SINH(MIN(KDMAX,2*KH))))*SI/K
-    !
-    RETURN
-    !/
-    !/ End of WAVNU3 ----------------------------------------------------- /
-    !/
-  END SUBROUTINE WAVNU4
-
   PURE SUBROUTINE WAVNU3 (SI,H,K,CG)
     !/
     !/                  +-----------------------------------+
@@ -560,6 +451,155 @@ CONTAINS
     !/ End of WAVNU3 ----------------------------------------------------- /
     !/
   END SUBROUTINE WAVNU3
+
+  PURE SUBROUTINE WAVNU4 (ALOCAL,SIG,DEP,K,CG)
+    !/
+    !/                  +-----------------------------------+
+    !/                  | WAVEWATCH III           NOAA/NCEP |
+    !/                  |           Aron Roland             |
+    !/                  |                        FORTRAN 90 |
+    !/                  | Last update :         20-05-17    |
+    !/                  +-----------------------------------+
+    !/
+    !/    20.05.17 : Initial Version, Aron Roland based on WAVNU1
+    !/
+    !  1. Purpose :
+    !
+    !     Calculate wavenumber and group velocity from the improved
+    !     Eckard's formula by Beji (2003)
+    !
+    !  2. Method :
+    !
+    !     Direct computation by approximation
+    !
+    !  3. Parameters used :
+    !
+    !     Parameter list
+    !     ----------------------------------------------------------------
+    !       SI      Real   I   Intrinsic frequency (moving frame)  (rad/s)
+    !       H       Real   I   Waterdepth                            (m)
+    !       K       Real   O   Wavenumber                          (rad/m)
+    !       CG      Real   O   Group velocity                       (m/s)
+    !     ----------------------------------------------------------------
+    !
+    !  4. Error messages :
+    !
+    !     - None.
+    !
+    !  5. Called by :
+    !
+    !     - Any main program
+    !
+    !  6. Subroutines used :
+    !
+    !     - None
+    !
+    !  7. Remarks :
+    !
+    !     - Calculated si* is always made positive without checks : check in
+    !       main program assumed !
+    !     - Depth is unlimited.
+    !
+    !  8. Structure :
+    !
+    !     +---------------------------------------------+
+    !     | calculate non-dimensional frequency         |
+    !     |---------------------------------------------|
+    !     | T            si* in range ?               F |
+    !     |----------------------|----------------------|
+    !     | calculate k* and cg* | deep water approx.   |
+    !     | calculate output     |                      |
+    !     |      parameters      |                      |
+    !     +---------------------------------------------+
+    !
+    !  9. Switches :
+    !
+    !     !/S  Enable subroutine tracing.
+    !
+    ! 10. Source code :
+    !
+    !/ ------------------------------------------------------------------- /
+    !/
+    USE CONSTANTS, ONLY : GRAV, PI
+    !!/S      USE W3SERVMD, ONLY: STRACE
+    !
+    IMPLICIT NONE
+    !/
+    !/ ------------------------------------------------------------------- /
+    !/ Parameter list
+    !/
+    REAL, INTENT(IN)        :: SIG, DEP, ALOCAL
+    REAL, INTENT(OUT)       :: K, CG
+    !/
+    !/ ------------------------------------------------------------------- /
+    !/ Local parameters
+    !/
+    INTEGER                 :: I1, I2
+    !!/S      INTEGER, SAVE           :: IENT = 0
+    REAL             :: TMP, TP, CP, L, T, KD
+    REAL             :: L0, K0, KD0, L1, TMP2, L2, HS, TMP3
+    REAL             :: COTH, COTH2, TANHKD, KD0NU, VBAR1, VBAR2, VBAR, UBAR, U, V
+    REAL, PARAMETER  :: BETA1 = 1.55
+    REAL, PARAMETER  :: BETA2 = 1.3
+    REAL, PARAMETER  :: BETA3 = 0.216
+    REAL, PARAMETER  :: ZPI   = 2 * PI
+    REAL, PARAMETER  :: KDMAX = 20.
+    REAL, PARAMETER  :: NU = 1.19
+    REAL, PARAMETER  :: ALPHA = 1.13
+
+    !/
+    !/ ------------------------------------------------------------------- /
+    !/
+    ! IENT does not work with PURE subroutines
+    !!/S      CALL STRACE (IENT, 'WAVNU1')
+    !
+    TP  = SIG/ZPI
+    KD0 = ZPI*ZPI*DEP/GRAV*TP*TP
+    TMP = 1.55 + 1.3*KD0 + 0.216*KD0*KD0
+    KD  = KD0 * (1 + KD0**1.09 * 1./EXP(MIN(KDMAX,TMP))) / SQRT(TANH(MIN(KDMAX,KD0)))
+    K0  = KD/DEP
+    CG  = 0.5*(1+(2*KD/SINH(MIN(KDMAX,2*KD))))*SIG/K0
+
+    HS     = ALOCAL ! 2DO: ADD FORMULA FOR COMPUTING Hmono,i 
+
+    T      = ZPI/SIG
+    L0     = GRAV*T*T/ZPI
+    K0     = ZPI/L0
+    KD0    = K0*DEP
+
+    L1     = ZPI/K
+    TMP    = KD0**(0.5*NU)
+    TMP2   = 1.0/TANH(MIN(KDMAX,TMP))
+    L2     = L1 / (1 - ALPHA * (HS/L0) * TMP2**(2.0/NU))
+    K      = ZPI/L2
+    KD     = K*DEP
+    TMP    = KD0**(0.50*NU)
+    COTH   = 1.0/TANH(TMP)
+    COTH2  = COTH**(2.0/NU)
+    TANHKD = tanh(KD0)
+    KD0NU  = KD0**(0.5*NU)
+    TMP    = (-TANHKD*KD0**(0.5*NU)*COTH**2+KD0*(TANHKD-1)*(TANHKD+1)*COTH+TANHKD*(KD0)**(0.5*NU))*ALPHA*K0*HS*COTH**(2./NU)
+    TMP2   = - ZPI * COTH  * (-TANHKD-KD0+KD0*TANHKD**2)
+    VBAR1  = GRAV * PI * (TMP+TMP2)
+    TMP    = 1.d0/ZPI*ALPHA*K0*DEP*COTH2
+    TMP2   = SQRT(GRAV*K0*TANH(KD0)/(1.d0-TMP))
+    TMP3   = (-ZPI+ALPHA*K0*HS*COTH2)**2*COTH
+    VBAR2  = 1.d0/(TMP2*TMP3)
+   
+    U      = SQRT(GRAV * K * tanh(KD) )
+    UBAR   = 0.5 * (GRAV * tanh(KD) + GRAV * K * (1 - tanh(KD)**2)*DEP) / U
+    V      = SQRT(1.d0/(1.d0-TMP))
+    TMP2   = (-0.5 * SQRT(2.d0) * PI * ALPHA * HS * COTH2) * (-COTH-KD0**(0.5*NU)+KD0**(0.5*NU)*COTH**2)
+    TMP3   = 1.d0/(SQRT(PI/(ZPI-ALPHA*K0*HS*COTH2))*(-ZPI+ALPHA*K0*HS*COTH2)**2*COTH)
+    VBAR   = TMP2*TMP3
+    CG     = U * VBAR + V * UBAR
+    !
+    RETURN
+    !/
+    !/ End of WAVNU3 ----------------------------------------------------- /
+    !/
+  END SUBROUTINE WAVNU4
+
 
 
   PURE SUBROUTINE WAVNU_LOCAL (SIG,DW,WNL,CGL)

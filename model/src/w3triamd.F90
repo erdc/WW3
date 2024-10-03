@@ -868,6 +868,7 @@ CONTAINS
       ! whereas TMPSTA and ZBIN are defined over the clean up list of nodes NX
       IF ((IX.NE.0).AND.(IX.LE.NX)) THEN
         IF ( (TMPSTA(1,IX).EQ.1) .AND. (STATUS(IX).EQ.0) .AND. (ZBIN(1,IX) .LT. ZLIM)) TMPSTA(1,IX) = 2
+!AR: 2DO: Delelte all WW3 mapings from the UG Scheme 
       END IF
     END DO
     !
