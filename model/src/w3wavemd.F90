@@ -1560,6 +1560,8 @@ CONTAINS
         END IF ! PDLIB
 #endif
 
+        IF (IAPROC == 1) WRITE(*,*) 'SUM B_JAC W3WAVE', SUM(B_JAC)
+
 
 #ifdef W3_PDLIB
 #ifdef W3_DEBUGSRC
@@ -1811,6 +1813,8 @@ CONTAINS
             END IF
           END IF
 
+          IF (IAPROC == 1) WRITE(*,*) 'SUM B_JAC W3WAVE BEFORE PDLIB_W3XYPUG_BLOCK_IMPLICIT', SUM(B_JAC)
+
           IF (LPDLIB) THEN
             !
 #ifdef W3_PDLIB
@@ -1831,6 +1835,7 @@ CONTAINS
 #endif
 #ifdef W3_PDLIB
               CALL PDLIB_W3XYPUG_BLOCK_IMPLICIT(IMOD, FACX, FACX, DTG, VGX, VGY, UGDTUPDATE )
+              IF (IAPROC == 1) WRITE(*,*) 'SUM B_JAC W3WAVE AFTER PDLIB_W3XYPUG_BLOCK_IMPLICIT', SUM(B_JAC)
 #endif
 #ifdef W3_PDLIB
             ELSE IF(FSTOTALEXP .and. (IT .ne. 0)) THEN
