@@ -3576,7 +3576,7 @@ CONTAINS
          PDLIB_I_DIAG, PDLIB_JA, PDLIB_TRIA03, PDLIB_SI
     USE W3ODATMD, only : IAPROC
     USE W3PARALL, only : ZERO
-    USE W3DISPMD, only : WAVNU_LOCAL
+    USE W3DISPMD, only : WAVNU_LOCAL, WAVNU4
 #ifdef W3_DB1
     USE W3SDB1MD
     USE W3GDATMD, only: SDBSC
@@ -3656,12 +3656,12 @@ CONTAINS
       DO IP = 1, NPA
 
         IP_GLOB = IPLG(IP)
-#ifdef NOCGTABLE
+!#ifdef NOCGTABLE
         !CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WN1,CG1)
         CALL WAVNU4 (VA(ISP,IP),SIG(IK),DW(IP_GLOB),WN1,CG1) 
-#else
-        CG1    = CG(IK,IP_GLOB)
-#endif
+!#else
+!        CG1    = CG(IK,IP_GLOB)
+!#endif
         CXY(1,IP) = CCOS * CG1/CLATS(IP_GLOB)
         CXY(2,IP) = CSIN * CG1
         IF (FLCUR) THEN
