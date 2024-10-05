@@ -5696,7 +5696,7 @@ CONTAINS
       B_JAC = ZERO
     ENDIF
 
-    IF (IAPROC == 1) WRITE(*,*) 'SUM B_JAC and ASPAR_DIAG_ALL', SUM(B_JAC), SUM(ASPAR_DIAG_ALL)
+    !IF (IAPROC == 1) WRITE(*,*) 'SUM B_JAC and ASPAR_DIAG_ALL', SUM(B_JAC), SUM(ASPAR_DIAG_ALL)
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_PROP SECTION 3')
     !
     !     source terms
@@ -5838,7 +5838,7 @@ CONTAINS
 #endif
               END IF
             END DO
-            IF (IAPROC == 1) WRITE(*,*) 'IMEM SUM ESUM', IP, SUM(ESUM) 
+            !IF (IAPROC == 1) WRITE(*,*) 'IMEM SUM ESUM', IP, SUM(ESUM) 
           ENDIF ! IMEM
 
 #ifdef W3_DEBUGSOLVERCOH
@@ -5926,7 +5926,7 @@ CONTAINS
           PRE_VA(:, IP)=REAL(eSum)
 #endif
           eSum(1:NSPEC)  = eSum(1:NSPEC) / ASPAR_DIAG(1:NSPEC)
-          IF (IAPROC == 1) WRITE(*,*) 'SUM ESUM AFTER DIV', IP, SUM(ESUM) 
+          !IF (IAPROC == 1) WRITE(*,*) 'SUM ESUM AFTER DIV', IP, SUM(ESUM) 
 #ifdef W3_DEBUGFREQSHIFT
           WRITE(740+IAPROC,*) 'JSEA=', JSEA, ' nbIter=', nbIter
           DO ISP=1,NSPEC
@@ -6299,8 +6299,8 @@ CONTAINS
       ENDIF  ! FLSOU
     END DO ! JSEA
 
-    IF (IAPROC == 1) WRITE(*,*) 'SUM VA', SUM(VA)
-    STOP 
+    !IF (IAPROC == 1) WRITE(*,*) 'SUM VA', SUM(VA)
+    !STOP 
 
 #ifdef WEIGHTS
     INQUIRE ( FILE='weights.ww3', EXIST = lexist )
