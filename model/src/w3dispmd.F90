@@ -520,7 +520,7 @@ CONTAINS
     !
     !/ ------------------------------------------------------------------- /
     !/
-    USE CONSTANTS, ONLY : GRAV, PI
+    USE CONSTANTS, ONLY : GRAV, PI, TPI
     !!/S      USE W3SERVMD, ONLY: STRACE
     !
     IMPLICIT NONE
@@ -537,7 +537,7 @@ CONTAINS
     INTEGER                 :: I1, I2
     !!/S      INTEGER, SAVE           :: IENT = 0
     REAL             :: TMP, TP, CP, L, T, KD
-    REAL             :: L0, K0, KD0, L1, TMP2, L2, HS, TMP3
+    REAL             :: L0, K0, KD0, L1, TMP2, L2, TMP3, HS, HMONO
     REAL             :: COTH, COTH2, TANHKD, KD0NU, VBAR1, VBAR2, VBAR, UBAR, U, V
     REAL, PARAMETER  :: BETA1 = 1.55
     REAL, PARAMETER  :: BETA2 = 1.3
@@ -553,6 +553,7 @@ CONTAINS
     ! IENT does not work with PURE subroutines
     !!/S      CALL STRACE (IENT, 'WAVNU1')
     !
+
     TP  = SIG/ZPI
     KD0 = ZPI*ZPI*DEP/GRAV*TP*TP
     TMP = 1.55 + 1.3*KD0 + 0.216*KD0*KD0
@@ -560,7 +561,8 @@ CONTAINS
     K0  = KD/DEP
     CG  = 0.5*(1+(2*KD/SINH(MIN(KDMAX,2*KD))))*SIG/K0
 
-    HS     = ALOCAL ! 2DO: ADD FORMULA FOR COMPUTING Hmono,i 
+    HS     = SQRT(4*ALOCAL*TPI*SIG/CG)
+    HMONO  = SQRT(2.)*HS
 
     T      = ZPI/SIG
     L0     = GRAV*T*T/ZPI
@@ -570,7 +572,7 @@ CONTAINS
     L1     = ZPI/K
     TMP    = KD0**(0.5*NU)
     TMP2   = 1.0/TANH(MIN(KDMAX,TMP))
-    L2     = L1 / (1 - ALPHA * (HS/L0) * TMP2**(2.0/NU))
+    L2     = L1 / (1 - ALPHA * (HMONO/L0) * TMP2**(2.0/NU))
     K      = ZPI/L2
     KD     = K*DEP
     TMP    = KD0**(0.50*NU)
@@ -578,7 +580,7 @@ CONTAINS
     COTH2  = COTH**(2.0/NU)
     TANHKD = tanh(KD0)
     KD0NU  = KD0**(0.5*NU)
-    TMP    = (-TANHKD*KD0**(0.5*NU)*COTH**2+KD0*(TANHKD-1)*(TANHKD+1)*COTH+TANHKD*(KD0)**(0.5*NU))*ALPHA*K0*HS*COTH**(2./NU)
+    TMP    = (-TANHKD*KD0**(0.5*NU)*COTH**2+KD0*(TANHKD-1)*(TANHKD+1)*COTH+TANHKD*(KD0)**(0.5*NU))*ALPHA*K0*HMONO*COTH**(2./NU)
     TMP2   = - ZPI * COTH  * (-TANHKD-KD0+KD0*TANHKD**2)
     VBAR1  = GRAV * PI * (TMP+TMP2)
     TMP    = 1.d0/ZPI*ALPHA*K0*DEP*COTH2
@@ -590,7 +592,7 @@ CONTAINS
     UBAR   = 0.5 * (GRAV * tanh(KD) + GRAV * K * (1 - tanh(KD)**2)*DEP) / U
     V      = SQRT(1.d0/(1.d0-TMP))
     TMP2   = (-0.5 * SQRT(2.d0) * PI * ALPHA * HS * COTH2) * (-COTH-KD0**(0.5*NU)+KD0**(0.5*NU)*COTH**2)
-    TMP3   = 1.d0/(SQRT(PI/(ZPI-ALPHA*K0*HS*COTH2))*(-ZPI+ALPHA*K0*HS*COTH2)**2*COTH)
+    TMP3   = 1.d0/(SQRT(PI/(ZPI-ALPHA*K0*HMONO*COTH2))*(-ZPI+ALPHA*K0*HMONO*COTH2)**2*COTH)
     VBAR   = TMP2*TMP3
     CG     = U * VBAR + V * UBAR
     !

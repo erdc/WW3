@@ -3657,7 +3657,8 @@ CONTAINS
 
         IP_GLOB = IPLG(IP)
 #ifdef NOCGTABLE
-        CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WN1,CG1)
+        !CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WN1,CG1)
+        CALL WAVNU4 (VA(ISP,IP),SIG(IK),DW(IP_GLOB),WN1,CG1) 
 #else
         CG1    = CG(IK,IP_GLOB)
 #endif
@@ -5650,6 +5651,7 @@ CONTAINS
         IK     = 1 + (ISP-1)/NTH
 #ifdef NOCGTABLE
         CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN1(IK),CG1(IK))
+        CALL WAVNU4(ACLOC,
 #else
         CG1(IK)    = CG(IK,ISEA)
 #endif
