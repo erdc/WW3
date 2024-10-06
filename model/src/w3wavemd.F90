@@ -1035,6 +1035,7 @@ CONTAINS
 
       !
       DO IT = IT0, NT
+
 #ifdef W3_TIMINGS
         CALL PRINT_MY_TIME("Begin of IT loop")
 #endif
@@ -1060,6 +1061,8 @@ CONTAINS
         call print_memcheck(memunit, 'memcheck_____:'//' WW3_WAVE TIME LOOP 0')
         !
         ITIME  = ITIME + 1
+
+        WRITE(*,*) 'ITIME = ', ITIME
         !
         DTG    = REAL(NINT(DTGA+DTRES+0.0001))
         DTRES  = DTRES + DTGA - DTG
@@ -1843,7 +1846,7 @@ CONTAINS
               CALL ALL_VA_INTEGRAL_PRINT(IMOD, "Before Block implicit", 1)
 #endif
 #ifdef W3_PDLIB
-              CALL PDLIB_W3XYPUG_BLOCK_IMPLICIT(IMOD, FACX, FACX, DTG, VGX, VGY, UGDTUPDATE )
+              CALL PDLIB_W3XYPUG_BLOCK_IMPLICIT(IMOD, FACX, FACX, DTG, VGX, VGY, UGDTUPDATE, ITIME )
               IF (IAPROC == 1) WRITE(*,*) 'SUM B_JAC W3WAVE AFTER PDLIB_W3XYPUG_BLOCK_IMPLICIT', SUM(B_JAC)
 #endif
 #ifdef W3_PDLIB

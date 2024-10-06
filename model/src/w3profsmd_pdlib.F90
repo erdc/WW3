@@ -2732,7 +2732,7 @@ CONTAINS
   END SUBROUTINE CHECK_ARRAY_INTEGRAL_NX_R8
   !/ ------------------------------------------------------------------- /
   !/ ------------------------------------------------------------------- /
-  SUBROUTINE PDLIB_W3XYPUG_BLOCK_IMPLICIT(IMOD, FACX, FACY, DTG, VGX, VGY, LCALC )
+  SUBROUTINE PDLIB_W3XYPUG_BLOCK_IMPLICIT(IMOD, FACX, FACY, DTG, VGX, VGY, LCALC, ITSUB )
     !/ ------------------------------------------------------------------- /
     !/
     !/                  +-----------------------------------+
@@ -2786,14 +2786,14 @@ CONTAINS
     USE W3GDATMD, only: B_JGS_USE_JACOBI
 
     LOGICAL, INTENT(IN) :: LCALC
-    INTEGER, INTENT(IN) :: IMOD
+    INTEGER, INTENT(IN) :: IMOD, ITSUB
     REAL, INTENT(IN)        :: FACX, FACY, DTG, VGX, VGY
 #ifdef W3_DEBUGSOLVER
     WRITE(740+IAPROC,*) 'B_JGS_USE_JACOBI=', B_JGS_USE_JACOBI
     FLUSH(740+IAPROC)
 #endif
     IF (B_JGS_USE_JACOBI) THEN
-      CALL PDLIB_JACOBI_GAUSS_SEIDEL_BLOCK(IMOD, FACX, FACY, DTG, VGX, VGY, LCALC)
+      CALL PDLIB_JACOBI_GAUSS_SEIDEL_BLOCK(IMOD, FACX, FACY, DTG, VGX, VGY, LCALC, ITSUB)
       RETURN
     END IF
     WRITE(*,*) 'Error: You need to use with JGS_USE_JACOBI'
@@ -3523,7 +3523,7 @@ CONTAINS
     !/
   END SUBROUTINE calcARRAY_JACOBI
   !/ ------------------------------------------------------------------- /
-  SUBROUTINE calcARRAY_JACOBI_VEC(DTG,FACX,FACY,VGX,VGY)
+  SUBROUTINE calcARRAY_JACOBI_VEC(DTG,FACX,FACY,VGX,VGY,ITSUB)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -3618,6 +3618,7 @@ CONTAINS
     USE W3STR1MD
 #endif
     REAL, INTENT(in) :: DTG, FACX, FACY, VGX, VGY
+    INTEGER, INTENT(IN) :: ITSUB
     INTEGER :: IP, ISP, ISEA, IP_glob
     INTEGER :: idx, IS
     INTEGER :: I, J, ITH, IK, J2
@@ -3669,10 +3670,17 @@ CONTAINS
 
         IP_GLOB = IPLG(IP)
 !#ifdef NOCGTABLE
-        !CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WN1,CG1)
-        CALL WAVNU4 (VA(ISP,IP),SIG(IK),DW(IP_GLOB),WN1,CG1) 
+        IF (ITSUB .LT. 20) THEN
+          CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WN1,CG1)
+        !WRITE(*,*) 'LINEAR', WN1, CG1
+        ELSE
+          CALL WAVNU4 (VA(ISP,IP),SIG(IK),DW(IP_GLOB),WN1,CG1) 
+        !WRITE(*,*) 'NONLINEAR', WN1, CG1
+        ENDIF
+
+        !WRITE(*,*) VA(ISP,IP),SIG(IK),DW(IP_GLOB),WN1,CG1
 !#else
-!        CG1    = CG(IK,IP_GLOB)
+        !CG1    = CG(IK,IP_GLOB)
 !#endif
         CXY(1,IP) = CCOS * CG1/CLATS(IP_GLOB)
         CXY(2,IP) = CSIN * CG1
@@ -5455,7 +5463,7 @@ CONTAINS
     ENDIF
   END SUBROUTINE ACTION_LIMITER_LOCAL
   !/ ------------------------------------------------------------------- /
-  SUBROUTINE PDLIB_JACOBI_GAUSS_SEIDEL_BLOCK(IMOD, FACX, FACY, DTG, VGX, VGY, LCALC)
+  SUBROUTINE PDLIB_JACOBI_GAUSS_SEIDEL_BLOCK(IMOD, FACX, FACY, DTG, VGX, VGY, LCALC, ITSUB)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -5551,7 +5559,7 @@ CONTAINS
 #endif
     implicit none
     LOGICAL, INTENT(IN) :: LCALC
-    INTEGER, INTENT(IN) :: IMOD
+    INTEGER, INTENT(IN) :: IMOD, ITSUB
     REAL, INTENT(IN) :: FACX, FACY, DTG, VGX, VGY
     !
     INTEGER :: IP, ISP, ITH, IK, JSEA, ISEA, IP_glob, IS0
@@ -5727,7 +5735,7 @@ CONTAINS
     !     geographical advection
     !
     IF (IMEM == 1) THEN
-      call calcARRAY_JACOBI_VEC(DTG,FACX,FACY,VGX,VGY)
+      call calcARRAY_JACOBI_VEC(DTG,FACX,FACY,VGX,VGY,ITSUB)
     ENDIF
 
 #ifdef W3_DEBUGSOLVER

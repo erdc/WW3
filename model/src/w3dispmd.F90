@@ -343,7 +343,7 @@ CONTAINS
     !/
   END SUBROUTINE WAVNU2
   !/
-  PURE SUBROUTINE WAVNU3 (SI,H,K,CG)
+  SUBROUTINE WAVNU3 (SI,H,K,CG)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -452,7 +452,7 @@ CONTAINS
     !/
   END SUBROUTINE WAVNU3
 
-  PURE SUBROUTINE WAVNU4 (ALOCAL,SIG,DEP,K,CG)
+  SUBROUTINE WAVNU4 (ALOCAL,SIG,DEP,K,CG)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -521,6 +521,7 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/
     USE CONSTANTS, ONLY : GRAV, PI, TPI
+    USE W3GDATMD, ONLY  : DMIN
     !!/S      USE W3SERVMD, ONLY: STRACE
     !
     IMPLICIT NONE
@@ -537,8 +538,8 @@ CONTAINS
     INTEGER                 :: I1, I2
     !!/S      INTEGER, SAVE           :: IENT = 0
     REAL             :: TMP, TP, CP, L, T, KD
-    REAL             :: L0, K0, KD0, L1, TMP2, L2, TMP3, HS, HMONO
-    REAL             :: COTH, COTH2, TANHKD, KD0NU, VBAR1, VBAR2, VBAR, UBAR, U, V
+    REAL             :: L0, K0, KD0, L1, TMP2, L2, TMP3, HS, HMONO, K1, CG1
+    REAL             :: COTH, COTH2, TANHKD, KD0NU, VBAR1, VBAR2, VBAR, UBAR, U, V, DEPTH
     REAL, PARAMETER  :: BETA1 = 1.55
     REAL, PARAMETER  :: BETA2 = 1.3
     REAL, PARAMETER  :: BETA3 = 0.216
@@ -554,27 +555,35 @@ CONTAINS
     !!/S      CALL STRACE (IENT, 'WAVNU1')
     !
 
+    DEPTH = MAX ( DMIN , DEP) 
+    !WRITE(*,*) 'SIG, DEP', SIG,DEPTH
+
     TP  = SIG/ZPI
-    KD0 = ZPI*ZPI*DEP/GRAV*TP*TP
+    KD0 = ZPI*ZPI*DEPTH/GRAV*TP*TP
     TMP = 1.55 + 1.3*KD0 + 0.216*KD0*KD0
     KD  = KD0 * (1 + KD0**1.09 * 1./EXP(MIN(KDMAX,TMP))) / SQRT(TANH(MIN(KDMAX,KD0)))
-    K0  = KD/DEP
-    CG  = 0.5*(1+(2*KD/SINH(MIN(KDMAX,2*KD))))*SIG/K0
+    K1  = KD/DEPTH
+    CG1 = 0.5*(1+(2*KD/SINH(MIN(KDMAX,2*KD))))*SIG/K1
 
-    HS     = SQRT(4*ALOCAL*TPI*SIG/CG)
+    HS     = SQRT(4*ALOCAL*TPI*SIG/CG1)
     HMONO  = SQRT(2.)*HS
+
+    IF (HS .GT. 0.) WRITE(*,*) HS, HMONO, ALOCAL
 
     T      = ZPI/SIG
     L0     = GRAV*T*T/ZPI
     K0     = ZPI/L0
-    KD0    = K0*DEP
+    KD0    = K0*DEPTH
+    !WRITE(*,*) 'HS, HMONO, T, L0, K0, KD0', HS, HMONO, T, L0, K0, KD0, CG 
 
-    L1     = ZPI/K
+    L1     = ZPI/K1
     TMP    = KD0**(0.5*NU)
     TMP2   = 1.0/TANH(MIN(KDMAX,TMP))
     L2     = L1 / (1 - ALPHA * (HMONO/L0) * TMP2**(2.0/NU))
     K      = ZPI/L2
-    KD     = K*DEP
+    !WRITE(*,'(A10,10F15.4)') 'L1, TMP, TMP2, L2, K0, K, HMONO', L1, TMP, TMP2, L2, K0, K, HMONO
+ 
+    KD     = K*DEPTH
     TMP    = KD0**(0.50*NU)
     COTH   = 1.0/TANH(TMP)
     COTH2  = COTH**(2.0/NU)
@@ -582,29 +591,34 @@ CONTAINS
     KD0NU  = KD0**(0.5*NU)
     TMP    = (-TANHKD*KD0**(0.5*NU)*COTH**2+KD0*(TANHKD-1)*(TANHKD+1)*COTH+TANHKD*(KD0)**(0.5*NU))*ALPHA*K0*HMONO*COTH**(2./NU)
     TMP2   = - ZPI * COTH  * (-TANHKD-KD0+KD0*TANHKD**2)
+    !WRITE(*,'(A40,10F15.4)') 'COTH, COTH2, TANHKD, KD0NU, TMP, TMP2', COTH, COTH2, TANHKD, KD0NU, TMP, TMP2
+
     VBAR1  = GRAV * PI * (TMP+TMP2)
-    TMP    = 1.d0/ZPI*ALPHA*K0*DEP*COTH2
+    TMP    = 1.d0/ZPI*ALPHA*K0*HMONO*COTH2
     TMP2   = SQRT(GRAV*K0*TANH(KD0)/(1.d0-TMP))
     TMP3   = (-ZPI+ALPHA*K0*HS*COTH2)**2*COTH
     VBAR2  = 1.d0/(TMP2*TMP3)
+    !WRITE(*,'(A40,10F15.4)') 'VBAR1, TMP, TMP2, TMP3, VBAR2', VBAR1, TMP, TMP2, TMP3, VBAR2
+
    
     U      = SQRT(GRAV * K * tanh(KD) )
-    UBAR   = 0.5 * (GRAV * tanh(KD) + GRAV * K * (1 - tanh(KD)**2)*DEP) / U
+    UBAR   = 0.5 * (GRAV * tanh(KD) + GRAV * K * (1 - tanh(KD)**2)*DEPTH) / U
     V      = SQRT(1.d0/(1.d0-TMP))
     TMP2   = (-0.5 * SQRT(2.d0) * PI * ALPHA * HS * COTH2) * (-COTH-KD0**(0.5*NU)+KD0**(0.5*NU)*COTH**2)
     TMP3   = 1.d0/(SQRT(PI/(ZPI-ALPHA*K0*HMONO*COTH2))*(-ZPI+ALPHA*K0*HMONO*COTH2)**2*COTH)
     VBAR   = TMP2*TMP3
     CG     = U * VBAR + V * UBAR
+    !WRITE(*,'(A10,10F15.4)') 'FINAL RESULT', U, UBAR, V, VBAR, K, CG
     !
     RETURN
     !/
-    !/ End of WAVNU3 ----------------------------------------------------- /
+    !/ End of WAVNU4 ----------------------------------------------------- /
     !/
   END SUBROUTINE WAVNU4
 
 
 
-  PURE SUBROUTINE WAVNU_LOCAL (SIG,DW,WNL,CGL)
+  SUBROUTINE WAVNU_LOCAL (SIG,DW,WNL,CGL)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
