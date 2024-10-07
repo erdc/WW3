@@ -421,7 +421,7 @@ CONTAINS
     use yowNodepool, only: npa
     use yowRankModule, only : rank
 #endif
-    USE W3GDATMD, ONLY: GTYPE, UNGTYPE, IOBDP_LOC
+    USE W3GDATMD, ONLY: GTYPE, UNGTYPE
 #ifdef W3_PDLIB
     USE PDLIB_W3PROFSMD, ONLY : PDLIB_MAPSTA_INIT, SET_IOBDP_PDLIB, PDLIB_IOBP_INIT, SET_IOBPA_PDLIB
     USE PDLIB_W3PROFSMD, ONLY : BLOCK_SOLVER_INIT, BLOCK_SOLVER_EXPLICIT_INIT, PDLIB_INIT, DEALLOCATE_PDLIB_GLOBAL
@@ -1286,9 +1286,9 @@ CONTAINS
       !Li     IF ( ISEA .NE. 0) THEN
       WLVeff=WLV(ISEA)
 #ifdef W3_SETUP
-!      IF (DO_CHANGE_WLV) THEN
-!        WLVeff=WLVeff + ZETA_SETUP(ISEA)
-!      END IF
+      IF (DO_CHANGE_WLV) THEN
+        WLVeff=WLVeff + ZETA_SETUP(ISEA)
+      END IF
 #endif
 #ifdef W3_DEBUGSTP
       max_val = MAX(max_val, WLVeff)
@@ -1315,9 +1315,9 @@ CONTAINS
       CALL INIT_GET_ISEA(ISEA, JSEA)
       WLVeff=WLV(ISEA)
 #ifdef W3_SETUP
-!      IF (DO_CHANGE_WLV) THEN
-!        WLVeff=WLVeff + ZETA_SETUP(ISEA)
-!      END IF
+      IF (DO_CHANGE_WLV) THEN
+        WLVeff=WLVeff + ZETA_SETUP(ISEA)
+      END IF
 #endif
 #ifdef W3_DEBUGSTP
       max_val = MAX(max_val, WLVeff)
@@ -1335,8 +1335,7 @@ CONTAINS
     !
 #ifdef W3_PDLIB
     IF ( IAPROC .LE. NAPROC ) THEN
-      CALL SET_IOBDP_PDLIB
-      WRITE(*,*) MAXVAL(IOBDP_LOC), MINVAL(IOBDP_LOC) 
+      CALL SET_IOBDP_PDLIB 
     ENDIF
 #endif
 

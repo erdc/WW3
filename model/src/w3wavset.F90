@@ -5,7 +5,6 @@
 !> @author Aron Roland
 !> @author Mathieu Dutour-Sikiric
 !> @date 1-Jun-2018
-#define W3_DEBUGSTP
 !>
 !     ----------------------------------------------------------------
 !>
