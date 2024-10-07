@@ -3572,9 +3572,10 @@ CONTAINS
     USE W3SERVMD, only: STRACE
 #endif
     !
+    USE CONSTANTS, ONLY: TPI
     USE W3GDATMD, only: NK, NK2, NTH, NSPEC, FACHFA, DMIN
     USE W3GDATMD, only: IOBP_LOC, IOBPD_LOC, IOBPA_LOC, IOBDP_LOC
-    USE W3GDATMD, only: NSEAL, CLATS
+    USE W3GDATMD, only: NSEAL, CLATS, DDEN
     USE W3GDATMD, only: MAPSTA, SIG
     USE W3WDATMD, only: VA
     USE W3ADATMD, only: CG, DW, WN, CX, CY
@@ -3633,12 +3634,12 @@ CONTAINS
     REAL    :: CRFS(3), K(3)
     REAL    :: KP(3,NE)
     REAL    :: KM(3), DELTAL(3,NE)
-    REAL    :: K1, eSI, eVS, eVD
-    REAL    :: eVal1, eVal2, eVal3
-    REAL    :: CG1, WN1
+    REAL    :: K1, eSI, eVS, eVD, CGL, WNL
+    REAL    :: eVal1, eVal2, eVal3, SPEC_VA(NSPEC)
+    REAL    :: CG1, WN1, ELOC, EMEAN, FMEAN, WNMEAN, AMAX
     REAL    :: TRIA03, SIDT, CCOS, CSIN
     REAL    :: SPEC(NSPEC), DEPTH, CCOSA(NTH), CSINA(NTH)
-    INTEGER :: IOBPTH1(NTH), IOBPTH2(NTH)
+    INTEGER :: IOBPTH1(NTH), IOBPTH2(NTH), ISP1
 
 #ifdef W3_DEBUGSOLVER
     WRITE(740+IAPROC,*) 'calcARRAY_JACOBI, begin'
@@ -3669,18 +3670,49 @@ CONTAINS
       DO IP = 1, NPA
 
         IP_GLOB = IPLG(IP)
+
 !#ifdef NOCGTABLE
-        IF (ITSUB .LT. 20) THEN
-          CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WN1,CG1)
+        IF (ITSUB .LT. 4) THEN
+          CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WNL,CGL)
+          WN1 = WNL
+          CG1 = CGL
         !WRITE(*,*) 'LINEAR', WN1, CG1
         ELSE
-          CALL WAVNU4 (VA(ISP,IP),SIG(IK),DW(IP_GLOB),WN1,CG1) 
+          CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WNL,CGL)
+          !DO IK=1,NK
+          !  DO ITH=1,NTH
+          !    ISP1=ITH + (IK-1)*NTH
+          !    SPEC_VA(ISP1) = VA(ISP1,IP) * CG(IK,IP_GLOB) / CLATS(IP_GLOB)
+          !  ENDDO
+          !ENDDO
+          !CALL COMPUTE_MEAN_PARAM(SPEC_VA, CG(1:NK,IP_GLOB), WN(1:NK,IP_GLOB), EMEAN, FMEAN, WNMEAN, AMAX)
+          ELOC = VA(ISP,IP) * DDEN(IK) / CGL * CGL / CLATS(IP_GLOB)
+          !IF (VA(ISP,IP) .GT. 0) THEN
+          ! WRITE(*,*) 'TEST', EMEAN, 4*SQRT(EMEAN), ELOC, 4*SQRT(ELOC), VA(ISP,IP), SUM(VA(:,IP))
+          ! pause
+          !ENDIF
+          !IF (ISP == 381 .and. IP == 3576) THEN
+          !IF (VA(ISP,IP) .GT. 0) THEN
+          !  WRITE(*,*) ISP, IP, ELOC, VA(ISP,IP), SIG(IK), CLATS(IP_GLOB), TPI
+          !ENDIF  
+          CALL WAVNU4 (ISP,IP,ELOC,SIG(IK),DW(IP_GLOB),WN1,CG1) 
+          !IF (CG1 .NE. CG1) THEN
+          !  STOP 'NAN'
+          !ENDIF
+          !IF (WN1 .NE. WN1) THEN
+          !  STOP 'NAN'
+          !ENDIF
+          !IF (ABS(CG1-CGL)/CGL*100 .GT. 5) THEN
+          !  WRITE(*,*) 'CG1, CGL', CG1, CGL
+          !ENDIF
+          !IF (ABS(WN1-WNL)/WNL*100 .GT. 5.) THEN
+          !  WRITE(*,*) 'WN1, WNL', WN1, WNL
+          !ENDIF
         !WRITE(*,*) 'NONLINEAR', WN1, CG1
         ENDIF
 
         !WRITE(*,*) VA(ISP,IP),SIG(IK),DW(IP_GLOB),WN1,CG1
 !#else
-        !CG1    = CG(IK,IP_GLOB)
 !#endif
         CXY(1,IP) = CCOS * CG1/CLATS(IP_GLOB)
         CXY(2,IP) = CSIN * CG1
@@ -5671,7 +5703,6 @@ CONTAINS
         IK     = 1 + (ISP-1)/NTH
 #ifdef NOCGTABLE
         CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN1(IK),CG1(IK))
-        CALL WAVNU4(ACLOC,
 #else
         CG1(IK)    = CG(IK,ISEA)
 #endif

@@ -452,7 +452,7 @@ CONTAINS
     !/
   END SUBROUTINE WAVNU3
 
-  SUBROUTINE WAVNU4 (ALOCAL,SIG,DEP,K,CG)
+  SUBROUTINE WAVNU4 (ISP,IP,ELOC,SIG,DEP,K,CG)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -529,8 +529,9 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/ Parameter list
     !/
-    REAL, INTENT(IN)        :: SIG, DEP, ALOCAL
+    REAL, INTENT(IN)        :: SIG, DEP, ELOC
     REAL, INTENT(OUT)       :: K, CG
+    INTEGER, INTENT(IN)     :: ISP, IP
     !/
     !/ ------------------------------------------------------------------- /
     !/ Local parameters
@@ -565,10 +566,8 @@ CONTAINS
     K1  = KD/DEPTH
     CG1 = 0.5*(1+(2*KD/SINH(MIN(KDMAX,2*KD))))*SIG/K1
 
-    HS     = SQRT(4*ALOCAL*TPI*SIG/CG1)
+    HS     = 4*SQRT(ELOC)
     HMONO  = SQRT(2.)*HS
-
-    IF (HS .GT. 0.) WRITE(*,*) HS, HMONO, ALOCAL
 
     T      = ZPI/SIG
     L0     = GRAV*T*T/ZPI
