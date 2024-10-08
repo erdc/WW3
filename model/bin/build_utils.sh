@@ -130,7 +130,7 @@ check_switches()
 #sort:s_bot:
       s_bot  ) TY='one'
                ID='bottom friction'
-               OK='BT0 BT1 BT4 BT8 BT9' ;;
+               OK='BT0 BT1 BT4 BT5 BT8 BT9' ;;
 #sort:s_db:
       s_db   ) TY='one'
                ID='depth-induced breaking'
@@ -683,6 +683,7 @@ switch_files()
    BT0) bt=$NULL ;;
    BT1) bt='w3sbt1md' ;;
    BT4) bt='w3sbt4md' ;;
+   BT5) bt='w3sbt5md' ;;
    BT8) bt='w3sbt8md' ;;
    BT9) bt='w3sbt9md' ;;
   esac

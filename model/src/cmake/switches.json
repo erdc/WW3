@@ -327,6 +327,10 @@
                 "build_files": ["w3sbt4md.F90"]
             },
             {
+                "name": "BT5",
+                "build_files": ["w3sbt5md.F90"]
+            },
+            {
                 "name": "BT8",
                 "build_files": ["w3sbt8md.F90"]
             },

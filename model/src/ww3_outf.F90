@@ -677,6 +677,10 @@ CONTAINS
 #ifdef W3_BT4
     REAL, PARAMETER            :: LOG2=LOG(2.)
 #endif
+#ifdef W3_BT5
+    REAL, PARAMETER            :: LOG2=LOG(2.)
+#endif
+
     !/
     !/ ------------------------------------------------------------------- /
     !/
@@ -993,6 +997,20 @@ CONTAINS
               CALL W3S2XY ( NSEA, NSEA, NX+1, NY, SED_D50  , MAPSF, X1 )
             ENDIF
 #endif
+#ifdef W3_BT5
+          ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
+            FLONE  = .TRUE.
+            FSC    = 0.01
+            UNITS  = 'Krumbein phi scale'
+            ENAME  = '.d50'
+            WHERE ( SED_D50.NE.UNDEF) SED_D50 = -LOG(SED_D50/0.001)/LOG2
+            IF ( ITYPE .EQ. 4 ) THEN
+              XS1    = SED_D50
+            ELSE
+              CALL W3S2XY ( NSEA, NSEA, NX+1, NY, SED_D50  , MAPSF, X1 )
+            ENDIF
+#endif
+
             !
 #ifdef W3_IS2
           ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 11 ) THEN

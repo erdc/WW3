@@ -372,6 +372,7 @@
          'W3SWLDMD'     ) modtest=w3swldmd.o ;;
          'W3SBT1MD'     ) modtest=w3sbt1md.o ;;
          'W3SBT4MD'     ) modtest=w3sbt4md.o ;;
+         'W3SBT5MD'     ) modtest=w3sbt5md.o ;;
          'W3SBT8MD'     ) modtest=w3sbt8md.o ;;
          'W3SBT9MD'     ) modtest=w3sbt9md.o ;;
          'W3SDB1MD'     ) modtest=w3sdb1md.o ;;

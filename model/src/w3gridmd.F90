@@ -453,6 +453,7 @@ MODULE W3GRIDMD
   !     !/BT1   JONSWAP bottom friction package.
   !     !/BT4   SHOWEX bottom friction using movable bed roughness
   !                  (Tolman 1994, Ardhuin & al. 2003)
+  !     !/BT5   Rocky bottom friction (Madsen etl al., 1988)
   !
   !     !/IC1   Sink term for interaction with ice (uniform k_i)
   !     !/IC2   Sink term for under-ice boundary layer friction
@@ -703,6 +704,13 @@ MODULE W3GRIDMD
   REAL, ALLOCATABLE       :: ZBIN(:,:), OBSX(:,:), OBSY(:,:)
   REAL, ALLOCATABLE       :: REFD(:,:), REFD2(:,:), REFS(:,:)
 #ifdef W3_BT4
+  REAL, ALLOCATABLE  :: SED_D50FILE(:,:), SED_POROFILE(:,:)
+  LOGICAL            :: SEDMAPD50
+  REAL               :: SED_D50_UNIFORM, SED_DSTAR, RIPFAC1, &
+       RIPFAC2, RIPFAC3, RIPFAC4, SIGDEPTH, &
+       BOTROUGHMIN, BOTROUGHFAC
+#endif
+#ifdef W3_BT5
   REAL, ALLOCATABLE  :: SED_D50FILE(:,:), SED_POROFILE(:,:)
   LOGICAL            :: SEDMAPD50
   REAL               :: SED_D50_UNIFORM, SED_DSTAR, RIPFAC1, &
@@ -1062,6 +1070,11 @@ MODULE W3GRIDMD
 #endif
 #ifdef W3_BT4
   NAMELIST /SBT4/ SEDMAPD50, SED_D50_UNIFORM, RIPFAC1,            &
+       RIPFAC2, RIPFAC3, RIPFAC4, SIGDEPTH,            &
+       BOTROUGHMIN, BOTROUGHFAC
+#endif
+#ifdef W3_BT5
+  NAMELIST /SBT5/ SEDMAPD50, SED_D50_UNIFORM, RIPFAC1,            &
        RIPFAC2, RIPFAC3, RIPFAC4, SIGDEPTH,            &
        BOTROUGHMIN, BOTROUGHFAC
 #endif
@@ -1468,6 +1481,9 @@ CONTAINS
     NRBT   = NRBT + 1
 #endif
 #ifdef W3_BT4
+    NRBT   = NRBT + 1
+#endif
+#ifdef W3_BT5
     NRBT   = NRBT + 1
 #endif
 #ifdef W3_BT8
@@ -2314,6 +2330,9 @@ CONTAINS
 #ifdef W3_BT4
     WRITE (NDSO,926)
 #endif
+#ifdef W3_BT5
+    WRITE (NDSO,926)
+#endif
     !
 #ifdef W3_BT1
     GAMMA  = -0.067
@@ -2334,6 +2353,29 @@ CONTAINS
     BOTROUGHMIN=0.01
     BOTROUGHFAC=1.00
     CALL READNL ( NDSS, 'SBT4', STATUS )
+    WRITE (NDSO,926) STATUS
+    WRITE (NDSO,927) SEDMAPD50, SED_D50_UNIFORM, &
+         RIPFAC1,RIPFAC2,RIPFAC3,RIPFAC4,SIGDEPTH,  &
+         BOTROUGHMIN, BOTROUGHFAC
+    SBTCX(1)=RIPFAC1
+    SBTCX(2)=RIPFAC2
+    SBTCX(3)=RIPFAC3
+    SBTCX(4)=RIPFAC4
+    SBTCX(5)=SIGDEPTH
+    SBTCX(6)=BOTROUGHMIN
+    SBTCX(7)=BOTROUGHFAC
+#endif
+#ifdef W3_BT5
+    SEDMAPD50=.FALSE.
+    SED_D50_UNIFORM=2.E-4  ! default grain size: medium sand 200 microns
+    RIPFAC1=0.4    ! A1 in Ardhuin et al. 2003
+    RIPFAC2=-2.5   ! A2 in Ardhuin et al. 2003
+    RIPFAC3=1.2    ! A3 in Ardhuin et al. 2003
+    RIPFAC4=0.05   ! A4 in Ardhuin et al. 2003
+    SIGDEPTH=0.05
+    BOTROUGHMIN=0.01
+    BOTROUGHFAC=1.00
+    CALL READNL ( NDSS, 'SBT5', STATUS )
     WRITE (NDSO,926) STATUS
     WRITE (NDSO,927) SEDMAPD50, SED_D50_UNIFORM, &
          RIPFAC1,RIPFAC2,RIPFAC3,RIPFAC4,SIGDEPTH,  &
@@ -3308,6 +3350,11 @@ CONTAINS
       WRITE (NDSO,2926) GAMMA
 #endif
 #ifdef W3_BT4
+      WRITE (NDSO,2926) SEDMAPD50, SED_D50_UNIFORM,      &
+           RIPFAC1,RIPFAC2,RIPFAC3,RIPFAC4, SIGDEPTH, &
+           BOTROUGHMIN, BOTROUGHFAC
+#endif
+#ifdef W3_BT5
       WRITE (NDSO,2926) SEDMAPD50, SED_D50_UNIFORM,      &
            RIPFAC1,RIPFAC2,RIPFAC3,RIPFAC4, SIGDEPTH, &
            BOTROUGHMIN, BOTROUGHFAC
@@ -5618,10 +5665,102 @@ CONTAINS
         ! ports, 1997 conference, Christchurch, p149-154, University of Cantebury, NZ
         SED_DSTAR=(GRAV*(SED_SG-1)/nu_water**2)**(0.333333)*SED_D50(ISEA)
         SED_PSIC(ISEA)=0.3/(1+1.2*SED_DSTAR)+0.55*(1-exp(-0.02*SED_DSTAR))
+      END DO
+    END DO
 #endif
+#ifdef W3_BT5
+    ALLOCATE ( SED_D50FILE(NX,NY))
+    IF ( SEDMAPD50 ) THEN
 
-
-#ifdef W3_BT4
+      !
+      !  9.e.1 Info from input file
+      !
+      IF (FLGNML) THEN
+        NDSTR = NML_SED%IDF
+        VSC = NML_SED%SF
+        IDLA = NML_SED%IDLA
+        IDFT = NML_SED%IDFM
+        RFORM = TRIM(NML_SED%FORMAT)
+        FROM = TRIM(NML_SED%FROM)
+        TNAME = TRIM(NML_SED%FILENAME)
+      ELSE
+        CALL NEXTLN ( COMSTR , NDSI , NDSE )
+        READ (NDSI,*,END=2001,ERR=2002) NDSTR, VSC, IDLA, IDFT, RFORM, &
+             FROM, TNAME
+      END IF
+      !
+      IF (   ABS(VSC) .LT. 1.E-7  ) THEN
+        VSC    = 1.
+      ELSE
+        ! WARNING TO BE ADDED ...
+      END IF
+      IF (IDLA.LT.1 .OR. IDLA.GT.4) IDLA   = 1
+      IF (IDFT.LT.1 .OR. IDFT.GT.3) IDFT   = 1
+      !
+      WRITE (NDSO,1978) NDSTR, VSC, IDLA, IDFT
+      IF (IDFT.EQ.2) WRITE (NDSO,973) RFORM
+      IF (FROM.EQ.'NAME' .AND. NDSG.NE.NDSTR) WRITE (NDSO,974) TNAME
+      !
+      ! 9.e.2  Open file and check if necessary
+      !
+      IF ( NDSTR .EQ. NDSI ) THEN
+        IF ( IDFT .EQ. 3 ) THEN
+          WRITE (NDSE,1004) NDSTR
+          CALL EXTCDE (23)
+        ELSE
+          CALL NEXTLN ( COMSTR , NDSI , NDSE )
+        END IF
+      ELSE IF ( NDSTR .EQ. NDSG ) THEN
+        IF ( ( IDFM.EQ.3 .AND. IDFT.NE.3 ) .OR.                 &
+             ( IDFM.NE.3 .AND. IDFT.EQ.3 ) ) THEN
+          WRITE (NDSE,1005) IDFM, IDFT
+          CALL EXTCDE (24)
+        END IF
+      ELSE
+        IF ( IDFT .EQ. 3 ) THEN
+          IF (FROM.EQ.'NAME') THEN
+            OPEN (NDSTR,FILE=TRIM(FNMPRE)//TNAME,             &
+                 form='UNFORMATTED', convert=file_endian,STATUS='OLD',ERR=2000, &
+                 IOSTAT=IERR)
+          ELSE
+            OPEN (NDSTR,           form='UNFORMATTED', convert=file_endian,      &
+                 STATUS='OLD',ERR=2000,IOSTAT=IERR)
+          END IF
+        ELSE
+          IF (FROM.EQ.'NAME') THEN
+            OPEN (NDSTR,FILE=TRIM(FNMPRE)//TNAME,             &
+                 STATUS='OLD',ERR=2000,IOSTAT=IERR)
+          ELSE
+            OPEN (NDSTR,                                    &
+                 STATUS='OLD',ERR=2000,IOSTAT=IERR)
+          END IF
+        END IF
+      END IF
+      !
+      ! 9.e.3 Read the data
+      !
+      CALL INA2R ( SED_D50FILE, NX, NY, 1, NX, 1, NY, NDSTR, NDST, NDSE, &
+           IDFM, RFORM, IDLA, VSC, VOF)
+      !
+      IF ( NDSTR .EQ. NDSI ) CALL NEXTLN ( COMSTR , NDSI , NDSE )
+      !
+      WRITE (NDSO,*) 'Min and Max values of kkr :',MINVAL(SED_D50FILE), MAXVAL(SED_D50FILE)
+      WRITE (NDSO,*)
+      !
+    ELSE
+      SED_D50FILE(:,:)=SED_D50_UNIFORM
+    END IF
+    !
+    DO IY=1, NY
+      DO IX=1, NX
+        ISEA = MAPFS (IY,IX)
+        SED_D50(ISEA)       = SED_D50FILE(IX,IY)
+        SED_D50(ISEA)       = MAX(SED_D50(ISEA),1E-5)
+        ! Critical Shields number, Soulsby, R.L. and R J S W Whitehouse
+        ! Threshold of sed. motion in coastal environments, Proc. Pacific Coasts and
+        ! ports, 1997 conference, Christchurch, p149-154, University of Cantebury, NZ
+        SED_DSTAR=(GRAV*(SED_SG-1)/nu_water**2)**(0.333333)*SED_D50(ISEA)
+        SED_PSIC(ISEA)=0.3/(1+1.2*SED_DSTAR)+0.55*(1-exp(-0.02*SED_DSTAR))
       END DO
     END DO
 #endif
@@ -6506,6 +6645,18 @@ CONTAINS
          '        SIGDEPTH =',F8.4,', BOTROUGHMIN =',F8.4, &
          ', BOTROUGHFAC =',F4.1,' /')
 #endif
+#ifdef W3_BT5
+926 FORMAT (/'  Bottom friction  (MADSEN)  ',A/                 &
+         ' --------------------------------------------------')
+927 FORMAT ( '       SEDMAPD50, SED_D50_UNIFORM        :',L3,1X,F8.6/ &
+         '       RIPFAC1,RIPFAC2,RIPFAC3,RIPFAC4   :',4F8.4/      &
+         '       SIGDEPTH, BOTROUGHMIN, BOTROUGHFAC:',3F8.4/)
+2926 FORMAT ( '  &SBT5 SEDMAPD50 =',L3,', SED_D50_UNIFORM =',F8.6,','/ &
+         '        RIPFAC1 =',F8.4,', RIPFAC2 =',F8.4,      &
+         ', RIPFAC3 =',F8.4,', RIPFAC4 =',F8.4,','/        &
+         '        SIGDEPTH =',F8.4,', BOTROUGHMIN =',F8.4, &
+         ', BOTROUGHFAC =',F4.1,' /')
+#endif
     !
 #ifdef W3_DB0
 928 FORMAT (/'  Surf breaking not defined.'/)
@@ -7375,6 +7526,10 @@ CONTAINS
 #ifdef W3_BT4
               CASE('SBT4')
                 READ (NDS,NML=SBT4,END=801,ERR=802,IOSTAT=J)
+#endif
+#ifdef W3_BT5
+              CASE('SBT5')
+                READ (NDS,NML=SBT5,END=801,ERR=802,IOSTAT=J)
 #endif
 #ifdef W3_IS1
               CASE('SIS1')

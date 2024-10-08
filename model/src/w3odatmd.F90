@@ -741,6 +741,9 @@ CONTAINS
 #ifdef W3_BT4
     NOGE(1) = 10
 #endif
+#ifdef W3_BT5
+    NOGE(1) = 10
+#endif
 #ifdef W3_IS2
     NOGE(1) = 12    ! CB
 #endif
@@ -759,6 +762,9 @@ CONTAINS
     IDOUT( 1, 9)  = 'Air density         '
 #ifdef W3_BT4
     IDOUT( 1, 10)  = 'Sediment diam D50   '
+#endif
+#ifdef W3_BT5
+    IDOUT( 1, 10)  = 'KKR   '
 #endif
 #ifdef W3_IS2
     IDOUT( 1, 11)  = 'ice thickness   '

@@ -1001,6 +1001,10 @@ CONTAINS
 #ifdef W3_BT4
     REAL, PARAMETER            :: LOG2=LOG(2.)
 #endif
+#ifdef W3_BT5
+    REAL, PARAMETER            :: LOG2=LOG(2.)
+#endif
+
     !
     REAL,DIMENSION(:),  ALLOCATABLE    :: LON, LAT, FREQ
     REAL,DIMENSION(:,:),  ALLOCATABLE  :: LON2D, LAT2D, ANGLD2D
@@ -1289,6 +1293,14 @@ CONTAINS
             WHERE ( X1.NE.UNDEF) X1 = -LOG(X1/0.001)/LOG2
             NFIELD=1
 #endif
+#ifdef W3_BT5
+            ! Krumbein phi scale
+          ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
+            CALL S2GRID(SED_D50, X1)
+            WHERE ( X1.NE.UNDEF) X1 = -LOG(X1/0.001)/LOG2
+            NFIELD=1
+#endif
+
             !
 #ifdef W3_IS2
             ! Ice thickness

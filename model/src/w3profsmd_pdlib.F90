@@ -3363,6 +3363,9 @@ CONTAINS
 #ifdef W3_BT4
     USE W3SBT4MD
 #endif
+#ifdef W3_BT5
+    USE W3SBT5MD
+#endif
 #ifdef W3_BT8
     USE W3SBT8MD
 #endif
@@ -3586,6 +3589,9 @@ CONTAINS
 #endif
 #ifdef W3_BT4
     USE W3SBT4MD
+#endif
+#ifdef W3_BT5
+    USE W3SBT5MD
 #endif
 #ifdef W3_BT8
     USE W3SBT8MD
@@ -3832,6 +3838,9 @@ CONTAINS
 #ifdef W3_BT4
     USE W3SBT4MD
 #endif
+#ifdef W3_BT5
+    USE W3SBT5MD
+#endif
 #ifdef W3_BT8
     USE W3SBT8MD
 #endif
@@ -4035,6 +4044,9 @@ CONTAINS
 #ifdef W3_BT4
     USE W3SBT4MD
 #endif
+#ifdef W3_BT5
+    USE W3SBT5MD
+#endif
 #ifdef W3_BT8
     USE W3SBT8MD
 #endif
@@ -4234,6 +4246,9 @@ CONTAINS
 #endif
 #ifdef W3_BT4
     USE W3SBT4MD
+#endif
+#ifdef W3_BT5
+    USE W3SBT5MD
 #endif
 #ifdef W3_BT8
     USE W3SBT8MD

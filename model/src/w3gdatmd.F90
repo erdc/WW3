@@ -95,7 +95,7 @@ MODULE W3GDATMD
   !/    15-Apr-2020 : Adds optional opt-out for CFL on BC ( version 7.08 )
   !/    06-May-2021 : Add SMCTYPE, ARCTC options.   JGLi  ( version 7.12 )
   !/    07-Jun-2021 : the GKE module (NL5, Q. Liu)        ( version 7.12 )
-  !/
+  !/    08-Oct-2024 : Rocky bottom friction (A.Roland)    ( version 7.14 )
   !/
   !/    Copyright 2009-2013 National Weather Service (NWS),
   !/       National Oceanic and Atmospheric Administration.  All rights
@@ -719,6 +719,9 @@ MODULE W3GDATMD
 #ifdef W3_BT4
     REAL, POINTER         :: SED_D50(:), SED_PSIC(:)
 #endif
+#ifdef W3_BT5
+    REAL, POINTER         :: SED_D50(:), SED_PSIC(:)
+#endif
 #ifdef W3_REF1
     LOGICAL, POINTER      :: RREF(:)
     REAL,    POINTER      :: REFPARS(:)
@@ -975,6 +978,10 @@ MODULE W3GDATMD
 #ifdef W3_BT4
     REAL                  :: SBTCX(10)
 #endif
+#ifdef W3_BT5
+    REAL                  :: SBTCX(10)
+#endif
+
 #ifdef W3_BT8
     REAL                  :: DUMMY
 #endif
@@ -1213,6 +1220,9 @@ MODULE W3GDATMD
 #ifdef W3_BT4
   REAL, POINTER         :: SED_D50(:), SED_PSIC(:)
 #endif
+#ifdef W3_BT5
+  REAL, POINTER         :: SED_D50(:), SED_PSIC(:)
+#endif
 
   LOGICAL, POINTER :: GINIT, FLDRY, FLCX, FLCY, FLCTH, FLCK, FLSOU, IICEDISP,&
        IICESMOOTH
@@ -1386,6 +1396,10 @@ MODULE W3GDATMD
 #ifdef W3_BT4
   REAL, POINTER           :: SBTCX(:)
 #endif
+#ifdef W3_BT5
+  REAL, POINTER           :: SBTCX(:)
+#endif
+
   !/
   !/ Data aliasses for structure SDBP(S)
   !/
@@ -1757,6 +1771,13 @@ CONTAINS
          STAT=ISTAT                 )
     CHECK_ALLOC_STATUS ( ISTAT )
 #endif
+#ifdef W3_BT5
+    ALLOCATE ( GRIDS(IMOD)%SED_D50(0:MSEA), &
+         GRIDS(IMOD)%SED_PSIC(0:MSEA),&
+         STAT=ISTAT                 )
+    CHECK_ALLOC_STATUS ( ISTAT )
+#endif
+
     !
 #ifdef W3_SMC
     ALLOCATE ( GRIDS(IMOD)%NLvCel(0:MRLv),     &
@@ -2457,6 +2478,11 @@ CONTAINS
       SED_D50  => GRIDS(IMOD)%SED_D50
       SED_PSIC => GRIDS(IMOD)%SED_PSIC
 #endif
+#ifdef W3_BT5
+      SED_D50  => GRIDS(IMOD)%SED_D50
+      SED_PSIC => GRIDS(IMOD)%SED_PSIC
+#endif
+
       !
 #ifdef W3_SMC
       NLvCel => GRIDS(IMOD)%NLvCel
@@ -2807,6 +2833,10 @@ CONTAINS
 #ifdef W3_BT4
     SBTCX  => MPARS(IMOD)%SBTPS%SBTCX
 #endif
+#ifdef W3_BT5
+    SBTCX  => MPARS(IMOD)%SBTPS%SBTCX
+#endif
+
     !
     !     Structure SDBPS
     !

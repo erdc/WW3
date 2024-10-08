@@ -2720,6 +2720,19 @@ CONTAINS
     META(1)%VMIN = -10.0
     META(1)%VMAX = 32.0
 #endif
+#ifdef W3_BT5
+    META => GROUP(1)%FIELD(10)%META
+    META(1)%FSC    = 0.001
+    META(1)%UNITS  = 'Krumbein phi scale'
+    META(1)%ENAME  = '.d50'
+    META(1)%VARNM='d50'
+    META(1)%VARNL='grain_size'
+    !META(1)%VARNS='sediment_grain_size'
+    META(1)%VARNS=''
+    META(1)%VARNG='sediment_grain_size'
+    META(1)%VMIN = -10.0
+    META(1)%VMAX = 32.0
+#endif
     ! IFI=1, IFJ=11, IC1
 #ifdef W3_IS2
     META => GROUP(1)%FIELD(11)%META

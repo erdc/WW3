@@ -1584,6 +1584,9 @@ CONTAINS
 #ifdef W3_BT4
     USE W3SBT4MD
 #endif
+#ifdef W3_BT5
+    USE W3SBT5MD
+#endif
 #ifdef W3_BT8
     USE W3SBT8MD
 #endif
@@ -1687,6 +1690,9 @@ CONTAINS
     REAL                    :: TAUSCX, TAUSCY
 #endif
 #ifdef W3_BT4
+    REAL                    :: D50, PSIC, BEDFORM(3), TAUBBL(2)
+#endif
+#ifdef W3_BT5
     REAL                    :: D50, PSIC, BEDFORM(3), TAUBBL(2)
 #endif
     REAL                    :: ICE
@@ -2503,6 +2509,15 @@ CONTAINS
               D50 = SED_D50(ISEA)
               PSIC= SED_PSIC(ISEA)
               CALL W3SBT4 ( A, CG, WN, DEPTH, D50, PSIC, TAUBBL,   &
+                   BEDFORM, XBT, DIA, IX, IY )
+#endif
+#ifdef W3_BT5
+              IX=1    ! to be fixed later
+              IY=1    ! to be fixed later
+              ISEA=1  ! to be fixed later
+              D50 = SED_D50(ISEA)
+              PSIC= SED_PSIC(ISEA)
+              CALL W3SBT5 ( A, CG, WN, DEPTH, D50, PSIC, TAUBBL,   &
                    BEDFORM, XBT, DIA, IX, IY )
 #endif
 

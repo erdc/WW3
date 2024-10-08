@@ -265,6 +265,7 @@ CONTAINS
     !/    22-Mar-2021 : Add extra fields used in coupling   ( version 7.13 )
     !/    07-Jun-2021 : S_{nl5} GKE NL5 (Q. Liu)            ( version 7.13 )
     !/    19-Jul-2021 : Momentum and air density support    ( version 7.14 )
+    !/    08-Oct-2024 : Rocky bottom friction BT5           ( version 7.14 )
     !/
     !/    Copyright 2009-2013 National Weather Service (NWS),
     !/       National Oceanic and Atmospheric Administration.  All rights
@@ -459,6 +460,7 @@ CONTAINS
     !     !/BT1   JONSWAP bottom friction.
     !     !/BT4   Bottom friction using movable bed roughness
     !                  (Tolman 1994, Ardhuin & al. 2003)
+    !     !/BT5   Bottom friction on rocky bottom (Madsen et al., 1988)
     !     !/BT8   Muddy bed (Dalrymple & Liu).
     !     !/BT9   Muddy bed (Ng).
     !
@@ -587,6 +589,9 @@ CONTAINS
 #endif
 #ifdef W3_BT4
     USE W3SBT4MD
+#endif
+#ifdef W3_BT5
+    USE W3SBT5MD
 #endif
 #ifdef W3_BT8
     USE W3SBT8MD
@@ -1306,6 +1311,11 @@ CONTAINS
       CALL W3SBT4 ( SPEC, CG1, WN1, DEPTH, D50, PSIC, TAUBBL,    &
            BEDFORM, VSBT, VDBT, IX, IY )
 #endif
+#ifdef W3_BT5
+      CALL W3SBT5 ( SPEC, CG1, WN1, DEPTH, D50, PSIC, TAUBBL,    &
+           BEDFORM, VSBT, VDBT, IX, IY )
+#endif
+
 #ifdef W3_BT8
       CALL W3SBT8 ( SPEC, DEPTH, VSBT, VDBT, IX, IY )
 #endif

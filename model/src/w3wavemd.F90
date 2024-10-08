@@ -98,6 +98,7 @@ MODULE W3WAVEMD
   !/    11-Nov-2021 : Remove XYB since it is obsolete     ( version 7.xx )
   !/    13-Sep-2022 : Add OMP for W3NMIN loops. Hide
   !/                  W3NMIN in W3_DEBUGRUN for scaling.  ( version 7.xx )
+  !/    08-Oct-2024 : Add rocky bottom friction  BT5      ( version 7.14 ) 
   !/
   !/    Copyright 2009-2014 National Weather Service (NWS),
   !/       National Oceanic and Atmospheric Administration.  All rights
@@ -1511,6 +1512,11 @@ CONTAINS
             D50=SED_D50(ISEA)
             PSIC=SED_PSIC(ISEA)
 #endif
+#ifdef W3_BT5
+            D50=SED_D50(ISEA)
+            PSIC=SED_PSIC(ISEA)
+#endif
+
             !
 #ifdef W3_DEBUGSRC
             IF (IX .eq. DEBUG_NODE) THEN
@@ -2186,6 +2192,11 @@ CONTAINS
               D50=SED_D50(ISEA)
               PSIC=SED_PSIC(ISEA)
 #endif
+#ifdef W3_BT5
+              D50=SED_D50(ISEA)
+              PSIC=SED_PSIC(ISEA)
+#endif
+
 
 
               IF ( MAPSTA(IY,IX) .EQ. 1 .AND. FLAGST(ISEA)) THEN

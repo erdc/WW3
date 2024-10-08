@@ -95,6 +95,7 @@ PROGRAM W3OUTP
   !/    19-Jul-2021 : Momentum and air density support    ( version 7.14 )
   !/    21-Jul-2022 : Correct FP0 calc for peak energy in ( version 7.14 )
   !/                  min/max freq band (B. Pouliot, CMC)
+  !/    08-Oct-2024 : Adding rocky bed friction BT5       ( version 7.14 )  
   !/
   !/    Copyright 2009-2014 National Weather Service (NWS),
   !/       National Oceanic and Atmospheric Administration.  All rights
@@ -1082,6 +1083,7 @@ CONTAINS
     !/    26-Dec-2012 : Modified obsolete declarations.     ( version 4.11 )
     !/    06-Feb-2014 : Fix header format in part. files.   ( version 4.18 )
     !/    19-Jul-2021 : Momentum and air density support    ( version 7.14 )
+    !/    08-Oct-2024 : Adding rocky bed friction BT5       ( version 7.14 ) 
     !/
     !  1. Purpose :
     !
@@ -1258,6 +1260,9 @@ CONTAINS
 #ifdef W3_BT4
     USE W3SBT4MD
 #endif
+#ifdef W3_BT5
+    USE W3SBT5MD
+#endif
 #ifdef W3_BT8
     USE W3SBT8MD
 #endif
@@ -1330,6 +1335,9 @@ CONTAINS
     REAL                    :: TAUSCX, TAUSCY
 #endif
 #ifdef W3_BT4
+    REAL                    :: D50, PSIC, BEDFORM(3), TAUBBL(2)
+#endif
+#ifdef W3_BT5
     REAL                    :: D50, PSIC, BEDFORM(3), TAUBBL(2)
 #endif
     REAL                    :: ICE
@@ -2057,6 +2065,16 @@ CONTAINS
             CALL W3SBT4 ( A, CG, WN, DEPTH, D50, PSIC, TAUBBL,   &
                  BEDFORM, XBT, DIA, IX, IY )
 #endif
+#ifdef W3_BT5
+            IX=1    ! to be fixed later
+            IY=1    ! to be fixed later
+            ISEA=1  ! to be fixed later
+            D50 = SED_D50(ISEA)
+            PSIC= SED_PSIC(ISEA)
+            CALL W3SBT5 ( A, CG, WN, DEPTH, D50, PSIC, TAUBBL,   &
+                 BEDFORM, XBT, DIA, IX, IY )
+#endif
+
 
             BT8MSG='ww3_outp: ITYPE=3 with BT8 or BT9: Sbot out'//&
                  'put is not yet supported. Use "F" for the 5'//&

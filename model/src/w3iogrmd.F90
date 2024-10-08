@@ -457,6 +457,9 @@ CONTAINS
 #ifdef W3_BT4
     TNAME3 = 'SHOWEX                        '
 #endif
+#ifdef W3_BT5
+    TNAME3 = 'MADSEN                        '
+#endif
 #ifdef W3_BT8
     TNAME3 = 'Muddy Bed (D & L)             '
 #endif
@@ -1789,6 +1792,20 @@ CONTAINS
     !
     !
 #ifdef W3_BT4
+    IF ( WRITE ) THEN
+      WRITE (NDSM)                                          &
+           SBTCX, SED_D50, SED_PSIC
+#ifdef W3_ASCII
+      WRITE (NDSA,*)                                        &
+           'SBTCX, SED_D50, SED_PSIC:',                     &
+           SBTCX, SED_D50, SED_PSIC
+#endif
+    ELSE
+      READ (NDSM,END=801,ERR=802,IOSTAT=IERR)               &
+           SBTCX, SED_D50, SED_PSIC
+    END IF
+#endif
+#ifdef W3_BT5
     IF ( WRITE ) THEN
       WRITE (NDSM)                                          &
            SBTCX, SED_D50, SED_PSIC
