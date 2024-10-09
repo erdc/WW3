@@ -77,6 +77,7 @@ PROGRAM W3OUNP
   !/    05-Jan-2022 : Added TIMESPLIT=0 (nodate) support  ( version 7.14 )
   !/    21-Jul-2022 : Correct FP0 calc for peak energy in ( version 7.14 )
   !/                  min/max freq band (B. Pouliot, CMC)
+  !/    18-Jul-2024 : Add triads (H.Michaud, Shom)        ( version 7.14 )
   !/
   !/    Copyright 2009 National Weather Service (NWS),
   !/       National Oceanic and Atmospheric Administration.  All rights
@@ -184,7 +185,7 @@ PROGRAM W3OUNP
   USE W3ODATMD, ONLY: W3SETO, W3NOUT
   USE W3ODATMD, ONLY: IAPROC, NAPROC, NAPERR, NAPOUT, DIMP
   USE W3IOGRMD, ONLY: W3IOGR
-  USE W3IOPOMD
+  USE W3IOPOMD, ONLY: W3IOPO
   USE W3SERVMD, ONLY : ITRACE, NEXTLN, EXTCDE, STRSPLIT
 #ifdef W3_S
   USE W3SERVMD, ONLY : STRACE
@@ -1578,6 +1579,9 @@ CONTAINS
 #ifdef W3_NL4
     USE W3SNL4MD
 #endif
+#ifdef W3_TR1
+    USE W3STR1MD
+#endif
 #ifdef W3_BT1
     USE W3SBT1MD
 #endif
@@ -2456,6 +2460,9 @@ CONTAINS
 #endif
 #ifdef W3_NL4
               CALL W3SNL4 ( A, CG, WN, DEPTH,     XNL, DIA )
+#endif
+#ifdef W3_TR1
+              CALL W3STR1 ( A, CG, WN, DEPTH, IX, XTR, DIA )
 #endif
             END IF
             IF ( FLSRCE(4) ) THEN
@@ -4763,16 +4770,16 @@ CONTAINS
       !Snl / Snlst
       IF (ISCALE.EQ.0 .OR. ISCALE.EQ.3) THEN
         IRET=NF90_DEF_VAR(NCID, 'snl', NF90_FLOAT,(/DIMID(4),DIMID(TWO),DIMID(ONE)/), VARID(12))
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'long_name','nonlinear 4 wave source term')
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'standard_name','nonlinear_4_wave_source_term')
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'globwave_name','nonlinear_4_wave_source_term')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'long_name','nonlinear 4 and 3 wave source term')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'standard_name','nonlinear_4_and_3_wave_source_term')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'globwave_name','nonlinear_4_and_3_wave_source_term')
         IRET=NF90_PUT_ATT(NCID,VARID(12),'units','m2')
       ELSE
         IRET=NF90_DEF_VAR(NCID, 'snlst', NF90_FLOAT,(/DIMID(4),DIMID(TWO),DIMID(ONE)/), VARID(12))
         IRET=NF90_PUT_ATT(NCID,VARID(12),'long_name',                 &
-             'nondimensionalized using nonlinear 4 wave source term')
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'standard_name','nonlinear_4_wave_source_term')
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'globwave_name','nonlinear_4_wave_source_term')
+             'nondimensionalized using nonlinear 4 and 3 wave source term')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'standard_name','nonlinear_4_and_3_wave_source_term')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'globwave_name','nonlinear_4_and_3_wave_source_term')
         IRET=NF90_PUT_ATT(NCID,VARID(12),'units','-')
       END IF
       IF (NCTYPE.EQ.4) IRET=NF90_DEF_VAR_DEFLATE(NCID, VARID(12), 1, 1, DEFLATE)
@@ -5057,15 +5064,15 @@ CONTAINS
       !Tnli / Tnlist
       IF (ISCALE.EQ.0 .OR. ISCALE.EQ.3) THEN
         IRET=NF90_DEF_VAR(NCID, 'tnli', NF90_FLOAT,(/DIMID(4),DIMID(TWO),DIMID(ONE)/), VARID(12))
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'long_name','nonlinear 4 wave source term normalised by Ef')
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'standard_name','inverse_time_scales_nonlinear_4_wave_source_term')
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'globwave_name','inverse_time_scales_nonlinear_4_wave_source_term')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'long_name','nonlinear 4 and 3 wave source term normalised by Ef')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'standard_name','inverse_time_scales_nonlinear_4_and_3_wave_source_term')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'globwave_name','inverse_time_scales_nonlinear_4_and_3_wave_source_term')
         IRET=NF90_PUT_ATT(NCID,VARID(12),'units','m2')
       ELSE
         IRET=NF90_DEF_VAR(NCID, 'tnlist', NF90_FLOAT,(/DIMID(4),DIMID(TWO),DIMID(ONE)/), VARID(12))
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'long_name','nondimensionalized using nonlinear 4 wave source term normalised by Ef')
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'standard_name','inverse_time_scales_nonlinear_4_wave_source_term')
-        IRET=NF90_PUT_ATT(NCID,VARID(12),'globwave_name','inverse_time_scales_nonlinear_4_wave_source_term')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'long_name','nondimensionalized using nonlinear 4 and 3 wave source term normalised by Ef')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'standard_name','inverse_time_scales_nonlinear_4_and_3_wave_source_term')
+        IRET=NF90_PUT_ATT(NCID,VARID(12),'globwave_name','inverse_time_scales_nonlinear_4_and_3_wave_source_term')
         IRET=NF90_PUT_ATT(NCID,VARID(12),'units','-')
       END IF
       IF (NCTYPE.EQ.4) IRET=NF90_DEF_VAR_DEFLATE(NCID, VARID(12), 1, 1, DEFLATE)
@@ -5444,9 +5451,9 @@ CONTAINS
         IF ( FLSRCE(3) )  THEN
           IRET=NF90_DEF_VAR(NCID,'snl',NF90_FLOAT,(/DIMID(5),DIMID(4),DIMID(TWO),DIMID(ONE)/),VARID(18))
           IF (NCTYPE.EQ.4) IRET=NF90_DEF_VAR_DEFLATE(NCID, VARID(18), 1, 1, DEFLATE)
-          IRET=NF90_PUT_ATT(NCID,VARID(18),'long_name','nonlinear 4 wave source term')
-          IRET=NF90_PUT_ATT(NCID,VARID(18),'standard_name','nonlinear_4_wave_source_term')
-          IRET=NF90_PUT_ATT(NCID,VARID(18),'globwave_name','nonlinear_4_wave_source_term')
+          IRET=NF90_PUT_ATT(NCID,VARID(18),'long_name','nonlinear 4 and 3 wave source term')
+          IRET=NF90_PUT_ATT(NCID,VARID(18),'standard_name','nonlinear_4_and_3_wave_source_term')
+          IRET=NF90_PUT_ATT(NCID,VARID(18),'globwave_name','nonlinear_4_and_3_wave_source_term')
           IRET=NF90_PUT_ATT(NCID,VARID(18),'units','m2 rad-1')
           IRET=NF90_PUT_ATT(NCID,VARID(18),'scale_factor',1.)
           IRET=NF90_PUT_ATT(NCID,VARID(18),'add_offset',0.)

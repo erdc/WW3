@@ -543,7 +543,7 @@ CONTAINS
          DTGA, DTG, DTGpre, DTRES,            &
          FAC, VGX, VGY, FACK, FACTH,          &
          FACX, XXX, REFLEC(4),                &
-         DELX, DELY, DELA, DEPTH, D50, PSIC
+         DELX, DELY, DELA, DEPTH, D50, PSIC, TANBETA
     REAL                     :: VSioDummy(NSPEC), VDioDummy(NSPEC), VAoldDummy(NSPEC)
     LOGICAL                  :: SHAVETOTioDummy
 #ifdef W3_SEC1
@@ -1681,7 +1681,30 @@ CONTAINS
           END IF
         END IF
 #endif
-
+		!
+		! Compute slope-dependant depth-induced breaking coefficient
+		!
+		CALL W3OUTG ( VA, .FALSE., .FALSE., .FALSE. )
+		DO JSEA=1, NSEAL
+		  CALL INIT_GET_ISEA(ISEA, JSEA)
+		  IX     = MAPSF(ISEA,1)
+		  IY     = MAPSF(ISEA,2)
+		  IF (LPDLIB) THEN
+			TANBETA = DDDX(1,JSEA)*COS(THP0(JSEA)) + DDDY(1,JSEA)*SIN(THP0(JSEA))
+			IF (TANBETA .LT. 0.) THEN
+			  BRCOEF(JSEA) = 0.1
+			ELSE
+			  BRCOEF(JSEA) = MIN(40*TANBETA,1.2)
+			ENDIF
+		  ELSE
+			TANBETA = DDDX(IY,IX)*COS(THP0(JSEA)) + DDDY(IY,IX)*SIN(THP0(JSEA))
+			IF (TANBETA .LT. 0.) THEN
+			  BRCOEF(JSEA) = 0.1
+			ELSE
+			  BRCOEF(JSEA) = MIN(40*TANBETA,1.2)
+			ENDIF
+		  ENDIF
+		END DO
         !
         ! 3.6 Perform Propagation = = = = = = = = = = = = = = = = = = = = = = =
         ! 3.6.1 Preparations

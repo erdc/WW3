@@ -926,14 +926,14 @@ CONTAINS
         ID_NB_RCV=ID_NB_RCV+1
         RCV(ID_NB_RCV)%CL_FIELD_NAME='WW3__SSH'
         !
-!      CASE('CUR')
-!        ! uz : sea surface zonal currents (m.s-1)
-!        ID_NB_RCV=ID_NB_RCV+1
-!        RCV(ID_NB_RCV)%CL_FIELD_NAME='WW3_OSSU'
-!        !
-!        ! vz : sea surface meridional currents (m.s-1)
-!        ID_NB_RCV=ID_NB_RCV+1
-!        RCV(ID_NB_RCV)%CL_FIELD_NAME='WW3_OSSV'
+      CASE('CUR')
+        ! uz : sea surface zonal currents (m.s-1)
+        ID_NB_RCV=ID_NB_RCV+1
+        RCV(ID_NB_RCV)%CL_FIELD_NAME='WW3_OSSU'
+        !
+        ! vz : sea surface meridional currents (m.s-1)
+        ID_NB_RCV=ID_NB_RCV+1
+        RCV(ID_NB_RCV)%CL_FIELD_NAME='WW3_OSSV'
 #endif
         !
         !

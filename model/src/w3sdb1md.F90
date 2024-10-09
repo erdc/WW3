@@ -91,7 +91,8 @@ CONTAINS
   !> @author J. H. Alves
   !> @author H. L. Tolman
   !> @author A. Roland
-  !> @date   08-Jun-2018
+  !> @author M. Pezerat
+  !> @date   23-Jul-2024
   !>
   SUBROUTINE W3SDB1 (IX, A, DEPTH, EMEAN, FMEAN, WNMEAN, CG, LBREAK, S, D )
     !/
@@ -183,7 +184,8 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/
     USE CONSTANTS
-    USE W3GDATMD, ONLY: NK, NTH, NSPEC, SDBC1, SDBC2, FDONLY, FSSOURCE, DDEN
+    USE W3ADATMD, ONLY: BRCOEF
+    USE W3GDATMD, ONLY: NK, NTH, NSPEC, SDBC1, SDBC2, FDONLY, FSLOPE, FSSOURCE, DDEN
     USE W3ODATMD, ONLY: NDST
     USE W3GDATMD, ONLY: SIG
     USE W3ODATMD, only : IAPROC
@@ -221,6 +223,7 @@ CONTAINS
     REAL*8                    :: HM, BB, ARG, Q0, QB, B, CBJ, HRMS, EB(NK)
     REAL*8                    :: AUX, CBJ2, RATIO, S0, S1, BR1, BR2, FAK
     REAL                      :: ETOT, FMEAN2
+    REAL                      :: BRCOEF_LOC
 #ifdef W3_T0
     REAL                    :: DOUT(NK,NTH)
 #endif
@@ -313,15 +316,24 @@ CONTAINS
       QB = 1.0 - THR
     END IF
     !
-    ! 3. Estimate the breaking coefficient ------------------------------- /
+    ! 3. Breaking coefficient
+    !
+    IF (FSLOPE) THEN
+!      BRCOEF_LOC = BRCOEF(IX)
+      BRCOEF_LOC = MAX(0.,BRCOEF(IX)*DBLE(SDBC1))
+	ELSE
+	  BRCOEF_LOC = DBLE(SDBC1)
+	END IF
+    !
+    ! 4. Estimate the breaking coefficient ------------------------------- /
     !
     CBJ  = 0
     IF (IWB == 1) THEN
       IF ( ( BB .GT. THR) .AND. ( ABS ( BB - QB ) .GT. THR) ) THEN
         IF ( BB .LT. 1.0) THEN
-          CBJ = 2 * DBLE(SDBC1) * QB * DBLE(FMEAN) / BB
+          CBJ = 2 * BRCOEF_LOC * QB * DBLE(FMEAN) / BB
         ELSE
-          CBJ = 2 * DBLE(SDBC1) * DBLE(FMEAN) * BB ! AR: degenerative regime, all waves must be .le. Hmax, we just smoothly let the excessive energy vanish by * BB.
+          CBJ = 2 * BRCOEF_LOC * DBLE(FMEAN) * BB ! AR: degenerative regime, all waves must be .le. Hmax, we just smoothly let the excessive energy vanish by * BB.
         END IF
       ELSE
         CBJ = 0.d0
@@ -332,7 +344,7 @@ CONTAINS
       IF (ETOT .GT. THR) THEN
         HRMS = SQRT(8*EMEAN)
         FAK  = (1+4./SQRT(PI)*(B*BB+1.5*B)*exp(-BB)-ERF(B))
-        CBJ  = -SDBC1*SQRT(PI)/16.*FMEAN*HRMS**3/DEPTH/ETOT
+        CBJ  = -BRCOEF_LOC*SQRT(PI)/16.*FMEAN*HRMS**3/DEPTH/ETOT
       ELSE
         CBJ  = 0.
       ENDIF
@@ -348,8 +360,8 @@ CONTAINS
 
 #ifdef W3_DEBUGRUN
     IF (IX == DEBUG_NODE) THEN
-      WRITE(*,'(A200)') 'IX, DEPTH, CBJ, BB, QB, SDBC1, SDBC2, FMEAN, FMEAN2, HS'
-      WRITE(*,'(I10,20F20.10)') IX, DEPTH, CBJ, BB, QB, SDBC1, SDBC2, FMEAN, FMEAN2, 4*SQRT(ETOT)
+      WRITE(*,'(A200)') 'IX, DEPTH, CBJ, BB, QB, BRCOEF_LOC, SDBC2, FMEAN, FMEAN2, HS'
+      WRITE(*,'(I10,20F20.10)') IX, DEPTH, CBJ, BB, QB, BRCOEF_LOC, SDBC2, FMEAN, FMEAN2, 4*SQRT(ETOT)
     ENDIF
 #endif
     !

@@ -989,7 +989,7 @@ MODULE W3GDATMD
 #endif
 #ifdef W3_DB1
     REAL                  :: SDBC1, SDBC2
-    LOGICAL               :: FDONLY
+    LOGICAL               :: FDONLY, FSLOPE
     REAL                  :: SDBSC
 #endif
   END TYPE SDBP
@@ -1392,7 +1392,7 @@ MODULE W3GDATMD
   !/
 #ifdef W3_DB1
   REAL, POINTER           :: SDBC1, SDBC2
-  LOGICAL, POINTER        :: FDONLY
+  LOGICAL, POINTER        :: FDONLY, FSLOPE
   REAL, POINTER           :: SDBSC
 #endif
   !/
@@ -2816,6 +2816,7 @@ CONTAINS
     SDBC1  => MPARS(IMOD)%SDBPS%SDBC1
     SDBC2  => MPARS(IMOD)%SDBPS%SDBC2
     FDONLY => MPARS(IMOD)%SDBPS%FDONLY
+    FSLOPE => MPARS(IMOD)%SDBPS%FSLOPE
     SDBSC  => MPARS(IMOD)%SDBPS%SDBSC
 #endif
     !
