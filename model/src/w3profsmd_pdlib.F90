@@ -3672,7 +3672,7 @@ CONTAINS
         IP_GLOB = IPLG(IP)
 
 !#ifdef NOCGTABLE
-        IF (ITSUB .LT. 4) THEN
+        IF (.true.) THEN!ITSUB .LT. 4) THEN
           CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WNL,CGL)
           WN1 = WNL
           CG1 = CGL
@@ -3696,12 +3696,6 @@ CONTAINS
           !  WRITE(*,*) ISP, IP, ELOC, VA(ISP,IP), SIG(IK), CLATS(IP_GLOB), TPI
           !ENDIF  
           CALL WAVNU4 (ISP,IP,ELOC,SIG(IK),DW(IP_GLOB),WN1,CG1) 
-          !IF (CG1 .NE. CG1) THEN
-          !  STOP 'NAN'
-          !ENDIF
-          !IF (WN1 .NE. WN1) THEN
-          !  STOP 'NAN'
-          !ENDIF
           !IF (ABS(CG1-CGL)/CGL*100 .GT. 5) THEN
           !  WRITE(*,*) 'CG1, CGL', CG1, CGL
           !ENDIF
@@ -5747,7 +5741,6 @@ CONTAINS
       B_JAC = ZERO
     ENDIF
 
-    !IF (IAPROC == 1) WRITE(*,*) 'SUM B_JAC and ASPAR_DIAG_ALL', SUM(B_JAC), SUM(ASPAR_DIAG_ALL)
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_PROP SECTION 3')
     !
     !     source terms
@@ -6107,6 +6100,7 @@ CONTAINS
         CALL MPI_ALLREDUCE(is_converged, itmp, 1, MPI_INT, MPI_SUM, MPI_COMM_WCMP, ierr)
         is_converged = itmp
         prop_conv = (DBLE(NX) - DBLE(is_converged))/DBLE(NX) * 100.
+        IF (myrank == 0) WRITE(*,*) 'No. of solver iterations', nbiter, is_converged, prop_conv, B_JGS_PMIN
 #ifdef W3_DEBUGSOLVER
         WRITE(740+IAPROC,*) 'solver', nbiter, is_converged, prop_conv, B_JGS_PMIN
         FLUSH(740+IAPROC)

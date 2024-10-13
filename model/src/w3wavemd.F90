@@ -1061,8 +1061,6 @@ CONTAINS
         call print_memcheck(memunit, 'memcheck_____:'//' WW3_WAVE TIME LOOP 0')
         !
         ITIME  = ITIME + 1
-
-        WRITE(*,*) 'ITIME = ', ITIME
         !
         DTG    = REAL(NINT(DTGA+DTRES+0.0001))
         DTRES  = DTRES + DTGA - DTG
@@ -1456,7 +1454,6 @@ CONTAINS
         call print_memcheck(memunit, 'memcheck_____:'//' WW3_WAVE TIME LOOP 13')
         !
 #ifdef W3_PDLIB
-
         IF (LPDLIB .and. .not. FLSOU .and. .not. FSSOURCE) THEN
           B_JAC     = 0.
           ASPAR_JAC = 0.
@@ -1479,7 +1476,7 @@ CONTAINS
 #ifdef W3_PDLIB
           IF (LSLOC) THEN
             B_JAC     = 0.
-            ASPAR_JAC = 0.
+            ASPAR_JAC = 0. 
           ELSE
             VSTOT = 0.
             VDTOT = 0.
@@ -1571,9 +1568,6 @@ CONTAINS
           END DO ! JSEA
         END IF ! PDLIB
 #endif
-
-        IF (IAPROC == 1) WRITE(*,*) 'SUM B_JAC W3WAVE', SUM(B_JAC)
-
 
 #ifdef W3_PDLIB
 #ifdef W3_DEBUGSRC
@@ -1825,8 +1819,6 @@ CONTAINS
             END IF
           END IF
 
-          IF (IAPROC == 1) WRITE(*,*) 'SUM B_JAC W3WAVE BEFORE PDLIB_W3XYPUG_BLOCK_IMPLICIT', SUM(B_JAC)
-
           IF (LPDLIB) THEN
             !
 #ifdef W3_PDLIB
@@ -1847,7 +1839,6 @@ CONTAINS
 #endif
 #ifdef W3_PDLIB
               CALL PDLIB_W3XYPUG_BLOCK_IMPLICIT(IMOD, FACX, FACX, DTG, VGX, VGY, UGDTUPDATE, ITIME )
-              IF (IAPROC == 1) WRITE(*,*) 'SUM B_JAC W3WAVE AFTER PDLIB_W3XYPUG_BLOCK_IMPLICIT', SUM(B_JAC)
 #endif
 #ifdef W3_PDLIB
             ELSE IF(FSTOTALEXP .and. (IT .ne. 0)) THEN
