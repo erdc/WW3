@@ -3672,7 +3672,7 @@ CONTAINS
         IP_GLOB = IPLG(IP)
 
 !#ifdef NOCGTABLE
-        IF (.true.) THEN!ITSUB .LT. 4) THEN
+        IF (ITSUB .LT. 4) THEN
           CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WNL,CGL)
           WN1 = WNL
           CG1 = CGL
