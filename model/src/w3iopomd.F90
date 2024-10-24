@@ -182,8 +182,8 @@ MODULE W3IOPOMD
   !> Variable name for the netCDF point output file, for DAIRO.
   character(*), parameter, private :: VNAME_DAIRO = 'DAIRO'
 
-  !> Variable name for the netCDF point output file, for ZET_SETO.
-  character(*), parameter, private :: VNAME_ZET_SETO = 'ZET_SETO'
+  !> Variable name for the netCDF point output file, for ZETA_SETUPO.
+  character(*), parameter, private :: VNAME_ZETA_SETUPO = 'ZETA_SETUPO'
 
   !> Variable name for the netCDF point output file, for ASO.
   character(*), parameter, private :: VNAME_ASO = 'ASO'
@@ -801,7 +801,7 @@ CONTAINS
 #endif
 #ifdef W3_SETUP
     USE W3WDATMD, ONLY: ZETA_SETUP
-    USE W3ODATMD, ONLY: ZET_SETO
+    USE W3ODATMD, ONLY: ZETA_SETUPO
 #endif
 #ifdef W3_MPI
     USE W3ODATMD, ONLY: IRQPO2
@@ -947,7 +947,7 @@ CONTAINS
       DPO(I) = RD(1)*DW(IS(1)) + RD(2)*DW(IS(2)) +                  &
            RD(3)*DW(IS(3)) + RD(4)*DW(IS(4))
 #ifdef W3_SETUP
-      DPO(I) = RD(1)*ZETA_SETUP(IS(1)) +                     &
+      ZETA_SETUPO(I) = RD(1)*ZETA_SETUP(IS(1)) +                     &
            RD(2)*ZETA_SETUP(IS(2)) +                     &
            RD(3)*ZETA_SETUP(IS(3)) +                     &
            RD(4)*ZETA_SETUP(IS(4))
@@ -1156,13 +1156,13 @@ CONTAINS
     USE W3ODATMD, ONLY: NDST, NDSE, IPASS => IPASS2, NOPTS, IPTINT, &
          IL, IW, II, PTLOC, PTIFAC, DPO, WAO, WDO,   &
          ASO, CAO, CDO, SPCO, PTNME, O2INIT, FNMPRE, &
-         GRDID, ICEO, ICEHO, ICEFO, W3DMO2
+         GRDID, ICEO, ICEHO, ICEFO, W3DMO2,ZETA_SETUPO
     USE W3SERVMD, ONLY: EXTCDE
 #ifdef W3_FLX5
     USE W3ODATMD, ONLY: TAUAO, TAUDO, DAIRO
 #endif
 #ifdef W3_SETUP
-    USE W3ODATMD, ONLY: ZET_SETO
+    USE W3WDATMD,, ONLY: ZETA_SETUP
 #endif
     IMPLICIT NONE
 
@@ -1180,7 +1180,7 @@ CONTAINS
     integer :: v_tauao,v_taudo, v_dairo
 #endif
 #ifdef W3_SETUP
-    integer :: v_zet_seto
+    integer :: v_zeta_setup
 #endif
     integer :: v_aso, v_cao, v_cdo, v_iceo
     integer :: v_iceho, v_icefo, v_grdid, v_spco
@@ -1341,9 +1341,9 @@ CONTAINS
       if (nf90_err(ncerr) .ne. 0) return
 #endif
 #ifdef W3_SETUP
-      ncerr = nf90_inq_varid(fh, ZET_SETO, v_zet_seto)
+      ncerr = nf90_inq_varid(fh, ZETA_SETUP, v_zeta_setup)
       if (nf90_err(ncerr) .ne. 0) return
-      ncerr = nf90_get_var(fh, v_zet_seto, ZET_SETO, start = (/ 1, IPASS/), &
+      ncerr = nf90_get_var(fh, v_zeta_setup, ZETA_SETUP, start = (/ 1, IPASS/), &
           count = (/ NOPTS, 1 /))
       if (nf90_err(ncerr) .ne. 0) return
 #endif
@@ -1436,7 +1436,7 @@ CONTAINS
     USE W3ODATMD, ONLY: TAUAO, TAUDO, DAIRO
 #endif
 #ifdef W3_SETUP
-    USE W3ODATMD, ONLY: ZET_SETO
+    USE W3WDATMD, ONLY: ZETA_SETUP
 #endif
 
     IMPLICIT NONE
@@ -1539,7 +1539,7 @@ CONTAINS
       if (nf90_err(ncerr) .ne. 0) return
 #endif    
 #ifdef W3_SETUP
-      ncerr = nf90_def_var(fh, VNAME_ZET_SETO, NF90_FLOAT, (/d_nopts, d_time/), v_zet_seto)
+      ncerr = nf90_def_var(fh, VNAME_ZETA_SETUPO, NF90_FLOAT, (/d_nopts, d_time/), v_zeta_setupo)
       if (nf90_err(ncerr) .ne. 0) return
 #endif    
       ncerr = nf90_def_var(fh, VNAME_ASO, NF90_FLOAT, (/d_nopts, d_time/), v_aso)
@@ -1630,7 +1630,7 @@ CONTAINS
        if (nf90_err(ncerr) .ne. 0) return
 #endif
 #ifdef W3_SETUP
-       ncerr = nf90_inq_varid(fh, VNAME_ZET_SETO, v_zet_seto)
+       ncerr = nf90_inq_varid(fh, VNAME_ZETA_SETUPO, v_zeta_setupo)
        if (nf90_err(ncerr) .ne. 0) return
 #endif
        ncerr = nf90_inq_varid(fh, VNAME_ASO, v_aso)
@@ -1677,7 +1677,7 @@ CONTAINS
     if (nf90_err(ncerr) .ne. 0) return
 #endif
 #ifdef W3_SETUP
-    ncerr = nf90_put_var(fh, v_zet_seto, ZET_SETO, start = (/ 1, itime/), &
+    ncerr = nf90_put_var(fh, v_zeta_setupo, ZETA_SETUPO, start = (/ 1, itime/), &
        count = (/ nopts, 1 /))
     if (nf90_err(ncerr) .ne. 0) return
 #endif
@@ -1867,7 +1867,7 @@ CONTAINS
   !> 4 | real | TAUAO | (W3_FLX5 only) Interpolated atmospheric stresses.
   !> 4 | real | TAUDO | (W3_FLX5 only) Interpolated atmospheric stress directions.
   !> 4 | real | DAIRO | (W3_FLX5 only) Interpolated rho atmosphere.
-  !> 4 | real | ZET_SETO | (W3_SETUP only) Used for wave setup.
+  !> 4 | real | ZETA_SETUPO | (W3_SETUP only) Used for wave setup.
   !> 4 | real | ASO | Interpolated air-sea temperature difference
   !> 4 | real | CAO | Interpolated current speeds.
   !> 4 | real | CDO | Interpolated current directions.
@@ -1990,14 +1990,14 @@ CONTAINS
     USE W3ODATMD, ONLY: NDST, NDSE, IPASS => IPASS2, NOPTS, IPTINT, &
          IL, IW, II, PTLOC, PTIFAC, DPO, WAO, WDO,   &
          ASO, CAO, CDO, SPCO, PTNME, O2INIT, FNMPRE, &
-         GRDID, ICEO, ICEHO, ICEFO
+         GRDID, ICEO, ICEHO, ICEFO,ZETA_SETUPO
 #ifdef W3_FLX5
     USE W3ODATMD, ONLY: TAUAO, TAUDO, DAIRO
 #endif
     USE W3ODATMD, ONLY :  OFILES
     !/
 #ifdef W3_SETUP
-    USE W3ODATMD, ONLY: ZET_SETO
+    USE W3WDATMD, ONLY: ZETA_SETUP
 #endif
     !/
     USE W3SERVMD, ONLY: EXTCDE
@@ -2281,7 +2281,7 @@ CONTAINS
              TAUAO(I), TAUDO(I), DAIRO(I),                     &
 #endif
 #ifdef W3_SETUP
-             ZET_SETO(I),                                      &
+             ZETA_SETUPO(I),                                      &
 #endif
              ASO(I), CAO(I), CDO(I), ICEO(I), ICEHO(I),        &
              ICEFO(I), GRDID(I), (SPCO(J,I),J=1,NSPEC)
@@ -2294,8 +2294,8 @@ CONTAINS
              TAUAO(I), TAUDO(I), DAIRO(I),                     &
 #endif
 #ifdef W3_SETUP
-             'ZET_SETO(I):',                                      &
-             ZET_SETO(I),                                      &
+             'ZETA_SETUPO(I):',                                      &
+             ZETA_SETUPO(I),                                      &
 #endif
              'ASO(I), CAO(I), CDO(I), ICEO(I), ICEHO(I):',        &
              ASO(I), CAO(I), CDO(I), ICEO(I), ICEHO(I),        &
@@ -2309,7 +2309,7 @@ CONTAINS
              TAUAO(I), TAUDO(I), DAIRO(I),                     &
 #endif
 #ifdef W3_SETUP
-             ZET_SETO(I),                                      &
+             ZETA_SETUPO(I),                                      &
 #endif
              ASO(I), CAO(I), CDO(I), ICEO(I), ICEHO(I),        &
              ICEFO(I), GRDID(I), (SPCO(J,I),J=1,NSPEC)

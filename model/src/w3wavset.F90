@@ -1758,12 +1758,12 @@
         !DW (ISEA) = MAX ( 0. , WLVeff-ZB(ISEA) )
         DW (IX) = MAX ( 0. , ZETA_WORK_ALL(IX) - ZB(IX) )
       END DO
-      IF (IAPROC .EQ. 1) THEN
-        write(6666)  1. 
-        write(6667)  1. 
-        write(6666)  (ZETA_WORK_ALL(IX), ZETA_WORK_ALL(IX), ZETA_WORK_ALL(IX), IX = 1, NX)
-        write(6667)  (ZETA_WORK_ALL(IX), ZETA_WORK_ALL(IX), DW(IX), IX = 1, NX)
-      ENDIF
+!      IF (IAPROC .EQ. 1) THEN
+!        write(6666)  1. 
+!        write(6667)  1. 
+!        write(6666)  (ZETA_WORK_ALL(IX), ZETA_WORK_ALL(IX), ZETA_WORK_ALL(IX), IX = 1, NX)
+!        write(6667)  (ZETA_WORK_ALL(IX), ZETA_WORK_ALL(IX), DW(IX), IX = 1, NX)
+!      ENDIF
       !WRITE(*,*) SUM(ZETA_WORK_ALL), SUM(ZETA_SETUP), SUM(ZETA_WORK_ALL), SUM(ZETA_WORK), MAXVAL(ZETA_SETUP), MINVAL(ZETA_SETUP), MAXVAL(DW), MINVAL(DW)
 #ifdef W3_DEBUGSTP
       WRITE(740+IAPROC,*) 'Now exiting TRIG_WAVE_SETUP_COMPUTATION'
