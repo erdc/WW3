@@ -259,6 +259,7 @@ CONTAINS
     !       CG      R.A.  I   Group velocities.
     !       WN      R.A.  I   Wavenumbers.
     !       DEPTH   Real  I   Mean water depth.
+    !       EMEAN   Real  I   Mean wave energy.
     !       FMEAN   Real  I   Mean wave frequency.
     !       S       R.A.  O   Source term (1-D version).
     !       D       R.A.  O   Diagonal term of derivative (1-D version).
@@ -308,6 +309,9 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     USE CONSTANTS, ONLY: GRAV, PI, TPI
     USE W3GDATMD, ONLY: NK, NTH, NSPEC, DTH, SIG, DDEN, FTE, FTF
+!#ifdef W3_DB1  !modification HM
+!    USE W3GDATMD, ONLY: FDONLY,SDBC2
+!#endif
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
 #ifdef W3_S
@@ -404,7 +408,13 @@ CONTAINS
     JACEPS = 1E-12
 
     HMAX   = DEPTH * 0.73
-
+#ifdef W3_DB1  !modification HM
+!    IF ( FDONLY ) THEN
+!      HMAX     = DBLE(SDBC2) * DBLE(DEPTH)
+!    ELSE
+!      HMAX   = DBLE(SDBC2) / DBLE(WNMEAN) * TANH ( DBLE(WNMEAN) * MAX(DEPTH,0.) )
+!    END IF
+#endif
     DO IK=1, NK
       EB(IK) = 0.
       ED(IK) = 0.

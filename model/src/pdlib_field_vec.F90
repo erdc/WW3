@@ -169,6 +169,9 @@ CONTAINS
     IF ( FLGRDALL( 2, 19) ) THEN
       IH = IH + 1
     END IF
+	IF ( FLGRDALL( 2, 20) ) THEN
+      IH = IH + 1
+    END IF
     IF ( FLGRDALL( 3, 1) ) THEN
       DO IK=E3DF(2,1),E3DF(3,1)
         IH = IH + 1
@@ -830,7 +833,7 @@ CONTAINS
          STH2M, HSIG, TAUICE, PHICE, PTHP0, PQP,&
          PPE, PGW, PSW, PTM1, PT1, PT2, PEP,   &
          QP, MSSD, MSCD, STMAXE, STMAXD, HMAXE, &
-         HCMAXE, HMAXD, HCMAXD, WBT, USSP
+         HCMAXE, HMAXD, HCMAXD, WBT, USSP, BRCOEF
     USE W3GDATMD, ONLY: NK, NSEAL
     USE W3ODATMD, ONLY: NDST, IAPROC, NAPROC, NTPROC, FLOUT,   &
          NAPFLD, NAPPNT, NAPRST, NAPBPT, NAPTRK,&
@@ -968,6 +971,10 @@ CONTAINS
             IH = IH + 1
             Arrexch(IH,JSEA)=WNMEAN(JSEA)
           END IF
+          IF ( FLGRDALL( 2, 20) ) THEN
+              IH = IH + 1
+              Arrexch(IH,JSEA)=BRCOEF(JSEA)
+          END IF
           IF ( FLGRDALL( 3, 1) ) THEN
             DO IK=E3DF(2,1),E3DF(3,1)
               IH = IH + 1
@@ -1098,11 +1105,11 @@ CONTAINS
           END IF
           IF ( FLGRDALL( 5, 1) ) THEN
             IH = IH + 1
-            Arrexch(IH,JSEA)=UST(ISEA)
+            Arrexch(IH,JSEA)=UST(JSEA)
             IH = IH + 1
-            Arrexch(IH,JSEA)=USTDIR(ISEA)
+            Arrexch(IH,JSEA)=USTDIR(JSEA)
             IH = IH + 1
-            Arrexch(IH,JSEA)=ASF(ISEA)
+            Arrexch(IH,JSEA)=ASF(JSEA)
           END IF
           IF ( FLGRDALL( 5, 2) ) THEN
             IH = IH + 1
@@ -1410,6 +1417,10 @@ CONTAINS
         IF ( FLGRDALL( 2, 19) ) THEN
           IH = IH + 1
           WNMEAN(1:NSEA) = ARRtotal(IH,:)
+        END IF
+        IF ( FLGRDALL( 2, 20) ) THEN
+          IH = IH + 1
+          BRCOEF(1:NSEA) = ARRtotal(IH,:)
         END IF
         IF ( FLGRDALL( 3, 1) ) THEN
           DO IK=E3DF(2,1),E3DF(3,1)

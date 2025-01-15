@@ -407,14 +407,15 @@ MODULE W3ADATMD
          THS(:),  THP0(:),                   &
          HSIG(:), STMAXE(:), STMAXD(:),      &
          HMAXE(:), HCMAXE(:), HMAXD(:),      &
-         HCMAXD(:), QP(:), WBT(:), WNMEAN(:)
+         HCMAXD(:), QP(:), WBT(:), WNMEAN(:),&
+         BRCOEF(:)
     REAL, POINTER         :: XHS(:), XWLM(:), XT02(:), XT0M1(:),  &
          XT01 (:), XFP0(:), XTHM(:),          &
          XTHS(:), XTHP0(:),                   &
          XHSIG(:), XSTMAXE(:), XSTMAXD(:),    &
          XHMAXE(:), XHCMAXE(:), XHMAXD(:),    &
          XHCMAXD(:), XQP(:), XWBT(:),         &
-         XWNMEAN(:)
+         XWNMEAN(:), XBRCOEF(:)
     !
     ! Output fields group 3)
     !
@@ -589,7 +590,7 @@ MODULE W3ADATMD
        THP0(:), HSIG(:),                    &
        STMAXE(:), STMAXD(:), HMAXE(:),      &
        HCMAXE(:), HMAXD(:), HCMAXD(:),      &
-       QP(:), WBT(:), WNMEAN(:)
+       QP(:), WBT(:), WNMEAN(:), BRCOEF(:)
   !
   REAL, POINTER           :: EF(:,:), TH1M(:,:), STH1M(:,:),      &
        TH2M(:,:), STH2M(:,:)
@@ -1050,6 +1051,7 @@ CONTAINS
          WADATS(IMOD)%HCMAXD(NSEALM), WADATS(IMOD)%QP(NSEALM),      &
          WADATS(IMOD)%WBT(NSEALM),                                  &
          WADATS(IMOD)%WNMEAN(NSEALM),                               &
+         WADATS(IMOD)%BRCOEF(NSEALM),                               &
          STAT=ISTAT )
     CHECK_ALLOC_STATUS ( ISTAT )
     !
@@ -1072,6 +1074,7 @@ CONTAINS
     WADATS(IMOD)%QP     = UNDEF
     WADATS(IMOD)%WBT    = UNDEF
     WADATS(IMOD)%WNMEAN = UNDEF
+    WADATS(IMOD)%BRCOEF = UNDEF
 
     call print_memcheck(memunit, 'memcheck_____:'//' W3DIMA 3')
     !
@@ -1732,7 +1735,15 @@ CONTAINS
       ALLOCATE ( WADATS(IMOD)%XWNMEAN(1), STAT=ISTAT )
       CHECK_ALLOC_STATUS ( ISTAT )
     END IF
-    !
+!
+    IF ( OUTFLAGS( 2, 20) ) THEN
+      ALLOCATE ( WADATS(IMOD)%XBRCOEF(NXXX), STAT=ISTAT )
+      CHECK_ALLOC_STATUS ( ISTAT )
+    ELSE
+      ALLOCATE ( WADATS(IMOD)%XBRCOEF(1), STAT=ISTAT )
+      CHECK_ALLOC_STATUS ( ISTAT )
+    END IF
+!
     WADATS(IMOD)%XHS    = UNDEF
     WADATS(IMOD)%XWLM   = UNDEF
     WADATS(IMOD)%XT02   = UNDEF
@@ -1751,6 +1762,7 @@ CONTAINS
     WADATS(IMOD)%XHCMAXD= UNDEF
     WADATS(IMOD)%XWBT   = UNDEF
     WADATS(IMOD)%XWNMEAN= UNDEF
+    WADATS(IMOD)%XBRCOEF= UNDEF
     !
     IF ( OUTFLAGS( 3, 1) ) THEN
       ALLOCATE ( WADATS(IMOD)%XEF(NXXX,E3DF(2,1):E3DF(3,1)), STAT=ISTAT )
@@ -2860,6 +2872,7 @@ CONTAINS
       QP     => WADATS(IMOD)%QP
       WBT    => WADATS(IMOD)%WBT
       WNMEAN => WADATS(IMOD)%WNMEAN
+      BRCOEF => WADATS(IMOD)%BRCOEF
       !
       EF     => WADATS(IMOD)%EF
       TH1M   => WADATS(IMOD)%TH1M
@@ -3203,6 +3216,7 @@ CONTAINS
       QP     => WADATS(IMOD)%XQP
       WBT    => WADATS(IMOD)%XWBT
       WNMEAN => WADATS(IMOD)%XWNMEAN
+      BRCOEF => WADATS(IMOD)%XBRCOEF
       !
       EF     => WADATS(IMOD)%XEF
       TH1M   => WADATS(IMOD)%XTH1M

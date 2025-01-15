@@ -168,7 +168,7 @@ PROGRAM W3OUTF
        CFLTHMAX, CFLKMAX, BEDFORMS, WHITECAP, T02, &
        CGE, T01, HSIG, STMAXE, STMAXD, HMAXE,      &
        HCMAXE, HMAXD, HCMAXD, MSSD, MSCD, WBT,     &
-       WNMEAN, TAUA, TAUADIR
+       WNMEAN, TAUA, TAUADIR, BRCOEF
   USE W3ODATMD, ONLY: NDSO, NDSE, NDST, NOGRP, NGRPP, IDOUT,      &
        UNDEF, FLOGRD, FNMPRE, NOSWLL, NOGE
   !
@@ -1254,6 +1254,17 @@ CONTAINS
               CALL W3S2XY ( NSEA, NSEA, NX+1, NY, WNMEAN, MAPSF, X1)
             ENDIF
             !
+          ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 20 ) THEN
+            FLONE  = .TRUE.
+            FSC    = 0.001
+            UNITS  = '1'
+            ENAME  = '.br'
+            IF ( ITYPE .EQ. 4 ) THEN
+              XS1    = BRCOEF
+            ELSE
+              CALL W3S2XY ( NSEA, NSEA, NX+1, NY, BRCOEF, MAPSF, X1)
+            ENDIF
+            !          
           ELSE IF ( IFI .EQ. 4 .AND. IFJ .EQ. 1 ) THEN
             FLONE  = .TRUE.
             FSC    = 0.01

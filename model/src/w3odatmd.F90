@@ -364,7 +364,7 @@ MODULE W3ODATMD
 #endif
          CAO(:), CDO(:), ICEO(:), ICEHO(:),   &
          ICEFO(:), SPCO(:,:)
-    REAL, POINTER         :: ZET_SETO(:)  ! For the wave setup.
+    REAL, POINTER         :: ZETA_SETUPO(:)  ! For the wave setup.
 
     CHARACTER(LEN=40), POINTER :: PTNME(:)
     CHARACTER(LEN=13), POINTER :: GRDID(:)
@@ -496,7 +496,7 @@ MODULE W3ODATMD
 #endif
        CAO(:), CDO(:), ICEO(:), ICEHO(:),   &
        ICEFO(:), SPCO(:,:)
-  REAL, POINTER           :: ZET_SETO(:)
+  REAL, POINTER           :: ZETA_SETUPO(:)
   !
   CHARACTER(LEN=40), POINTER :: PTNME(:)
   CHARACTER(LEN=13), POINTER :: GRDID(:)
@@ -1078,7 +1078,7 @@ CONTAINS
          OUTPTS(IMOD)%OUT2%GRDID(NPT)      ,                  &
          OUTPTS(IMOD)%OUT2%DPO(NPT)        ,                  &
          OUTPTS(IMOD)%OUT2%WAO(NPT)        ,                  &
-         OUTPTS(IMOD)%OUT2%ZET_SETO(NPT)   ,                  &
+         OUTPTS(IMOD)%OUT2%ZETA_SETUPO(NPT)   ,                  &
          OUTPTS(IMOD)%OUT2%WDO(NPT)        ,                  &
          OUTPTS(IMOD)%OUT2%ASO(NPT)        ,                  &
 #ifdef W3_FLX5
@@ -1703,7 +1703,7 @@ CONTAINS
       PTIFAC => OUTPTS(IMOD)%OUT2%PTIFAC
       DPO    => OUTPTS(IMOD)%OUT2%DPO
       WAO    => OUTPTS(IMOD)%OUT2%WAO
-      ZET_SETO => OUTPTS(IMOD)%OUT2%ZET_SETO
+      ZETA_SETUPO => OUTPTS(IMOD)%OUT2%ZETA_SETUPO
       WDO    => OUTPTS(IMOD)%OUT2%WDO
       ASO    => OUTPTS(IMOD)%OUT2%ASO
 #ifdef W3_FLX5

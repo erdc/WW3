@@ -1595,8 +1595,8 @@ CONTAINS
 985 FORMAT                                                           &
          (/'      point  |      X      |      Y      |  name  '/     &
          '     --------|-------------|-------------|----------------')
-980 FORMAT ( 5X,I5,'   |',2(F10.2,'   |'),2X,A)
-986 FORMAT ( 5X,I5,'   |',2(F8.1,'E3   |'),2X,A)
+980 FORMAT ( 5X,I5,'   |',2(F15.10,'   |'),2X,A)
+986 FORMAT ( 5X,I5,'   |',2(F15.10,'E3   |'),2X,A)
     !
 981 FORMAT (/' Initial time     : ',A)
 982 FORMAT ( ' Water level time : ',A)
@@ -2150,7 +2150,8 @@ CONTAINS
          STMAXE, STMAXD, HMAXE, HCMAXE, HMAXD,     &
          HCMAXD, QP, PTHP0, PQP, PPE, PGW, PSW,    &
          PTM1, PT1, PT2, PEP, WBT, CX, CY,         &
-         TAUOCX, TAUOCY, WNMEAN, QKK, SKEW, EMBIA1, EMBIA2
+         TAUOCX, TAUOCY, WNMEAN,                   &
+         QKK, SKEW, EMBIA1, EMBIA2,BRCOEF 
 #endif
 
 #ifdef W3_MPI

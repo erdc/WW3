@@ -1809,18 +1809,18 @@ CONTAINS
 #ifdef W3_DB1
     IF ( WRITE ) THEN
       WRITE (NDSM)                                            &
-           SDBC1, SDBC2, FDONLY
+           SDBC1, SDBC2, FDONLY, FSLOPE
 #ifdef W3_ASCII
       WRITE (NDSA,*)                                          &
-           'SDBC1, SDBC2, FDONLY:',                           &
-           SDBC1, SDBC2, FDONLY
+           'SDBC1, SDBC2, FDONLY, FSLOPE:',                   &
+           SDBC1, SDBC2, FDONLY, FSLOPE
 #endif
     ELSE
       READ (NDSM,END=801,ERR=802,IOSTAT=IERR)                 &
-           SDBC1, SDBC2, FDONLY
+           SDBC1, SDBC2, FDONLY, FSLOPE
     END IF
     !
-    IF ( FLTEST ) WRITE (NDST,9053) SDBC1, SDBC2, FDONLY
+    IF ( FLTEST ) WRITE (NDST,9053) SDBC1, SDBC2, FDONLY, FSLOPE
 #endif
 
 #ifdef W3_UOST

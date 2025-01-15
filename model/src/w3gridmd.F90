@@ -896,6 +896,7 @@ MODULE W3GRIDMD
 #ifdef W3_DB1
   REAL                    :: BJALFA, BJGAM
   LOGICAL                 :: BJFLAG
+  LOGICAL                 :: BRFLAG
 #endif
 #ifdef W3_PR2
   REAL                    :: DTIME
@@ -1067,7 +1068,7 @@ MODULE W3GRIDMD
        BOTROUGHMIN, BOTROUGHFAC
 #endif
 #ifdef W3_DB1
-  NAMELIST /SDB1/ BJALFA, BJGAM, BJFLAG
+  NAMELIST /SDB1/ BJALFA, BJGAM, BJFLAG, BRFLAG
 #endif
 #ifdef W3_UOST
   NAMELIST /UOST/ UOSTFILELOCAL, UOSTFILESHADOW,             &
@@ -2359,6 +2360,7 @@ CONTAINS
     BJALFA = 1.
     BJGAM  = 0.73
     BJFLAG = .TRUE.
+    BRFLAG = .FALSE.
     CALL READNL ( NDSS, 'SDB1', STATUS )
     WRITE (NDSO,928) STATUS
     BJALFA = MAX ( 0. , BJALFA )
@@ -2374,6 +2376,7 @@ CONTAINS
     SDBC1  = BJALFA
     SDBC2  = BJGAM
     FDONLY = BJFLAG
+    FSLOPE = BRFLAG
 #endif
     !
     !
@@ -3317,9 +3320,17 @@ CONTAINS
 #endif
 #ifdef W3_DB1
       IF ( BJFLAG ) THEN
-        WRITE (NDSO,2928) BJALFA, BJGAM, '.TRUE.'
+        IF (BRFLAG) THEN
+          WRITE (NDSO,2928) BJALFA, BJGAM, '.TRUE.', '.TRUE.'
+			  ELSE
+          WRITE (NDSO,2928) BJALFA, BJGAM, '.TRUE.', '.FALSE.'
+        END IF
       ELSE
-        WRITE (NDSO,2928) BJALFA, BJGAM, '.FALSE.'
+        IF (BRFLAG) THEN
+          WRITE (NDSO,2928) BJALFA, BJGAM, '.FALSE.', '.TRUE.'
+			  ELSE
+          WRITE (NDSO,2928) BJALFA, BJGAM, '.FALSE.', '.FALSE.'
+			  END IF
       END IF
 #endif
 #ifdef W3_PR1
@@ -3336,7 +3347,7 @@ CONTAINS
       WRITE (NDSO,2953) CFLTM, WDTHCG, WDTHTH
 #endif
       !
-      WRITE (NDSO,2956) UGBCCFL, UGOBCAUTO, UGOBCDEPTH,TRIM(UGOBCFILE), &
+      WRITE (NDSO,*) UGBCCFL, UGOBCAUTO, UGOBCDEPTH,TRIM(UGOBCFILE), &
            EXPFSN, EXPFSPSI, EXPFSFCT, IMPFSN, EXPTOTAL,&
            IMPTOTAL, IMPREFRACTION, IMPFREQSHIFT,      &
            IMPSOURCE, LREAD2DM, SETUP_APPLY_WLV,        &
@@ -6527,7 +6538,7 @@ CONTAINS
 929 FORMAT ( '       alpha                       :',F8.3/      &
          '       gamma                       :',F8.3)
 2928 FORMAT ( '  &SDB1 BJALFA =',F7.3,', BJGAM =',F7.3,         &
-         ', BJFLAG = ',A,' /')
+         ', BJFLAG = ',A, ', BRFLAG = ',A,' /')
 #endif
     !
 #ifdef W3_TR0

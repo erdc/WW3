@@ -1093,7 +1093,7 @@ CONTAINS
          FP0AUX, THMAUX1, THMAUX2, THSAUX, THP0AUX1,   &
          THP0AUX2, HSIGAUX, STMAXEAUX,STMAXDAUX,       &
          HMAXEAUX, HCMAXEAUX, HMAXDAUX, HCMAXDAUX,     &
-         WBTAUX, WNMEANAUX, SUMWT2(NOGE(2))
+         WBTAUX, WNMEANAUX, BRCOEFAUX, SUMWT2(NOGE(2))
     ! Local group 3 variables
     REAL          :: EFAUX(E3DF(2,1):E3DF(3,1)),                   &
          TH1MAUX(E3DF(2,2):E3DF(3,2)),                 &
@@ -1198,6 +1198,7 @@ CONTAINS
     HCMAXD   = UNDEF
     WBT      = UNDEF
     WNMEAN   = UNDEF
+    BRCOEF   = UNDEF
     !
     ! Group 3 variables
     !
@@ -1434,6 +1435,7 @@ CONTAINS
             HCMAXDAUX   = UNDEF
             WBTAUX      = UNDEF
             WNMEANAUX   = UNDEF
+            BRCOEFAUX   = UNDEF
             SUMWT2      = 0
             !
             ! Group 3 variables
@@ -1886,6 +1888,14 @@ CONTAINS
                   IF ( WNMEANAUX .EQ. UNDEF )   WNMEANAUX = 0.
                   WNMEANAUX = WNMEANAUX + WADATS(IGRID)%WNMEAN(GSEA)*WT
                 END IF
+              END IF
+              !
+              IF ( FLOGRD(2,20) .AND. ACTIVE ) THEN
+                    IF ( WADATS(IGRID)%BRCOEF(GSEA) .NE. UNDEF ) THEN
+                      SUMWT2(20) = SUMWT2(20) + WT
+                      IF ( BRCOEFAUX .EQ. UNDEF )   BRCOEFAUX = 0.
+                      BRCOEFAUX = BRCOEFAUX + WADATS(IGRID)%BRCOEF(GSEA)*WT
+                    END IF
               END IF
               !
               ! Group 3 variables

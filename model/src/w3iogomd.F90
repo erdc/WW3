@@ -917,10 +917,13 @@ CONTAINS
     CASE('WNM')
       I = 2
       J = 19
+    CASE('BRCOEF')
+      I = 2
+      J = 20
 #ifdef W3_OASOCM
     CASE('THM')
       I = 2
-      J = 20
+      J = 21
 #endif
       !
       ! Group 3
@@ -2522,7 +2525,7 @@ CONTAINS
     USE W3ADATMD, ONLY: AINIT, DW, UA, UD, AS, CX, CY, WN,          &
          TAUA, TAUADIR
     USE W3ADATMD, ONLY: HS, WLM, T02, T0M1, T01, FP0, THM, THS, THP0,&
-         WBT, WNMEAN
+         WBT, WNMEAN, BRCOEF
     USE W3ADATMD, ONLY: DTDYN, FCUT, ABA, ABD, UBA, UBD, SXX, SYY, SXY,&
          PHS, PTP, PLP, PDIR, PSI, PWS, PWST, PNR,    &
          PTHP0, PQP, PPE, PGW, PSW, PTM1, PT1, PT2,  &
@@ -2846,6 +2849,7 @@ CONTAINS
           IF ( FLOGRD( 2,16) ) HCMAXD(ISEA) = UNDEF
           IF ( FLOGRD( 2,17) ) WBT   (ISEA) = UNDEF
           IF ( FLOGRD( 2,19) ) WNMEAN(ISEA) = UNDEF
+          IF ( FLOGRD( 2,20) ) BRCOEF(ISEA) = UNDEF
           !
           IF ( FLOGRD( 3, 1) ) EF   (ISEA,:) = UNDEF
           IF ( FLOGRD( 3, 2) ) TH1M (ISEA,:) = UNDEF
@@ -3215,6 +3219,11 @@ CONTAINS
               WRITE ( NDSOG ) WNMEAN(1:NSEA)
 #ifdef W3_ASCII
               WRITE ( NDSOA,* ) 'WNMEAN:', WNMEAN(1:NSEA)
+#endif
+            ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 20 ) THEN
+              WRITE ( NDSOG ) BRCOEF(1:NSEA)
+#ifdef W3_ASCII
+              WRITE ( NDSOA,* ) 'BRCOEF:', BRCOEF(1:NSEA)
 #endif
               !
               !     Section 3)
@@ -3784,6 +3793,9 @@ CONTAINS
             ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 19 ) THEN
               READ (NDSOG,END=801,ERR=802,IOSTAT=IERR)         &
                    WNMEAN(1:NSEA)
+            ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 20 ) THEN
+              READ (NDSOG,END=801,ERR=802,IOSTAT=IERR)         &
+                    BRCOEF(1:NSEA)
               !
               !     Section 3)
               !

@@ -194,7 +194,7 @@ PROGRAM W3OUNF
        CFLTHMAX, CFLXYMAX, CFLKMAX, TAUICE, PHICE,  &
        STMAXE, STMAXD, HMAXE, HCMAXE, HMAXD, HCMAXD,&
        P2SMS, EF, US3D, TH1M, STH1M, TH2M, STH2M,   &
-       WN, USSP, WBT, WNMEAN, QKK, SKEW, EMBIA1, EMBIA2
+       WN, USSP, WBT, WNMEAN, QKK, SKEW, EMBIA1, EMBIA2, BRCOEF
   USE W3ODATMD, ONLY: NDSO, NDSE, SCREEN, NOGRP, NGRPP, IDOUT,     &
        UNDEF, FLOGRD, FNMPRE, NOSWLL, NOGE
   !
@@ -1411,6 +1411,10 @@ CONTAINS
             ELSE
               CALL W3S2XY ( NSEA, NSEA, NX+1, NY, WNMEAN, MAPSF, X1 )
             END IF
+            !
+            ! Breaking coefficient
+          ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 20 ) THEN
+              CALL S2GRID(BRCOEF, X1)
             !
             ! Wave elevation spectrum
           ELSE IF ( IFI .EQ. 3 .AND. IFJ .EQ. 1 ) THEN
