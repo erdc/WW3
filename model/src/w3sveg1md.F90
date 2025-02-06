@@ -112,7 +112,6 @@
 !
 !/ ------------------------------------------------------------------- /
 !/
-      USE CONSTANTS
       USE W3SERVMD, ONLY: EXTCDE
       USE W3GDATMD, ONLY: NK, NTH, NSPEC, FSSOURCE, DDEN
       USE W3ODATMD, ONLY: NDST

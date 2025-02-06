@@ -46,6 +46,7 @@
     CHARACTER(13)               :: WINDS
     CHARACTER(13)               :: ATM_MOMENTUM
     CHARACTER(13)               :: AIR_DENSITY
+    CHARACTER(13)               :: VEGETATION
     CHARACTER(13)               :: ICE_CONC
     CHARACTER(13)               :: ICE_PARAM1
     CHARACTER(13)               :: ICE_PARAM2
@@ -79,8 +80,6 @@
     TYPE(NML_MODEL_RESOURCE_T)  :: RESOURCE
   END TYPE NML_MODEL_GRID_T
 
-
-
   ! input grid data structure
   TYPE NML_INPUT_FORCING_T
     LOGICAL                     :: WATER_LEVELS
@@ -88,6 +87,7 @@
     LOGICAL                     :: WINDS
     LOGICAL                     :: ATM_MOMENTUM
     LOGICAL                     :: AIR_DENSITY
+    LOGICAL                     :: VEGETATION
     LOGICAL                     :: ICE_CONC
     LOGICAL                     :: ICE_PARAM1
     LOGICAL                     :: ICE_PARAM2
@@ -200,6 +200,7 @@
     REAL                        :: VALUE1
     REAL                        :: VALUE2
     REAL                        :: VALUE3
+    REAL                        :: VALUE4
   END TYPE NML_HOMOG_INPUT_T
 
 
@@ -1447,6 +1448,7 @@
         HOMOG_INPUT(I)%VALUE1    = 0.
         HOMOG_INPUT(I)%VALUE2    = 0.
         HOMOG_INPUT(I)%VALUE3    = 0.
+        HOMOG_INPUT(I)%VALUE4    = 0.
       END DO
     END IF
 
@@ -2156,6 +2158,7 @@
         WRITE (NDSN,14) TRIM(MSG),'VALUE1    = ', NML_HOMOG_INPUT(I)%VALUE1
         WRITE (NDSN,14) TRIM(MSG),'VALUE2    = ', NML_HOMOG_INPUT(I)%VALUE2
         WRITE (NDSN,14) TRIM(MSG),'VALUE3    = ', NML_HOMOG_INPUT(I)%VALUE3
+        WRITE (NDSN,14) TRIM(MSG),'VALUE4    = ', NML_HOMOG_INPUT(I)%VALUE4
         WRITE (NDSN,'(A)')
       END DO
     END IF

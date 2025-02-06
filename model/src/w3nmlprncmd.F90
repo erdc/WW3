@@ -40,6 +40,7 @@
     LOGICAL                     :: WINDS_AST
     LOGICAL                     :: ATM_MOMENTUM
     LOGICAL                     :: AIR_DENSITY
+    LOGICAL                     :: VEGETATION
     LOGICAL                     :: ICE_CONC
     LOGICAL                     :: ICE_BERG
     LOGICAL                     :: DATA_ASSIM

@@ -2622,7 +2622,7 @@
               IF ( FLH(J) ) THEN
                 CALL W3FLDH (J, NDST, NDSEN, NX, NY, NX, NY,    &
                              TIME0, TIMEN, NH(J), NHMAX, THO, HA, HD, HS,&
-                             HR, TTT, XXX, XXX, XXX, TIN, XXX, BERGI, ICEI0,&
+                             HR, TTT, XXX, XXX, XXX, TIN, XXX, BERGI, ICEI,&
                              XXX, IERR)
               ELSE
 #ifdef W3_OASIS
