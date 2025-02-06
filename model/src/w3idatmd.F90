@@ -255,7 +255,7 @@
       LOGICAL, POINTER        :: IINIT
       LOGICAL, POINTER        :: INFLAGS1(:), INFLAGS2(:), FLAGSC(:)
       LOGICAL, POINTER        :: FLLEV, FLCUR, FLWIND, FLICE, FLTAUA, &
-                                 FLRHOA
+                                 FLRHOA, FLVEG
       LOGICAL, POINTER        :: FLMTH, FLMVS, FLMDN
       LOGICAL, POINTER        :: FLIC1, FLIC2, FLIC3, FLIC4, FLIC5 
       LOGICAL, POINTER        :: FLVG1, FLVG2
@@ -951,7 +951,7 @@
       TIN    => INPUTS(IMOD)%TFN(:,4)
       TUN    => INPUTS(IMOD)%TFN(:,5)
       TRN    => INPUTS(IMOD)%TFN(:,6)
-      TPN    => INPUTS(IMOD)%TPN(:,7)
+      TPN    => INPUTS(IMOD)%TFN(:,7)
       T0N    => INPUTS(IMOD)%TFN(:,8)
       T1N    => INPUTS(IMOD)%TFN(:,9)
       T2N    => INPUTS(IMOD)%TFN(:,10)
@@ -1098,6 +1098,8 @@
               VEGN   => INPUTS(IMOD)%VEGN
               VEGCD  => INPUTS(IMOD)%VEGCD
           END IF
+
+       END IF 
 !
 !
       RETURN

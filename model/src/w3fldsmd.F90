@@ -691,7 +691,7 @@
            IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
            IDFLD.NE.'ICE' .AND. IDFLD.NE.'VEG' .AND.                  &
            IDFLD.NE.'TAU' .AND. IDFLD.NE.'RHO' .AND.                  &
-           IDFLD.NE.'VEG' .AND. IDFLD.NE.'ISI' .AND'                  &
+           IDFLD.NE.'VEG' .AND. IDFLD.NE.'ISI' .AND.                  &
            IDFLD.NE.'DT0' .AND. IDFLD.NE.'DT1' .AND.                  &
            IDFLD.NE.'DT2' )    GOTO 802
       WRITE  = INXOUT .EQ. 'WRITE'
