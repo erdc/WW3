@@ -484,7 +484,7 @@ CONTAINS
          FLGD(:,:), FLG2(:,:), FLG2D(:,:),     &
          FLG1D(:), CPLINP(:)
     CHARACTER(LEN=1)        :: COMSTR
-    CHARACTER(LEN=3)        :: IDSTR(9), IDTST
+    CHARACTER(LEN=3)        :: IDSTR(10), IDTST
     CHARACTER(LEN=5)        :: STOUT, OUTSTR(6)
     CHARACTER(LEN=6)        :: ACTION(11), YESXX, XXXNO
     CHARACTER(LEN=8)        :: LFILE, STTIME
@@ -505,7 +505,7 @@ CONTAINS
     CHARACTER(LEN=18)       :: PFILE
 #endif
 
-    CHARACTER(LEN=13)       :: IDFLDS(-7:9)
+    CHARACTER(LEN=13)       :: IDFLDS(-7:10)
     CHARACTER(LEN=23)       :: DTME21
     CHARACTER(LEN=30)       :: IDOTYP(8)
     CHARACTER(LEN=80)       :: TNAME
@@ -532,6 +532,7 @@ CONTAINS
          'water levels ' , 'currents     ' ,               &
          'winds        ' , 'ice fields   ' ,               &
          'momentum     ' , 'air density  ' ,               &
+         'vegetation   ' ,                                 &
          'mean param.  ' , '1D spectra   ' ,               &
          '2D spectra   ' /
     !
@@ -544,7 +545,7 @@ CONTAINS
          'Fields for coupling           ' ,                &
          'Restart files second request  '/
     !
-    DATA IDSTR  / 'LEV', 'CUR', 'WND', 'ICE', 'TAU', 'RHO',         &
+    DATA IDSTR  / 'LEV', 'CUR', 'WND', 'ICE', 'TAU', 'RHO', 'VEG',  &
          'DT0', 'DT1', 'DT2' /
     !
     DATA YESXX  / 'YES/--' /
@@ -745,7 +746,7 @@ CONTAINS
     !
     ALLOCATE ( MDS(15,NRGRD), NTRACE(2,NRGRD), ODAT(40,0:NRGRD),    &
          FLGRD(NOGRP,NGRPP,NRGRD), OT2(0:NRGRD), FLGD(NOGRP,NRGRD), &
-         MDSF(-NRINP:NRGRD,JFIRST:9), IPRT(6,NRGRD), LPRT(NRGRD),   &
+         MDSF(-NRINP:NRGRD,JFIRST:10), IPRT(6,NRGRD), LPRT(NRGRD),   &
          FLGR2(NOGRP,NGRPP,NRGRD),FLG2D(NOGRP,NGRPP), FLG1D(NOGRP), &
          FLG2(NOGRP,NRGRD),OUTFF(7,0:NRGRD))
     !
@@ -797,7 +798,7 @@ CONTAINS
     !                   sources, and from communication rather than
     !                   files.
     !
-    ALLOCATE ( INAMES(2*NRGRD,JFIRST:9), MNAMES(-NRINP:2*NRGRD),   &
+    ALLOCATE ( INAMES(2*NRGRD,JFIRST:10), MNAMES(-NRINP:2*NRGRD),   &
          TMPRNK(2*NRGRD), TMPGRP(2*NRGRD), NINGRP(2*NRGRD),  &
          RP1(2*NRGRD), RPN(2*NRGRD), BCDTMP(NRGRD+1:2*NRGRD) )
     ALLOCATE ( GRANK(NRGRD), GRGRP(NRGRD), USEINP(NRINP) )
@@ -820,7 +821,7 @@ CONTAINS
       CALL NEXTLN ( COMSTR , MDSI , MDSE2 )
       CALL W3SETI ( -I, MDSE, MDST )
       INFLAGS1 = .FALSE.
-      READ (MDSI,*,END=2001,ERR=2002) MNAMES(-I), INFLAGS1(JFIRST:9)
+      READ (MDSI,*,END=2001,ERR=2002) MNAMES(-I), INFLAGS1(JFIRST:10)
       !
     END DO
     !
@@ -868,10 +869,10 @@ CONTAINS
           CALL W3SETI ( I, MDSE, MDST )
           INFLAGS1      = .FALSE.
 #ifdef W3_MGW
-          INFLAGS1(10)   = .TRUE.
+          INFLAGS1(11)   = .TRUE.
 #endif
 #ifdef W3_MGP
-          INFLAGS1(10)   = .TRUE.
+          INFLAGS1(11)   = .TRUE.
 #endif
           INAMES(I,:)= INAMES(J,:)
           MNAMES(I)  = MNAMES(J)
@@ -972,7 +973,7 @@ CONTAINS
     WRITE (MDST,9022)
     DO I=-NRINP, NRGRD
       IF ( I .EQ. 0 ) CYCLE
-      WRITE (MDST,9021) I, MDSF(I,JFIRST:9)
+      WRITE (MDST,9021) I, MDSF(I,JFIRST:10)
     END DO
 #endif
     !
@@ -1084,10 +1085,11 @@ CONTAINS
         DO J=JFIRST, 6
           IF ( INFLAGS1(J) ) ACTION(J) = ' X    '
         END DO
-        ACTION(7:9) = '-     '
+        ACTION(7:10) = '-     '
         IF ( INFLAGS1(7) ) ACTION(7) = '1     '
         IF ( INFLAGS1(8) ) ACTION(8) = '2     '
         IF ( INFLAGS1(9) ) ACTION(9) = '3     '
+        IF ( INFLAGS1(10)) ACTION(10)= '4     '
         IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC )                &
              WRITE (MDSS,925) I, MNAMES(-I), ACTION(JFIRST:9)
         IF ( NMPLOG .EQ. IMPROC )                                 &
@@ -1124,6 +1126,7 @@ CONTAINS
           ACTION(J) = MNAMES( INPMAP(I,J))
         END IF
       END DO
+
       ACTION(7:11) = '-     '
       IF ( INFLAGS1(7) ) ACTION(7) = '1     '
       IF ( INFLAGS1(8) ) ACTION(8) = '2     '
@@ -1133,6 +1136,7 @@ CONTAINS
       ELSE
         ACTION(10) = 'no    '
       END IF
+
       IF ( BCDUMP(I) ) ACTION(11) = 'y     '
       IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC )                    &
            WRITE (MDSS,931) I, MNAMES(I), ACTION(1:10), GRANK(I),     &
@@ -2300,6 +2304,30 @@ CONTAINS
       !       CALL WMUSET ( MDSE, MDST, NDSFND, .TRUE., DESC='Test output' )
       !       MDS( 3,I) = NDSFND
       !
+!   NEED to double check this loop  TJH
+        DO J=1, 6
+          IF ( J.EQ.4 .OR. J.EQ.5 ) CYCLE
+          IF ( ODAT(5*(J-1)+3,I) .GT. 0 ) THEN
+              CALL WMUGET ( MDSE, MDST, NDSFND, 'OUT' )
+              CALL WMUSET ( MDSE, MDST, NDSFND, .TRUE.,              &
+                            DESC='Raw output file' )
+              SELECT CASE (J)
+                CASE (1)
+                  MDS(7,I) = NDSFND
+                CASE (2)
+                  MDS(8,I) = NDSFND
+                CASE (3)
+                  MDS(12,I) = NDSFND
+                  CALL WMUGET ( MDSE, MDST, NDSFND, 'INP' )
+                  CALL WMUSET ( MDSE, MDST, NDSFND, .TRUE.,           &
+                                DESC='Input data file' )
+                  MDS(11,I) = NDSFND
+                CASE (6)
+                  MDS(13,I) = NDSFND
+              END SELECT
+            END IF
+          END DO
+!
       DO J=1, 6
         IF ( J.EQ.4 .OR. J.EQ.5 ) CYCLE
         IF ( ODAT(5*(J-1)+3,I) .GT. 0 ) THEN
@@ -2525,7 +2553,7 @@ CONTAINS
 
       TFLAGS = INFLAGS1
       !
-      DO J=JFIRST, 9
+      DO J=JFIRST, 10
         IF ( INPMAP(I,J) .NE. 0 ) THEN
           !
           TFLAGS(J) = .TRUE.
@@ -2791,7 +2819,7 @@ CONTAINS
       !
       ! Skipping assimilation input files for now.
       !
-      DO J=JFIRST, 9
+      DO J=JFIRST, 10
         IF ( MDSF(-I,J) .NE. -1 ) CALL WMUINQ                     &
              ( MDSE, MDST, MDSF(-I,J) )
       END DO
@@ -2799,7 +2827,7 @@ CONTAINS
     END DO
     !
     DO I=1, NRGRD
-      DO J=JFIRST, 9
+      DO J=JFIRST, 10
         IF  ( INPMAP(I,J).LT.0 .AND. INPMAP(I,J).NE.-999) IDINP(I,J) = IDINP( INPMAP(I,J),J)
         !IF ( INPMAP(I,J) .LT. 0 ) IDINP(I,J) = IDINP( INPMAP(I,J),J)
         IF ( INPMAP(I,J) .GT. 0 ) IDINP(I,J) = IDINP(-INPMAP(I,J),J)
@@ -3871,7 +3899,7 @@ CONTAINS
     REAL, ALLOCATABLE       :: X(:), Y(:), AMOVE(:), DMOVE(:),       &
          RP1(:), RPN(:)
     !
-    LOGICAL                 :: FLT, TFLAGI, TFLAGS(-7:14), PSHARE
+    LOGICAL                 :: FLT, TFLAGI, TFLAGS(-7:15), PSHARE
     LOGICAL, ALLOCATABLE    :: FLGRD(:,:,:), FLRBPI(:), BCDTMP(:),   &
          USEINP(:), LPRT(:), FLGR2(:,:,:),     &
          FLGD(:,:), FLG2(:,:), FLG2D(:,:),     &
@@ -3879,7 +3907,7 @@ CONTAINS
     !
     CHARACTER(LEN=1)        :: COMSTR
     CHARACTER(LEN=256)      :: TMPLINE, TEST
-    CHARACTER(LEN=3)        :: IDSTR(-7:9), IDTST
+    CHARACTER(LEN=3)        :: IDSTR(-7:10), IDTST
     CHARACTER(LEN=5)        :: STOUT, OUTSTR(6)
     CHARACTER(LEN=6)        :: YESXX, XXXNO
     CHARACTER(LEN=6),                                                &
@@ -3888,7 +3916,7 @@ CONTAINS
 #ifdef W3_SHRD
     CHARACTER(LEN=9)        :: TFILE
 #endif
-    CHARACTER(LEN=13)       :: STDATE, MN, TNAMES(9)
+    CHARACTER(LEN=13)       :: STDATE, MN, TNAMES(10)
     CHARACTER(LEN=40)       :: PN
     CHARACTER(LEN=13),                                               &
          ALLOCATABLE :: INAMES(:,:), MNAMES(:)
@@ -3901,45 +3929,46 @@ CONTAINS
 #ifdef W3_MPRF
     CHARACTER(LEN=18)       :: PFILE
 #endif
-    CHARACTER(LEN=13)       :: IDFLDS(-7:9)
-    CHARACTER(LEN=23)       :: DTME21
-    CHARACTER(LEN=30)       :: IDOTYP(8)
-    CHARACTER(LEN=80)       :: TNAME, LINE
-    CHARACTER(LEN=1024)     :: FLDOUT
-    !
+      CHARACTER(LEN=13)       :: IDFLDS(-7:10)
+      CHARACTER(LEN=23)       :: DTME21
+      CHARACTER(LEN=30)       :: IDOTYP(8)
+      CHARACTER(LEN=80)       :: TNAME, LINE
+      CHARACTER(LEN=1024)     :: FLDOUT
+!
 
     !/
     !/ ------------------------------------------------------------------- /
     !/
 
-    DATA IDFLDS / 'ice param. 1 ' , 'ice param. 2 ' ,               &
-         'ice param. 3 ' , 'ice param. 4 ' ,               &
-         'ice param. 5 ' ,                                 &
-         'mud density  ' , 'mud thkness  ' ,               &
-         'mud viscos.  ' ,                                 &
-         'water levels ' , 'currents     ' ,               &
-         'winds        ' , 'ice fields   ' ,               &
-         'momentum     ' , 'air density  ' ,               &
-         'mean param.  ' , '1D spectra   ' ,               &
-         '2D spectra   ' /
-    !
-    DATA IDOTYP / 'Fields of mean wave parameters' ,                &
-         'Point output                  ' ,                &
-         'Track point output            ' ,                &
-         'Restart files                 ' ,                &
-         'Nesting data                  ' ,                &
-         'Separated wave field data     ' ,                &
-         'Fields for coupling           ' ,                &
-         'Restart files second request  '/
-    !
-    DATA IDSTR  / 'IC1', 'IC2', 'IC3', 'IC4', 'IC5',                &
-         'MDN', 'MTH', 'MVS', 'LEV', 'CUR',                &
-         'WND', 'ICE', 'TAU', 'RHO', 'DT0',                &
-         'DT1', 'DT2' /
-    !
-    DATA YESXX  / 'YES/--' /
-    DATA XXXNO  / '---/NO' /
-    !
+      DATA IDFLDS / 'ice param. 1 ' , 'ice param. 2 ' ,               &
+                    'ice param. 3 ' , 'ice param. 4 ' ,               &
+                    'ice param. 5 ' ,                                 &
+                    'mud density  ' , 'mud thkness  ' ,               &
+                    'mud viscos.  ' ,                                 &
+                    'water levels ' , 'currents     ' ,               &
+                    'winds        ' , 'ice fields   ' ,               &
+                    'momentum     ' , 'air density  ' ,               &
+                    'vegetation   ' ,                                 &
+                    'mean param.  ' , '1D spectra   ' ,               &
+                    '2D spectra   ' /
+!
+      DATA IDOTYP / 'Fields of mean wave parameters' ,                &
+                    'Point output                  ' ,                &
+                    'Track point output            ' ,                &
+                    'Restart files                 ' ,                &
+                    'Nesting data                  ' ,                &
+                    'Separated wave field data     ' ,                &
+                    'Fields for coupling           ' ,                &
+                    'Restart files second request  '/
+!
+      DATA IDSTR  / 'IC1', 'IC2', 'IC3', 'IC4', 'IC5',                &
+                    'MDN', 'MTH', 'MVS', 'LEV', 'CUR',                &
+                    'WND', 'ICE', 'TAU', 'RHO', 'VEG',                &
+                    'DT0', 'DT1', 'DT2' /
+!
+      DATA YESXX  / 'YES/--' /
+      DATA XXXNO  / '---/NO' /
+!
 #ifdef W3_MPRF
     CALL PRINIT
     CALL PRTIME ( PRFT0 )
@@ -4150,7 +4179,7 @@ CONTAINS
     !
     ALLOCATE ( MDS(15,NRGRD), NTRACE(2,NRGRD), ODAT(40,0:NRGRD),    &
          FLGRD(NOGRP,NGRPP,NRGRD), OT2(0:NRGRD), FLGD(NOGRP,NRGRD), &
-         MDSF(-NRINP:NRGRD,JFIRST:9), IPRT(6,NRGRD), LPRT(NRGRD),   &
+         MDSF(-NRINP:NRGRD,JFIRST:10), IPRT(6,NRGRD), LPRT(NRGRD),   &
          FLGR2(NOGRP,NGRPP,NRGRD),FLG2D(NOGRP,NGRPP), FLG1D(NOGRP), &
          FLG2(NOGRP,NRGRD),OUTFF(7,0:NRGRD))
     !
@@ -4202,7 +4231,7 @@ CONTAINS
     !                   sources, and from communication rather than
     !                   files.
     !
-    ALLOCATE ( INAMES(2*NRGRD,-7:9), MNAMES(-NRINP:2*NRGRD),   &
+    ALLOCATE ( INAMES(2*NRGRD,-7:10), MNAMES(-NRINP:2*NRGRD),   &
          TMPRNK(2*NRGRD), TMPGRP(2*NRGRD), NINGRP(2*NRGRD),  &
          RP1(2*NRGRD), RPN(2*NRGRD), BCDTMP(NRGRD+1:2*NRGRD) )
     ALLOCATE ( GRANK(NRGRD), GRGRP(NRGRD), USEINP(NRINP) )
@@ -4239,6 +4268,7 @@ CONTAINS
       INFLAGS1(4) = NML_INPUT_GRID(I)%FORCING%ICE_CONC
       INFLAGS1(5) = NML_INPUT_GRID(I)%FORCING%ATM_MOMENTUM
       INFLAGS1(6) = NML_INPUT_GRID(I)%FORCING%AIR_DENSITY
+      INFLAGS1(7) = NML_INPUT_GRID(I)%FORCING%VEGETATION
       INFLAGS1(7) = NML_INPUT_GRID(I)%ASSIM%MEAN
       INFLAGS1(8) = NML_INPUT_GRID(I)%ASSIM%SPEC1D
       INFLAGS1(9) = NML_INPUT_GRID(I)%ASSIM%SPEC2D
@@ -4307,10 +4337,10 @@ CONTAINS
           CALL W3SETI ( I, MDSE, MDST )
           INFLAGS1      = .FALSE.
 #ifdef W3_MGW
-          INFLAGS1(10)   = .TRUE.
+              INFLAGS1(11)   = .TRUE.
 #endif
 #ifdef W3_MGP
-          INFLAGS1(10)   = .TRUE.
+              INFLAGS1(11)   = .TRUE.
 #endif
           INAMES(I,:)= INAMES(J,:)
           MNAMES(I)  = MNAMES(J)
@@ -4474,7 +4504,7 @@ CONTAINS
     WRITE (MDST,9035) NINGRP(1:NRGRP)
 #endif
     !
-    ALLOCATE ( ACTION(JFIRST:11) )
+    ALLOCATE ( ACTION(JFIRST:12) )
     ALLOCATE ( INGRP(NRGRP,0:MAXVAL(NINGRP(:NRGRP))) )
     DEALLOCATE ( TMPRNK, TMPGRP, NINGRP, BCDTMP )
     INGRP = 0
@@ -4520,14 +4550,15 @@ CONTAINS
       DO I=1, NRINP
         IF ( .NOT. USEINP(I) ) CYCLE
         CALL W3SETI ( -I, MDSE, MDST )
-        ACTION(1:6) = '---   '
-        DO J=JFIRST, 6
+        ACTION(1:7) = '---   '
+        DO J=JFIRST, 7
           IF ( INFLAGS1(J) ) ACTION(J) = ' X    '
         END DO
         ACTION(7:9) = '-     '
         IF ( INFLAGS1(7) ) ACTION(7) = '1     '
         IF ( INFLAGS1(8) ) ACTION(8) = '2     '
         IF ( INFLAGS1(9) ) ACTION(9) = '3     '
+        IF ( INFLAGS1(9) ) ACTION(9) = '4     ' !AR: There is quite osme work this is for sure not working right. 
         IF ( MDSS.NE.MDSO .AND. NMPSCR.EQ.IMPROC )                &
              WRITE (MDSS,925) I, MNAMES(-I), ACTION(JFIRST:9)
         IF ( NMPLOG .EQ. IMPROC )                                 &
@@ -4565,10 +4596,11 @@ CONTAINS
         END IF
       END DO
       ACTION(7:11) = '-     '
-      IF ( INFLAGS1(7) ) ACTION(7) = '1     '
-      IF ( INFLAGS1(8) ) ACTION(8) = '2     '
-      IF ( INFLAGS1(9) ) ACTION(9) = '3     '
-      IF ( INFLAGS1(10) ) THEN
+      IF ( INFLAGS1(7) )  ACTION(7) = '1    '
+      IF ( INFLAGS1(8) )  ACTION(8) = '2    '
+      IF ( INFLAGS1(9) )  ACTION(9) = '3    '
+      IF ( INFLAGS1(10) ) ACTION(9) = '4    '
+      IF ( INFLAGS1(11) ) THEN
         ACTION(10) = 'yes   '
       ELSE
         ACTION(10) = 'no    '
@@ -5893,7 +5925,7 @@ CONTAINS
       !
       IF ( CPLINP(I) ) CYCLE
       !
-      DO J=JFIRST, 6
+      DO J=JFIRST, 7
         IF ( INFLAGS1(J) ) THEN
           IDINP(-I,J) = IDSTR(J)
           CALL W3FLDO ('READ', IDINP(-I,J), MDSF(-I,J), MDST,     &
@@ -5910,7 +5942,7 @@ CONTAINS
       !
       ! Skipping assimilation input files for now.
       !
-      DO J=JFIRST, 9
+      DO J=JFIRST, 10
         IF ( MDSF(-I,J) .NE. -1 ) CALL WMUINQ                     &
              ( MDSE, MDST, MDSF(-I,J) )
       END DO
@@ -5918,7 +5950,7 @@ CONTAINS
     END DO
     !
     DO I=1, NRGRD
-      DO J=JFIRST, 9
+      DO J=JFIRST, 10
         IF  ( INPMAP(I,J).LT.0 .AND. INPMAP(I,J).NE.-999) IDINP(I,J) = IDINP( INPMAP(I,J),J)
         !IF ( INPMAP(I,J) .LT. 0 ) IDINP(I,J) = IDINP( INPMAP(I,J),J)
         IF ( INPMAP(I,J) .GT. 0 ) IDINP(I,J) = IDINP(-INPMAP(I,J),J)

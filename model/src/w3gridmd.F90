@@ -579,7 +579,7 @@ MODULE W3GRIDMD
   TYPE(NML_OUTBND_LINE_T), ALLOCATABLE  :: NML_OUTBND_LINE(:)
   !
   INTEGER, PARAMETER      :: NFL = 6
-  INTEGER                 :: NDSI, NDSI2, NDSS, NDSM, NDSG, NDSTR,&
+      INTEGER                 :: NDSI, NDSI2, NDSS, NDSM, NDSG, NDSTR,&
        IERR, NDSTRC, NTRACE, ITH, IK, ITH0, &
        ISP, IYN(NFL), NRLIN, NRSRCE, NRNL,  &
        NRBT, NRDB, NRTR, NRBS, NRPROP,      &
@@ -588,7 +588,8 @@ MODULE W3GRIDMD
        IFL, NBOTOT, NPO, IP, IX1, IX2, IY1, &
        IY2, J, JJ, IXR(4), IYR(4), ISEAI(4),&
        IST, NKI, NTHI, NRIC, NRIS, I, IDFT, &
-       NSTAT, NBT, NLAND, NOSW, NMAPB, IMAPB
+       NSTAT, NBT, NLAND, NOSW, NMAPB, IMAPB,&
+       NRVG
 #ifdef W3_ASCII
   INTEGER                  :: NDSMA
 #endif
@@ -713,7 +714,7 @@ MODULE W3GRIDMD
   LOGICAL                 :: FLLIN, FLINDS, FLNL, FLBT, FLDB,     &
        FLTR, FLBS, FLPROP, FLREF,     &
        FIRST, CONNCT, FLNEW, INGRID,FLIC,   &
-       FLIS, FLGNML
+       FLIS, FLGNML, FLVG
   LOGICAL                 :: FLTC96 = .FALSE.
   LOGICAL                 :: FLNMLO = .FALSE.
   LOGICAL                 :: FLSTB2 = .FALSE.
@@ -1394,6 +1395,7 @@ CONTAINS
     NRDB   = 0
     NRTR   = 0
     NRBS   = 0
+    NRVG   = 0
     !
     FLLIN  = .TRUE.
     FLINDS = .TRUE.
@@ -1405,6 +1407,7 @@ CONTAINS
     FLTR   = .TRUE.
     FLBS   = .TRUE.
     FLREF  = .FALSE.
+    FLVG   = .TRUE.
     !
 #ifdef W3_LN0
     NRLIN  = NRLIN + 1

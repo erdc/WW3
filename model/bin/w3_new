@@ -233,6 +233,14 @@
      'miche'  ) cd $main_dir/src ; touch w3gdatmd.F90
                                    touch w3srcemd.F90
                                    touch w3gridmd.F90 ;;
+     's_veg'  ) cd $main_dir/src ; touch w3gdatmd.F90
+                                   touch w3srcemd.F90
+                                   touch w3iogrmd.F90
+                                   touch w3profsmd_pdlib.F90
+                                   touch ww3_grid.F90
+                                   touch ww3_outp.F90
+                                   touch ww3_ounp.F90
+                                   touch gx_outp.F90 ;;
      's_tr'   ) cd $main_dir/src ; touch w3gdatmd.F90
                                    touch w3srcemd.F90
                                    touch w3iogrmd.F90

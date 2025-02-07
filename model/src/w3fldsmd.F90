@@ -130,7 +130,7 @@ CONTAINS
     !       IDFLD   C*3  I/O ID string for field type, valid are: 'IC1',
     !                        'IC2', 'IC3', 'IC4', 'IC5', 'MDN', 'MTH',
     !                        'MVS', 'LEV', 'CUR', 'WND', 'WNS', 'ICE',
-    !                        'TAU', 'RHO', 'ISI', and 'DTn'.
+    !                        'TAU', 'RHO', 'VEG', 'ISI', and 'DTn'.
     !       NDS     Int.  I  Dataset number for fields file.
     !       NDST    Int.  I  Dataset number for test output.
     !       NDSE    Int.  I  Dataset number for error output.
@@ -269,6 +269,7 @@ CONTAINS
          IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
          IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
          IDFLD.NE.'ICE' .AND. IDFLD.NE.'TAU' .AND.                  &
+         IDFLD.NE.'RHO' .AND. IDFLD.NE.'VEG' .AND.                  &
          IDFLD.NE.'RHO' .AND. IDFLD.NE.'DT0' .AND.                  &
          IDFLD.NE.'DT1' .AND. IDFLD.NE.'DT2' .AND.                  &
          IDFLD.NE.'ISI' )    GOTO 802
@@ -299,6 +300,12 @@ CONTAINS
     ELSE IF ( IDFLD.EQ.'ICE' .OR. IDFLD.EQ.'ISI' ) THEN
       FNAME = 'ice.' // TEMPXT(:I)
       I     = I + 4
+    ELSE IF ( IDFLD.EQ.'VEG' ) THEN
+      FNAME = 'vegetation.' // TEMPXT(:I)
+      I     = I + 10
+    ELSE IF ( IDFLD.EQ.'VEG' ) THEN
+      FNAME = 'vegetation.' // TEMPXT(:I)
+      I     = I + 10
     ELSE IF ( IDFLD.EQ.'TAU' ) THEN
       FNAME = 'momentum.' // TEMPXT(:I)
       I     = I + 9
@@ -556,7 +563,7 @@ CONTAINS
     !                        'READ' and 'WRITE'.
     !       IDFLD   C*3  I/O ID string for field type, valid are:
     !                        'LEV', 'CUR', 'WND', 'WNS', 'ICE', 'ISI',
-    !                        'TAU', 'RHO', and 'DTn'.
+    !                        'TAU', 'RHO', 'VEG', and 'DTn'.
     !       NDS     Int.  I  Dataset number for fields file.
     !       NDST    Int.  I  Dataset number for test output.
     !       NDSE    Int.  I  Dataset number for error output.
@@ -642,17 +649,18 @@ CONTAINS
 #ifdef W3_S
     CALL STRACE (IENT, 'W3FLDTIDE1')
 #endif
-    !
-    ! test input parameters ---------------------------------------------- *
-    !
-    IF (INXOUT.NE.'READ' .AND. INXOUT.NE.'WRITE') GOTO 801
-    IF ( IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
-         IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
-         IDFLD.NE.'ICE' .AND. IDFLD.NE.'TAU' .AND.                  &
-         IDFLD.NE.'RHO' .AND. IDFLD.NE.'DT0' .AND.                  &
-         IDFLD.NE.'DT1' .AND. IDFLD.NE.'DT2' .AND.                  &
-         IDFLD.NE.'ISI' )    GOTO 802
-    WRITE  = INXOUT .EQ. 'WRITE'
+!
+! test input parameters ---------------------------------------------- *
+!
+      IF (INXOUT.NE.'READ' .AND. INXOUT.NE.'WRITE') GOTO 801
+      IF ( IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
+           IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
+           IDFLD.NE.'ICE' .AND. IDFLD.NE.'VEG' .AND.                  &
+           IDFLD.NE.'TAU' .AND. IDFLD.NE.'RHO' .AND.                  &
+           IDFLD.NE.'VEG' .AND. IDFLD.NE.'ISI' .AND.                  &
+           IDFLD.NE.'DT0' .AND. IDFLD.NE.'DT1' .AND.                  &
+           IDFLD.NE.'DT2' )    GOTO 802
+      WRITE  = INXOUT .EQ. 'WRITE'
 
 #ifdef W3_TIDE
     IF ( WRITE ) THEN
@@ -747,7 +755,7 @@ CONTAINS
     !                        'READ' and 'WRITE'.
     !       IDFLD   C*3  I/O ID string for field type, valid are:
     !                        'LEV', 'CUR', 'WND', 'WNS', 'ICE', 'ISI',
-    !                        'TAU', 'RHO',  and 'DTn'.
+    !                        'TAU', 'RHO', 'VEG', and 'DTn'.
     !       NDS     Int.  I  Dataset number for fields file.
     !       NDST    Int.  I  Dataset number for test output.
     !       NDSE    Int.  I  Dataset number for error output.
@@ -834,17 +842,17 @@ CONTAINS
 #ifdef W3_S
     CALL STRACE (IENT, 'W3FLDTIDE2')
 #endif
-    !
-    ! test input parameters ---------------------------------------------- *
-    !
-    IF (INXOUT.NE.'READ' .AND. INXOUT.NE.'WRITE') GOTO 801
-    IF ( IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
-         IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
-         IDFLD.NE.'ICE' .AND. IDFLD.NE.'TAU' .AND.                  &
-         IDFLD.NE.'RHO' .AND. IDFLD.NE.'DT0' .AND.                  &
-         IDFLD.NE.'DT1' .AND. IDFLD.NE.'DT2' .AND.                  &
-         IDFLD.NE.'ISI' )    GOTO 802
-    WRITE  = INXOUT .EQ. 'WRITE'
+!
+! test input parameters ---------------------------------------------- *
+!
+      IF (INXOUT.NE.'READ' .AND. INXOUT.NE.'WRITE') GOTO 801
+      IF ( IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
+           IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
+           IDFLD.NE.'ICE' .AND. IDFLD.NE.'ISI' .AND.                  &
+           IDFLD.NE.'TAU' .AND. IDFLD.NE.'RHO' .AND.                  &
+           IDFLD.NE.'VEG' .AND. IDFLD.NE.'DT0' .AND.                  &
+           IDFLD.NE.'DT1' .AND. IDFLD.NE.'DT2' )    GOTO 802
+      WRITE  = INXOUT .EQ. 'WRITE'
 
 #ifdef W3_TIDE
     IF ( WRITE ) THEN
@@ -996,7 +1004,7 @@ CONTAINS
     !       IDFLD   C*3    I   ID string for field type, valid are: 'IC1',
     !                          'IC2', 'IC3', 'IC4', 'IC5', 'MDN', 'MTH', 'MVS',
     !                          'LEV', 'CUR', 'WND', 'WNS', 'ICE', 'ISI',
-    !                          'TAU', and 'RHO'.
+    !                          'TAU', 'RHO' and 'VEG'.
     !       NDS     Int.   I   Dataset number for fields file.
     !       NDST    Int.   I   Dataset number for test output.
     !       NDSE    Int.   I   Dataset number for error output.
@@ -1141,7 +1149,8 @@ CONTAINS
          IDFLD.NE.'LEV' .AND. IDFLD.NE.'CUR' .AND.                  &
          IDFLD.NE.'WND' .AND. IDFLD.NE.'WNS' .AND.                  &
          IDFLD.NE.'ICE' .AND. IDFLD.NE.'ISI' .AND.                  &
-         IDFLD.NE.'TAU' .AND. IDFLD.NE.'RHO' )    GOTO 802
+         IDFLD.NE.'TAU' .AND. IDFLD.NE.'RHO' .AND.                  &
+         IDFLD.NE.'VEG' )    GOTO 802
     !
     ! Set internal variables --------------------------------------------- *
     !
@@ -2135,9 +2144,9 @@ CONTAINS
     !/
   END SUBROUTINE W3FLDP
   !/ ------------------------------------------------------------------- /
-  SUBROUTINE W3FLDH (J, NDST, NDSE, MX, MY, NX, NY, T0, TN,       &
-       NH, NHM, THO, HA, HD, HS, TF0, FX0, FY0, FS0,&
-       TFN, FXN, FYN, FSN, IERR)
+      SUBROUTINE W3FLDH (J, NDST, NDSE, MX, MY, NX, NY, T0, TN,       &
+                         NH, NHM, THO, HA, HD, HS, HR,  TF0, FX0, FY0,&
+                         FS0, TFN, FXN, FYN, FSN, FRN , IERR)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -2182,6 +2191,7 @@ CONTAINS
     !                           4 : ice
     !                           5 : atmospheric momentum
     !                           6 : air density
+    !                           7 : vegetation
     !                          10 : moving grid
     !       NDST    Int.   I   Unit number test output.
     !       NDSE    Int.   I   Unit number error messages.
@@ -2245,25 +2255,27 @@ CONTAINS
 #ifdef W3_S
     USE W3SERVMD, ONLY: STRACE
 #endif
-    USE W3TIMEMD
-    !
-    IMPLICIT NONE
-    !/
-    !/ ------------------------------------------------------------------- /
-    !/ Parameter list
-    !/
-    INTEGER, INTENT(IN)     :: J, NDST, NDSE, MX, MY, NX, NY,       &
-         T0(2), TN(2), NHM
-    INTEGER, INTENT(INOUT)  :: NH, THO(2,-7:10,NHM), TF0(2), TFN(2)
-    INTEGER, INTENT(OUT)    :: IERR
-    REAL, INTENT(INOUT)     :: HA(NHM,-7:10), HD(NHM,-7:10), HS(NHM,-7:10), &
-         FX0(MX,MY), FY0(MX,MY), FS0(MX,MY),  &
-         FXN(MX,MY), FYN(MX,MY), FSN(MX,MY)
-    !/
-    !/ ------------------------------------------------------------------- /
-    !/ Local parameters
-    !/
-    INTEGER                 :: IX, IY, I
+      USE W3TIMEMD
+!
+      IMPLICIT NONE
+!/
+!/ ------------------------------------------------------------------- /
+!/ Parameter list
+!/
+      INTEGER, INTENT(IN)     :: J, NDST, NDSE, MX, MY, NX, NY,       &
+                                 T0(2), TN(2), NHM
+      INTEGER, INTENT(INOUT)  :: NH, THO(2,-7:10,NHM), TF0(2), TFN(2)
+      INTEGER, INTENT(OUT)    :: IERR
+      REAL, INTENT(INOUT)     :: HA(NHM,-7:10), HD(NHM,-7:10),        &
+            HS(NHM,-7:10), HR(NHM,-7:10),        &
+            FX0(MX,MY), FY0(MX,MY), FS0(MX,MY),  &
+            FXN(MX,MY), FYN(MX,MY), FSN(MX,MY),  &
+            FRN(MX,MY)
+!/
+!/ ------------------------------------------------------------------- /
+!/ Local parameters
+!/
+      INTEGER                 :: IX, IY, I
 #ifdef W3_S
     INTEGER, SAVE           :: IENT = 0
 #endif
@@ -2378,18 +2390,29 @@ CONTAINS
 #ifdef W3_T
           WRITE (NDST,9050) X, Y, HS(1,J)
 #endif
-        END IF
-        !
-        ! Shift data arrays
-        !
-        DO I=1, NH-1
-          THO(1,J,I) = THO(1,J,I+1)
-          THO(2,J,I) = THO(2,J,I+1)
-          HA(I,J)    = HA(I+1,J)
-          HD(I,J)    = HD(I+1,J)
-          HS(I,J)    = HS(I+1,J)
-        END DO
-        NH      = NH - 1
+              END IF
+! veg
+            IF ( J .EQ. 7 ) THEN
+               DO IX = 1, NX
+                 DO IY = 1, NY
+                   FXN(IX,IY) = HA(1,J)
+                   FYN(IX,IY) = HD(1,J)
+                   FSN(IX,IY) = HS(1,J)
+                   FRN(IX,IY) = HR(1,J)
+                 END DO
+               END DO
+            END IF
+!
+! Shift data arrays
+!
+            DO I=1, NH-1
+              THO(1,J,I) = THO(1,J,I+1)
+              THO(2,J,I) = THO(2,J,I+1)
+              HA(I,J)    = HA(I+1,J)
+              HD(I,J)    = HD(I+1,J)
+              HS(I,J)    = HS(I+1,J)
+              END DO
+            NH      = NH - 1
 #ifdef W3_T
         WRITE (NDST,9051) TFN
 #endif
@@ -2577,9 +2600,9 @@ CONTAINS
     !/ Parameter list
     !/
     INTEGER, INTENT(IN)     :: J, NDST, NDSE, T0(2), TN(2), NHM
-    INTEGER, INTENT(INOUT)  :: NH, THO(2,-7:10,NHM), TF0(2), TFN(2)
+    INTEGER, INTENT(INOUT)  :: NH, THO(2,-9:10,NHM), TF0(2), TFN(2)
     INTEGER, INTENT(OUT)    :: IERR
-    REAL, INTENT(INOUT)     :: HA(NHM,-7:10), HD(NHM,-7:10), A0, AN, D0, DN
+    REAL, INTENT(INOUT)     :: HA(NHM,-9:10), HD(NHM,-9:10), A0, AN, D0, DN
     !/
     !/ ------------------------------------------------------------------- /
     !/ Local parameters

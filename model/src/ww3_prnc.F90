@@ -311,7 +311,7 @@ PROGRAM W3PRNC
   CHARACTER               :: COMSTR*1, IDFLD*3, IDTYPE*2,         &
        IDTIME*23, FROMLL*4, FORMLL*16,      &
        NAMELL*80, NAMEF*80, IDTIME2*23
-  CHARACTER*14            :: IDSTR1(-7:7)
+  CHARACTER*14            :: IDSTR1(-7:8)
   CHARACTER*15            :: IDSTR3(3)
   CHARACTER*32            :: FORMT(2), FORMF(2)
   CHARACTER*20            :: IDSTR2(6)
@@ -653,6 +653,8 @@ PROGRAM W3PRNC
       IFLD    = 6
     ELSE IF ( IDFLD.EQ.'RHO' ) THEN
       IFLD    = 7
+    ELSE IF ( IDFLD.EQ.'VEG' ) THEN
+      IFLD    = 8
     ELSE
       WRITE (NDSE,1030) IDFLD
       CALL EXTCDE ( 30 )

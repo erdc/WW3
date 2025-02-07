@@ -473,10 +473,12 @@ CONTAINS
     !             viscoelastic sea ice model (Mosig et al. 2015).
     !     !/DB0   No depth-limited breaking.                 ( Choose one )
     !     !/DB1   Battjes-Janssen depth-limited breaking.
+
+    !   !/VEG0  No vegetation dissipation                  ( Choose one )
+    !   !/VEG1  Dissipation due to vegetation
     !
     !     !/TR0   No triad interactions.                     ( Choose one )
     !     !/TR1   Lumped Triad Approximation (LTA).
-    !
     !     !/BS0   No bottom scattering.                      ( Choose one )
     !     !/BS1   Scattering term by Ardhuin and Magne (2007).
     !
@@ -618,6 +620,9 @@ CONTAINS
 #endif
 #ifdef W3_DB1
     USE W3SDB1MD
+#endif
+#ifdef W3_VEG1
+     USE W3SVEG1MD
 #endif
 #ifdef W3_TR1
     USE W3STR1MD
@@ -765,7 +770,9 @@ CONTAINS
 #ifdef W3_DB1
     REAL :: VSDB(NSPEC), VDDB(NSPEC)
 #endif
-
+#ifdef W3_VEG1
+    REAL :: VSVG(NSPEC), VDVG(NSPEC)
+#endif
 #ifdef W3_TR1
     REAL :: VSTR(NSPEC), VDTR(NSPEC)
 #endif
@@ -876,6 +883,10 @@ CONTAINS
 #ifdef W3_DB1
     VSDB = 0.
     VDDB = 0.
+#endif
+#ifdef W3_VEG1
+      VSVG = 0.
+      VDVG = 0.
 #endif
 
 #if defined(W3_IC1) || defined(W3_IC2) || defined(W3_IC3) || defined(W3_IC4) || defined(W3_IC5)
@@ -1317,9 +1328,14 @@ CONTAINS
       CALL W3SBS1 ( SPEC, CG1, WN1, DEPTH, CX, CY,                &
            TAUSCX, TAUSCY, VSBS, VDBS )
 #endif
-      !
-      ! 2.e Unresolved Obstacles Source Term
-      !
+
+! 2.d2 Vegetation 
+#ifdef W3_VEG1
+     CALL W3SVEG1 ( IX, IY, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, VSVG, VDVG )
+#endif
+!
+! 2.e Unresolved Obstacles Source Term
+!
 #ifdef W3_UOST
       ! UNRESOLVED OBSTACLES
       CALL UOST_SRCTRMCOMPUTE(IX, IY, SPEC, CG1, DT,            &

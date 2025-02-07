@@ -67,6 +67,8 @@ MODULE W3IDATMD
   !      TIN       I.A.  Public   Time for ice field. (concentration)
   !      TU0/N     I.A.  Public   Times for momentum fields.
   !      TR0/N     I.A.  Public   Times for air density fields.
+  !      TPN       I.A.  Public   Times for vegetation fields
+  !      TPN       I.A.  Public   Times for vegetation fields
   !      TI1N      I.A.  Public   Time for ice field. (parameter 1)
   !      TI2N      I.A.  Public   Time for ice field. (parameter 2)
   !      TI3N      I.A.  Public   Time for ice field. (parameter 3)
@@ -169,7 +171,7 @@ MODULE W3IDATMD
   !/ Data structure INPUT
   !/
   TYPE, PUBLIC :: INPUT
-    INTEGER               :: TFN(2,-7:10)
+    INTEGER               :: TFN(2,-7:11)
     INTEGER               :: TC0(2)
     INTEGER               :: TW0(2)
     INTEGER               :: TU0(2)
@@ -211,6 +213,10 @@ MODULE W3IDATMD
     REAL, POINTER         :: ICEP3(:,:)
     REAL, POINTER         :: ICEP4(:,:)
     REAL, POINTER         :: ICEP5(:,:)
+    REAL, POINTER         :: VEGLS(:,:)
+    REAL, POINTER         :: VEGBV(:,:)
+    REAL, POINTER         :: VEGN(:,:)
+    REAL, POINTER         :: VEGCD(:,:)
 #ifdef W3_TIDE
     REAL, POINTER         :: CXTIDE(:,:,:,:)
     REAL, POINTER         :: CYTIDE(:,:,:,:)
@@ -238,7 +244,7 @@ MODULE W3IDATMD
        TIN(:), TR0(:), TRN(:), T0N(:),      &
        T1N(:), T2N(:), TDN(:), TG0(:),      &
        TGN(:), TTN(:), TVN(:), TZN(:),      &
-       TI1(:), TI2(:), TI3(:), TI4(:), TI5(:)
+       TI1(:), TI2(:), TI3(:), TI4(:), TI5(:), TPN(:), TV1(:), TV2(:)
   REAL, POINTER           :: GA0, GD0, GAN, GDN
   REAL, POINTER           :: WX0(:,:), WY0(:,:), DT0(:,:),        &
        WXN(:,:), WYN(:,:), DTN(:,:),        &
@@ -251,7 +257,9 @@ MODULE W3IDATMD
        UYN(:,:), RH0(:,:), RHN(:,:),        &
        BERGI(:,:), MUDT(:,:), MUDV(:,:),    &
        MUDD(:,:), ICEP1(:,:), ICEP2(:,:),   &
-       ICEP3(:,:), ICEP4(:,:), ICEP5(:,:)
+       ICEP3(:,:), ICEP4(:,:), ICEP5(:,:),  &
+       VEGLS(:,:), VEGBV(:,:), VEGN(:,:),   &
+       VEGCD(:,:)
 #ifdef W3_TIDE
   REAL, POINTER           :: CXTIDE(:,:,:,:),         &
        CYTIDE(:,:,:,:), WLTIDE(:,:,:,:)
@@ -259,7 +267,7 @@ MODULE W3IDATMD
   LOGICAL, POINTER        :: IINIT
   LOGICAL, POINTER        :: INFLAGS1(:), INFLAGS2(:), FLAGSC(:)
   LOGICAL, POINTER        :: FLLEV, FLCUR, FLWIND, FLICE, FLTAUA, &
-       FLRHOA
+                             FLRHOA, FLVEG
   LOGICAL, POINTER        :: FLMTH, FLMVS, FLMDN
   LOGICAL, POINTER        :: FLIC1, FLIC2, FLIC3, FLIC4, FLIC5
 #ifdef W3_TIDE
@@ -579,6 +587,15 @@ CONTAINS
     FLLEVRESI = FLAGSTIDE(3)
     FLCURRESI = FLAGSTIDE(4)
 #endif
+ 
+    FLWIND => INPUTS(IMOD)%INFLAGS1(3)
+    FLICE  => INPUTS(IMOD)%INFLAGS1(4)
+    FLTAUA => INPUTS(IMOD)%INFLAGS1(5)
+    FLRHOA => INPUTS(IMOD)%INFLAGS1(6)
+    FLVEG  => INPUTS(IMOD)%INFLAGS1(7)
+!
+! notes: future improvement: flags for ICEPx should be 
+!     "all or nothing" rather than 5 individual flags
 
     FLWIND => INPUTS(IMOD)%INFLAGS1(3)
     FLICE  => INPUTS(IMOD)%INFLAGS1(4)
@@ -731,11 +748,11 @@ CONTAINS
 #ifdef W3_SMC
       ENDIF
 #endif
-      CHECK_ALLOC_STATUS ( ISTAT )
-    END IF
-    !
-    INPUTS(IMOD)%IINIT  = .TRUE.
-    !
+          CHECK_ALLOC_STATUS ( ISTAT )
+        END IF
+!
+      INPUTS(IMOD)%IINIT  = .TRUE.
+!
 #ifdef W3_T
     WRITE (NDST,9001)
 #endif
@@ -936,16 +953,18 @@ CONTAINS
     TTN    => INPUTS(IMOD)%TFN(:,-1)
     TVN    => INPUTS(IMOD)%TFN(:,0)
     !
+!AR: 2do -> TFN IS A BIG ISSUE ... 
     TLN    => INPUTS(IMOD)%TFN(:,1)
     TCN    => INPUTS(IMOD)%TFN(:,2)
     TWN    => INPUTS(IMOD)%TFN(:,3)
     TIN    => INPUTS(IMOD)%TFN(:,4)
     TUN    => INPUTS(IMOD)%TFN(:,5)
     TRN    => INPUTS(IMOD)%TFN(:,6)
-    T0N    => INPUTS(IMOD)%TFN(:,7)
-    T1N    => INPUTS(IMOD)%TFN(:,8)
-    T2N    => INPUTS(IMOD)%TFN(:,9)
-    TGN    => INPUTS(IMOD)%TFN(:,10)
+    TPN    => INPUTS(IMOD)%TFN(:,7)
+    T0N    => INPUTS(IMOD)%TFN(:,8)
+    T1N    => INPUTS(IMOD)%TFN(:,9)
+    T2N    => INPUTS(IMOD)%TFN(:,10)
+    TGN    => INPUTS(IMOD)%TFN(:,11)
     !
     GA0    => INPUTS(IMOD)%GA0
     GD0    => INPUTS(IMOD)%GD0
@@ -1008,6 +1027,17 @@ CONTAINS
       IF ( FLMVS  ) THEN
         MUDV   => INPUTS(IMOD)%MUDV
       END IF
+
+!
+!TJH          IF ( FLVG1  ) THEN
+!              VEGLS  => INPUTS(IMOD)%VEGLS
+!              VEGBV  => INPUTS(IMOD)%VEGBV
+!              VEGN   => INPUTS(IMOD)%VEGN
+!          END IF
+!          IF ( FLVG2  ) THEN
+!              VEGCD  => INPUTS(IMOD)%VEGCD
+!          END IF
+
       !
       IF ( FLLEV  ) THEN
         WLEV   => INPUTS(IMOD)%WLEV
@@ -1047,6 +1077,15 @@ CONTAINS
         ICEI   => INPUTS(IMOD)%ICEI
         BERGI  => INPUTS(IMOD)%BERGI
       END IF
+!
+!TJH          IF ( FLVG1  ) THEN
+!              VEGLS  => INPUTS(IMOD)%VEGLS
+!              VEGBV  => INPUTS(IMOD)%VEGBV
+!              VEGN   => INPUTS(IMOD)%VEGN
+!          END IF
+!          IF ( FLVG2  ) THEN
+!              VEGCD  => INPUTS(IMOD)%VEGCD
+!          END IF
       !
       IF ( FLTAUA  ) THEN
         UX0    => INPUTS(IMOD)%UX0
@@ -1058,6 +1097,13 @@ CONTAINS
       IF ( FLRHOA  ) THEN
         RH0    => INPUTS(IMOD)%RH0
         RHN    => INPUTS(IMOD)%RHN
+      END IF
+
+      IF ( FLVEG  ) THEN
+        VEGLS  => INPUTS(IMOD)%VEGLS
+        VEGBV  => INPUTS(IMOD)%VEGBV
+        VEGN   => INPUTS(IMOD)%VEGN
+        VEGCD  => INPUTS(IMOD)%VEGCD
       END IF
       !
     END IF
