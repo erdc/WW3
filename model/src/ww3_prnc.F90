@@ -374,7 +374,7 @@ PROGRAM W3PRNC
        'ice conc.     ' , 'water levels ' ,              &
        'winds         ' , 'currents     ' ,              &
        'data          ' , 'momentum     ' ,              &
-       'air density   ' /
+       'air density   ' , 'vegetation   ' /
   DATA IDSTR2 / 'pre-processed file  ' , 'long.-lat. grid     ' , &
        'grid from file (1)  ' , 'grid from file (2)  ' , &
        'data (assimilation) ' , 'pre-pro. file + tide'  /
