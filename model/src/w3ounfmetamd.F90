@@ -2752,6 +2752,7 @@ CONTAINS
     META(1)%ENAME  = '.zet'
     META(1)%VARNM='zet'
     META(1)%VARNL='wave_setup'
+    !META(1)%VARNS='sediment_grain_size'
     META(1)%VARNS=''
     META(1)%VARNG='wave_setup'
     META(1)%VMIN = -100.
