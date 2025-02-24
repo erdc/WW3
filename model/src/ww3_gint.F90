@@ -1198,7 +1198,7 @@ CONTAINS
     HCMAXD   = UNDEF
     WBT      = UNDEF
     WNMEAN   = UNDEF
-    BRCOEF   = UNDEF
+    BRCOEF   = UNDEF 
     !
     ! Group 3 variables
     !
@@ -1891,11 +1891,11 @@ CONTAINS
               END IF
               !
               IF ( FLOGRD(2,20) .AND. ACTIVE ) THEN
-                    IF ( WADATS(IGRID)%BRCOEF(GSEA) .NE. UNDEF ) THEN
-                      SUMWT2(20) = SUMWT2(20) + WT
-                      IF ( BRCOEFAUX .EQ. UNDEF )   BRCOEFAUX = 0.
-                      BRCOEFAUX = BRCOEFAUX + WADATS(IGRID)%BRCOEF(GSEA)*WT
-                    END IF
+                IF ( WADATS(IGRID)%BRCOEF(GSEA) .NE. UNDEF ) THEN
+                  SUMWT2(20) = SUMWT2(20) + WT
+                  IF ( BRCOEFAUX .EQ. UNDEF )   BRCOEFAUX = 0.
+                  BRCOEFAUX = BRCOEFAUX + WADATS(IGRID)%BRCOEF(GSEA)*WT
+                END IF
               END IF
               !
               ! Group 3 variables

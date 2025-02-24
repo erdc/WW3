@@ -91,8 +91,7 @@ CONTAINS
   !> @author J. H. Alves
   !> @author H. L. Tolman
   !> @author A. Roland
-  !> @author M. Pezerat
-  !> @date   23-Jul-2024
+  !> @date   08-Jun-2018
   !>
   SUBROUTINE W3SDB1 (IX, A, DEPTH, EMEAN, FMEAN, WNMEAN, CG, LBREAK, S, D )
     !/
@@ -129,6 +128,8 @@ CONTAINS
     !
     !     Where CDB   = SDBC1 = BJALFA (defaults to BJALFA = 1)
     !                   modified via ww3_grid namelist parameter BJALFA
+    !                 = BRCOEF if FSLOPE=T
+    !                   modified via ww3_grid namelist parameter BRFLAG
     !           HM    = GAMMA * DEP
     !           GAMMA = SDBC2 defaults to 0.73 (mean Battjes/Janssen value)
     !                   modified via ww3_grid namelist parameter BJGAM
@@ -189,7 +190,6 @@ CONTAINS
     USE W3ODATMD, ONLY: NDST
     USE W3GDATMD, ONLY: SIG
     USE W3ODATMD, only : IAPROC
-    USE W3PARALL, only : THR 
 #ifdef W3_S
     USE W3SERVMD, ONLY: STRACE
 #endif
@@ -221,7 +221,7 @@ CONTAINS
     INTEGER, SAVE           :: IENT = 0
 #endif
     REAL*8                    :: HM, BB, ARG, Q0, QB, B, CBJ, HRMS, EB(NK)
-    REAL*8                    :: AUX, CBJ2, RATIO, S0, S1, BR1, BR2, FAK
+    REAL*8                    :: AUX, CBJ2, RATIO, S0, S1, THR, BR1, BR2, FAK
     REAL                      :: ETOT, FMEAN2
     REAL                      :: BRCOEF_LOC
 #ifdef W3_T0
@@ -236,11 +236,11 @@ CONTAINS
     !
     ! 0.  Initialzations ------------------------------------------------- /
     !     Never touch this 4 lines below ... otherwise my exceptionhandling will not work.
-    IF (EMEAN .LT. TINY(1.d0)) THEN
-      S = 0 
-      D = 0 
-      RETURN
-    ENDIF
+    S = 0.
+    D = 0.
+
+    THR = DBLE(1.E-15)
+    IF (SUM(A) .LT. THR) RETURN
 
     IWB = 1
     !
@@ -319,11 +319,10 @@ CONTAINS
     ! 3. Breaking coefficient
     !
     IF (FSLOPE) THEN
-!      BRCOEF_LOC = BRCOEF(IX)
-      BRCOEF_LOC = MAX(0.,BRCOEF(IX)*DBLE(SDBC1))
-	ELSE
-	  BRCOEF_LOC = DBLE(SDBC1)
-	END IF
+      BRCOEF_LOC = BRCOEF(IX)
+    ELSE
+      BRCOEF_LOC = DBLE(SDBC1)
+    END IF
     !
     ! 4. Estimate the breaking coefficient ------------------------------- /
     !
@@ -360,8 +359,8 @@ CONTAINS
 
 #ifdef W3_DEBUGRUN
     IF (IX == DEBUG_NODE) THEN
-      WRITE(*,'(A200)') 'IX, DEPTH, CBJ, BB, QB, BRCOEF_LOC, SDBC2, FMEAN, FMEAN2, HS'
-      WRITE(*,'(I10,20F20.10)') IX, DEPTH, CBJ, BB, QB, BRCOEF_LOC, SDBC2, FMEAN, FMEAN2, 4*SQRT(ETOT)
+      WRITE(*,'(A200)') 'IX, DEPTH, CBJ, BB, QB, BRCOEF_LOC SDBC1, SDBC2, FMEAN, FMEAN2, HS'
+      WRITE(*,'(I10,20F20.10)') IX, DEPTH, CBJ, BB, QB, BRCOEF_LOC, SDBC1, SDBC2, FMEAN, FMEAN2, 4*SQRT(ETOT)
     ENDIF
 #endif
     !

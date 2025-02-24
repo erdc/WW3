@@ -2150,8 +2150,8 @@ CONTAINS
          STMAXE, STMAXD, HMAXE, HCMAXE, HMAXD,     &
          HCMAXD, QP, PTHP0, PQP, PPE, PGW, PSW,    &
          PTM1, PT1, PT2, PEP, WBT, CX, CY,         &
-         TAUOCX, TAUOCY, WNMEAN,                   &
-         QKK, SKEW, EMBIA1, EMBIA2,BRCOEF 
+         TAUOCX, TAUOCY, WNMEAN, QKK, SKEW,        & 
+         EMBIA1, EMBIA2, BRCOEF
 #endif
 
 #ifdef W3_MPI
@@ -2465,6 +2465,16 @@ CONTAINS
                IT, MPI_COMM_WAVE, IRQGO(IH), IERR)
 #ifdef W3_MPIT
           WRITE (NDST,9011) IH, ' 2/19', IROOT, IT, IRQGO(IH), IERR
+#endif
+        END IF
+        !
+        IF ( FLGRDALL( 2, 20) ) THEN
+          IH     = IH + 1
+          IT     = IT + 1
+          CALL MPI_SEND_INIT (BRCOEF(1),NSEALM , MPI_REAL, IROOT,   &
+               IT, MPI_COMM_WAVE, IRQGO(IH), IERR)
+#ifdef W3_MPIT
+          WRITE (NDST,9011) IH, ' 2/20', IROOT, IT, IRQGO(IH), IERR
 #endif
         END IF
         !

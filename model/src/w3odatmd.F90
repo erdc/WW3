@@ -321,7 +321,7 @@ MODULE W3ODATMD
   INTEGER                 :: NOUTP = -1, IOUTP = -1, IOSTYP = 1
   !
   INTEGER, PARAMETER      :: NOGRP = 10
-  INTEGER, PARAMETER      :: NGRPP = 20
+  INTEGER, PARAMETER      :: NGRPP = 21
   INTEGER, PARAMETER      :: DIMP = 15
   INTEGER                 :: NOGE(NOGRP)
   INTEGER                 :: NOTYPE
@@ -770,9 +770,9 @@ CONTAINS
     !
     ! 2) Standard mean wave parameters
     !
-    NOGE(2) = 19
-#ifdef W3_OASOCM
     NOGE(2) = 20
+#ifdef W3_OASOCM
+    NOGE(2) = 21
 #endif
     !
     IDOUT( 2, 1)  = 'Wave height         '
@@ -794,8 +794,9 @@ CONTAINS
     IDOUT( 2, 17)  = 'Dominant wave bT   '
     IDOUT( 2, 18)  = 'Peak prd. (from fp)'
     IDOUT( 2, 19)  = 'Mean wave number   '
+    IDOUT( 2, 20)  = 'Breaking coef.     '
 #ifdef W3_OASOCM
-    IDOUT( 2, 20) = 'Mean wave dir. norot'
+    IDOUT( 2, 21) = 'Mean wave dir. norot'
 #endif
     !      IDOUT( 2,10)  = 'Mean wave dir. a2b2'
     !      IDOUT( 2,11)  = 'Mean dir. spr. a2b2'

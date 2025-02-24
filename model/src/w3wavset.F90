@@ -1756,7 +1756,8 @@
         !WLV(ISEA) = WLVeff 
         !WRITE(*,*) DW (IX), MAX ( 0. ,ZETA_WORK_ALL(IX)-ZB(IX) ), ZETA_WORK_ALL(IX), ZB(IX)
         !DW (ISEA) = MAX ( 0. , WLVeff-ZB(ISEA) )
-        DW (IX) = MAX ( 0. , ZETA_WORK_ALL(IX) - ZB(IX) )
+!        DW (IX) = MAX ( 0. , ZETA_WORK_ALL(IX) - ZB(IX) )
+        DW (IX) = MAX ( 0. , WLV(ISEA) + ZETA_SETUP(IX) - ZB(IX) )
       END DO
 !      IF (IAPROC .EQ. 1) THEN
 !        write(6666)  1. 

@@ -3795,7 +3795,7 @@ CONTAINS
                    WNMEAN(1:NSEA)
             ELSE IF ( IFI .EQ. 2 .AND. IFJ .EQ. 20 ) THEN
               READ (NDSOG,END=801,ERR=802,IOSTAT=IERR)         &
-                    BRCOEF(1:NSEA)
+                   BRCOEF(1:NSEA)
               !
               !     Section 3)
               !

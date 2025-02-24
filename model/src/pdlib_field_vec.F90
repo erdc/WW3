@@ -972,8 +972,8 @@ CONTAINS
             Arrexch(IH,JSEA)=WNMEAN(JSEA)
           END IF
           IF ( FLGRDALL( 2, 20) ) THEN
-              IH = IH + 1
-              Arrexch(IH,JSEA)=BRCOEF(JSEA)
+            IH = IH + 1
+            Arrexch(IH,JSEA)=BRCOEF(JSEA)
           END IF
           IF ( FLGRDALL( 3, 1) ) THEN
             DO IK=E3DF(2,1),E3DF(3,1)

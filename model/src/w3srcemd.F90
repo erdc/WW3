@@ -1282,7 +1282,7 @@ CONTAINS
       IF (.NOT. FSSOURCE .or. LSLOC) THEN
 #endif
 #ifdef W3_DB1
-        CALL W3SDB1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, CG1,       &
+        CALL W3SDB1 ( JSEA, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, CG1,       &
              LBREAK, VSDB, VDDB )
 #endif
 #ifdef W3_PDLIB
@@ -1553,9 +1553,9 @@ CONTAINS
                   evS = -evS
                   evD = 2*evD
                 ENDIF
+#endif
                 B_JAC(ISP,JSEA)                   = B_JAC(ISP,JSEA) + SIDT * eVS
                 ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) = ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) - SIDT * eVD
-#endif
 
 #ifdef W3_TR1
                 eVS = VSTR(ISP) * JAC
@@ -1567,9 +1567,9 @@ CONTAINS
                   evS = -evS
                   evD = 2*evD
                 ENDIF
+#endif
                 B_JAC(ISP,JSEA)                   = B_JAC(ISP,JSEA) + SIDT * eVS
                 ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) = ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) - SIDT * eVD
-#endif
               END DO
             END DO
 

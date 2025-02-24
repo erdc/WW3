@@ -381,7 +381,7 @@ CONTAINS
     REAL    :: AUX1, AUX2, BIPH, C0, CM, DEP, DEP_2, DEP_3, E0, EM, HS
     REAL    :: FT, RINT, SIGPICG, SINBPH, STRI, WISM, WISM1, WISP
     REAL    :: WISP1, W0, WM, WN0, WNM, XIS, XISLN, EDM, ED0, G9DEP, STRI2
-    REAL    :: E(NK), SA(NTH,100), SA2(NTH,100), A2(NSPEC), A3(NSPEC), HMAX
+    REAL    :: E(NK), SA(NTH,200), SA2(NTH,200), A2(NSPEC), A3(NSPEC), HMAX
     REAL    :: EB(NK), EBAND, EMEAN, SIGM01, ED(NK)
 !----- Temp (to be moved) -----
     REAL    :: EF(NK), JACEPS, DIFFSTR
@@ -469,6 +469,11 @@ CONTAINS
 
     ISP    = INT( LOG(2.) / XISLN )
     ISP1   = ISP + 1
+#ifdef W3_DEBUGSTP
+      WRITE(740+IAPROC,*) 'ISP1=', ISP1, XISLN ,XIS,I2
+      FLUSH(740+IAPROC)
+#endif
+
     WISP   = (2. - XIS**ISP) / (XIS**ISP1 - XIS**ISP)
     WISP1  = 1. - WISP
 

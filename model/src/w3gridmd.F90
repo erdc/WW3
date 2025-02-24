@@ -2362,10 +2362,18 @@ CONTAINS
     BJFLAG = .TRUE.
     BRFLAG = .FALSE.
     CALL READNL ( NDSS, 'SDB1', STATUS )
-    WRITE (NDSO,928) STATUS
-    BJALFA = MAX ( 0. , BJALFA )
-    BJGAM  = MAX ( 0. , BJGAM )
-    WRITE (NDSO,929) BJALFA, BJGAM
+	WRITE (NDSO,928) STATUS
+    IF ( BRFLAG ) THEN
+      WRITE (NDSO,*) '      Slope-dependant breaking coeff.'
+      BJALFA = MIN (50. , MAX ( 40. , BJALFA ))
+      BJGAM  = MAX ( 0. , BJGAM )
+      WRITE (NDSO,929) BJALFA, BJGAM
+    ELSE
+      WRITE (NDSO,*) '      Constant breaking coeff.'
+      BJALFA = MAX ( 0. , BJALFA )
+      BJGAM  = MAX ( 0. , BJGAM )
+      WRITE (NDSO,929) BJALFA, BJGAM
+    END IF
     IF ( BJFLAG ) THEN
       WRITE (NDSO,*) '      Using Hmax/d ratio only.'
     ELSE
@@ -3322,15 +3330,15 @@ CONTAINS
       IF ( BJFLAG ) THEN
         IF (BRFLAG) THEN
           WRITE (NDSO,2928) BJALFA, BJGAM, '.TRUE.', '.TRUE.'
-			  ELSE
+		ELSE
           WRITE (NDSO,2928) BJALFA, BJGAM, '.TRUE.', '.FALSE.'
         END IF
       ELSE
         IF (BRFLAG) THEN
           WRITE (NDSO,2928) BJALFA, BJGAM, '.FALSE.', '.TRUE.'
-			  ELSE
+		ELSE
           WRITE (NDSO,2928) BJALFA, BJGAM, '.FALSE.', '.FALSE.'
-			  END IF
+		END IF
       END IF
 #endif
 #ifdef W3_PR1
@@ -6535,10 +6543,10 @@ CONTAINS
 #ifdef W3_DB1
 928 FORMAT (/'  Surf breaking (B&J 1978) ',A/                  &
          ' --------------------------------------------------')
-929 FORMAT ( '       alpha                       :',F8.3/      &
+929 FORMAT ( '       alpha / slope factor                       :',F8.3/      &
          '       gamma                       :',F8.3)
 2928 FORMAT ( '  &SDB1 BJALFA =',F7.3,', BJGAM =',F7.3,         &
-         ', BJFLAG = ',A, ', BRFLAG = ',A,' /')
+         ', BJFLAG = ',A,', BRFLAG = ' ,A,' /')
 #endif
     !
 #ifdef W3_TR0
