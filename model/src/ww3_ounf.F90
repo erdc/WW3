@@ -8,6 +8,207 @@
 #define CHECK_ERR(I) CHECK_ERROR(I, __LINE__)
 !/ ------------------------------------------------------------------- /
 
+module ReadWriteWindBinary_m
+    implicit none
+
+    type ::WindWriter_t
+        ! Different file versions float/double, timestamps, settings, checksums etc.
+        integer :: windVer = 1
+        integer :: fhdl = 0
+        integer :: np_global = 0
+
+        contains
+        procedure :: close => WindWriter_close
+        procedure :: writeNext => WindWriter_writeNext
+    end type
+
+    type ::WindReader_t
+        integer :: fhdl = 0
+        integer :: np_global = 0
+
+        contains
+        procedure :: close => WindReader_close
+        procedure :: readNext => WindReader_readNext
+    end type
+
+    contains
+
+    function WindWriter(filename, np_global) result(this)
+        implicit none
+        character(len=*), intent(in) :: filename
+        integer, intent(in) :: np_global
+        type(WindWriter_t) :: this
+        ! len=1000 don't change
+        character(len=1000) :: header
+
+        this%np_global = np_global
+        header = "This file contains some windy clouds"
+
+        open(newunit=this%fhdl, file=trim(filename), access="stream", action='write', status='replace')
+        ! fill header with linebreaks \n so it's easiert to see the concent of the binary file with program head
+        write(this%fhdl) trim(header) // repeat(achar(10),1000-len_trim(header))
+        write(this%fhdl) this%windVer, np_global
+        call flush(this%fhdl)
+    end function
+
+    subroutine WindWriter_close(this)
+        implicit none
+        class(WindWriter_t), intent(inout) :: this
+
+        if(this%fhdl /= 0) then
+            close(this%fhdl)
+        endif
+    end subroutine
+
+    subroutine WindWriter_writeNext(this, time, WINDX, WINDY)
+        class(WindWriter_t), intent(inout) :: this
+        real(4), intent(in) :: time
+        real(4), intent(in) :: WINDX(:), WINDY(:)
+        integer :: ip
+        real(4), allocatable ::  WINDXY(:,:)
+
+        allocate(WINDXY(2, this%np_global))
+
+        do ip=1, this%np_global
+          WINDXY(1,ip) = WINDX(ip)
+          WINDXY(2,ip) = WINDY(ip)
+        end do
+
+        write(this%fhdl) time
+        write(this%fhdl) WINDXY
+        call flush(this%fhdl)
+
+        deallocate(WINDXY)
+    end subroutine
+
+
+    function WindReader(filename, np_global) result(this)
+        implicit none
+        character(len=*), intent(in) :: filename
+        integer, intent(out) :: np_global
+        type(WindReader_t) :: this
+        ! len=1000 don't change
+        character(len=1000) :: header
+        integer :: i, windVer
+
+        open(newunit=this%fhdl, file=trim(filename), access="stream", action='read')
+        read(this%fhdl) header
+        read(this%fhdl) windVer, np_global
+        this%np_global = np_global
+
+        ! remove linebreaks from header
+        do i=1000, 1, -1
+            if(header(i:i) == achar(10)) then
+                header(i:i) = ' '
+            else
+                exit
+            endif
+        end do
+
+        write(*,*) "Header: ", trim(header)
+        write(*,*) "Version: ", windVer
+    end function
+
+    subroutine WindReader_close(this)
+        implicit none
+        class(WindReader_t), intent(inout) :: this
+
+        if(this%fhdl /= 0) then
+            close(this%fhdl)
+        endif
+    end subroutine
+
+    subroutine WindReader_readNext(this, time, WINDX, WINDY, ok)
+        class(WindReader_t), intent(inout) :: this
+        real(4), intent(inout) :: time
+        real(4), intent(inout) :: WINDX(:), WINDY(:)
+        logical, intent(inout) :: ok
+
+        integer :: stat, ip
+        real(4), allocatable ::  WINDXY(:,:)
+
+        ok = .true.
+
+        read(this%fhdl, iostat=stat) time
+
+        if(stat /= 0) then
+            ok = .false.
+            return
+        endif
+
+        allocate(WINDXY(2, this%np_global))
+        read(this%fhdl) WINDXY
+
+        do ip=1, this%np_global
+          WINDX(ip) = WINDXY(1,ip)
+          WINDY(ip) = WINDXY(2,ip)
+        end do
+        deallocate(WINDXY)
+    end subroutine
+end module
+
+subroutine writeTestfile()
+    use ReadWriteWindBinary_m
+    implicit none
+    integer :: np_global, i
+    real(4), allocatable :: WINDX(:), WINDY(:)
+    type(WindWriter_t) :: writer
+
+    write(*,*) "Write testfile"
+
+    np_global = 18
+    allocate(WINDX(np_global), WINDY(np_global))
+
+    do i=1, np_global
+      WINDX(i) = i-1
+      WINDY(i) = i
+    end do
+
+    write(*,*) "Checksum 1 X Y", sum(WINDX), sum(WINDY)
+
+    writer = WindWriter("wind.bin", np_global)
+    call writer%writeNext(1.0, WINDX, WINDY)
+
+    do i=1, np_global
+      WINDX(i) = 100*(i-1)
+      WINDY(i) = 100*i
+    end do
+    write(*,*) "Checksum 2 X Y", sum(WINDX), sum(WINDY)
+    call writer%writeNext(2.0, WINDX, WINDY)
+
+    call writer%close()
+end subroutine
+
+subroutine readTestfile()
+    use ReadWriteWindBinary_m
+    implicit none
+    integer :: np_global
+    real(4), allocatable :: WINDX(:), WINDY(:)
+    real(4) :: time
+    type(WindReader_t) :: reader
+    logical :: ok
+    integer :: nRecords
+
+    write(*,*)
+    write(*,*) "Read testfile"
+
+    reader = WindReader("wind.bin", np_global)
+
+    allocate(WINDX(np_global), WINDY(np_global))
+
+    nRecords = 0
+    do
+        call reader%readNext(time, WINDX, WINDY, ok)
+        if(.not. ok) exit
+
+        nRecords = nRecords + 1
+        write(*,*) "Time", time, "Checksum X Y", sum(WINDX), sum(WINDY)
+    end do
+
+    call reader%close()
+
+    write(*,*) "Records in file:", nRecords
+end subroutine
 !> @brief Post-processing of grid output to NetCDF files.
 !>
 !> @details Data is read from the grid output file out_grd.ww3
@@ -211,9 +412,12 @@ PROGRAM W3OUNF
 #ifdef W3_SMC
   USE W3SMCOMD, SMCNOVAL=>NOVAL
 #endif
+  USE ReadWriteWindBinary_m
+
 
   IMPLICIT NONE
 
+  type(WindWriter_t) :: writer
   !/
   !/ ------------------------------------------------------------------- /
   !/ Local parameters
@@ -606,6 +810,8 @@ PROGRAM W3OUNF
   WRITE (NDSO,970)
 
   ! 5.1 Loops on out_grd.ww3 to read the time and data
+  writer = WindWriter("wind.bin", nsea)
+  
   DO
     DTEST  = DSEC21 ( TIME , TOUT )
     IF ( DTEST .GT. 0. ) THEN
@@ -1216,6 +1422,9 @@ CONTAINS
             CALL S2GRID(CX(1:NSEA), XX)
             CALL S2GRID(CY(1:NSEA), XY)
             NFIELD=2
+            !
+            ! ww-x output part
+            call writer%writeNext(1.0, CX(1:NSEA), CY(1:NSEA))
             !
             ! Wind
           ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 3 ) THEN
@@ -3928,3 +4137,4 @@ CONTAINS
   !/ End of W3OUNF ----------------------------------------------------- /
   !/
 END PROGRAM W3OUNF
+
