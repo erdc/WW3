@@ -2972,6 +2972,17 @@ CONTAINS
     META(1)%VARNG=''
     META(1)%VMIN = 0
     META(1)%VMAX = 32
+    ! IFI=2, IFJ=20
+    META => GROUP(2)%FIELD(20)%META
+    META(1)%FSC    = 0.001
+    META(1)%UNITS  = '1'
+    META(1)%ENAME  = '.brc'
+    META(1)%VARNM='brcoef'
+    META(1)%VARNL='breaking coefficient'
+    META(1)%VARNS=''
+    META(1)%VARNG=''
+    META(1)%VMIN = 0
+    META(1)%VMAX = 1.2
     !
     !---------- GROUP 3 ----------------
     !

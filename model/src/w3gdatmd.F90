@@ -529,6 +529,9 @@ MODULE W3GDATMD
   !      SDBC2     Real  Public   Hmax/d ratio.                (!/DB1)
   !      FDONLY    Log.  Public   Flag for checking depth only (!/DB1)
   !                               otherwise Miche criterion.
+  !      FSLOPE    Log.  Public   Flag for computing slope     (!/DB1)       
+  !                               dependant breaking coeff,
+  !                               constant otherwise
   !     ----------------------------------------------------------------
   !
   !     The structure STRP contains parameters for the triad interaction
@@ -991,7 +994,7 @@ MODULE W3GDATMD
 #endif
 #ifdef W3_DB1
     REAL                  :: SDBC1, SDBC2
-    LOGICAL               :: FDONLY
+    LOGICAL               :: FDONLY, FSLOPE
     REAL                  :: SDBSC
 #endif
   END TYPE SDBP
@@ -1394,7 +1397,7 @@ MODULE W3GDATMD
   !/
 #ifdef W3_DB1
   REAL, POINTER           :: SDBC1, SDBC2
-  LOGICAL, POINTER        :: FDONLY
+  LOGICAL, POINTER        :: FDONLY, FSLOPE
   REAL, POINTER           :: SDBSC
 #endif
   !/
@@ -2818,6 +2821,7 @@ CONTAINS
     SDBC1  => MPARS(IMOD)%SDBPS%SDBC1
     SDBC2  => MPARS(IMOD)%SDBPS%SDBC2
     FDONLY => MPARS(IMOD)%SDBPS%FDONLY
+    FSLOPE => MPARS(IMOD)%SDBPS%FSLOPE
     SDBSC  => MPARS(IMOD)%SDBPS%SDBSC
 #endif
     !

@@ -1283,7 +1283,7 @@ CONTAINS
       IF (.NOT. FSSOURCE .or. LSLOC) THEN
 #endif
 #ifdef W3_DB1
-        CALL W3SDB1 ( IX, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, CG1,       &
+        CALL W3SDB1 ( JSEA, SPEC, DEPTH, EMEAN, FMEAN, WNMEAN, CG1,       &
              LBREAK, VSDB, VDDB )
 #endif
 #ifdef W3_PDLIB
