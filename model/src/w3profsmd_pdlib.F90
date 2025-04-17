@@ -6936,6 +6936,17 @@ CONTAINS
         IOBDP_LOC(IP)  = 1
       ENDIF
     END DO
+
+#ifdef W3_IG1
+    DO JSEA=1,NPA
+      IF (IOBDP_LOC(IP) == 1) THEN
+        DO IP = 1, PDLIB_NCONN(JSEA)
+          IP2 = PDLIB_CCON(IP,JSEA)
+        ENDDO
+      ENDIF
+    END DO
+#endif
+
     !/
     !/ End of SETDEPTH_PDLIB --------------------------------------------- /
     !/
