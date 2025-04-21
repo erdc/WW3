@@ -565,8 +565,8 @@ CONTAINS
 #endif
     !
     USE W3GDATMD, only : INDEX_MAP, NBND_MAP, NSEA, NSEAL, GRIDS, NX, NTH
-    USE W3GDATMD, only : IOBP, IOBDP, IOBPA, IOBPD, NBND_MAP, INDEX_MAP
-    USE W3GDATMD, only : IOBP_LOC, IOBPD_LOC, IOBDP_LOC, IOBPA_LOC
+    USE W3GDATMD, only : IOBP, IOBDP, IOBPA, IOBPD, NBND_MAP, INDEX_MAP, IOBPW, IOBPDW
+    USE W3GDATMD, only : IOBP_LOC, IOBPD_LOC, IOBDP_LOC, IOBPA_LOC, IOBPW_LOC, IOBPDW_LOC
     USE W3ODATMD, only : IAPROC, NAPROC
     USE YOWNODEPOOL, only: iplg, npa
     USE yowfunction, only: pdlib_abort
@@ -607,16 +607,26 @@ CONTAINS
     if(istat /= 0) CALL PDLIB_ABORT(9)
     ALLOCATE(GRIDS(IMOD)%IOBPA_LOC(NPA), stat=istat)
     if(istat /= 0) CALL PDLIB_ABORT(9)
+    ALLOCATE(GRIDS(IMOD)%IOBPDW_LOC(NTH,NPA), stat=istat)
+    if(istat /= 0) CALL PDLIB_ABORT(9)
+    ALLOCATE(GRIDS(IMOD)%IOBPW_LOC(NPA), stat=istat)
+    if(istat /= 0) CALL PDLIB_ABORT(9)
+
   
     GRIDS(IMOD)%IOBP_LOC = 1
     GRIDS(IMOD)%IOBPA_LOC = 1
     GRIDS(IMOD)%IOBPD_LOC = 1
     GRIDS(IMOD)%IOBDP_LOC = 1
+    GRIDS(IMOD)%IOBPW_LOC = 0
+    GRIDS(IMOD)%IOBPDW_LOC = 0
+
 
     IOBP_loc  => GRIDS(IMOD)%IOBP_LOC
     IOBPA_loc => GRIDS(IMOD)%IOBPA_LOC
     IOBPD_loc => GRIDS(IMOD)%IOBPD_LOC
     IOBDP_loc => GRIDS(IMOD)%IOBDP_LOC
+    IOBPW_loc => GRIDS(IMOD)%IOBPW_LOC
+    IOBPDW_loc => GRIDS(IMOD)%IOBPDW_LOC
 
     DO IP = 1, npa
       IP_glob         = iplg(IP)
@@ -3522,7 +3532,7 @@ CONTAINS
           IK     = 1 + (ISP-1)/NTH
           K1    =  KP(POS,ISP,IE)
 #ifdef W3_REF1
-          eIOBPDR=(1-IOBP_LOC(IP_glob))*(1-IOBPD_LOC(ITH,IP_glob))
+          eIOBPDR = (1-IOBP_LOC(IP_glob)) * (1-IOBPD_LOC(ITH,IP_glob)) ! Here we turn off advection 
           IF (eIOBPDR .eq. 1) THEN
             K1=ZERO
           END IF
@@ -6899,11 +6909,12 @@ CONTAINS
     USE W3SERVMD, only: STRACE
 #endif
     USE CONSTANTS, only : LPDLIB
-    USE W3GDATMD, only: MAPSF, NSEAL, DMIN, MAPSTA, NX
-    USE W3GDATMD, only: IOBP_LOC, IOBPD_LOC, IOBPA_LOC, IOBDP_LOC
+    USE W3GDATMD, only: MAPSF, NSEAL, DMIN, MAPSTA, NX, IOBPDW, IOBPW
+    USE W3GDATMD, only: IOBP_LOC, IOBPD_LOC, IOBPA_LOC, IOBDP_LOC, IOBPDW_LOC, IOBPW_LOC
     USE W3ADATMD, only: DW
     USE W3PARALL, only: INIT_GET_ISEA
-    USE YOWNODEPOOL, only: iplg, np, npa
+    USE YOWNODEPOOL, only: iplg, np, npa, PDLIB_CCON, PDLIB_IE_CELL2, PDLIB_POS_CELL2
+    use yowElementpool, only: NE, INE 
     !/
     !/
     !/ ------------------------------------------------------------------- /
@@ -6919,34 +6930,42 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/
     !
-    INTEGER :: JSEA, ISEA, IX, IP, IP_glob
+    INTEGER :: JSEA, ISEA, IX, I, IP, IP2, IP_glob, IE, POS, IDRY
     REAL*8, PARAMETER :: DTHR = 10E-6
 #ifdef W3_S
     CALL STRACE (IENT, 'SETDEPTH_PDLIB')
 #endif
     IOBDP_LOC = 1
-    !WRITE(*,*) 'IOBDP_LOC', SUM(IOBDP_LOC) 
-    !pause
     DO JSEA=1,NPA
-      IP = JSEA
-      IP_glob = iplg(IP)
+      IP_glob = iplg(JSEA)
       IF (DW(IP_glob) .LT. DMIN + DTHR) THEN
-        IOBDP_LOC(IP)  = 0
+        IOBDP_LOC(JSEA)  = 0
       ELSE
-        IOBDP_LOC(IP)  = 1
+        IOBDP_LOC(JSEA)  = 1
       ENDIF
     END DO
 
-#ifdef W3_IG1
+#ifdef W3_REF1
     DO JSEA=1,NPA
-      IF (IOBDP_LOC(IP) == 1) THEN
-        DO IP = 1, PDLIB_NCONN(JSEA)
-          IP2 = PDLIB_CCON(IP,JSEA)
-        ENDDO
+      IF (IOBP_LOC(IP) == 1 .and. IOBDP_LOC(IP) .GT. 0) THEN ! The local point is wet 
+        IP_glob = iplg(JSEA)
+        IDRY = 0 
+        DO I = 1, PDLIB_CCON(JSEA)
+          IE    =  PDLIB_IE_CELL2(I,JSEA)
+          POS   =  PDLIB_POS_CELL2(I,JSEA)
+          IP2   =  INE(POS_TRICK(POS,2),IE)
+          IF (IOBDP_LOC(IP2) .EQ. 0) THEN
+            IDRY = IDRY + 1  ! Count dry points ...
+          ENDIF 
+        ENDDO 
+        IF (IDRY .GT. 0) THEN
+          IOBPW(IP_glob) = 1
+        ELSE
+          IOBPW(IP_glob) = 0
+        ENDIF
       ENDIF
-    END DO
-#endif
-
+    ENDDO
+#endif 
     !/
     !/ End of SETDEPTH_PDLIB --------------------------------------------- /
     !/

@@ -754,7 +754,9 @@ MODULE W3GDATMD
     INTEGER :: NBND_MAP
     INTEGER, POINTER     :: INDEX_MAP(:)
     INTEGER, POINTER     :: MAPSTA_LOC(:)
+    INTEGER*1, POINTER   :: IOBPDW_LOC(:,:)
     INTEGER*1, POINTER   :: IOBPD_LOC(:,:)
+    INTEGER*2, POINTER   :: IOBPW_LOC(:)
     INTEGER*2, POINTER   :: IOBP_LOC(:)
     INTEGER*1, POINTER   :: IOBDP_LOC(:)
     INTEGER*1, POINTER   :: IOBPA_LOC(:)
@@ -769,8 +771,8 @@ MODULE W3GDATMD
          POS_CELL(:),   &
          IAA(:), JAA(:), POSI(:,:), INDEX_CELL(:),       &
          I_DIAG(:), JA_IE(:,:,:)
-    INTEGER*2, POINTER    :: IOBP(:)
-    INTEGER*1, POINTER    :: IOBPD(:,:), IOBDP(:), IOBPA(:)
+    INTEGER*2, POINTER    :: IOBP(:), IOBPW(:)
+    INTEGER*1, POINTER    :: IOBPD(:,:), IOBDP(:), IOBPA(:), IOBPDW(:,:)
     INTEGER, POINTER      :: EDGES(:,:), NEIGH(:,:)
     REAL(8), POINTER      :: TRIA(:)
     REAL, POINTER         :: CROSSDIFF(:,:)
@@ -1113,8 +1115,10 @@ MODULE W3GDATMD
   INTEGER, POINTER        :: NBND_MAP
   INTEGER, POINTER        :: INDEX_MAP(:)
   INTEGER, POINTER        :: MAPSTA_LOC(:)
+  INTEGER*1, POINTER   :: IOBPDW_LOC(:,:)
   INTEGER*1, POINTER   :: IOBPD_LOC(:,:)
   INTEGER*2, POINTER   :: IOBP_LOC(:)
+  INTEGER*2, POINTER   :: IOBPW_LOC(:)
   INTEGER*1, POINTER   :: IOBDP_LOC(:)
   INTEGER*1, POINTER   :: IOBPA_LOC(:)
 #endif
@@ -1126,8 +1130,8 @@ MODULE W3GDATMD
        IAA(:), JAA(:), POSI(:,:),                   &
        I_DIAG(:), JA_IE(:,:,:),                     &
        INDEX_CELL(:)
-  INTEGER*2, POINTER      :: IOBP(:)
-  INTEGER*1, POINTER      :: IOBPD(:,:), IOBDP(:), IOBPA(:)
+  INTEGER*2, POINTER      :: IOBP(:), IOBPW(:)
+  INTEGER*1, POINTER      :: IOBPD(:,:), IOBDP(:), IOBPA(:), IOBPDW(:,:)
   REAL(8), POINTER        :: TRIA(:)
   REAL, POINTER           :: CROSSDIFF(:,:)
   REAL,POINTER            :: MAXX, MAXY, DXYMAX
@@ -2403,6 +2407,7 @@ CONTAINS
     IE_CELL     => GRIDS(IMOD)%IE_CELL
     POS_CELL     => GRIDS(IMOD)%POS_CELL
     IOBP     => GRIDS(IMOD)%IOBP
+    IOBPW     => GRIDS(IMOD)%IOBPW
     IAA      => GRIDS(IMOD)%IAA
     JAA      => GRIDS(IMOD)%JAA
     POSI     => GRIDS(IMOD)%POSI
@@ -2412,6 +2417,7 @@ CONTAINS
     EDGES     => GRIDS(IMOD)%EDGES
     NEIGH     => GRIDS(IMOD)%NEIGH
     NNZ      => GRIDS(IMOD)%NNZ
+    IOBPDW    => GRIDS(IMOD)%IOBPDW
     IOBPD     => GRIDS(IMOD)%IOBPD
     IOBDP     => GRIDS(IMOD)%IOBDP
     IOBPA     => GRIDS(IMOD)%IOBPA
@@ -3237,6 +3243,8 @@ CONTAINS
          GRIDS(IMOD)%I_DIAG(NX),                            &
          GRIDS(IMOD)%JA_IE(3,3,MTRI),                       &
          GRIDS(IMOD)%IOBP(MX),                              &
+         GRIDS(IMOD)%IOBPW(MX),                              &
+         GRIDS(IMOD)%IOBPDW(NTH,MX),                         &
          GRIDS(IMOD)%IOBPD(NTH,MX),                         &
          GRIDS(IMOD)%IOBDP(MX),                             &
          GRIDS(IMOD)%IOBPA(MX),                             &

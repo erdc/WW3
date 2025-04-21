@@ -3554,6 +3554,209 @@ CONTAINS
     !
     RETURN
   END SUBROUTINE SET_UG_IOBP
+
+    !/ ------------------------------------------------------------------- /
+
+  !>
+  !> @brief Redefines the values of the boundary points and angle pointers
+  !>  based on the MAPSTA array.
+  !>
+  !> @details Adapted boundary detection from A. Roland and M. Dutour (WWM code).
+  !>
+  !> @author Fabrice Ardhuin
+  !> @author Aron Roland
+  !> @date   17-Apr-2016
+  !>
+  SUBROUTINE SET_UG_IOBPW()
+    !/
+    !/                  +-----------------------------------+
+    !/                  | WAVEWATCH III           NOAA/NCEP |
+    !/                  |                                   |
+    !/                  |        Aron Roland                |
+    !/                  |                        FORTRAN 90 |
+    !/                  | Last update :         21-Apr-2025 |
+    !/                  +-----------------------------------+
+    !/
+    !/    21-Apr-2025 : For moving wetting/drying boundary  ( version 7.xx )
+    !/
+    !  1. Purpose :
+    !
+    !     Redefines the values of the boundary points and angle pointers
+    !     based on the MAPSTA array
+    !
+    !  2. Method :
+    !
+    !     Same as the other routine only for the wetting and drying points
+    !
+    !  3. Parameters :
+    !
+    !     Parameter list
+    !     ----------------------------------------------------------------
+    !     ----------------------------------------------------------------
+    !
+    !     Local variables.
+    !     ----------------------------------------------------------------
+    !     ----------------------------------------------------------------
+    !
+    !  4. Subroutines used :
+    !
+
+    !  5. Called by :
+    !
+    !      Name      Type  Module   Description
+    !     ----------------------------------------------------------------
+    !      WW3_GRID  Prog. WW3_GRID Grid preprocessor
+    !      W3ULEV    Subr. W3UPDTMD Water level update
+    !     ----------------------------------------------------------------
+    !
+    !  6. Error messages :
+    !
+    !       None.
+    !
+    !  7. Remarks :
+    !
+    !  8. Structure :
+    !
+    !
+    !  9. Switches :
+    !
+    !       !/S     Enable subroutine tracing.
+    !
+    !
+    ! 10. Source code :
+    !/ ------------------------------------------------------------------- /
+    !/
+    !
+    USE CONSTANTS
+    !
+    !
+    USE W3GDATMD, ONLY: NX, NY, NSEA, MAPFS,                        &
+         NK, NTH, DTH, XFR, MAPSTA, COUNTRI,         &
+         ECOS, ESIN, IEN, NTRI, TRIGP,               &
+         IOBP,IOBPD, IOBPA,                          &
+#ifdef W3_REF1
+         REFPARS, REFLC, REFLD, IOBPDW, IOBPW,                      &
+#endif
+         ANGLE0, ANGLE
+
+    USE W3ODATMD, ONLY: TBPI0, TBPIN, FLBPI
+    USE W3ADATMD, ONLY: CG, CX, CY, ATRNX, ATRNY, ITIME, CFLXYMAX
+    USE W3IDATMD, ONLY: FLCUR
+    USE W3ODATMD, only : IAPROC
+#ifdef W3_S
+    USE W3SERVMD, ONLY: STRACE
+#endif
+
+    IMPLICIT NONE
+    !/ ------------------------------------------------------------------- /
+    !/ Parameter list
+    !/
+    !/
+    !/ ------------------------------------------------------------------- /
+    !/ Local parameters
+    !/
+    INTEGER                 :: ITH, IX, I, J, IP, IE, NDIRSUM
+    REAL (KIND = 8)         :: COSSUM, SINSUM
+    REAL (KIND = 8)         :: DIRMIN, DIRMAX, SHIFT, TEMPO, DIRCOAST
+    REAL (KIND = 8)         :: X1, X2, Y1, Y2, DXP1, DXP2, DXP3
+    REAL (KIND = 8)         :: DYP1, DYP2, DYP3, eDet1, eDet2, EVX, EVY
+    REAL(KIND=8), PARAMETER :: THR    = TINY(1.)
+    INTEGER                 :: I1, I2, I3
+    INTEGER                 :: ITMP(NX), NEXTVERT(NX), PREVVERT(NX)
+    CHARACTER(60) :: FNAME
+#ifdef W3_S
+    INTEGER, SAVE           :: IENT = 0
+#endif
+    !/ ------------------------------------------------------------------- /
+    !
+    ! 1.  Preparations --------------------------------------------------- *
+    ! 1.a Set constants
+    !
+#ifdef W3_S
+    CALL STRACE (IENT, 'SETUGIOBP')
+#endif
+    !
+    !
+    !--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+    ! 3. Defines directions pointing into land or sea
+    !
+    IOBPDW(:,:) = 0
+
+    DO IE = 1,NTRI
+      I1   =   TRIGP(1,IE)
+      I2   =   TRIGP(2,IE)
+      I3   =   TRIGP(3,IE)
+      DXP1 =   IEN(IE,6)
+      DYP1 = - IEN(IE,5)
+      DXP2 =   IEN(IE,2)
+      DYP2 = - IEN(IE,1)
+      DXP3 =   IEN(IE,4)
+      DYP3 = - IEN(IE,3)
+      DO ITH=1,NTH
+        EVX=ECOS(ITH)
+        EVY=ESIN(ITH)
+        DO I=1,3
+          IF (I.eq.1) THEN
+            x1=   DXP1
+            y1=   DYP1
+            x2= - DXP3
+            y2= - DYP3
+            IP=   I1
+          END IF
+          IF (I.eq.2) THEN
+            x1 =   DXP2
+            y1 =   DYP2
+            x2 = - DXP1
+            y2 = - DYP1
+            IP =   I2
+          END IF
+          IF (I.eq.3) THEN
+            x1 =   DXP3
+            y1 =   DYP3
+            x2 = - DXP2
+            y2 = - DYP2
+            IP =   I3
+          END IF
+          IF (IOBPW(IP) .eq. 1) THEN ! moving wet/dry boundary
+            eDet1 = THR-x1*EVY+y1*EVX
+            eDet2 = THR+x2*EVY-y2*EVX
+            IF ((eDet1.gt.0.).and.(eDet2.gt.0.)) THEN
+              ! this is the case of waves going towards the boundary ...
+              IOBPDW(ITH,IP)=1
+            ENDIF
+          ELSE ! water ...
+            IOBPDW(ITH,IP)=1
+          END IF
+        END DO
+      END DO
+    END DO
+
+#ifdef W3_REF1
+    !
+    ! Finds the wetting/drying boundary direction from IOBPD
+    !
+    REFLC(1,:)= 0.
+    REFLD(:,:)= 1
+    DO IP=1,NX
+      IF (IOBPW(IP) .EQ. 1) THEN
+        COSSUM=0.
+        SINSUM=0.
+        NDIRSUM=0.
+        DO ITH=1,NTH
+          COSSUM=COSSUM+IOBPD(ITH,IP)*ECOS(ITH)
+          SINSUM=SINSUM+IOBPD(ITH,IP)*ESIN(ITH)
+          NDIRSUM=NDIRSUM+IOBPD(ITH,IP)
+        END DO
+        DIRCOAST=ATAN2(SINSUM, COSSUM)
+        REFLD(1,MAPFS(1,IP)) = 1+MOD(NTH+NINT(DIRCOAST/DTH),NTH)
+        REFLD(2,MAPFS(1,IP)) = 4-MAX(2,NINT(4.*REAL(NDIRSUM)/REAL(NTH)))
+        REFLC(1,MAPFS(1,IP))= REFPARS(1)
+      END IF
+    END DO
+#endif
+    !
+    RETURN
+  END SUBROUTINE SET_UG_IOBPW
   !/ ------------------------------------------------------------------- /
 
   !>
