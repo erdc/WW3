@@ -1423,9 +1423,6 @@ CONTAINS
             CALL S2GRID(CY(1:NSEA), XY)
             NFIELD=2
             !
-            ! ww-x output part
-            call writer%writeNext(1.0, CX(1:NSEA), CY(1:NSEA))
-            !
             ! Wind
           ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 3 ) THEN
             !! Note - UA and UD read in from .ww3 file are UX,UY
@@ -1442,6 +1439,9 @@ CONTAINS
             CALL S2GRID(UA(1:NSEA), XX)
             CALL S2GRID(UD(1:NSEA), XY)
             NFIELD=2
+            !
+            ! ww-x output part
+            call writer%writeNext(1.0, UA(1:NSEA), UD(1:NSEA))
             !
             ! Air-sea temperature difference
           ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 4 ) THEN
