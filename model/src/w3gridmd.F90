@@ -809,6 +809,7 @@ MODULE W3GRIDMD
   !
   REAL(8)                 :: GSHIFT ! see notes in WMGHGH
   LOGICAL                 :: FLC, ICEDISP, TRCKCMPR
+  LOGICAL                 :: ICNUMERICS
   INTEGER                 :: PTM   ! Partitioning method
   REAL                    :: PTFC  ! Part. cut off freq (for method 5)
   REAL                    :: AIRCMIN, AIRGB
@@ -1113,7 +1114,7 @@ MODULE W3GRIDMD
        STDX, STDY, STDT, ICEHMIN, ICEHINIT, ICEDISP,   &
        ICESLN, ICEWIND, ICESNL, ICESDS, ICEHFAC,       &
        ICEHDISP, ICEDDISP, ICEFDISP, CALTYPE,          &
-       TRCKCMPR, PTM, PTFC, BTBET
+       TRCKCMPR, PTM, PTFC, BTBET, ICNUMERICS
   NAMELIST /OUTS/ P2SF, I1P2SF, I2P2SF,                      &
        US3D, I1US3D, I2US3D,                    &
        USSP, IUSSP, STK_WN,                     &
@@ -2765,6 +2766,7 @@ CONTAINS
     STDY = -1.
     STDT = -1.
     ICEDISP = .FALSE.
+    ICNUMERICS=.FALSE.
     CALTYPE = 'standard'
     ! Variables for 3D array output
     E3D=0
@@ -3035,6 +3037,7 @@ CONTAINS
     IICEHDISP  = ICEHDISP
     IICEDDISP  = ICEDDISP
     IICEFDISP  = ICEFDISP
+    IC_NUMERICS=ICNUMERICS
     PMOVE  = MAX ( 0. , PMOVE )
     PFMOVE = PMOVE
     !
@@ -3424,7 +3427,7 @@ CONTAINS
              ICEHINIT, ICEDISP, ICEHDISP,          &
              ICESLN, ICEWIND, ICESNL, ICESDS,      &
              ICEDDISP,ICEFDISP, CALTYPE, TRCKCMPR, &
-             BTBETA
+             BTBETA,ICNUMERICS
       ELSE
         WRITE (NDSO,2966) CICE0, CICEN, LICE, PMOVE, XSEED, FLAGTR, &
              XP, XR, XFILT, IHMAX, HSPMIN, WSMULT, &
@@ -3434,7 +3437,7 @@ CONTAINS
              ICEHINIT, ICEDISP, ICEHDISP,          &
              ICESLN, ICEWIND, ICESNL, ICESDS,      &
              ICEDDISP, ICEFDISP, CALTYPE, TRCKCMPR,&
-             BTBETA
+             BTBETA,ICNUMERICS
       END IF
       !
 #ifdef W3_FLD1
@@ -6833,7 +6836,7 @@ CONTAINS
          ', ICESNL = ',F6.2,', ICESDS = ',F5.2,','/       &
          '        ICEDDISP = ',F5.2,', ICEFDISP = ',F5.2,       &
          ', CALTYPE = ',A8,' , TRCKCMPR = ', L3,','/      &
-         '        BTBET  = ', F6.2, ' /')
+         '        BTBET  = ', F6.2, ', ICNUMERICS =',L3,' /')
     !
 2976 FORMAT ( '  &OUTS P2SF  =',I2,', I1P2SF =',I2,', I2P2SF =',I3,','/&
          '        US3D  =',I2,', I1US3D =',I3,', I2US3D =',I3,','/&
