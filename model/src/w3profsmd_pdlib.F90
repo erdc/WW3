@@ -128,9 +128,6 @@ MODULE PDLIB_W3PROFSMD
   REAL, SAVE            :: RTIME = 0.d0
   INTEGER               :: POS_TRICK(3,2)
 
-#ifdef W3_DEBUGSRC
-  INTEGER  :: TESTNODE = 1
-#endif
   integer  :: memunit
   !
   !/ ------------------------------------------------------------------- /
@@ -3572,6 +3569,7 @@ CONTAINS
     USE W3SERVMD, only: STRACE
 #endif
     !
+    USE CONSTANTS, only: DEBUG_NODE
     USE W3GDATMD, only: NK, NK2, NTH, NSPEC, FACHFA, DMIN
     USE W3GDATMD, only: IOBP_LOC, IOBPD_LOC, IOBPA_LOC, IOBDP_LOC
     USE W3GDATMD, only: NSEAL, CLATS
@@ -3759,6 +3757,8 @@ CONTAINS
       END DO
     END DO ! ISP
 
+    WRITE(*,*) 'B_JAC & ASPAR_DIAG AFTER', SUM(B_JAC(:,DEBUG_NODE)), SUM(ASPAR_JAC(:,PDLIB_I_DIAG(DEBUG_NODE)))
+
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_JACOBI SECTION 1')
 #ifdef W3_DEBUGSOLVER
     WRITE(740+IAPROC,*) 'sum(VA)=', sum(VA)
@@ -3818,7 +3818,6 @@ CONTAINS
     USE W3SERVMD, only: STRACE
 #endif
     !
-
     USE W3GDATMD, only: NK, NK2, NTH, NSPEC, FACHFA, DMIN
     USE W3GDATMD, only: IOBP_LOC, IOBPD_LOC, IOBPA_LOC, IOBDP_LOC
     USE W3GDATMD, only: NSEAL, CLATS
@@ -5602,8 +5601,6 @@ CONTAINS
     INTEGER JP_glob
     INTEGER is_converged, itmp
 
-    INTEGER :: TESTNODE = 923
-
     LOGICAL :: LSIG = .FALSE.
 
     memunit = 50000+IAPROC
@@ -6234,7 +6231,7 @@ CONTAINS
       END DO
 #ifdef W3_DEBUGSRC
       WRITE(740+IAPROC,*) 'ISEA=', ISEA, ' IntDiff=', IntDiff, ' DTG=', DTG
-      IF (ISEA .eq. TESTNODE) THEN
+      IF (ISEA .eq. DEBUG_NODE) THEN
         DO ISP=1,NSPEC
           WRITE(740+IAPROC,*) 'ISP=', ISP, 'VA/VAsolve=', VA(ISP,JSEA), VAsolve(ISP)
         END DO

@@ -494,7 +494,7 @@ CONTAINS
     !
     !/ ------------------------------------------------------------------- /
     USE CONSTANTS, ONLY: DWAT, srce_imp_post, srce_imp_pre,         &
-         srce_direct, GRAV, TPI, TPIINV
+         srce_direct, GRAV, TPI, TPIINV, DEBUG_NODE
     USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, TH, DMIN, DTMAX,       &
          DTMIN, FACTI1, FACTI2, FACSD, FACHFA, FACP, &
          XFC, XFLT, XREL, XFT, FXFM, FXPM, DDEN,     &
@@ -685,7 +685,7 @@ CONTAINS
     INTEGER :: IK, ITH, IS, IS0, NSTEPS, NKH, NKH1, &
          IKS1, IS1, NSPECH, IDT, IERR, ISP
     REAL :: DTTOT, FHIGH, DT, AFILT, DAMAX, AFAC, &
-         HDT, ZWND, FP, DEPTH, TAUSCX, TAUSCY, FHIGI
+         HDT, ZWND, FP, DEPTH, TAUSCX, TAUSCY, FHIGI, SPECCG(NSPEC) 
     ! Scaling factor for SIN, SDS, SNL
     REAL :: ICESCALELN, ICESCALEIN, ICESCALENL, ICESCALEDS
     REAL :: EMEAN, FMEAN, AMAX, CD, Z0, SCAT,    &
@@ -1186,6 +1186,15 @@ CONTAINS
       !
 #ifdef W3_LN1
       CALL W3SLN1 (       WN1, FHIGH, USTAR, U10DIR , VSLN       )
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'SUM SPEC', SUM(SPEC) 
+        DO ISP = 1, NSPEC 
+          IK = 1 + (ISP-1)/NTH
+          SPECCG(ISP) = SPEC(ISP) / CG1(IK) 
+        ENDDO 
+        WRITE(*,*) 'SUM SPECCG', SUM(SPECCG)
+        WRITE(*,*) 'SUM W3SLN1', SUM(VSLN) 
+      ENDIF
 #endif
       !
 #ifdef W3_ST1
@@ -1204,6 +1213,9 @@ CONTAINS
       CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
            U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
            VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'SUM W3SIN4', SUM(VSIN), SUM(VDIN)
+      ENDIF
 #endif
 
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
@@ -1223,6 +1235,9 @@ CONTAINS
 #ifdef W3_NL1
       IF (IQTPE.GT.0) THEN
         CALL W3SNL1 ( SPEC, CG1, WNMEAN*DEPTH, VSNL, VDNL )
+        IF (IX == DEBUG_NODE) THEN
+          WRITE(*,*) 'SUM W3SNL1', SUM(VSNL), SUM(VDNL) 
+        ENDIF
       ELSE
         CALL W3SNLGQM ( SPEC, CG1, WN1, DEPTH, VSNL, VDNL )
       END IF
@@ -1267,6 +1282,9 @@ CONTAINS
 #ifdef W3_ST4
       CALL W3SDS4 ( SPEC, WN1, CG1, USTAR, USTDIR, DEPTH, DAIR, VSDS,   &
            VDDS, IX, IY, BRLAMBDA, WHITECAP, DLWMEAN )
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
+      ENDIF
 #endif
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
       IF (IX == DEBUG_NODE) THEN
@@ -1616,6 +1634,10 @@ CONTAINS
 #endif
               END DO
             END DO
+
+            IF (IX == DEBUG_NODE) THEN
+              WRITE(*,*) 'BJAC & ASPAR_DIAG', SUM(B_JAC(:,JSEA)), SUM(ASPAR_JAC(:,PDLIB_I_DIAG(JSEA)))
+            ENDIF
 
           ELSEIF (IMEM == 2) THEN
 

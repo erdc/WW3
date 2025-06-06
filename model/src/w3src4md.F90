@@ -1,4 +1,3 @@
-!> @file
 !> @brief The 'SHOM/Ifremer' source terms based on P.A.E.M.
 !>
 !> @author F. Ardhuin
@@ -1063,7 +1062,7 @@ CONTAINS
     ! 10. Source code :
     !
     !/ ------------------------------------------------------------------- /
-    USE CONSTANTS, ONLY: TPIINV, RADE, GRAV
+    USE CONSTANTS, ONLY: TPIINV, RADE, GRAV, DEBUG_NODE 
     USE W3ODATMD,  ONLY: NDSE
     USE W3SERVMD,  ONLY: EXTCDE
     USE W3DISPMD,  ONLY: WAVNU2
@@ -1147,6 +1146,10 @@ CONTAINS
       SATINDICES(:,:)=1
       SATWEIGHTS(:,:)=1.
     END IF
+
+    WRITE(*,*) 'SATINDICES', SATINDICES
+    WRITE(*,*) '-----------------------------------------------'
+    WRITE(*,*) 'SATWEIGHTS', SATWEIGHTS
     !/ ------------------------------------------------------------------- /
     !
     ! Precomputes QBI and DCKI (TEST 500)
@@ -2166,8 +2169,9 @@ CONTAINS
     REAL                    :: EFDF(NK)     ! Energy integrated over a spectral band
     INTEGER                 :: IKSUP(NK)
     REAL                    :: FACSAT, DKHS, FACSTRAINB, FACSTRAINL
-    REAL                    :: BTH0(NK)     !saturation spectrum
+    REAL                    :: BTH0(NK)     !saturation spectrum integrated over directions 
     REAL                    :: BTH(NSPEC)   !saturation spectrum
+    REAL                    :: BTH2(NSPEC)
     REAL                    :: MSSSUM(NK,5),  FACHF
     REAL                    :: MSSLONG
     REAL                    :: MSSPCS, MSSPC2, MSSPS2, MSSP, MSSD, MSSTH
@@ -2260,6 +2264,7 @@ CONTAINS
       ! 2.a.1 Computes saturation
       !
       BTH(:) = 0.
+      BTH2(:) = 0.
 
       DO  IK=IK1, NK
 
@@ -2267,21 +2272,42 @@ CONTAINS
         IS0=(IK-1)*NTH
         BTH(IS0+1)=0.
         ASUM = SUM(A(IS0+1:IS0+NTH))
-        BTH0(IK)=ASUM*FACSAT
+        BTH0(IK) = ASUM * FACSAT
+        IF (IX == DEBUG_NODE) THEN
+          WRITE(*,*) DEBUG_NODE
+          WRITE(*,*) 'FACSAT, SIG(IK), K(IK), CG1(IK), DTH', FACSAT, SIG(IK), K(IK), CG(IK), DTH
+        ENDIF 
         !
         IF (SSDSDTH.GE.180) THEN  ! integrates around full circle
           BTH(IS0+1:IS0+NTH)=BTH0(IK)
         ELSE
+          IF (IX == DEBUG_NODE) THEN 
+            WRITE(*,*) 'A(IS0+1:IS0+NTH)', A(IS0+1:IS0+NTH)
+          ENDIF
           DO ITH=1,NTH            ! partial integration
             IS=ITH+(IK-1)*NTH
             BTH(IS)=DOT_PRODUCT(SATWEIGHTS(:,ITH),  A(IS0+SATINDICES(:,ITH)) ) &
                  *FACSAT
+            BTH2(IS) = 0
+            do ITH2=1, size(SATWEIGHTS,1)
+                BTH2(IS) = BTH2(IS) + SATWEIGHTS(ITH2,ITH)*  A(IS0+SATINDICES(ITH2,ITH))
+                if(ix == debug_node) then
+                    write(*,*) "is id id2 ", IK, ITH, ITH2, SATWEIGHTS(ITH2,ITH), A(IS0+SATINDICES(ITH2,ITH)), BTH2(IS)
+                endif
+            end do
           END DO
 
-          BTH0(IK)=MAXVAL(BTH(IS0+1:IS0+NTH))
+          BTH0(IK) = MAXVAL(BTH(IS0+1:IS0+NTH))
+          IF (IX == DEBUG_NODE) THEN
+            WRITE(*,*) 'IK BTH0', IK, BTH0(IK)
+          ENDIF 
         END IF
         !
       END DO !IK=NK
+
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'SUM BTH, BTH0', SUM(BTH), SUM(BTH0)
+      ENDIF
       !
       !  2.a.2  Computes spontaneous breaking dissipation rate
       !
@@ -2570,6 +2596,11 @@ CONTAINS
           SRHS(IS)  = SRHS(IS)  + A(IS)* DIAG2
         END DO
       END DO
+
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'SUM RENEWALFREQ' , RENEWALFREQ
+      ENDIF 
+
     END IF
     !
     !  COMPUTES WHITECAP PARAMETERS
