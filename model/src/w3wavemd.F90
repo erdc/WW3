@@ -1445,7 +1445,8 @@ CONTAINS
         END IF
 #endif
         IF (IT .eq. 0) THEN
-          DTGpre = 1.
+!AR: check this stuff 
+          DTGpre = 1
         ELSE
           DTGpre = DTG
         END IF
@@ -2204,6 +2205,7 @@ CONTAINS
                 TMP3   = TAUBBL(JSEA,1:2)
                 TMP4   = TAUICE(JSEA,1:2)
 #ifdef W3_PDLIB
+                if (.true.) then
                 IF (FSSOURCE) THEN
                   CALL W3SRCE(srce_imp_post,IT,ISEA,JSEA,IX,IY,IMOD,     &
                        VAOLD(:,JSEA), VA(:,JSEA),                        &
@@ -2257,6 +2259,7 @@ CONTAINS
                        RHOAIR(ISEA), ASF(ISEA))
 #ifdef W3_PDLIB
                 END IF
+                endif
 #endif
                 WHITECAP(JSEA,1:4) = TMP1
                 BEDFORMS(JSEA,1:3) = TMP2

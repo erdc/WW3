@@ -3656,6 +3656,8 @@ CONTAINS
     CSINA = FACX * ESIN(1:NTH)
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_JACOBI SECTION 0')
 
+    WRITE(*,*) 'ENTERING SOLVER'
+
     DO ISP = 1, NSPEC
 
       ITH    = 1 + MOD(ISP-1,NTH)
@@ -3724,14 +3726,17 @@ CONTAINS
 #ifdef W3_REF1
             IF (IBR == 1) THEN
               DTK               = KP(POS,IE) * DTG
-              B_JAC(ISP,IP)     = B_JAC(ISP,IP) + PDLIB_TRIA03(IE) * VA(ISP,IP)
+              !B_JAC(ISP,IP)     = B_JAC(ISP,IP) + PDLIB_TRIA03(IE) * VA(ISP,IP)
             ELSE
               DTK               = KP(POS,IE) * DTG * IB1
-              B_JAC(ISP,IP)     = B_JAC(ISP,IP) + PDLIB_TRIA03(IE) * VA(ISP,IP) * IB2
+              !B_JAC(ISP,IP)     = B_JAC(ISP,IP) + PDLIB_TRIA03(IE) * VA(ISP,IP) * IB2
             ENDIF
 #else
             DTK               = KP(POS,IE) * DTG * IB1
-            B_JAC(ISP,IP)     = B_JAC(ISP,IP) + PDLIB_TRIA03(IE) * VA(ISP,IP) * IB2
+            !B_JAC(ISP,IP)     = B_JAC(ISP,IP) + PDLIB_TRIA03(IE) * VA(ISP,IP) * IB2
+            !IF (IP == DEBUG_NODE) THEN
+            !  WRITE(*,*) 'IK, ITH, B_JAC(ISP,IP), VA(ISP,IP)', IK, ITH, B_JAC(ISP,IP), VA(ISP,IP) * PDLIB_TRIA03(IE)
+            !ENDIF 
 #endif
 
             I1  =  PDLIB_POSI(1,J)
@@ -3757,7 +3762,12 @@ CONTAINS
       END DO
     END DO ! ISP
 
-    WRITE(*,*) 'B_JAC & ASPAR_DIAG AFTER', SUM(B_JAC(:,DEBUG_NODE)), SUM(ASPAR_JAC(:,PDLIB_I_DIAG(DEBUG_NODE)))
+    DO IP = 1, NP
+      B_JAC(:,IP) = B_JAC(:,IP) + PDLIB_SI(IP) * VA(:,IP) 
+      IF (IP == DEBUG_NODE) THEN
+        WRITE(*,*) 'IP  SUM(B_JAC(:,IP)), PDLIB_SI(IP), SUM(VA(:,IP))', SUM(B_JAC(:,IP)), PDLIB_SI(IP), SUM(VA(:,IP))
+      ENDIF
+    ENDDO 
 
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_JACOBI SECTION 1')
 #ifdef W3_DEBUGSOLVER
@@ -5503,7 +5513,7 @@ CONTAINS
     USE W3SERVMD, only: STRACE
 #endif
     !/
-    USE CONSTANTS, only : TPI, TPIINV, GRAV
+    USE CONSTANTS, only : TPI, TPIINV, GRAV, DEBUG_NODE 
     USE W3GDATMD, only: MAPSTA
     USE W3GDATMD, only: FSREFRACTION, FSFREQSHIFT, FSSOURCE, NX, DSIP
     USE W3GDATMD, only: B_JGS_NORM_THR, B_JGS_TERMINATE_NORM, B_JGS_PMIN
@@ -5766,6 +5776,10 @@ CONTAINS
 
       DO IP = 1, np
 
+        IF (IP == DEBUG_NODE .and. nbiter == 0) THEN 
+          WRITE(*,*) 'SUM VA SOLVER', SUM(VA(:,IP))
+        ENDIF
+
         IP_glob = iplg(IP)
         ISEA    = MAPFS(1,IP_glob)
         IF (IOBDP_LOC(IP) .eq. 0) THEN
@@ -5842,6 +5856,10 @@ CONTAINS
 #endif
               END IF
             END DO
+        
+            IF (IP == DEBUG_NODE) THEN
+              WRITE(*,*) 'DEBUG SOLVER B_JAC ASPAR_DIAG', SUM(B_JAC(:,IP)), SUM(ASPAR_DIAG), SUM(eSum)
+            ENDIF
           ENDIF ! IMEM
 
 #ifdef W3_DEBUGSOLVERCOH
@@ -5928,7 +5946,18 @@ CONTAINS
 #ifdef W3_DEBUGSOLVERCOH
           PRE_VA(:, IP)=REAL(eSum)
 #endif
+          IF (IP == DEBUG_NODE) THEN
+            DO IK=1,NK
+              DO ITH=1,NTH
+                ISP  = ITH + (IK-1)*NTH
+                !WRITE(*,*) 'DEBUG SOLVER BEFORE ESUM / DIAG', IP, eSum(isp), ASPAR_DIAG(isp), eSum(isp) / ASPAR_DIAG(isp)
+              ENDDO 
+            ENDDO 
+          ENDIF
           eSum(1:NSPEC)  = eSum(1:NSPEC) / ASPAR_DIAG(1:NSPEC)
+          IF (IP == DEBUG_NODE) THEN
+            WRITE(*,*) 'DEBUG SOLVER AFTER SUM ESUM', IP, sum(eSum)
+          ENDIF 
 #ifdef W3_DEBUGFREQSHIFT
           WRITE(740+IAPROC,*) 'JSEA=', JSEA, ' nbIter=', nbIter
           DO ISP=1,NSPEC
@@ -5994,6 +6023,9 @@ CONTAINS
           END IF
         ELSE
           esum = VA(1:NSPEC,IP)
+          IF (IP == DEBUG_NODE) THEN
+            WRITE(*,*) 'SUM VA AFTER SOLVER', IP, SUM(esum)
+          ENDIF
         ENDIF ! .NOT. LCONVERGED
 
         IF (B_JGS_TERMINATE_DIFFERENCE) THEN

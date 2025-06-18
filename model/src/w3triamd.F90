@@ -1114,6 +1114,8 @@ CONTAINS
       IEN(IE,5) = N3(1)
       IEN(IE,6) = N3(2)
 
+      !WRITE(*,*) IE, IEN(IE,1:6)
+
     END DO
 
   END SUBROUTINE NVECTRI
@@ -2881,7 +2883,7 @@ CONTAINS
     USE W3GDATMD, ONLY: NX, NY, NSEA, MAPFS,                        &
          NK, NTH, DTH, XFR, MAPSTA, COUNTRI,         &
          ECOS, ESIN, IEN, NTRI, TRIGP,               &
-         IOBP,IOBPD, IOBPA,                          &
+         IOBP,IOBPD, IOBPA, TH,                          &
 #ifdef W3_REF1
          REFPARS, REFLC, REFLD,                      &
 #endif
@@ -2993,6 +2995,14 @@ CONTAINS
         END DO
       END DO
     END DO
+    !DO IP = 1, NX
+    !  IF (IP == 141) THEN
+    !    DO ITH = 1, NTH
+    !      WRITE(*,*) IP, ITH, TH(ITH), ECOS(ITH), ESIN(ITH), IOBPD(ITH,IP)
+    !    ENDDO 
+    !    STOP
+    !  ENDIF
+    !ENDDO 
     DO IP = 1, NX
       IF ( IOBPA(IP) .eq. 1 .OR. IOBP(IP) .eq. 3 .OR. IOBP(IP) .eq. 4) IOBPD(:,IP) = 1
     END DO

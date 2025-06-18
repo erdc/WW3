@@ -704,7 +704,7 @@ CONTAINS
          VSNL(NSPEC), VDNL(NSPEC),            &
          VSDS(NSPEC), VDDS(NSPEC),            &
          VSBT(NSPEC), VDBT(NSPEC)
-    REAL :: VS(NSPEC), VD(NSPEC), EB(NK)
+    REAL :: VS(NSPEC), VD(NSPEC), EB(NK), VSCG(NSPEC), VSCGJAC(NSPEC) 
 
     LOGICAL :: SHAVE
     LOGICAL :: LBREAK
@@ -1054,6 +1054,10 @@ CONTAINS
            USTAR, USTDIR,                                  &
            TAUWX, TAUWY, CD, Z0, CHARN, LLWS, FMEANWS, DLWMEAN)
 #endif
+ 
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'TEST EMEAN', EMEAN, 4 * SQRT(EMEAN), SUM(SPEC)
+      ENDIF
 
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
       IF (IX == DEBUG_NODE) THEN
@@ -1069,7 +1073,7 @@ CONTAINS
       IF (SINTAILPAR(4).GT.0.5) CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
            U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
            VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
-    END IF
+     END IF
 #endif
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
     IF (IX == DEBUG_NODE) THEN
@@ -1146,6 +1150,7 @@ CONTAINS
     FAGE   = 0.
     FHIGH  = MAX( (FFXFM + FAGE ) * MAX(FMEAN1,FMEANWS), FFXPM / USTAR)
     FHIGI  = FFXFA * FMEAN1
+    !WRITE(*,*) 'TEST TEST TEST', FAGE, FHIGH, FHIGI 
 #endif
 #ifdef W3_ST6
     IF (FXFM .LE. 0) THEN
@@ -1185,7 +1190,7 @@ CONTAINS
       ! 2.a Input.
       !
 #ifdef W3_LN1
-      CALL W3SLN1 (       WN1, FHIGH, USTAR, U10DIR , VSLN       )
+      CALL W3SLN1 (     IX,  WN1, FHIGH, USTAR, U10DIR , VSLN       )
       IF (IX == DEBUG_NODE) THEN
         WRITE(*,*) 'SUM SPEC', SUM(SPEC) 
         DO ISP = 1, NSPEC 
@@ -1193,7 +1198,8 @@ CONTAINS
           SPECCG(ISP) = SPEC(ISP) / CG1(IK) 
         ENDDO 
         WRITE(*,*) 'SUM SPECCG', SUM(SPECCG)
-        WRITE(*,*) 'SUM W3SLN1', SUM(VSLN) 
+        WRITE(*,*) 'SUM W3SLN1', SUM(VSLN)
+        WRITE(*,*) 'SUM VSIN VDIN', SUM(VSIN), SUM(VDIN) 
       ENDIF
 #endif
       !
@@ -1210,12 +1216,12 @@ CONTAINS
            ICE, VSIN, VDIN, LLWS, IX, IY )
 #endif
 #ifdef W3_ST4
-      CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
-           U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
-           VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
-      IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'SUM W3SIN4', SUM(VSIN), SUM(VDIN)
-      ENDIF
+      !CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
+      !     U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
+      !     VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
+           IF (IX == DEBUG_NODE) THEN
+             WRITE(*,*) 'SUM W3SIN4', SUM(VSIN), SUM(VDIN)
+           ENDIF
 #endif
 
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
@@ -1282,9 +1288,9 @@ CONTAINS
 #ifdef W3_ST4
       CALL W3SDS4 ( SPEC, WN1, CG1, USTAR, USTDIR, DEPTH, DAIR, VSDS,   &
            VDDS, IX, IY, BRLAMBDA, WHITECAP, DLWMEAN )
-      IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
-      ENDIF
+       IF (IX == DEBUG_NODE) THEN
+          WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
+       ENDIF
 #endif
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
       IF (IX == DEBUG_NODE) THEN
@@ -1584,6 +1590,17 @@ CONTAINS
               JAC = CLATSL/CG1(IK)
               DO ITH = 1, NTH
                 ISP = ITH + (IK-1)*NTH
+                VSCG(ISP) = VS(ISP)/CG1(IK)
+                VSCGJAC(ISP) = VS(ISP) * JAC 
+              ENDDO
+            ENDDO 
+            IF (IX == DEBUG_NODE) THEN
+              WRITE(*,*) 'SUM VSTOT VSSCGTOT, VDTOT', IX, SUM(VS), SUM(VSCG), SUM(VD), SUM(VSCGJAC), CLATSL 
+            ENDIF 
+            DO IK = 1, NK
+              JAC = CLATSL/CG1(IK)
+              DO ITH = 1, NTH
+                ISP = ITH + (IK-1)*NTH
                 VD(ISP) = MIN(0., VD(ISP))
                 IF (B_JGS_LIMITER_FUNC == 2) THEN
                   MAXDAC = MAX(DAM(ISP),DAM2(ISP))
@@ -1600,10 +1617,15 @@ CONTAINS
                   eVS = 0
                   eVD = 0
                 ELSE
-                  eVS    = PreVS / CG1(IK) * CLATSL
+                  eVS    = PreVS * JAC 
                   eVD    = MIN(0.,VD(ISP))
                 ENDIF
-                B_JAC(ISP,JSEA)                   = B_JAC(ISP,JSEA) + SIDT * (eVS - eVD*SPEC(ISP)*JAC)
+                B_JAC(ISP,JSEA) = B_JAC(ISP,JSEA) + SIDT * (eVS - eVD * SPEC(ISP)*JAC)
+                
+                !IF (ISEA == DEBUG_NODE) THEN
+                !  WRITE(*,*) 'IK, ITH, B_JAC(ISP,JSEA), eVS * PDLIB_SI(JSEA) * DTG', IK, ITH, B_JAC(ISP,JSEA), eVS * PDLIB_SI(JSEA) * DTG
+                !ENDIF
+ 
                 ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) = ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) - SIDT * eVD
 #ifdef W3_DB1
                 eVS = VSDB(ISP) * JAC

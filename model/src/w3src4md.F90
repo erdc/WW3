@@ -504,7 +504,7 @@ CONTAINS
 #ifdef W3_T
          RADE,                                      &
 #endif
-         DELAB,ABMIN
+         DELAB,ABMIN, DEBUG_NODE
     USE W3GDATMD, ONLY: NK, NTH, NSPEC, DDEN, SIG, SIG2, TH,         &
          ESIN, ECOS, EC2, ZZWND, AALPHA, BBETA, ZZALP,&
          TTAUWSHELTER, SSWELLF, DDEN2, DTH, SSINTHP,  &
@@ -793,6 +793,10 @@ CONTAINS
           END IF
         END DO
       END DO
+
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'TEST DSTAB', SUM(DSTAB) 
+      ENDIF 
       !
       D(:)=DSTAB(3,:)
       XSTRESS=STRESSSTAB (3,1)
@@ -1147,9 +1151,9 @@ CONTAINS
       SATWEIGHTS(:,:)=1.
     END IF
 
-    WRITE(*,*) 'SATINDICES', SATINDICES
-    WRITE(*,*) '-----------------------------------------------'
-    WRITE(*,*) 'SATWEIGHTS', SATWEIGHTS
+    !WRITE(*,*) 'SATINDICES', SATINDICES
+    !WRITE(*,*) '-----------------------------------------------'
+    !WRITE(*,*) 'SATWEIGHTS', SATWEIGHTS
     !/ ------------------------------------------------------------------- /
     !
     ! Precomputes QBI and DCKI (TEST 500)
@@ -2274,15 +2278,15 @@ CONTAINS
         ASUM = SUM(A(IS0+1:IS0+NTH))
         BTH0(IK) = ASUM * FACSAT
         IF (IX == DEBUG_NODE) THEN
-          WRITE(*,*) DEBUG_NODE
-          WRITE(*,*) 'FACSAT, SIG(IK), K(IK), CG1(IK), DTH', FACSAT, SIG(IK), K(IK), CG(IK), DTH
+          !WRITE(*,*) DEBUG_NODE
+          !WRITE(*,*) 'FACSAT, SIG(IK), K(IK), CG1(IK), DTH', FACSAT, SIG(IK), K(IK), CG(IK), DTH
         ENDIF 
         !
         IF (SSDSDTH.GE.180) THEN  ! integrates around full circle
           BTH(IS0+1:IS0+NTH)=BTH0(IK)
         ELSE
           IF (IX == DEBUG_NODE) THEN 
-            WRITE(*,*) 'A(IS0+1:IS0+NTH)', A(IS0+1:IS0+NTH)
+            !WRITE(*,*) 'A(IS0+1:IS0+NTH)', A(IS0+1:IS0+NTH)
           ENDIF
           DO ITH=1,NTH            ! partial integration
             IS=ITH+(IK-1)*NTH
@@ -2292,21 +2296,21 @@ CONTAINS
             do ITH2=1, size(SATWEIGHTS,1)
                 BTH2(IS) = BTH2(IS) + SATWEIGHTS(ITH2,ITH)*  A(IS0+SATINDICES(ITH2,ITH))
                 if(ix == debug_node) then
-                    write(*,*) "is id id2 ", IK, ITH, ITH2, SATWEIGHTS(ITH2,ITH), A(IS0+SATINDICES(ITH2,ITH)), BTH2(IS)
+                    !write(*,*) "is id id2 ", IK, ITH, ITH2, SATWEIGHTS(ITH2,ITH), A(IS0+SATINDICES(ITH2,ITH)), BTH2(IS)
                 endif
             end do
           END DO
 
           BTH0(IK) = MAXVAL(BTH(IS0+1:IS0+NTH))
           IF (IX == DEBUG_NODE) THEN
-            WRITE(*,*) 'IK BTH0', IK, BTH0(IK)
+            !WRITE(*,*) 'IK BTH0', IK, BTH0(IK)
           ENDIF 
         END IF
         !
       END DO !IK=NK
 
       IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'SUM BTH, BTH0', SUM(BTH), SUM(BTH0)
+        !WRITE(*,*) 'SUM BTH, BTH0', SUM(BTH), SUM(BTH0)
       ENDIF
       !
       !  2.a.2  Computes spontaneous breaking dissipation rate

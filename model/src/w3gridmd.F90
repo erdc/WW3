@@ -1263,6 +1263,7 @@ CONTAINS
     !
     DO ITH=1, NTH
       TH  (ITH) = DTH * ( RTH0 + REAL(ITH-1) )
+
       ESIN(ITH) = SIN ( TH(ITH) )
       ECOS(ITH) = COS ( TH(ITH) )
       IF ( ABS(ESIN(ITH)) .LT. 1.E-5 ) THEN
@@ -1677,6 +1678,7 @@ CONTAINS
     RFHF   = MAX(0.,MIN (1.,RFHF))
     WRITE (NDSO,821) CLIN, RFPM, RFHF
     SLNC1  = CLIN * (DAIR/DWAT)**2 / GRAV**2
+    WRITE(*,*) 'SLNC1  = CLIN * (DAIR/DWAT)**2 / GRAV**2', CLIN, DAIR, DWAT, GRAV
     FSPM   = RFPM
     FSHF   = RFHF
 #endif

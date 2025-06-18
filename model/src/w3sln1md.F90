@@ -53,7 +53,7 @@ MODULE W3SLN1MD
   !/
 CONTAINS
   !/ ------------------------------------------------------------------- /
-  SUBROUTINE W3SLN1 (K, FHIGH, USTAR, USDIR, S)
+  SUBROUTINE W3SLN1 (IX, K, FHIGH, USTAR, USDIR, S)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -137,6 +137,7 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     USE CONSTANTS
     USE W3GDATMD, ONLY: NTH, NK, ECOS, ESIN, SIG, SLNC1, FSPM, FSHF
+    USE W3ADATMD, ONLY: WN, CG
     USE W3ODATMD, ONLY: NDSE, NDST
     USE W3SERVMD, ONLY: EXTCDE
 #ifdef W3_S
@@ -148,6 +149,7 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/ Parameter list
     !/
+    INTEGER, INTENT(IN)     :: IX
     REAL, INTENT(IN)        :: K(NK), FHIGH, USTAR, USDIR
     REAL, INTENT(OUT)       :: S(NTH,NK)
     !/
@@ -175,15 +177,29 @@ CONTAINS
     !
     COSU   = COS(USDIR)
     SINU   = SIN(USDIR)
+    IF (IX == DEBUG_NODE) THEN 
+      DO IK = 1, NK
+        !WRITE(*,*) 'K(IK), WN(IK,IX), CG(IK,IX)', K(IK), WN(IK,IX), CG(IK,IX)
+      ENDDO 
+    ENDIF
     !
     DO ITH=1, NTH
       DIRF(ITH) = MAX ( 0. , (ECOS(ITH)*COSU+ESIN(ITH)*SINU) )**4
+      IF (IX == DEBUG_NODE) THEN
+        !WRITE(*,*) 'DIRF', ITH, DIRF(ITH), ECOS(ITH), ESIN(ITH)
+      ENDIF
     END DO
     !
     FAC    = SLNC1 * USTAR**4
     FF1    = FSPM * GRAV/(28.*USTAR)
     FF2    = FSHF * MIN(SIG(NK),FHIGH)
     FFILT  = MIN ( MAX(FF1,FF2) , 2.*SIG(NK) )
+    IF (IX == DEBUG_NODE) THEN
+      !WRITE(*,*) 'FSPM FSHF FHIGH USTAR',FSPM, FSHF, FHIGH, USTAR
+      !WRITE(*,*) 'FFILT, FF1, FF2, MAX(FF1,FF2), 2.*SIG(NK)', FFILT, FF1, FF2, MAX(FF1,FF2), 2.*SIG(NK)
+      !WRITE(*,*) 'SLNC1 USTAR FSPM, FSHF', SLNC1, USTAR, FSPM, FSHF
+      !WRITE(*,*) 'COSDIR, COSU, SINU, FAC, FF1, FF2, FFILT, SIG(NK)', USDIR, COSU, SINU, FAC, FF1, FF2, FFILT, SIG(NK)
+    ENDIF
     DO IK=1, NK
       RFR    = SIG(IK) / FFILT
       IF ( RFR .LT. 0.5 ) THEN
@@ -191,6 +207,9 @@ CONTAINS
       ELSE
         WNF(IK) = FAC / K(IK) * EXP(-RFR**(-4))
       END IF
+      IF (IX == DEBUG_NODE) THEN
+        !WRITE(*,*) 'IK, WNF(IK), FAC, K(IK), SIG(IK), RFR, EXP(-RFR**(-4))', IK, WNF(IK), FAC, K(IK), SIG(IK), RFR, EXP(-RFR**(-4))
+      ENDIF
     END DO
     !
     ! 2.  Compose source term -------------------------------------------- *
@@ -198,6 +217,14 @@ CONTAINS
     DO IK=1, NK
       S(:,IK) = WNF(IK) * DIRF(:)
     END DO
+    !
+    IF (IX == DEBUG_NODE) THEN 
+      DO IK=1, NK
+        DO ITH = 1, NTH
+          !WRITE(*,*) 'SLINEAR', IK, ITH, S(ITH,IK), WNF(IK), DIRF(ITH) 
+        ENDDO
+      ENDDO 
+    ENDIF
     !
     RETURN
     !
