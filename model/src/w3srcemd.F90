@@ -1241,6 +1241,8 @@ CONTAINS
 #ifdef W3_NL1
       IF (IQTPE.GT.0) THEN
         CALL W3SNL1 ( SPEC, CG1, WNMEAN*DEPTH, VSNL, VDNL )
+        VSNL = 0.
+        VDNL = 0. 
         IF (IX == DEBUG_NODE) THEN
           WRITE(*,*) 'SUM W3SNL1', SUM(VSNL), SUM(VDNL) 
         ENDIF
@@ -1288,6 +1290,8 @@ CONTAINS
 #ifdef W3_ST4
       CALL W3SDS4 ( SPEC, WN1, CG1, USTAR, USTDIR, DEPTH, DAIR, VSDS,   &
            VDDS, IX, IY, BRLAMBDA, WHITECAP, DLWMEAN )
+       VSDS = 0. 
+       VDDS = 0. 
        IF (IX == DEBUG_NODE) THEN
           WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
        ENDIF
@@ -1622,9 +1626,9 @@ CONTAINS
                 ENDIF
                 B_JAC(ISP,JSEA) = B_JAC(ISP,JSEA) + SIDT * (eVS - eVD * SPEC(ISP)*JAC)
                 
-                !IF (ISEA == DEBUG_NODE) THEN
-                !  WRITE(*,*) 'IK, ITH, B_JAC(ISP,JSEA), eVS * PDLIB_SI(JSEA) * DTG', IK, ITH, B_JAC(ISP,JSEA), eVS * PDLIB_SI(JSEA) * DTG
-                !ENDIF
+                IF (ISEA == DEBUG_NODE) THEN
+                  WRITE(*,*) 'IK, ITH, B_JAC(ISP,JSEA), SIDT, eVs, evd', IK, ITH, B_JAC(ISP,JSEA), SIDT, eVs, evd, SPEC(ISP)
+                ENDIF
  
                 ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) = ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) - SIDT * eVD
 #ifdef W3_DB1
