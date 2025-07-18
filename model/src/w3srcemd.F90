@@ -1191,6 +1191,7 @@ CONTAINS
       !
 #ifdef W3_LN1
       CALL W3SLN1 (     IX,  WN1, FHIGH, USTAR, U10DIR , VSLN       )
+      !VSLN = 0.
       IF (IX == DEBUG_NODE) THEN
         WRITE(*,*) 'SUM SPEC', SUM(SPEC) 
         DO ISP = 1, NSPEC 
@@ -1216,9 +1217,11 @@ CONTAINS
            ICE, VSIN, VDIN, LLWS, IX, IY )
 #endif
 #ifdef W3_ST4
-      !CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
-      !     U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
-      !     VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
+      CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
+           U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
+           VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
+           VSIN = 0. 
+           VDIN = 0.
            IF (IX == DEBUG_NODE) THEN
              WRITE(*,*) 'SUM W3SIN4', SUM(VSIN), SUM(VDIN)
            ENDIF
@@ -1244,7 +1247,7 @@ CONTAINS
         VSNL = 0.
         VDNL = 0. 
         IF (IX == DEBUG_NODE) THEN
-          WRITE(*,*) 'SUM W3SNL1', SUM(VSNL), SUM(VDNL) 
+        !  WRITE(*,*) 'SUM W3SNL1', SUM(VSNL), SUM(VDNL) 
         ENDIF
       ELSE
         CALL W3SNLGQM ( SPEC, CG1, WN1, DEPTH, VSNL, VDNL )
@@ -1591,7 +1594,7 @@ CONTAINS
           IF (IMEM == 1) THEN
             SIDT  = PDLIB_SI(JSEA) * DTG
             DO IK = 1, NK
-              JAC = CLATSL/CG1(IK)
+              JAC = 1./CG1(IK)
               DO ITH = 1, NTH
                 ISP = ITH + (IK-1)*NTH
                 VSCG(ISP) = VS(ISP)/CG1(IK)
@@ -1602,7 +1605,7 @@ CONTAINS
               WRITE(*,*) 'SUM VSTOT VSSCGTOT, VDTOT', IX, SUM(VS), SUM(VSCG), SUM(VD), SUM(VSCGJAC), CLATSL 
             ENDIF 
             DO IK = 1, NK
-              JAC = CLATSL/CG1(IK)
+              JAC = 1./CG1(IK)
               DO ITH = 1, NTH
                 ISP = ITH + (IK-1)*NTH
                 VD(ISP) = MIN(0., VD(ISP))
@@ -1627,7 +1630,7 @@ CONTAINS
                 B_JAC(ISP,JSEA) = B_JAC(ISP,JSEA) + SIDT * (eVS - eVD * SPEC(ISP)*JAC)
                 
                 IF (ISEA == DEBUG_NODE) THEN
-                  WRITE(*,*) 'IK, ITH, B_JAC(ISP,JSEA), SIDT, eVs, evd', IK, ITH, B_JAC(ISP,JSEA), SIDT, eVs, evd, SPEC(ISP)
+                  WRITE(*,*) 'IK, ITH, B_JAC(ISP,JSEA), eVs, evd', IK, ITH, B_JAC(ISP,JSEA), eVs, evd, SPEC(ISP), DT
                 ENDIF
  
                 ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) = ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) - SIDT * eVD
@@ -1663,13 +1666,14 @@ CONTAINS
 
             IF (IX == DEBUG_NODE) THEN
               WRITE(*,*) 'BJAC & ASPAR_DIAG', SUM(B_JAC(:,JSEA)), SUM(ASPAR_JAC(:,PDLIB_I_DIAG(JSEA)))
+              PAUSE
             ENDIF
 
           ELSEIF (IMEM == 2) THEN
 
             SIDT   = PDLIB_SI(JSEA) * DTG
             DO IK=1,NK
-              JAC = CLATSL/CG1(IK)
+              JAC = 1./CG1(IK)
               DO ITH=1,NTH
                 ISP=ITH + (IK-1)*NTH
                 VD(ISP) = MIN(0., VD(ISP))
