@@ -2108,7 +2108,7 @@ CONTAINS
                          CY(ISEA), DCXDX(IY,IXrel), DCXDY(IY,IXrel),     &
                          DCYDX(IY,IXrel), DCYDY(IY,IXrel),               &
                          DCDX(:,IY,IXrel), DCDY(:,IY,IXrel), VA(:,JSEA), &
-                         CFLTHMAX(JSEA), CFLKMAX(JSEA) )
+                         FLTHMAX(JSEA), CFLKMAX(JSEA) )
 #endif
                     !
                   END IF  !! GTYPE

@@ -138,7 +138,7 @@ CONTAINS
 !> @author H. L. Tolman
 !> @date   22-Feb-2020
 !>
-  SUBROUTINE W3SPR4 (A, CG, WN, EMEAN, FMEAN, FMEAN1, WNMEAN,     &
+  SUBROUTINE W3SPR4 (IX, A, CG, WN, EMEAN, FMEAN, FMEAN1, WNMEAN,     &
        AMAX, U, UDIR,                                    &
 #ifdef W3_FLX5
        TAUA, TAUADIR, DAIR,                              &
@@ -225,7 +225,7 @@ CONTAINS
     !
     !/ ------------------------------------------------------------------- /
     USE W3ODATMD, ONLY: IAPROC
-    USE CONSTANTS, ONLY: TPIINV, GRAV, nu_air
+    USE CONSTANTS, ONLY: TPIINV, GRAV, nu_air, DEBUG_NODE
     USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, DTH, DDEN, WWNMEANP, &
          WWNMEANPTAIL, FTE, FTF, SSTXFTF, SSTXFTWN,&
          SSTXFTFTAIL, SSWELLF, ESIN, ECOS, AAIRCMIN, &
@@ -255,6 +255,7 @@ CONTAINS
     REAL, INTENT(INOUT)     :: USTAR ,USDIR
     REAL, INTENT(OUT)       :: EMEAN, FMEAN, FMEAN1, WNMEAN, AMAX,  &
          CD, Z0, CHARN, FMEANWS, DLWMEAN
+    INTEGER, INTENT(IN)     :: IX
     !/
     !/ ------------------------------------------------------------------- /
     !/ Local parameters
@@ -265,7 +266,7 @@ CONTAINS
 #endif
 
     REAL                    :: TAUW, EBAND, EMEANWS,UNZ,            &
-         EB(NK),EB2(NK),ELCS, ELSN, SIGFAC
+         EB(NK),EB2(NK),ELCS, ELSN, SIGFAC, EBCG(NK)
     !/
     !/ ------------------------------------------------------------------- /
     !/
@@ -292,10 +293,16 @@ CONTAINS
     DO IK=1, NK
       EB(IK)  = 0.
       EB2(IK) = 0.
+      EBCG(IK) = 0. 
       SIGFAC=SIG(IK)**SSDSC(12) * DDEN(IK) / CG(IK)
       DO ITH=1, NTH
         IS=ITH+(IK-1)*NTH
         EB(IK) = EB(IK) + A(ITH,IK)
+        EBCG(IK) = EBCG(IK) + A(ITH,IK)/CG(IK)
+        IF (IX == DEBUG_NODE) THEN
+!2do - small accuracy errro between triton to be further checked in the summation and division by cg
+          WRITE(33333,*) IK, ITH, EB(IK), A(ITH, IK), A(ITH, IK)/CG(IK), EB(IK)/CG(IK), EBCG(IK) 
+        ENDIF 
         ELCS = ELCS + A(ITH,IK)*ECOS(IS)*SIGFAC
         ELSN = ELSN + A(ITH,IK)*ESIN(IS)*SIGFAC
         IF (LLWS(IS)) EB2(IK) = EB2(IK) + A(ITH,IK)
@@ -311,6 +318,9 @@ CONTAINS
       EB(IK)   = EB(IK) * DDEN(IK) / CG(IK)
       EB2(IK)   = EB2(IK) * DDEN(IK) / CG(IK)
       EMEAN    = EMEAN  + EB(IK)
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(44444,*) IK, EMEAN, EB(IK), DDEN(IK) 
+      ENDIF
       FMEAN    = FMEAN  + EB(IK) /SIG(IK)
       FMEAN1   = FMEAN1 + EB(IK) *(SIG(IK)**(2.*WWNMEANPTAIL))
       WNMEAN   = WNMEAN + EB(IK) *(WN(IK)**WWNMEANP)
@@ -322,6 +332,9 @@ CONTAINS
     !     ( DTH * SIG absorbed in FTxx )
     !
     EBAND  = EB(NK) / DDEN(NK)
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'EBAND, EB(NK), DDEN(NK), FTE, EMEAN, EMEAN + EBAND * FTE', EBAND, EB(NK), DDEN(NK), FTE, EMEAN, EMEAN + EBAND * FTE
+    ENDIF
     EMEAN  = EMEAN  + EBAND * FTE
     FMEAN  = FMEAN  + EBAND * FTF
     FMEAN1 = FMEAN1 + EBAND * SSTXFTFTAIL

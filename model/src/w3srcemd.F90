@@ -1046,7 +1046,7 @@ CONTAINS
       USTAR=0.
       USTDIR=0.
     ELSE
-      CALL W3SPR4 (SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN, &
+      CALL W3SPR4 (IX, SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN, &
            AMAX, U10ABS, U10DIR,                           &
 #ifdef W3_FLX5
            TAUA, TAUADIR, DAIR,                             &
@@ -1073,6 +1073,8 @@ CONTAINS
       IF (SINTAILPAR(4).GT.0.5) CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
            U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
            VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
+           VSIN = 0
+           VDIN = 0 
      END IF
 #endif
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
@@ -1089,7 +1091,7 @@ CONTAINS
 #endif
 
 #ifdef W3_ST4
-    CALL W3SPR4 (SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN, &
+    CALL W3SPR4 (IX, SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN, &
          AMAX, U10ABS, U10DIR,                         &
 #ifdef W3_FLX5
          TAUA, TAUADIR, DAIR,                    &
@@ -1630,7 +1632,7 @@ CONTAINS
                 B_JAC(ISP,JSEA) = B_JAC(ISP,JSEA) + SIDT * (eVS - eVD * SPEC(ISP)*JAC)
                 
                 IF (ISEA == DEBUG_NODE) THEN
-                  WRITE(*,*) 'IK, ITH, B_JAC(ISP,JSEA), eVs, evd', IK, ITH, B_JAC(ISP,JSEA), eVs, evd, SPEC(ISP), DT
+                  !WRITE(*,*) 'IK, ITH, B_JAC(ISP,JSEA), eVs, evd', IK, ITH, B_JAC(ISP,JSEA), eVs, evd, SPEC(ISP), EMEAN, 4*SQRT(EMEAN)
                 ENDIF
  
                 ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) = ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) - SIDT * eVD
@@ -1666,7 +1668,6 @@ CONTAINS
 
             IF (IX == DEBUG_NODE) THEN
               WRITE(*,*) 'BJAC & ASPAR_DIAG', SUM(B_JAC(:,JSEA)), SUM(ASPAR_JAC(:,PDLIB_I_DIAG(JSEA)))
-              PAUSE
             ENDIF
 
           ELSEIF (IMEM == 2) THEN
@@ -1888,7 +1889,7 @@ CONTAINS
            TAUWX, TAUWY, CD, Z0, CHARN, LLWS, FMEANWS)
 #endif
 #ifdef W3_ST4
-      CALL W3SPR4 (SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN,&
+      CALL W3SPR4 (IX, SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN,&
            AMAX, U10ABS, U10DIR,                          &
 #ifdef W3_FLX5
            TAUA, TAUADIR, DAIR,                     &
@@ -2020,7 +2021,7 @@ CONTAINS
       CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,      &
            U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY, &
            VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
-      IF (SINTAILPAR(4).LT.0.5) CALL W3SPR4 (SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN,&
+      IF (SINTAILPAR(4).LT.0.5) CALL W3SPR4 (IX, SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN,&
            AMAX, U10ABS, U10DIR,                          &
 #ifdef W3_FLX5
            TAUA, TAUADIR, DAIR,                     &

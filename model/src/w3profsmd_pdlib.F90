@@ -5565,7 +5565,7 @@ CONTAINS
     INTEGER :: IP, ISP, ITH, IK, JSEA, ISEA, IP_glob, IS0
     INTEGER :: myrank
     INTEGER :: nbIter, ISPnextDir, ISPprevDir
-    INTEGER :: ISPp1, ISPm1, JP, ICOUNT1, ICOUNT2
+    INTEGER :: ISPp1, ISPm1, JP, ICOUNT1, ICOUNT2, IX
     ! for the exchange
     REAL  :: CCOS, CSIN, CCURX, CCURY
     REAL  :: eSum(NSPEC), FRLOCAL
@@ -5672,7 +5672,7 @@ CONTAINS
 #else
         CG1(IK)    = CG(IK,ISEA)
 #endif
-        VA(ISP,JSEA) = VA(ISP,JSEA) / CG1(IK) * CLATS(ISEA)
+        VA(ISP,JSEA) = VA(ISP,JSEA) / CG1(IK)! * CLATS(ISEA)
       END DO
     END DO
     VAOLD = VA(1:NSPEC,1:NSEAL)
@@ -5818,8 +5818,10 @@ CONTAINS
           DO ISP=1,NSPEC
             VAold(ISP) = VA(ISP,JSEA)
             IK=MAPWN(ISP)
-            VAinput(ISP) = DBLE(CG(IK,ISEA)/CLATS(ISEA)) * VA(ISP, IP)
-            VAacloc(ISP) = DBLE(CG(IK,ISEA)/CLATS(ISEA)) * ACLOC(ISP)
+            !VAinput(ISP) = DBLE(CG(IK,ISEA)/CLATS(ISEA)) * VA(ISP, IP)
+            !VAinput(ISP) = DBLE(CG(IK,ISEA)/CLATS(ISEA)) * VA(ISP, IP)
+            VAacloc(ISP) = DBLE(CG(IK,ISEA)) * ACLOC(ISP)
+            VAacloc(ISP) = DBLE(CG(IK,ISEA)) * ACLOC(ISP)
           END DO
           WRITE(740+IAPROC,*) 'sum(VAold/VAinput/VAacloc)=', sum(VAold), sum(VAinput), sum(VAacloc)
 #endif
@@ -5962,7 +5964,8 @@ CONTAINS
           WRITE(740+IAPROC,*) 'JSEA=', JSEA, ' nbIter=', nbIter
           DO ISP=1,NSPEC
             IK=MAPWN(ISP)
-            VAnew(ISP) = DBLE(CG(IK,ISEA)/CLATS(ISEA)) * eSum(ISP)
+            !VAnew(ISP) = DBLE(CG(IK,ISEA)/CLATS(ISEA)) * eSum(ISP)
+            VAnew(ISP) = DBLE(CG(IK,ISEA)) * eSum(ISP)
           END DO
           DO ISP=1,NSPEC
             VAAnew(ISP)   = VAnew(ISP)
@@ -6233,6 +6236,9 @@ CONTAINS
       SumACout=0
 #endif
       !
+      IF (IP == DEBUG_NODE) THEN
+        WRITE(22222,*) VA(:,IP)
+      ENDIF
       DO ISP=1,NSPEC
 
         IK     = 1 + (ISP-1)/NTH
@@ -6241,8 +6247,10 @@ CONTAINS
 #else
         CG1(IK)    = CG(IK,ISEA)
 #endif
-        eVA = MAX ( ZERO ,CG1(IK)/CLATS(ISEA)*REAL(VA(ISP,IP)) )
-        eVO = MAX ( ZERO ,CG1(IK)/CLATS(ISEA)*REAL(VAOLD(ISP,JSEA)) )
+        !eVA = MAX ( ZERO ,CG1(IK)/CLATS(ISEA)*REAL(VA(ISP,IP)) )
+        !eVO = MAX ( ZERO ,CG1(IK)/CLATS(ISEA)*REAL(VAOLD(ISP,JSEA)) )
+        eVA = MAX ( ZERO ,CG1(IK)*REAL(VA(ISP,IP)) )
+        eVO = MAX ( ZERO ,CG1(IK)*REAL(VAOLD(ISP,JSEA)) )
 #ifdef W3_DEBUGSRC
         SumACout=SumACout + REAL(VA(ISP,IP))
         VS_w3srce = VSTOT(ISP,JSEA) * DTG / MAX(1., (1. - DTG*VDTOT(ISP,JSEA)))
@@ -6250,7 +6258,7 @@ CONTAINS
         IntDiff = IntDiff + abs(eVA - eVA_w3srce)
         ACsolve=B_JAC(ISP,IP)/ASPAR_JAC(ISP,PDLIB_I_DIAG(IP))
         eB=VA(ISP,JSEA) + DTG*(VSTOT(ISP,JSEA) - VDTOT(ISP,JSEA)*VA(ISP,JSEA))
-        eVAsolve=MAX(0., CG(IK,ISEA)/CLATS(ISEA)*ACsolve)
+        eVAsolve=MAX(0., CG(IK,ISEA)*ACsolve)
         VAsolve(ISP)=eVAsolve
         SumVS = SumVS + abs(VSTOT(ISP,JSEA))
         SumVD = SumVD + abs(VDTOT(ISP,JSEA))
@@ -6286,7 +6294,7 @@ CONTAINS
             SPEC(ISP) = VAOLD(ISP,JSEA)
           ENDDO
 #ifdef W3_ST4
-          CALL W3SPR4 (SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN, &
+          CALL W3SPR4 (IX, SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN, &
                AMAX, U10(ISEA), U10D(ISEA),                           &
 #ifdef W3_FLX5
                TAUA, TAUADIR, DAIR,                             &
@@ -6297,8 +6305,14 @@ CONTAINS
 
           DAM = 0.
           DO IK=1, NK
-            DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG(IK,ISEA)) * CG1(IK) / CLATS(ISEA)
+            DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG1(IK)) * CG1(IK)
           END DO
+          IF (ISEA == DEBUG_NODE) THEN 
+            DO IK=1, NK
+              DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG1(IK)) * CG1(IK)
+          !    WRITE(*,*) IK, ITH, DAM(1+(IK-1)*NTH), SIG(IK), WN(IK,ISEA)**3, CG1(IK)
+            END DO
+          ENDIF
           !
           DO IK=1, NK
             IS0    = (IK-1)*NTH
@@ -6311,7 +6325,7 @@ CONTAINS
           DO IK=1, NK
             JAC2     = 1./TPI/SIG(IK)
             FRLOCAL  = SIG(IK)*TPIINV
-            DAM2(1+(IK-1)*NTH) = 1E-06 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2 * CG1(IK) / CLATS(ISEA)
+            DAM2(1+(IK-1)*NTH) = 1E-06 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2 * CG1(IK)
           END DO
           DO IK=1, NK
             IS0  = (IK-1)*NTH
@@ -6324,7 +6338,8 @@ CONTAINS
             DO ITH = 1, NTH
               ISP = ITH + (IK-1)*NTH
               newdac     = VA(ISP,IP) - VAOLD(ISP,JSEA)
-              maxdac     = max(DAM(ISP),DAM2(ISP))
+              !maxdac     = max(DAM(ISP),DAM2(ISP))
+              maxdac     = DAM(ISP)
               NEWDAC     = SIGN(MIN(MAXDAC,ABS(NEWDAC)), NEWDAC)
               VA(ISP,IP) = max(0., VAOLD(ISP,IP) + NEWDAC)
             ENDDO
@@ -6583,7 +6598,8 @@ CONTAINS
         isp = 0
         do ith = 1,nth
           isp = ith + (ik-1)*nth
-          u(ith,ip) = va(isp,ip) / cgsig(ip) * clats(iplg(ip))
+!AR: This clats is also wrong here ...
+          u(ith,ip) = va(isp,ip) / cgsig(ip) !* clats(iplg(ip))
         enddo
       enddo
       CALL PDLIB_exchange2DREAL(U)

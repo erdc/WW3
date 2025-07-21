@@ -6511,7 +6511,7 @@ contains
           ustdr = zero
           tauwx = zero
           tauwy = zero
-          call w3spr4( va(:,jsea), cg(1:nk,isea), wn(1:nk,isea),   &
+          call w3spr4( ix, va(:,jsea), cg(1:nk,isea), wn(1:nk,isea),   &
                emean, fmean, fmean1, wnmean, amax,         &
                u10(isea), u10d(isea), ustar, ustdr, tauwx, &
                tauwy, cd, z0, charn(jsea), llws, fmeanws,  &
@@ -6664,7 +6664,7 @@ contains
             ustdr = zero
             tauwx = zero
             tauwy = zero
-            call w3spr4( va(:,jsea), cg(1:nk,isea), wn(1:nk,isea),   &
+            call w3spr4( ix, va(:,jsea), cg(1:nk,isea), wn(1:nk,isea),   &
                  emean, fmean, fmean1, wnmean, amax,         &
                  u10(isea), u10d(isea), ustar, ustdr, tauwx, &
                  tauwy, cd, z0, charn(jsea), llws, fmeanws,  &
