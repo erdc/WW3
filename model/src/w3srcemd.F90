@@ -1056,7 +1056,7 @@ CONTAINS
 #endif
  
       IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'TEST EMEAN', EMEAN, 4 * SQRT(EMEAN), SUM(SPEC)
+        !WRITE(*,*) 'TEST EMEAN', EMEAN, 4 * SQRT(EMEAN), SUM(SPEC)
       ENDIF
 
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
@@ -1195,14 +1195,14 @@ CONTAINS
       CALL W3SLN1 (     IX,  WN1, FHIGH, USTAR, U10DIR , VSLN       )
       !VSLN = 0.
       IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'SUM SPEC', SUM(SPEC) 
+        !WRITE(*,*) 'SUM SPEC', SUM(SPEC) 
         DO ISP = 1, NSPEC 
           IK = 1 + (ISP-1)/NTH
           SPECCG(ISP) = SPEC(ISP) / CG1(IK) 
         ENDDO 
-        WRITE(*,*) 'SUM SPECCG', SUM(SPECCG)
-        WRITE(*,*) 'SUM W3SLN1', SUM(VSLN)
-        WRITE(*,*) 'SUM VSIN VDIN', SUM(VSIN), SUM(VDIN) 
+        !WRITE(*,*) 'SUM SPECCG', SUM(SPECCG)
+        !WRITE(*,*) 'SUM W3SLN1', SUM(VSLN)
+        !WRITE(*,*) 'SUM VSIN VDIN', SUM(VSIN), SUM(VDIN) 
       ENDIF
 #endif
       !
@@ -1222,8 +1222,8 @@ CONTAINS
       CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
            U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
            VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
-           VSIN = 0. 
-           VDIN = 0.
+           !VSIN = 0. 
+           !VDIN = 0.
            IF (IX == DEBUG_NODE) THEN
              WRITE(*,*) 'SUM W3SIN4', SUM(VSIN), SUM(VDIN)
            ENDIF
@@ -1298,7 +1298,7 @@ CONTAINS
        VSDS = 0. 
        VDDS = 0. 
        IF (IX == DEBUG_NODE) THEN
-          WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
+         !WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
        ENDIF
 #endif
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
@@ -1604,7 +1604,7 @@ CONTAINS
               ENDDO
             ENDDO 
             IF (IX == DEBUG_NODE) THEN
-              WRITE(*,*) 'SUM VSTOT VSSCGTOT, VDTOT', IX, SUM(VS), SUM(VSCG), SUM(VD), SUM(VSCGJAC), CLATSL 
+              !WRITE(*,*) 'SUM VSTOT VSSCGTOT, VDTOT', IX, SUM(VS), SUM(VSCG), SUM(VD), SUM(VSCGJAC), CLATSL 
             ENDIF 
             DO IK = 1, NK
               JAC = 1./CG1(IK)

@@ -333,7 +333,7 @@ CONTAINS
     !
     EBAND  = EB(NK) / DDEN(NK)
     IF (IX == DEBUG_NODE) THEN
-      WRITE(*,*) 'EBAND, EB(NK), DDEN(NK), FTE, EMEAN, EMEAN + EBAND * FTE', EBAND, EB(NK), DDEN(NK), FTE, EMEAN, EMEAN + EBAND * FTE
+      !WRITE(*,*) 'EBAND, EB(NK), DDEN(NK), FTE, EMEAN, EMEAN + EBAND * FTE', EBAND, EB(NK), DDEN(NK), FTE, EMEAN, EMEAN + EBAND * FTE
     ENDIF
     EMEAN  = EMEAN  + EBAND * FTE
     FMEAN  = FMEAN  + EBAND * FTF
@@ -645,6 +645,11 @@ CONTAINS
     UORB  = 2*SQRT(UORB)                  ! significant orbital amplitude
     AORB1 = 2*AORB**(1-0.5*SSWELLF(6))    ! half the significant wave height ... if SWELLF(6)=1
     RE = 4*UORB*AORB1 / NU_AIR           ! Reynolds number
+
+
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'UORB, AORB, RE, CONST0, CONST1', UORB, AORB, RE, CONST0, CONST1
+    ENDIF
     !
     ! Defines the swell dissipation based on the "Reynolds number"
     !
@@ -702,6 +707,9 @@ CONTAINS
     WRITE (NDST,9003) AS, Usigma, USTARsigma, U
 #endif
     UST=USTAR
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'UST', UST, DRAT  
+    ENDIF
     ISTAB=3
 #ifdef W3_STAB3
     DO ISTAB=1,2
@@ -745,6 +753,11 @@ CONTAINS
         !
         SWELLCOEFV=-SSWELLF(5)*DRAT*2*K(IS)*SQRT(2*NU_AIR*SIG2(IS))
         SWELLCOEFT=-DRAT*SSWELLF(1)*16*SIG2(IS)**2/GRAV
+
+        IF (IX == DEBUG_NODE) THEN
+          WRITE(*,*) 'TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT' 
+          WRITE(*,*) TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT
+        ENDIF
         !
         DO ITH=1,NTH
           IS=ITH+(IK-1)*NTH
@@ -808,7 +821,7 @@ CONTAINS
       END DO
 
       IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'TEST DSTAB', SUM(DSTAB) 
+        !WRITE(*,*) 'TEST DSTAB', SUM(DSTAB) 
       ENDIF 
       !
       D(:)=DSTAB(3,:)
@@ -2615,7 +2628,7 @@ CONTAINS
       END DO
 
       IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'SUM RENEWALFREQ' , RENEWALFREQ
+        !WRITE(*,*) 'SUM RENEWALFREQ' , RENEWALFREQ
       ENDIF 
 
     END IF

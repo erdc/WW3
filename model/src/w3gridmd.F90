@@ -1672,6 +1672,7 @@ CONTAINS
     RFPM   =  1.
     RFHF   =  0.5
     CALL READNL ( NDSS, 'SLN1', STATUS )
+    WRITE(55555, NML=SLN1) 
     WRITE (NDSO,820) STATUS
     CLIN   = MAX (0.,CLIN)
     RFPM   = MAX (0.,RFPM)
@@ -1803,6 +1804,7 @@ CONTAINS
     !
 #ifdef W3_ST4
     CALL READNL ( NDSS, 'SIN4', STATUS )
+    WRITE(55555, NML=SIN4)
     WRITE (NDSO,920) STATUS
     WRITE (NDSO,921) ALPHA0, BETAMAX, SINTHP, Z0MAX, ZALP, ZWND, TAUWSHELTER, &
          SWELLFPAR, SWELLF, SWELLF2, SWELLF3, SWELLF4, SWELLF5, &
@@ -1882,6 +1884,7 @@ CONTAINS
     GQAMP3=1.
     GQAMP4=1.
     CALL READNL ( NDSS, 'SNL1', STATUS )
+    WRITE(55555, NML=SNL1)
     WRITE (NDSO,922) STATUS
     WRITE (NDSO,923) LAMBDA, NLPROP, KDCONV, KDMIN,            &
          SNLCS1, SNLCS2, SNLCS3
@@ -2234,6 +2237,8 @@ CONTAINS
     !
 #ifdef W3_ST4
     CALL READNL ( NDSS, 'SDS4', STATUS )
+    WRITE(55555, NML=SDS4)
+    WRITE(*, NML=SDS4)
     WRITE (NDSO,924) STATUS
     WRITE (NDSO,925) SDSC2, SDSBCK, SDSCUM, WNMEANP
     SSDSC(1)   = REAL(SDSBCHOICE)
@@ -7298,6 +7303,7 @@ CONTAINS
 #ifdef W3_LN1
               CASE('SLN1')
                 READ (NDS,NML=SLN1,END=801,ERR=802,IOSTAT=J)
+                WRITE(55555, NML=SLN1)
 #endif
 #ifdef W3_ST1
               CASE('SIN1')
@@ -7314,6 +7320,7 @@ CONTAINS
 #ifdef W3_ST4
               CASE('SIN4')
                 READ (NDS,NML=SIN4,END=801,ERR=802,IOSTAT=J)
+                WRITE(55555, NML=SIN4)
 #endif
 #ifdef W3_ST6
               CASE('SIN6')
@@ -7322,6 +7329,7 @@ CONTAINS
 #ifdef W3_NL1
               CASE('SNL1')
                 READ (NDS,NML=SNL1,END=801,ERR=802,IOSTAT=J)
+                WRITE(55555, NML=SNL1)
 #endif
 #ifdef W3_NL2
               CASE('SNL2')
@@ -7366,6 +7374,7 @@ CONTAINS
 #ifdef W3_ST4
               CASE('SDS4')
                 READ (NDS,NML=SDS4,END=801,ERR=802,IOSTAT=J)
+                WRITE(55555, NML=SDS4)
 #endif
 #ifdef W3_ST6
               CASE('SDS6')

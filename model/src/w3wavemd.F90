@@ -315,7 +315,7 @@ CONTAINS
     !     ----------------------------------------------------------------
     !       IMOD    Int.   I   Model number.
     !       TEND    I.A.   I   Ending time of integration.
-    !       STAMP   Log.   I   WRITE(*,*)time stamp (optional, defaults to T).
+    !       STAMP   Log.   I   WRITE(*!!!!!!!,*)time stamp (optional, defaults to T).
     !       NO_OUT  Log.   I   Skip output (optional, defaults to F).
     !                          Skip at ending time only!
     !     ----------------------------------------------------------------
@@ -2108,7 +2108,7 @@ CONTAINS
                          CY(ISEA), DCXDX(IY,IXrel), DCXDY(IY,IXrel),     &
                          DCYDX(IY,IXrel), DCYDY(IY,IXrel),               &
                          DCDX(:,IY,IXrel), DCDY(:,IY,IXrel), VA(:,JSEA), &
-                         FLTHMAX(JSEA), CFLKMAX(JSEA) )
+                         CFLTHMAX(JSEA), CFLKMAX(JSEA) )
 #endif
                     !
                   END IF  !! GTYPE
@@ -2205,7 +2205,7 @@ CONTAINS
                 TMP3   = TAUBBL(JSEA,1:2)
                 TMP4   = TAUICE(JSEA,1:2)
 #ifdef W3_PDLIB
-                if (.true.) then
+                if (.false.) then
                 IF (FSSOURCE) THEN
                   CALL W3SRCE(srce_imp_post,IT,ISEA,JSEA,IX,IY,IMOD,     &
                        VAOLD(:,JSEA), VA(:,JSEA),                        &
