@@ -1358,19 +1358,6 @@ CONTAINS
             FLDDIR = FLDDIR .OR. FLCTH .OR. FSREFRACTION .OR. FLCK .OR. FSFREQSHIFT
           END IF
         END IF
-
-#ifdef W3_SETUP
-       !IF (DO_CHANGE_WLV) THEN
-         !DO ISEA = 1, NSEA
-           !write(*,*) 'CHECK WAVE SETUP', WLV(ISEA) + ZETA_SETUP(ISEA), DW(ISEA), ZB(ISEA)
-           !WLVeff    = WLV(ISEA) + ZETA_SETUP(ISEA)
-           !WLV(ISEA) = WLVeff
-           !DW (ISEA) = MAX ( 0. , WLVeff-ZB(ISEA) )
-         !ENDDO 
-         !pause
-       !END IF
-#endif
-
 #ifdef W3_DEBUGCOH
         CALL ALL_VA_INTEGRAL_PRINT(IMOD, "After FFLEV and DTL0", 1)
 #endif
@@ -2199,7 +2186,6 @@ CONTAINS
             !
             DO JSEA=1, NSEAL
               CALL INIT_GET_ISEA(ISEA, JSEA)
-
               IX     = MAPSF(ISEA,1)
               IY     = MAPSF(ISEA,2)
               DELA=1.
