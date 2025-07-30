@@ -5562,7 +5562,7 @@ CONTAINS
     INTEGER, INTENT(IN) :: IMOD
     REAL, INTENT(IN) :: FACX, FACY, DTG, VGX, VGY
     !
-    INTEGER :: IP, ISP, ITH, IK, JSEA, ISEA, IP_glob, IS0
+    INTEGER :: IP, ISP, ITH, IK, JSEA, IP_glob, IS0
     INTEGER :: myrank
     INTEGER :: nbIter, ISPnextDir, ISPprevDir
     INTEGER :: ISPp1, ISPm1, JP, ICOUNT1, ICOUNT2, IX
@@ -5587,7 +5587,6 @@ CONTAINS
     REAL  :: USTAR, USTDIR, TAUWX, TAUWY, CD, Z0, CHARN, FMEANWS, DLWMEAN
     REAL  :: eVal1, eVal2
     REAL  :: eVA, eVO, CG2, NEWDAC, NEWAC, OLDAC, MAXDAC
-    REAL  :: CG1(0:NK+1), WN1(0:NK+1)
     LOGICAL :: LCONVERGED(NSEAL), lexist, LLWS(NSPEC)
 #ifdef WEIGHTS
     INTEGER :: ipiter(nseal), ipitergl(np_global), ipiterout(np_global)
@@ -5648,6 +5647,9 @@ CONTAINS
 #ifdef W3_DEBUGSRC
     WRITE(740+IAPROC,*) 'optionCall=', optionCall
     FLUSH(740+IAPROC)
+
+    WRITE(*,*) 'Starting solver system', sum(VA(:,DEBUG_NODE))
+
 #endif
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_PROP SECTION 1')
     !
@@ -5663,19 +5665,16 @@ CONTAINS
     DO JSEA=1,NSEAL
       IP      = JSEA
       IP_glob = iplg(IP)
-      ISEA    = MAPFS(1,IP_glob)
       DO ISP=1,NSPEC
         ITH    = 1 + MOD(ISP-1,NTH)
         IK     = 1 + (ISP-1)/NTH
 #ifdef NOCGTABLE
-        CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN1(IK),CG1(IK))
-#else
-        CG1(IK)    = CG(IK,ISEA)
+        CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WN1(IK),CG(IK,IP_GLOB))
 #endif
-        VA(ISP,JSEA) = VA(ISP,JSEA) / CG1(IK)! * CLATS(ISEA)
+        VA(ISP,JSEA) = VA(ISP,JSEA) / CG(IK,IP_GLOB)
       END DO
     END DO
-    VAOLD = VA(1:NSPEC,1:NSEAL)
+    VAOLD = MAX(0.,VA(1:NSPEC,1:NSEAL))
 
 #ifdef W3_DEBUGSRC
     DO JSEA=1,NSEAL
@@ -5783,7 +5782,6 @@ CONTAINS
         ENDIF
 
         IP_glob = iplg(IP)
-        ISEA    = MAPFS(1,IP_glob)
         IF (IOBDP_LOC(IP) .eq. 0) THEN
           is_converged   = is_converged + 1
           lconverged(ip) = .true.
@@ -5792,15 +5790,11 @@ CONTAINS
 
         DO IK = 0, NK + 1
 #ifdef NOCGTABLE
-          CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN1(IK),CG1(IK))
-#else
-          CG1(IK)  = CG(IK,ISEA)
-          WN1(IK)  = WN(IK,ISEA)
+          CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN(IK,IP_GLOB),CG(IK,IP_GLOB))
 #endif
         ENDDO
 
         JSEA  = JX_TO_JSEA(IP)
-        ISEA  = MAPFS(1,IP_glob)
         eSI   = PDLIB_SI(IP)
         ACLOC = VA(:,JSEA)
 
@@ -5895,7 +5889,7 @@ CONTAINS
               CP_SIG = MAX(ZERO,CAS)
               CM_SIG = MIN(ZERO,CAS)
               DO IK=0, NK
-                DMM(IK+1) = DBLE(WN1(IK+1) - WN1(IK))
+                DMM(IK+1) = DBLE(WN(IK+1,IP_GLOB) - WN(IK,IP_GLOB))
               END DO
               DMM(NK+2) = ZERO
               DMM(0)=DMM(1)
@@ -5903,14 +5897,14 @@ CONTAINS
                 DO IK=2,NK
                   ISP       = ITH + (IK   -1)*NTH
                   ISPm1     = ITH + (IK-1 -1)*NTH
-                  eFactM1   = CG1(IK-1) / CG1(IK)
+                  eFactM1   = CG(IK-1,IP_GLOB) / CG(IK,IP_GLOB)
                   eA_SIG    = - eSI * CP_SIG(ISPm1)/DMM(IK-1) * eFactM1
                   eSum(ISP) = eSum(ISP) - eA_SIG*VA(ISPm1,IP)
                 END DO
                 DO IK=1,NK-1
                   ISP       = ITH + (IK   -1)*NTH
                   ISPp1     = ITH + (IK+1 -1)*NTH
-                  eFactP1   = CG1(IK+1) / CG1(IK)
+                  eFactP1   = CG(IK+1,IP_GLOB) / CG(IK,IP_GLOB)
                   eC_SIG    = eSI * CM_SIG(ISPp1)/DMM(IK) * eFactP1
                   eSum(ISP) = eSum(ISP) - eC_SIG*VA(ISPp1,IP)
                 END DO
@@ -5918,7 +5912,7 @@ CONTAINS
             ELSE IF (FreqShiftMethod .eq. 2) THEN
               CWNB_M2=CWNB_SIG_M2(:,IP)
               DO IK=1, NK
-                DWNI_M2(IK) = DBLE( CG1(IK) / DSIP(IK) )
+                DWNI_M2(IK) = DBLE( CG(IK,IP_GLOB) / DSIP(IK) )
               END DO
 #ifdef W3_DEBUGFREQSHIFT
               WRITE(740+IAPROC,*) 'Before FreqShift oper eSum=', sum(abs(eSum))
@@ -5927,14 +5921,14 @@ CONTAINS
                 DO IK=2,NK
                   ISP       = ITH + (IK   -1)*NTH
                   ISPm1     = ITH + (IK-1 -1)*NTH
-                  eFactM1   = DBLE( CG1(IK-1) / CG1(IK) )
+                  eFactM1   = DBLE( CG(IK-1,IP_GLOB) / CG(IK,IP_GLOB) )
                   eA_SIG    = - eSI * DWNI_M2(IK) * MAX(CWNB_M2(ISPm1),ZERO) *eFactM1
                   eSum(ISP) = eSum(ISP) - eA_SIG*VA(ISPm1,IP)
                 END DO
                 DO IK=1,NK-1
                   ISP       = ITH + (IK   -1)*NTH
                   ISPp1     = ITH + (IK+1 -1)*NTH
-                  eFactP1   = DBLE( CG1(IK+1) / CG1(IK) )
+                  eFactP1   = DBLE( CG(IK+1,IP_GLOB) / CG(IK,IP_GLOB) )
                   eC_SIG    = eSI * DWNI_M2(IK) * MIN(CWNB_M2(ISP),ZERO) * eFactP1
                   eSum(ISP) = eSum(ISP) - eC_SIG*VA(ISPp1,IP)
                 END DO
@@ -6124,7 +6118,6 @@ CONTAINS
             eSI=PDLIB_SI(IP)
             eSum=B_JAC(:,IP)
             ACLOC=VA(:,IP)
-            ISEA= MAPFS(1,IP_glob)
             eSum(:) = eSum(:) - ASPAR_DIAG(:)*ACLOC
             DO I = PDLIB_IA_P(IP)+1, PDLIB_IA_P(IP+1)
               JP=PDLIB_JA(I)
@@ -6147,10 +6140,7 @@ CONTAINS
               CM_SIG = MIN(ZERO,CAS)
               DO IK = 0, NK + 1
 #ifdef NOCGTABLE
-                CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN1(IK),CG1(IK))
-#else
-                CG1(IK)  = CG(IK,ISEA)
-                WN1(IK)  = WN(IK,ISEA)
+                CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN(IK,IP_GLOB),CG(IK,IP_GLOB))
 #endif
               ENDDO
               DO ITH=1,NTH
@@ -6158,14 +6148,14 @@ CONTAINS
                   DO IK=2,NK
                     ISP  =ITH + (IK  -1)*NTH
                     ISPm1=ITH + (IK-1-1)*NTH
-                    eFactM1=CG(IK-1,ISEA) / CG1(IK)
+                    eFactM1=CG(IK-1,IP_GLOB)/CG(IK,IP_GLOB)
                     eA_SIG= - eSI*CP_SIG(ISPm1)/DMM(IK-1) * eFactM1
                     eSum(ISP) = eSum(ISP) - eA_SIG*VA(ISPm1,IP)
                   END DO
                   DO IK=1,NK-1
                     ISP  =ITH + (IK  -1)*NTH
                     ISPp1=ITH + (IK+1-1)*NTH
-                    eFactP1=CG(IK+1,ISEA) / CG1(IK)
+                    eFactP1=CG(IK+1,IP_GLOB) / CG(IK,IP_GLOB)
                     eC_SIG= eSI*CM_SIG(ISPp1)/DMM(IK) * eFactP1
                     eSum(ISP) = eSum(ISP) - eC_SIG*VA(ISPp1,IP)
                   END DO
@@ -6193,7 +6183,8 @@ CONTAINS
 
     END DO ! Open Do Loop ... End of Time Interval
 
-    WRITE(*,*) 'converged sum(VA)out=', sum(VA(:,DEBUG_NODE))
+    WRITE(*,*) 'After Solver WWM system', sum(VA(:,DEBUG_NODE))
+    !CALL print_spec(VA(1:NSPEC,DEBUG_NODE))
 
 #ifdef W3_DEBUGSOLVER
     WRITE(740+IAPROC,*) 'nbIter=', nbIter, ' B_JGS_MAXITER=', B_JGS_MAXITER
@@ -6220,16 +6211,15 @@ CONTAINS
 #ifdef W3_DEBUGSOLVERCOH
     CALL ALL_VA_INTEGRAL_PRINT(IMOD, "VA(npa) after loop", 1)
 #endif
+     
 #ifdef W3_DEBUGSOLVER
     WRITE(740+IAPROC,*) 'FLBPI=', FLBPI
     FLUSH(740+IAPROC)
 #endif
 
     DO JSEA=1, NSEAL
-
       IP      = JSEA
       IP_glob = iplg(IP)
-      ISEA    = MAPFS(1,IP_glob)
       !
 #ifdef W3_DEBUGSRC
       IntDiff=0
@@ -6244,117 +6234,47 @@ CONTAINS
       IF (IP == DEBUG_NODE) THEN
         WRITE(22222,*) VA(:,IP)
       ENDIF
+
+      IF (B_JGS_LIMITER) THEN
+        DO IK = 1, NK
+          MAXDAC = 0.1*0.0081/(2*SIG(IK)*WN(IK,IP_GLOB)**3*CG(IK,IP_GLOB))
+          DO ITH = 1, NTH
+            ISP = ITH + (IK-1)*NTH
+            NEWDAC = VA(ISP,IP) - VAOLD(ISP,JSEA)
+            NEWDAC = SIGN(MIN(MAXDAC,ABS(NEWDAC)), NEWDAC)
+            VA(ISP,IP) = MAX(0., VAOLD(ISP,IP) + NEWDAC)
+          ENDDO
+        ENDDO
+      ENDIF ! B_JGS_LIMITER
+    ENDDO 
+ 
+    WRITE(*,*) 'After limiter in WWM system', sum(VA(:,DEBUG_NODE))
+    !CALL print_spec(VA(1:NSPEC,DEBUG_NODE))
+
+    DO IP=1, NSEAL
+      IP_glob = iplg(IP)
+      !
       DO ISP=1,NSPEC
 
         IK     = 1 + (ISP-1)/NTH
 #ifdef NOCGTABLE
-        CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN1(IK),CG1(IK))
-#else
-        CG1(IK)    = CG(IK,ISEA)
+        CALL WAVNU_LOCAL(SIG(IK),DW(IP_GLOB),WN(IK,IP_GLOB),CG(IK,IP_GLOB))
 #endif
-        !eVA = MAX ( ZERO ,CG1(IK)/CLATS(ISEA)*REAL(VA(ISP,IP)) )
-        !eVO = MAX ( ZERO ,CG1(IK)/CLATS(ISEA)*REAL(VAOLD(ISP,JSEA)) )
-        eVA = MAX ( ZERO ,CG1(IK)*REAL(VA(ISP,IP)) )
-        eVO = MAX ( ZERO ,CG1(IK)*REAL(VAOLD(ISP,JSEA)) )
-#ifdef W3_DEBUGSRC
-        SumACout=SumACout + REAL(VA(ISP,IP))
-        VS_w3srce = VSTOT(ISP,JSEA) * DTG / MAX(1., (1. - DTG*VDTOT(ISP,JSEA)))
-        eVA_w3srce = MAX(0., VA(ISP,JSEA) + VS_w3srce)
-        IntDiff = IntDiff + abs(eVA - eVA_w3srce)
-        ACsolve=B_JAC(ISP,IP)/ASPAR_JAC(ISP,PDLIB_I_DIAG(IP))
-        eB=VA(ISP,JSEA) + DTG*(VSTOT(ISP,JSEA) - VDTOT(ISP,JSEA)*VA(ISP,JSEA))
-        eVAsolve=MAX(0., CG(IK,ISEA)*ACsolve)
-        VAsolve(ISP)=eVAsolve
-        SumVS = SumVS + abs(VSTOT(ISP,JSEA))
-        SumVD = SumVD + abs(VDTOT(ISP,JSEA))
-        SumVAin = SumVAin + abs(VA(ISP,JSEA))
-        SumVAout = SumVAout + abs(eVA)
-        SumVAw3srce = SumVAw3srce + abs(eVA_w3srce)
-#endif
-        VAOLD(ISP,JSEA) = eVO
-        VA(ISP,JSEA) = eVA
+        eVA = MAX ( ZERO ,CG(IK,IP_GLOB)*REAL(VA(ISP,IP)) )
+        eVO = MAX ( ZERO ,CG(IK,IP_GLOB)*REAL(VAOLD(ISP,IP)) )
+        
+        !IF (IP == DEBUG_NODE) THEN
+        !  WRITE(*,*) IP, DEBUG_NODE, IP == DEBUG_NODE
+        !  WRITE(*,*) IP, ISP, IK, CG(IK,IP_GLOB), eVA, VA(ISP,IP) 
+        !ENDIF
+        VAOLD(ISP,IP) = eVO
+        VA(ISP,IP) = eVA
       END DO
-#ifdef W3_DEBUGSRC
-      WRITE(740+IAPROC,*) 'ISEA=', ISEA, ' IntDiff=', IntDiff, ' DTG=', DTG
-      IF (ISEA .eq. DEBUG_NODE) THEN
-        DO ISP=1,NSPEC
-          WRITE(740+IAPROC,*) 'ISP=', ISP, 'VA/VAsolve=', VA(ISP,JSEA), VAsolve(ISP)
-        END DO
-      END IF
-      WRITE(740+IAPROC,*) 'SHAVE=', SHAVETOT(JSEA)
-      WRITE(740+IAPROC,*) 'Sum(VS/VD)=', SumVS, SumVD
-      WRITE(740+IAPROC,*) 'min/max/sum(VS)=', minval(VSTOT(:,JSEA)), maxval(VSTOT(:,JSEA)), sum(VSTOT(:,JSEA))
-      WRITE(740+IAPROC,*) 'min/max/sum(VD)=', minval(VDTOT(:,JSEA)), maxval(VDTOT(:,JSEA)), sum(VDTOT(:,JSEA))
-      WRITE(740+IAPROC,*) 'min/max/sum(VA)=', minval(VA(:,JSEA)), maxval(VA(:,JSEA)), sum(VA(:,JSEA))
-      WRITE(740+IAPROC,*) 'min/max/sum(VAsolve)=', minval(VAsolve), maxval(VAsolve), sum(VAsolve)
-      WRITE(740+IAPROC,*) 'SumVA(in/out/w3srce)=', SumVAin, SumVAout, SumVAw3srce
-      WRITE(740+IAPROC,*) 'SumACout=', SumACout
-#endif
 
-      IF (FLSOU) THEN
-        IF (B_JGS_LIMITER) THEN
+    END DO ! IP 
 
-          DO ISP=1,NSPEC
-            IK   = 1 + (ISP-1)/NTH
-            SPEC(ISP) = VAOLD(ISP,JSEA)
-          ENDDO
-#ifdef W3_ST4
-          CALL W3SPR4 (IX, SPEC, CG1, WN1, EMEAN, FMEAN, FMEAN1, WNMEAN, &
-               AMAX, U10(ISEA), U10D(ISEA),                           &
-#ifdef W3_FLX5
-               TAUA, TAUADIR, DAIR,                             &
-#endif
-               USTAR, USTDIR,                                  &
-               TAUWX, TAUWY, CD, Z0, CHARN, LLWS, FMEANWS, DLWMEAN)
-#endif
-
-          DAM = 0.
-          DO IK=1, NK
-            DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG1(IK)) * CG1(IK)
-          END DO
-          IF (ISEA == DEBUG_NODE) THEN 
-            DO IK=1, NK
-              DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG1(IK)) * CG1(IK)
-          !    WRITE(*,*) IK, ITH, DAM(1+(IK-1)*NTH), SIG(IK), WN(IK,ISEA)**3, CG1(IK)
-            END DO
-          ENDIF
-          !
-          DO IK=1, NK
-            IS0    = (IK-1)*NTH
-            DO ITH=2, NTH
-              DAM(ITH+IS0) = DAM(1+IS0)
-            END DO
-          END DO
-
-          DAM2 = 0.
-          DO IK=1, NK
-            JAC2     = 1./TPI/SIG(IK)
-            FRLOCAL  = SIG(IK)*TPIINV
-            DAM2(1+(IK-1)*NTH) = 1E-06 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2 * CG1(IK)
-          END DO
-          DO IK=1, NK
-            IS0  = (IK-1)*NTH
-            DO ITH=2, NTH
-              DAM2(ITH+IS0) = DAM2(1+IS0)
-            END DO
-          END DO
- 
-          DO IK = 1, NK
-            DO ITH = 1, NTH
-              ISP = ITH + (IK-1)*NTH
-              newdac     = VA(ISP,IP) - VAOLD(ISP,JSEA)
-              !maxdac     = max(DAM(ISP),DAM2(ISP))
-              maxdac     = DAM(ISP) 
-              IF (JSEA == DEBUG_NODE) THEN 
-                !WRITE(*,*) 'NEWDAC, MAXDAC, VA(ISP,IP), VAOLD(ISP,JSEA)', IK, ITH, NEWDAC, MAXDAC, VA(ISP,IP), VAOLD(ISP,JSEA)
-              ENDIF 
-              NEWDAC     = SIGN(MIN(MAXDAC,ABS(NEWDAC)), NEWDAC)
-              VA(ISP,IP) = max(0., VAOLD(ISP,IP) + NEWDAC)
-            ENDDO
-          ENDDO
-        ENDIF ! B_JGS_LIMITER
-      ENDIF  ! FLSOU
-    END DO ! JSEA
+    WRITE(*,*) 'After limiter in WW3 system', sum(VA(:,DEBUG_NODE))
+    !CALL print_spec(VA(1:NSPEC,DEBUG_NODE))
 
 #ifdef WEIGHTS
     INQUIRE ( FILE='weights.ww3', EXIST = lexist )
@@ -7694,5 +7614,45 @@ CONTAINS
     !/ End of JACOBI_FINALIZE -------------------------------------------- /
     !/
   END SUBROUTINE JACOBI_FINALIZE
+
+subroutine print_spec(spec)
+
+  USE W3GDATMD, only: NK, NTH
+  implicit none
+
+  real, intent(in) :: spec(:)
+  integer :: ID, IS, ISP
+
+  do IS=1, NK
+    write(*,'(A)',advance='no') '{'
+     do ID=1, NTH
+      ISP  = ID + (IS-1)*NTH
+      write(*,'(G0, A)', advance='no') SPEC(ISP), "f, "
+    end do
+    write(*,'(A)',advance='no') '},'
+    write(*,*)
+  end do
+
+end subroutine
+subroutine print_spec2(spec)
+    
+  USE W3GDATMD, only: NK, NTH
+  implicit none
+
+  real, intent(in) :: spec(:,:)
+  integer :: ID, IS, ISP
+      
+  do IS=1, NK
+    write(*,'(A)',advance='no') '{'
+     do ID=1, NTH
+      ISP  = ID + (IS-1)*NTH
+      write(*,'(G0, A)', advance='no') SPEC(ID,IS), "f, "
+    end do
+    write(*,'(A)',advance='no') '},'
+    write(*,*)
+  end do  
+        
+end subroutine
+
   !/ ------------------------------------------------------------------- /
 END MODULE PDLIB_W3PROFSMD

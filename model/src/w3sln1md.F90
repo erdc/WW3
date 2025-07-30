@@ -138,6 +138,7 @@ CONTAINS
     USE CONSTANTS
     USE W3GDATMD, ONLY: NTH, NK, ECOS, ESIN, SIG, SLNC1, FSPM, FSHF
     USE W3ADATMD, ONLY: WN, CG
+    USE PDLIB_W3PROFSMD, ONLY : print_spec2
     USE W3ODATMD, ONLY: NDSE, NDST
     USE W3SERVMD, ONLY: EXTCDE
 #ifdef W3_S
@@ -217,14 +218,19 @@ CONTAINS
     DO IK=1, NK
       S(:,IK) = WNF(IK) * DIRF(:)
     END DO
+  
     !
     IF (IX == DEBUG_NODE) THEN 
+      WRITE(*,*) 'PRINTING THE LINEAR TERM' 
+      !CALL PRINT_SPEC2(S)
       DO IK=1, NK
         DO ITH = 1, NTH
           !WRITE(*,*) 'SLINEAR', IK, ITH, S(ITH,IK), WNF(IK), DIRF(ITH) 
         ENDDO
       ENDDO 
+      WRITE(*,*) 'SUM LINEAR TERM', SUM(S)
     ENDIF
+
     !
     RETURN
     !

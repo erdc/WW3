@@ -642,7 +642,7 @@ CONTAINS
     USE W3UOSTMD, ONLY: UOST_SRCTRMCOMPUTE
 #endif
 #ifdef W3_PDLIB
-    USE PDLIB_W3PROFSMD, ONLY : B_JAC, ASPAR_JAC, ASPAR_DIAG_ALL
+    USE PDLIB_W3PROFSMD, ONLY : B_JAC, ASPAR_JAC, ASPAR_DIAG_ALL, print_spec
     USE yowNodepool, ONLY: PDLIB_I_DIAG, PDLIB_SI
     USE W3GDATMD, ONLY: B_JGS_LIMITER, FSSOURCE, optionCall
     USE W3GDATMD, ONLY: IOBP_LOC, IOBPD_LOC, B_JGS_LIMITER_FUNC
@@ -979,6 +979,10 @@ CONTAINS
     QI5TSTART = TIME
     CALL TICK21 (QI5TSTART, -1.0 * DTG)
 #endif
+    IF (IX == DEBUG_NODE) THEN 
+      !WRITE(*,*) 'SPECTRUM ON ENTRY OF W3SRCE' 
+      !CALL print_spec(spec)
+    ENDIF 
     !
 #ifdef W3_DEBUGSRC
     IF (IX .eq. DEBUG_NODE) THEN
@@ -1070,11 +1074,11 @@ CONTAINS
 #endif
 
 #ifdef W3_ST4
-      IF (SINTAILPAR(4).GT.0.5) CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
-           U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
-           VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
-           VSIN = 0
-           VDIN = 0 
+!      IF (SINTAILPAR(4).GT.0.5) CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
+!           U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
+!           VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
+!           VSIN = 0
+!           VDIN = 0 
      END IF
 #endif
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
@@ -1222,8 +1226,8 @@ CONTAINS
       CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
            U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
            VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
-           !VSIN = 0. 
-           !VDIN = 0.
+           VSIN = 0. 
+           VDIN = 0.
            IF (IX == DEBUG_NODE) THEN
              WRITE(*,*) 'SUM W3SIN4', SUM(VSIN), SUM(VDIN)
            ENDIF
@@ -1246,8 +1250,8 @@ CONTAINS
 #ifdef W3_NL1
       IF (IQTPE.GT.0) THEN
         CALL W3SNL1 ( SPEC, CG1, WNMEAN*DEPTH, VSNL, VDNL )
-        VSNL = 0.
-        VDNL = 0. 
+        !VSNL = 0.
+        !VDNL = 0. 
         IF (IX == DEBUG_NODE) THEN
         !  WRITE(*,*) 'SUM W3SNL1', SUM(VSNL), SUM(VDNL) 
         ENDIF
@@ -1298,7 +1302,7 @@ CONTAINS
        VSDS = 0. 
        VDDS = 0. 
        IF (IX == DEBUG_NODE) THEN
-         !WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
+         WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
        ENDIF
 #endif
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)

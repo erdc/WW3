@@ -538,6 +538,7 @@ CONTAINS
 #ifdef W3_T1
     USE W3ARRYMD, ONLY: OUTMAT
 #endif
+    USE PDLIB_W3PROFSMD, ONLY : print_spec
     !
     IMPLICIT NONE
     !/
@@ -578,7 +579,7 @@ CONTAINS
     REAL TEMP, TEMP2
     INTEGER IND,J,I,ISTAB
     REAL DSTAB(3,NSPEC), DVISC, DTURB
-    REAL STRESSSTAB(3,2),STRESSSTABN(3,2)
+    REAL STRESSSTAB(3,2),STRESSSTABN(3,2), ACG(NSPEC) 
     !
     INTEGER, PARAMETER      :: JTOT=50
     REAL   , PARAMETER      :: KM=363.,CMM=0.2325  ! K and C at phase speed minimum in rad/m
@@ -626,6 +627,7 @@ CONTAINS
     !
     UORB=0.
     AORB=0.
+    ACG=0.
 
     DO IK=1, NK
       EB  = 0.
@@ -634,6 +636,7 @@ CONTAINS
       DO ITH=1, NTH
         IS=ITH+(IK-1)*NTH
         EB  = EB  + A(IS)
+        ACG(IS) = A(IS) / CG(IK)
       END DO
       !
       !  At this point UORB and AORB are the variances of the orbital velocity and surface elevation
@@ -641,11 +644,16 @@ CONTAINS
       UORB = UORB + EB *SIG(IK)**2 * DDEN(IK) / CG(IK)
       AORB = AORB + EB             * DDEN(IK) / CG(IK)  !correct for deep water only
     END DO
+
+    IF (IX == DEBUG_NODE) THEN
+      !WRITE(*,*) 'PRINT_SPEC ACG from SIN4'
+      !CALL PRINT_SPEC(ACG)
+    ENDIF
+
     !      FMEAN = SQRT((UORB+1E-6)/(AORB+1E-6))
     UORB  = 2*SQRT(UORB)                  ! significant orbital amplitude
     AORB1 = 2*AORB**(1-0.5*SSWELLF(6))    ! half the significant wave height ... if SWELLF(6)=1
     RE = 4*UORB*AORB1 / NU_AIR           ! Reynolds number
-
 
     IF (IX == DEBUG_NODE) THEN
       WRITE(*,*) 'UORB, AORB, RE, CONST0, CONST1', UORB, AORB, RE, CONST0, CONST1
@@ -726,6 +734,9 @@ CONTAINS
       !
       STRESSSTAB(ISTAB,:)=0.
       STRESSSTABN(ISTAB,:)=0.
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT' 
+      ENDIF
       !
       DO IK=1, NK
         TAUPX=TAUX-ABS(TTAUWSHELTER)*STRESSSTAB(ISTAB,1)
@@ -752,11 +763,10 @@ CONTAINS
         ! precomputes swell factors
         !
         SWELLCOEFV=-SSWELLF(5)*DRAT*2*K(IS)*SQRT(2*NU_AIR*SIG2(IS))
-        SWELLCOEFT=-DRAT*SSWELLF(1)*16*SIG2(IS)**2/GRAV
+        SWELLCOEFT=-DRAT*SSWELLF(1)*16*SIG2(IS)**2/GRAV 
 
         IF (IX == DEBUG_NODE) THEN
-          WRITE(*,*) 'TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT' 
-          WRITE(*,*) TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT
+          !WRITE(*,*) IK, TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT, STRESSSTAB(ISTAB,1), STRESSSTAB(ISTAB,2), TTAUWSHELTER
         ENDIF
         !
         DO ITH=1,NTH
@@ -776,7 +786,6 @@ CONTAINS
               ! as given by Janssen 1991 eq. 19
               ! Note that this is slightly diffent from ECWAM code CY45R2 where ZLOG is replaced by ??
               DSTAB(ISTAB,IS) = CONST*EXP(ZLOG)*ZLOG**4*UCN*UCN*COSWIND**SSINTHP
-
               ! Below is an example with breaking probability feeding back to the input...
               !DSTAB(ISTAB,IS) = CONST*EXP(ZLOG)*ZLOG**4  &
               !                  *UCN*UCN*COSWIND**SSINTHP *(1+BRLAMBDA(IS)*20*SSINBR)
@@ -795,6 +804,8 @@ CONTAINS
             DSTAB(ISTAB,IS) = 0.
             LLWS(IS)=.FALSE.
           END IF
+
+          !IF (IX == DEBUG_NODE) WRITE(*,*) 'DSTAB(ISTAB,IS)', DSTAB(ISTAB,IS), CONST, ZLOG, UCN, COSWIND, SSINTHP
           !
           IF ((SSWELLF(1).NE.0.AND.DSTAB(ISTAB,IS).LT.1E-7*SIG2(IS)) &
                .OR.SSWELLF(3).GT.0) THEN
@@ -804,24 +815,33 @@ CONTAINS
             !
             DSTAB(ISTAB,IS) = DSTAB(ISTAB,IS) + PTURB*DTURB +  PVISC*DVISC
           END IF
+          !IF (IX == DEBUG_NODE) WRITE(*,*) 'IK, ITH, DSTAB(ISTAB,IS)', IK, ITH, DSTAB(ISTAB,IS)
           !
           ! Sums up the wave-supported stress
           !
           ! Wave direction is "direction to"
           ! therefore there is a PLUS sign for the stress
           TEMP2=CONST2*DSTAB(ISTAB,IS)*A(IS)
+          !IF (IX == DEBUG_NODE) WRITE(*,*) 'TEMP2,CONST2*DSTAB(ISTAB,IS)*A(IS)', IK, ITH, TEMP2, CONST2, DSTAB(ISTAB,IS), A(IS) , A(IS)/CG(IK)
           IF (DSTAB(ISTAB,IS).LT.0) THEN
             STRESSSTABN(ISTAB,1)=STRESSSTABN(ISTAB,1)+TEMP2*ECOS(IS)
             STRESSSTABN(ISTAB,2)=STRESSSTABN(ISTAB,2)+TEMP2*ESIN(IS)
+            !IF (IX == DEBUG_NODE) WRITE(*,*) 'STRESSTABN', IK, ITH, DSTAB(ISTAB,IS).LT.0, TEMP2, STRESSSTABN(ISTAB,1), STRESSSTABN(ISTAB,2)
           ELSE
             STRESSSTAB(ISTAB,1)=STRESSSTAB(ISTAB,1)+TEMP2*ECOS(IS)
             STRESSSTAB(ISTAB,2)=STRESSSTAB(ISTAB,2)+TEMP2*ESIN(IS)
+            !IF (IX == DEBUG_NODE) WRITE(*,*) 'STRESSTAB', IK, ITH, DSTAB(ISTAB,IS).LT.0, TEMP2, STRESSSTAB(ISTAB,1), STRESSSTAB(ISTAB,2)
           END IF
+
+          IF (IX == DEBUG_NODE) THEN
+            !WRITE(*,*) 'IK, ITH, IS, DSTAB(ISTAB,IS), CONST,  ZLOG, UCN, COSWIND, SSINTHP', IK, ITH, IS, DSTAB(ISTAB,IS), CONST,  ZLOG, UCN, COSWIND, SSINTHP, A(IS)/CG(IK)
+          ENDIF 
+
         END DO
       END DO
 
       IF (IX == DEBUG_NODE) THEN
-        !WRITE(*,*) 'TEST DSTAB', SUM(DSTAB) 
+        WRITE(*,*) 'TEST DSTAB', SUM(DSTAB) 
       ENDIF 
       !
       D(:)=DSTAB(3,:)
@@ -840,6 +860,10 @@ CONTAINS
 #ifdef W3_T
     WRITE (NDST,9002) SUM(D), SUM(A), XSTRESS, YSTRESS, TAUWNX, TAUWNY
 #endif
+    IF (IX == DEBUG_NODE) THEN
+       !WRITE(*,*) 'PRINT_SPEC D from SIN4'
+       !CALL PRINT_SPEC(D)
+    ENDIF
     S = D * A
     !
     ! ... Test output of arrays
