@@ -371,7 +371,7 @@ CONTAINS
     CALL W3FLX5 ( ZZWND, U, UDIR, TAUA, TAUADIR, DAIR,  &
          USTAR, USDIR, Z0, CD, CHARN )
 #else
-    CALL CALC_USTAR(U,TAUW,USTAR,Z0,CHARN)
+    CALL CALC_USTAR(IX, U,TAUW,USTAR,Z0,CHARN)
     UNZ    = MAX ( 0.01 , U )
     CD     = (USTAR/UNZ)**2
     USDIR = UDIR
@@ -1894,7 +1894,7 @@ CONTAINS
   !> @author F. Ardhuin
   !> @date   14-Aug-2006
   !>
-  SUBROUTINE CALC_USTAR(WINDSPEED,TAUW,USTAR,Z0,CHARN)
+  SUBROUTINE CALC_USTAR(IX,WINDSPEED,TAUW,USTAR,Z0,CHARN)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -1955,7 +1955,7 @@ CONTAINS
     !
     ! 10. Source code :
     !-----------------------------------------------------------------------------!
-    USE CONSTANTS, ONLY: GRAV, KAPPA, NU_AIR
+    USE CONSTANTS, ONLY: GRAV, KAPPA, NU_AIR, DEBUG_NODE
     USE W3GDATMD,  ONLY: ZZWND, AALPHA, ZZ0MAX, SINTAILPAR, CAPCHNK
 #ifdef W3_T
     USE W3ODATMD, ONLY: NDST
@@ -1963,6 +1963,7 @@ CONTAINS
     IMPLICIT NONE
     REAL, intent(in) :: WINDSPEED,TAUW
     REAL, intent(out) :: USTAR, Z0, CHARN
+    INTEGER, intent(in) :: IX
     ! local variables
     REAL             :: SQRTCDM1
     REAL             :: XI,DELI1,DELI2,XJ,delj1,delj2  ! used for table version
@@ -1994,6 +1995,9 @@ CONTAINS
       DELJ2   = 1. - DELJ1
       USTAR=(TAUT(IND,J)*DELI2+TAUT(IND+1,J  )*DELI1)*DELJ2 &
            + (TAUT(IND,J+1)*DELI2+TAUT(IND+1,J+1)*DELI1)*DELJ1
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'CALC_USTAR', TAUW_LOCAL, TAUW, TAUWMAX, IND, DELI1, DELI2, XJ, J, DELJ1, DELJ2, USTAR, TAUT(IND,J), TAUT(IND+1,J), TAUT(IND,J+1), TAUT(IND+1,J+1)
+      ENDIF 
     ELSE
       IF (CAPCHNK(1).EQ.1.) THEN
         ! Computation of sea surface roughness and charnock coefficient based

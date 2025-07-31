@@ -1074,9 +1074,9 @@ CONTAINS
 #endif
 
 #ifdef W3_ST4
-!      IF (SINTAILPAR(4).GT.0.5) CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
-!           U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
-!           VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
+      IF (SINTAILPAR(4).GT.0.5) CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
+           U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
+           VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
 !           VSIN = 0
 !           VDIN = 0 
      END IF
