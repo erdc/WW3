@@ -327,6 +327,7 @@ CONTAINS
       EMEANWS  = EMEANWS+ EB2(IK)
       FMEANWS  = FMEANWS+ EB2(IK)*(SIG(IK)**(2.*WWNMEANPTAIL))
     END DO
+
     !
     ! 3.  Add tail beyond discrete spectrum and get mean pars ------------ *
     !     ( DTH * SIG absorbed in FTxx )
@@ -378,6 +379,11 @@ CONTAINS
     !
     ! 6.  Final test output ---------------------------------------------- *
     !
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'EMEAN HS', EMEAN, 4*SQRT(EMEAN), WNMEAN
+      WRITE(*,*) 'CD, Z0, CHARN, USTAR', CD, Z0, CHARN, USTAR
+    ENDIF 
+
 #ifdef W3_T
     WRITE (NDST,9060) EMEAN, WNMEAN, TPIINV, USTAR, CD, Z0
 #endif
@@ -834,15 +840,11 @@ CONTAINS
           END IF
 
           IF (IX == DEBUG_NODE) THEN
-            !WRITE(*,*) 'IK, ITH, IS, DSTAB(ISTAB,IS), CONST,  ZLOG, UCN, COSWIND, SSINTHP', IK, ITH, IS, DSTAB(ISTAB,IS), CONST,  ZLOG, UCN, COSWIND, SSINTHP, A(IS)/CG(IK)
+            !WRITE(*,*) 'IK, ITH, IS, DSTAB(ISTAB,IS), CONST', IK, ITH, IS, DSTAB(ISTAB,IS), CONST, A(IS)/CG(IK)
           ENDIF 
 
         END DO
       END DO
-
-      IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'TEST DSTAB', SUM(DSTAB) 
-      ENDIF 
       !
       D(:)=DSTAB(3,:)
       XSTRESS=STRESSSTAB (3,1)

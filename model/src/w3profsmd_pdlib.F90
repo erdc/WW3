@@ -5648,7 +5648,7 @@ CONTAINS
     WRITE(740+IAPROC,*) 'optionCall=', optionCall
     FLUSH(740+IAPROC)
 
-    WRITE(*,*) 'Starting solver system', sum(VA(:,DEBUG_NODE))
+    WRITE(*,*) 'Entering Solver WW3 System', sum(VA(:,DEBUG_NODE))
 
 #endif
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_PROP SECTION 1')
@@ -5675,6 +5675,8 @@ CONTAINS
       END DO
     END DO
     VAOLD = MAX(0.,VA(1:NSPEC,1:NSEAL))
+
+    WRITE(*,*) 'Entering Solver WWM System', sum(VA(:,DEBUG_NODE))
 
 #ifdef W3_DEBUGSRC
     DO JSEA=1,NSEAL
