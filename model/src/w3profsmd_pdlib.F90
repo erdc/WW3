@@ -1589,7 +1589,7 @@ CONTAINS
     ! local double
     !
     REAL  :: SUMTHETA, CFLXY
-    REAL*8  :: FT, UTILDE
+    REAL*8  :: FT(NE), UTILDE
     REAL*8  :: FL11, FL12, FL21, FL22, FL31, FL32
     REAL*8  :: FL111, FL112, FL211, FL212, FL311, FL312
     REAL  :: DTSI(npa), U(npa), UL(npa)
@@ -1704,11 +1704,11 @@ CONTAINS
       PP = ZERO
       DO IE = 1, NE
         NI   =  INE(:,IE)
-        FT   = - ONESIXTH*DOT_PRODUCT(U(NI),FLALL(:,IE))
-        UTILDE = NM(IE) * ( DOT_PRODUCT(KELEM(:,IE),U(NI)) - FT )
+        FT(IE)  = - ONESIXTH*DOT_PRODUCT(U(NI),FLALL(:,IE))
+        UTILDE = NM(IE) * ( DOT_PRODUCT(KELEM(:,IE),U(NI)) - FT(IE) )
         THETA_L(:,IE) = KELEM(:,IE) * (U(NI) - UTILDE)
-        IF (ABS(FT) .GT. 0.0d0) THEN
-          BET1(:) = THETA_L(:,IE)/FT
+        IF (ABS(FT(IE)) .GT. 0.0d0) THEN
+          BET1(:) = THETA_L(:,IE)/FT(IE)
           IF (ANY( BET1 .LT. 0.0d0) ) THEN
             BETAHAT(1)    = BET1(1) + 0.5d0 * BET1(2)
             BETAHAT(2)    = BET1(2) + 0.5d0 * BET1(3)
@@ -1716,12 +1716,13 @@ CONTAINS
             BET1(1)       = MAX(ZERO,MIN(BETAHAT(1),1.d0-BETAHAT(2),1.d0))
             BET1(2)       = MAX(ZERO,MIN(BETAHAT(2),1.d0-BETAHAT(3),1.d0))
             BET1(3)       = MAX(ZERO,MIN(BETAHAT(3),1.d0-BETAHAT(1),1.d0))
-            THETA_L(:,IE) = FT * BET1
+            THETA_L(:,IE) = FT(IE) * BET1
           END IF
         END IF
         ST(NI) = ST(NI) + THETA_L(:,IE) ! the 2nd term are the theta values of each node ...
-        THETA_H         = (1./3.+DT/(2.*PDLIB_TRIA(IE)) * KELEM(:,IE) ) * FT ! LAX
-        !        THETA_H = (1./3.+2./3.*KELEM(:,IE)/SUM(MAX(ZERO,KELEM(:,IE))))*FT  ! CENTRAL ... can be tested as well a bit more dispersive then LAX
+        THETA_H         = (1./3.+DT/ITER(IK,ITH)/(2*PDLIB_TRIA(IE)) * KELEM(:,IE) ) * FT ! LAX
+!        THETA_H = (1./3.+2./3.*KELEM(:,IE)/SUM(MAX(ZERO,KELEM(:,IE))))*FT  ! CENTRAL ... can be tested as well a bit more dispersive then LAX
+
         THETA_ACE(:,IE) = THETA_H-THETA_L(:,IE)
         PP(NI) =  PP(NI) + MAX(ZERO, -THETA_ACE(:,IE)) * DTSI(NI)
         PM(NI) =  PM(NI) + MIN(ZERO, -THETA_ACE(:,IE)) * DTSI(NI)

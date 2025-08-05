@@ -243,7 +243,7 @@ CONTAINS
     !/ End of W3SLN1 ----------------------------------------------------- /
     !/
   END SUBROUTINE W3SLN1
-  !/
+  !
   !/ End of module INSLN1MD -------------------------------------------- /
   !/
 END MODULE W3SLN1MD

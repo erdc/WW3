@@ -1195,6 +1195,7 @@ CONTAINS
       !
       ! 2.a Input.
       !
+      IF (IX == 1) WRITE(*,*) 'SUM SPEC', SUM(SPEC)
 #ifdef W3_LN1
       CALL W3SLN1 (     IX,  WN1, FHIGH, USTAR, U10DIR , VSLN       )
       !VSLN = 0.
@@ -1209,6 +1210,7 @@ CONTAINS
         !WRITE(*,*) 'SUM VSIN VDIN', SUM(VSIN), SUM(VDIN) 
       ENDIF
 #endif
+      IF (IX == 1) WRITE(*,*) 'SUM LINEAR WIND INPUT', SUM(VSLN)
       !
 #ifdef W3_ST1
       CALL W3SIN1 ( SPEC, WN2, USTAR, U10DIR ,        VSIN, VDIN )
@@ -1249,9 +1251,9 @@ CONTAINS
       !
 #ifdef W3_NL1
       IF (IQTPE.GT.0) THEN
-        CALL W3SNL1 ( SPEC, CG1, WNMEAN*DEPTH, VSNL, VDNL )
-        VSNL = 0.
-        VDNL = 0. 
+        CALL W3SNL1 ( IX, SPEC, CG1, WNMEAN*DEPTH, VSNL, VDNL )
+        !VSNL = 0.
+        !VDNL = 0. 
         IF (IX == DEBUG_NODE) THEN
         !  WRITE(*,*) 'SUM W3SNL1', SUM(VSNL), SUM(VDNL) 
         ENDIF
@@ -1299,8 +1301,8 @@ CONTAINS
 #ifdef W3_ST4
       CALL W3SDS4 ( SPEC, WN1, CG1, USTAR, USTDIR, DEPTH, DAIR, VSDS,   &
            VDDS, IX, IY, BRLAMBDA, WHITECAP, DLWMEAN )
-       VSDS = 0
-       VDDS = 0 
+       !VSDS = 0
+       !VDDS = 0 
        IF (IX == DEBUG_NODE) THEN
          WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
        ENDIF
@@ -1830,6 +1832,8 @@ CONTAINS
       !              wave ->BBL  flux PHIBBL------------------------------- *
       !              wave ->ice  flux PHICE ------------------------------- *
       !
+
+!AR: MUSS NOCH REIN!
       WHITECAP(3)=0.
       HSTOT=0.
       DO IK=IKS1, NK

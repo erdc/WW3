@@ -111,7 +111,7 @@ CONTAINS
 !> @author H. L. Tolman
 !> @date   06-Jun-2018
 !>
-  SUBROUTINE W3SNL1 (A, CG, KDMEAN, S, D)
+  SUBROUTINE W3SNL1 (IX, A, CG, KDMEAN, S, D)
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -306,6 +306,7 @@ CONTAINS
     !/
     REAL, INTENT(IN)        :: A(NSPEC), CG(NK), KDMEAN
     REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC)
+    INTEGER, INTENT(IN)     :: IX
     !/
     !/ ------------------------------------------------------------------- /
     !/ Local parameters
@@ -351,6 +352,9 @@ CONTAINS
       DO ITH=1, NTH
         ISP       = ITH + (IFR-1)*NTH
         UE (ISP) = A(ISP) / CONX
+        !IF (IX == DEBUG_NODE) 
+        !  WRITE(*,*) 'UE ISP', IFR, ITH, CONX, SIG(IFR), CG(IFR), UE(ISP), A(ISP) 
+        !ENDIF
         CON(ISP) = CONX
       END DO
     END DO
@@ -361,6 +365,11 @@ CONTAINS
         UE(ISP) = UE(ISP-NTH) * FACHFE
       END DO
     END DO
+
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'SUM UE', SUM(UE), SUM(A)
+    !  PAUSE
+    !ENDIF 
     !
     DO ISP=1-NTH, 0
       UE  (ISP) = 0.

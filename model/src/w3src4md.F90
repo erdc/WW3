@@ -544,7 +544,6 @@ CONTAINS
 #ifdef W3_T1
     USE W3ARRYMD, ONLY: OUTMAT
 #endif
-    USE PDLIB_W3PROFSMD, ONLY : print_spec
     !
     IMPLICIT NONE
     !/
@@ -1194,8 +1193,8 @@ CONTAINS
           IF (I_INT.LT.1)  J_INT=I_INT+NTH
           IF (I_INT.GT.NTH) J_INT=I_INT-NTH
           SATINDICES(I_INT-(ITH-SDSNTH)+1,ITH)=J_INT
-          SATWEIGHTS(I_INT-(ITH-SDSNTH)+1,ITH)=          &
-               COS(TH(ITH)-TH(J_INT))**SSDSCOS
+          SATWEIGHTS(I_INT-(ITH-SDSNTH)+1,ITH)=COS(TH(ITH)-TH(J_INT))**SSDSCOS
+          WRITE(*,*) 'SATS ---', ITH, I_INT, J_INT, COS(TH(ITH)-TH(J_INT))**SSDSCOS
         END DO
       END DO
     ELSE
@@ -1995,6 +1994,7 @@ CONTAINS
       DELJ2   = 1. - DELJ1
       USTAR=(TAUT(IND,J)*DELI2+TAUT(IND+1,J  )*DELI1)*DELJ2 &
            + (TAUT(IND,J+1)*DELI2+TAUT(IND+1,J+1)*DELI1)*DELJ1
+      USTAR = WINDSPEED/28.
       IF (IX == DEBUG_NODE) THEN
         WRITE(*,*) 'CALC_USTAR', TAUW_LOCAL, TAUW, TAUWMAX, IND, DELI1, DELI2, XJ, J, DELJ1, DELJ2, USTAR, TAUT(IND,J), TAUT(IND+1,J), TAUT(IND,J+1), TAUT(IND+1,J+1)
       ENDIF 
@@ -2201,7 +2201,8 @@ CONTAINS
     !/ Parameter list
     !/
     INTEGER, OPTIONAL, INTENT(IN) :: IX, IY
-    REAL, INTENT(IN)        :: A(NSPEC), K(NK), CG(NK),            &
+    REAL, INTENT(INOUT)     :: A(NSPEC)
+    REAL, INTENT(IN)        :: K(NK), CG(NK),            &
          DEPTH, DAIR, USTAR, USDIR, DLWMEAN
     REAL, INTENT(OUT)       :: SRHS(NSPEC), DDIAG(NSPEC), BRLAMBDA(NSPEC)
     REAL, INTENT(OUT)       :: WHITECAP(1:4)
@@ -2262,6 +2263,11 @@ CONTAINS
     DK=0.; HS=0.; KBAR=0.; DCK=0.; EFDF=0.
     BTH0=0.; BTH=0.; DDIAG=0.; SRHS=0.; PB=0.
     MSSSUM(:,:)=0.
+
+    !IF (IX == DEBUG_NODE) THEN
+    !  CALL PRINT_SPEC(A)
+    !ENDIF
+ 
 #ifdef W3_T0
     DOUT=0.
 #endif
@@ -2337,6 +2343,9 @@ CONTAINS
           !WRITE(*,*) DEBUG_NODE
           !WRITE(*,*) 'FACSAT, SIG(IK), K(IK), CG1(IK), DTH', FACSAT, SIG(IK), K(IK), CG(IK), DTH
         ENDIF 
+        !DO ITH = 1, NTH
+        !  A(IS0+ITH) = REAL(ITH) 
+        !ENDDO
         !
         IF (SSDSDTH.GE.180) THEN  ! integrates around full circle
           BTH(IS0+1:IS0+NTH)=BTH0(IK)
@@ -2346,20 +2355,25 @@ CONTAINS
           ENDIF
           DO ITH=1,NTH            ! partial integration
             IS=ITH+(IK-1)*NTH
-            BTH(IS)=DOT_PRODUCT(SATWEIGHTS(:,ITH),  A(IS0+SATINDICES(:,ITH)) ) &
-                 *FACSAT
+            BTH(IS)=DOT_PRODUCT(SATWEIGHTS(:,ITH),A(IS0+SATINDICES(:,ITH)) )
+            !WRITE(*,*) 'BTH(IS)', IK, ITH, BTH(IS)  
+            BTH(IS) = BTH(IS) * FACSAT
             BTH2(IS) = 0
             do ITH2=1, size(SATWEIGHTS,1)
-                BTH2(IS) = BTH2(IS) + SATWEIGHTS(ITH2,ITH)*  A(IS0+SATINDICES(ITH2,ITH))
+                BTH2(IS) = BTH2(IS) + SATWEIGHTS(ITH2,ITH) * A(IS0+SATINDICES(ITH2,ITH))
                 if(ix == debug_node) then
                     !write(*,*) "is id id2 ", IK, ITH, ITH2, SATWEIGHTS(ITH2,ITH), A(IS0+SATINDICES(ITH2,ITH)), BTH2(IS)
                 endif
             end do
           END DO
-
+         
+          IF (IX == DEBUG_NODE) THEN
+            !WRITE(*,*) 'IK, BTH(IS0+1)', IK, BTH(IS0+1)
+          ENDIF
+ 
           BTH0(IK) = MAXVAL(BTH(IS0+1:IS0+NTH))
           IF (IX == DEBUG_NODE) THEN
-            !WRITE(*,*) 'IK BTH0', IK, BTH0(IK)
+            !WRITE(*,*) 'IK BTH0', IK, BTH0(IK), SUM(A)
           ENDIF 
         END IF
         !
@@ -2662,6 +2676,11 @@ CONTAINS
       ENDIF 
 
     END IF
+
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) '----------------------------------------------------------'
+    !  CALL PRINT_SPEC(DDIAG)
+    !ENDIF
     !
     !  COMPUTES WHITECAP PARAMETERS
     !
@@ -2734,6 +2753,8 @@ CONTAINS
     END IF
     !
     ! End of output computing
+
+
     !
     RETURN
     !
@@ -2744,5 +2765,43 @@ CONTAINS
     !/
   END SUBROUTINE W3SDS4
 
+subroutine print_spec(spec)
+
+  USE W3GDATMD, only: NK, NTH
+  implicit none
+
+  real, intent(in) :: spec(:)
+  integer :: ID, IS, ISP
+
+  do IS=1, NK
+    write(*,'(A)',advance='no') '{'
+     do ID=1, NTH
+      ISP  = ID + (IS-1)*NTH
+      write(*,'(G0, A)', advance='no') SPEC(ISP), "f, "
+    end do
+    write(*,'(A)',advance='no') '},'
+    write(*,*)
+  end do
+
+end subroutine
+subroutine print_spec2(spec)
+
+  USE W3GDATMD, only: NK, NTH
+  implicit none
+
+  real, intent(in) :: spec(:,:)
+  integer :: ID, IS, ISP
+
+  do IS=1, NK
+    write(*,'(A)',advance='no') '{'
+     do ID=1, NTH
+      ISP  = ID + (IS-1)*NTH
+      write(*,'(G0, A)', advance='no') SPEC(ID,IS), "f, "
+    end do
+    write(*,'(A)',advance='no') '},'
+    write(*,*)
+  end do
+
+end subroutine
 
 END MODULE W3SRC4MD
