@@ -5,7 +5,8 @@
 #  > Explicit                                                               #
 #      > Conventional method Card Deck  (ww3_grid_a.inp)                    #
 #      > domain decomposition  (ww3_grid_b.inp)                             #
-#  > Implicit (domain decomposition) (ww3_grid_c.inp)                       #
+#  > Implicit (domain decomposition) (ww3_grid_c.inp)    
+#  > Rocky bottom parameterization (ww3_grid_d.inp) 
 # Grid:                                                                     # 
 # Shinnecock Inlet                                                          #
 # --------------------------------------------------------------------------#
@@ -32,6 +33,11 @@
 #                                                                           #
 # NOGRB TRKNC DIST MPI SCRIP MLIM PR3 UQ FLX0 PDLIB SCOTCH LN1 ST4          #
 # STAB0 NL1 BT4 DB1 TR0 BS0 IS0 IC0 REF0 WNT2 WNX1 RWND CRT1 CRX1 O0        #
+# O1 O2 O2a O2b O2c O3 O4 O5 O6 O7                                          #
+#                                                                           #
+# or for rocky bottom parameterization                                      #
+# NOGRB TRKNC DIST MPI SCRIP MLIM PR3 UQ FLX0 PDLIB SCOTCH LN1 ST4          #
+# STAB0 NL1 BT5 DB1 TR0 BS0 IS0 IC0 REF0 WNT2 WNX1 RWND CRT1 CRX1 O0        #
 # O1 O2 O2a O2b O2c O3 O4 O5 O6 O7                                          #
 #                                                                           #
 #   The choice of propagation schemes for unstructured grids is done via    #
