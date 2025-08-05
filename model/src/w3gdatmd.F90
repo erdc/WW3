@@ -722,7 +722,7 @@ MODULE W3GDATMD
     REAL, POINTER         :: SED_D50(:), SED_PSIC(:)
 #endif
 #ifdef W3_BT5
-    REAL, POINTER         :: SED_D50(:), SED_PSIC(:)
+    REAL, POINTER         :: SED_D50(:)
 #endif
 #ifdef W3_REF1
     LOGICAL, POINTER      :: RREF(:)
@@ -980,9 +980,6 @@ MODULE W3GDATMD
 #ifdef W3_BT4
     REAL                  :: SBTCX(10)
 #endif
-#ifdef W3_BT5
-    REAL                  :: SBTCX(10)
-#endif
 
 #ifdef W3_BT8
     REAL                  :: DUMMY
@@ -1223,7 +1220,7 @@ MODULE W3GDATMD
   REAL, POINTER         :: SED_D50(:), SED_PSIC(:)
 #endif
 #ifdef W3_BT5
-  REAL, POINTER         :: SED_D50(:), SED_PSIC(:)
+  REAL, POINTER         :: SED_D50(:)
 #endif
 
   LOGICAL, POINTER :: GINIT, FLDRY, FLCX, FLCY, FLCTH, FLCK, FLSOU, IICEDISP,&
@@ -1397,9 +1394,6 @@ MODULE W3GDATMD
   REAL, POINTER           :: SBTC1
 #endif
 #ifdef W3_BT4
-  REAL, POINTER           :: SBTCX(:)
-#endif
-#ifdef W3_BT5
   REAL, POINTER           :: SBTCX(:)
 #endif
 
@@ -1776,7 +1770,6 @@ CONTAINS
 #endif
 #ifdef W3_BT5
     ALLOCATE ( GRIDS(IMOD)%SED_D50(0:MSEA), &
-         GRIDS(IMOD)%SED_PSIC(0:MSEA),&
          STAT=ISTAT                 )
     CHECK_ALLOC_STATUS ( ISTAT )
 #endif
@@ -2484,7 +2477,6 @@ CONTAINS
 #endif
 #ifdef W3_BT5
       SED_D50  => GRIDS(IMOD)%SED_D50
-      SED_PSIC => GRIDS(IMOD)%SED_PSIC
 #endif
 
       !
@@ -2837,9 +2829,7 @@ CONTAINS
 #ifdef W3_BT4
     SBTCX  => MPARS(IMOD)%SBTPS%SBTCX
 #endif
-#ifdef W3_BT5
-    SBTCX  => MPARS(IMOD)%SBTPS%SBTCX
-#endif
+
 
     !
     !     Structure SDBPS

@@ -1523,7 +1523,6 @@ CONTAINS
 
 #ifdef W3_BT5
             D50=SED_D50(ISEA)
-            PSIC=SED_PSIC(ISEA)
 #endif
 
               !
@@ -2206,7 +2205,6 @@ CONTAINS
 #endif
 #ifdef W3_BT5
               D50=SED_D50(ISEA)
-              PSIC=SED_PSIC(ISEA)
 #endif
 
 

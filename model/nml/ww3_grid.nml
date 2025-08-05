@@ -589,8 +589,8 @@
 ! -------------------------------------------------------------------- !
 ! Define the sedimentary bottom map via SED_NML namelist
 !
-! * only used if &SBT4 SEDMAPD50 = T defined in param.nml
-!
+! * only used if &SBT4 SEDMAPD50 = T 
+!          or if &SBT5 SEDMAPD50 = T defined in param.nml
 ! * value <= value_read * scale_fac
 !
 ! * IDLA : Layout indicator :

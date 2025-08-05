@@ -1075,9 +1075,7 @@ MODULE W3GRIDMD
        BOTROUGHMIN, BOTROUGHFAC
 #endif
 #ifdef W3_BT5
-  NAMELIST /SBT5/ SEDMAPD50, SED_D50_UNIFORM, RIPFAC1,            &
-       RIPFAC2, RIPFAC3, RIPFAC4, SIGDEPTH,            &
-       BOTROUGHMIN, BOTROUGHFAC
+  NAMELIST /SBT5/ SEDMAPD50, SED_D50_UNIFORM
 #endif
 #ifdef W3_DB1
   NAMELIST /SDB1/ BJALFA, BJGAM, BJFLAG
@@ -2368,26 +2366,10 @@ CONTAINS
 #endif
 #ifdef W3_BT5
     SEDMAPD50=.FALSE.
-    SED_D50_UNIFORM=2.E-4  ! default grain size: medium sand 200 microns
-    RIPFAC1=0.4    ! A1 in Ardhuin et al. 2003
-    RIPFAC2=-2.5   ! A2 in Ardhuin et al. 2003
-    RIPFAC3=1.2    ! A3 in Ardhuin et al. 2003
-    RIPFAC4=0.05   ! A4 in Ardhuin et al. 2003
-    SIGDEPTH=0.05
-    BOTROUGHMIN=0.01
-    BOTROUGHFAC=1.00
+    SED_D50_UNIFORM=0.03  ! default hydraulics roughness lenght 
     CALL READNL ( NDSS, 'SBT5', STATUS )
     WRITE (NDSO,926) STATUS
-    WRITE (NDSO,927) SEDMAPD50, SED_D50_UNIFORM, &
-         RIPFAC1,RIPFAC2,RIPFAC3,RIPFAC4,SIGDEPTH,  &
-         BOTROUGHMIN, BOTROUGHFAC
-    SBTCX(1)=RIPFAC1
-    SBTCX(2)=RIPFAC2
-    SBTCX(3)=RIPFAC3
-    SBTCX(4)=RIPFAC4
-    SBTCX(5)=SIGDEPTH
-    SBTCX(6)=BOTROUGHMIN
-    SBTCX(7)=BOTROUGHFAC
+    WRITE (NDSO,927) SEDMAPD50, SED_D50_UNIFORM
 #endif
     !
     !
@@ -3358,9 +3340,7 @@ CONTAINS
            BOTROUGHMIN, BOTROUGHFAC
 #endif
 #ifdef W3_BT5
-      WRITE (NDSO,2926) SEDMAPD50, SED_D50_UNIFORM,      &
-           RIPFAC1,RIPFAC2,RIPFAC3,RIPFAC4, SIGDEPTH, &
-           BOTROUGHMIN, BOTROUGHFAC
+      WRITE (NDSO,2926) SEDMAPD50, SED_D50_UNIFORM
 #endif
 #ifdef W3_DB1
       IF ( BJFLAG ) THEN
@@ -5700,7 +5680,7 @@ CONTAINS
       IF (IDLA.LT.1 .OR. IDLA.GT.4) IDLA   = 1
       IF (IDFT.LT.1 .OR. IDFT.GT.3) IDFT   = 1
       !
-      WRITE (NDSO,1978) NDSTR, VSC, IDLA, IDFT
+      WRITE (NDSO,1979) NDSTR, VSC, IDLA, IDFT
       IF (IDFT.EQ.2) WRITE (NDSO,973) RFORM
       IF (FROM.EQ.'NAME' .AND. NDSG.NE.NDSTR) WRITE (NDSO,974) TNAME
       !
@@ -5747,7 +5727,7 @@ CONTAINS
       !
       IF ( NDSTR .EQ. NDSI ) CALL NEXTLN ( COMSTR , NDSI , NDSE )
       !
-      WRITE (NDSO,*) 'Min and Max values of kkr :',MINVAL(SED_D50FILE), MAXVAL(SED_D50FILE)
+      WRITE (NDSO,*) 'Min and Max values of kr :',MINVAL(SED_D50FILE), MAXVAL(SED_D50FILE)
       WRITE (NDSO,*)
       !
     ELSE
@@ -5759,11 +5739,6 @@ CONTAINS
         ISEA = MAPFS (IY,IX)
         SED_D50(ISEA)       = SED_D50FILE(IX,IY)
         SED_D50(ISEA)       = MAX(SED_D50(ISEA),1E-5)
-        ! Critical Shields number, Soulsby, R.L. and R J S W Whitehouse
-        ! Threshold of sed. motion in coastal environments, Proc. Pacific Coasts and
-        ! ports, 1997 conference, Christchurch, p149-154, University of Cantebury, NZ
-        SED_DSTAR=(GRAV*(SED_SG-1)/nu_water**2)**(0.333333)*SED_D50(ISEA)
-        SED_PSIC(ISEA)=0.3/(1+1.2*SED_DSTAR)+0.55*(1-exp(-0.02*SED_DSTAR))
       END DO
     END DO
 #endif
@@ -6651,14 +6626,8 @@ CONTAINS
 #ifdef W3_BT5
 926 FORMAT (/'  Bottom friction  (MADSEN)  ',A/                 &
          ' --------------------------------------------------')
-927 FORMAT ( '       SEDMAPD50, SED_D50_UNIFORM        :',L3,1X,F8.6/ &
-         '       RIPFAC1,RIPFAC2,RIPFAC3,RIPFAC4   :',4F8.4/      &
-         '       SIGDEPTH, BOTROUGHMIN, BOTROUGHFAC:',3F8.4/)
-2926 FORMAT ( '  &SBT5 SEDMAPD50 =',L3,', SED_D50_UNIFORM =',F8.6,','/ &
-         '        RIPFAC1 =',F8.4,', RIPFAC2 =',F8.4,      &
-         ', RIPFAC3 =',F8.4,', RIPFAC4 =',F8.4,','/        &
-         '        SIGDEPTH =',F8.4,', BOTROUGHMIN =',F8.4, &
-         ', BOTROUGHFAC =',F4.1,' /')
+927 FORMAT ( '       SEDMAPD50, SED_D50_UNIFORM        :',L3,1X,F8.6/) 
+2926 FORMAT ( '  &SBT5 SEDMAPD50 =',L3,', SED_D50_UNIFORM =',F8.6,' /')
 #endif
     !
 #ifdef W3_DB0
@@ -7114,6 +7083,12 @@ CONTAINS
          '       Layout indicator            :',I6/             &
          '       Format indicator            :',I6)
     !
+1979 FORMAT ( '       Hydraulics roughnesse length:',I6/             &
+         '       Scale factor                :',F10.4/          &
+         '       Layout indicator            :',I6/             &
+         '       Format indicator            :',I6)
+    !
+
 979 FORMAT ( '  Processing ',A)
 980 FORMAT (/'  Input boundary points : '/                          &
          ' --------------------------------------------------')

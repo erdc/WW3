@@ -1807,16 +1807,13 @@ CONTAINS
 #endif
 #ifdef W3_BT5
     IF ( WRITE ) THEN
-      WRITE (NDSM)                                          &
-           SBTCX, SED_D50, SED_PSIC
+      WRITE (NDSM)SED_D50
 #ifdef W3_ASCII
-      WRITE (NDSA,*)                                        &
-           'SBTCX, SED_D50, SED_PSIC:',                     &
-           SBTCX, SED_D50, SED_PSIC
+      WRITE (NDSA,*)'SED_D50:',SED_D50
 #endif
     ELSE
       READ (NDSM,END=801,ERR=802,IOSTAT=IERR)               &
-           SBTCX, SED_D50, SED_PSIC
+         SED_D50
     END IF
 #endif
     !

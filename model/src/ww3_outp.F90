@@ -1492,7 +1492,7 @@ CONTAINS
     REAL                    :: D50, PSIC, BEDFORM(3), TAUBBL(2)
 #endif
 #ifdef W3_BT5
-    REAL                    :: D50, PSIC, BEDFORM(3), TAUBBL(2)
+    REAL                    :: D50, TAUBBL(2)
 #endif
     REAL                    :: ICE
 #ifdef W3_STAB2
@@ -2232,9 +2232,8 @@ CONTAINS
             IY=1    ! to be fixed later
             ISEA=1  ! to be fixed later
             D50 = SED_D50(ISEA)
-            PSIC= SED_PSIC(ISEA)
-            CALL W3SBT5 ( A, CG, WN, DEPTH, D50, PSIC, TAUBBL,   &
-                 BEDFORM, XBT, DIA, IX, IY )
+            CALL W3SBT5 ( A, CG, WN, DEPTH, D50,  TAUBBL,   &
+                 XBT, DIA, IX, IY )
 #endif
 
 

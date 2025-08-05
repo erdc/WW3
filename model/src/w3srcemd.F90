@@ -1313,8 +1313,8 @@ CONTAINS
            BEDFORM, VSBT, VDBT, IX, IY )
 #endif
 #ifdef W3_BT5
-      CALL W3SBT5 ( SPEC, CG1, WN1, DEPTH, D50, PSIC, TAUBBL,    &
-           BEDFORM, VSBT, VDBT, IX, IY )
+      CALL W3SBT5 ( SPEC, CG1, WN1, DEPTH, D50, TAUBBL,    &
+           VSBT, VDBT, IX, IY )
 #endif
 
 #ifdef W3_BT8

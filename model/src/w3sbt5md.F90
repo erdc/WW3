@@ -55,16 +55,9 @@ MODULE W3SBT5MD
   !      Name      Type  Scope    Description
   !     ----------------------------------------------------------------
   !      W3SBT5    Subr. Public   Rocky bottom friction 
-  !      INSBT5    Subr. Public   Corresponding initialization routine.
-  !      TABU_ERF  Subr. Public   Tabulation of ERF function
   !     ----------------------------------------------------------------
   !
   !  4. Subroutines and functions used :
-  !
-  !      Name      Type  Module   Description
-  !     ----------------------------------------------------------------
-  !      STRACE    Subr. W3SERVMD Subroutine tracing.
-  !     ----------------------------------------------------------------
   !
   !  5. Remarks :
   !
@@ -121,233 +114,52 @@ MODULE W3SBT5MD
   !
 
   PUBLIC
-  !
-  ! Parameters for ERF function
-  !
-  INTEGER, PARAMETER      :: SIZEERFTABLE=300
-  REAL                    :: ERFTABLE(0:SIZEERFTABLE)
-  REAL                    :: DELXERF
-  REAL,    PARAMETER      :: XERFMAX =  4. ! number of stdev
   !/
 CONTAINS
-
-
   !/ ------------------------------------------------------------------- /
   !>
-  !> @brief Initialization for bottom friction source term routine.
-  !>
-  !> @author F. Ardhuin
-  !> @date   14-Mar-2012
-  !>
-  SUBROUTINE INSBT5
-    !/
-    !/                  +-----------------------------------+
-    !/                  | WAVEWATCH III           NOAA/NCEP |
-    !/                  |                         SHOM      |
-    !/                  |    H. Michaud and M. Pezerat      |
-    !/                  |                        FORTRAN 90 |
-    !/                  | Last update :          23-07-2024 |
-    !/                  +-----------------------------------+
-    !/
-    !/    14-Mar-2012 : Origination.                        ( version 4.05 )
-    !
-    !  1. Purpose :
-    !
-    !     Initialization for bottom friction source term routine.
-    !
-    !  2. Method :
-    !
-    !  3. Parameters :
-    !
-    !     Parameter list
-    !     ----------------------------------------------------------------
-    !     ----------------------------------------------------------------
-    !
-    !  4. Subroutines used :
-    !
-    !      Name      Type  Module   Description
-    !     ----------------------------------------------------------------
-    !      STRACE    Subr. W3SERVMD Subroutine tracing.
-    !     ----------------------------------------------------------------
-    !
-    !  5. Called by :
-    !
-    !      Name      Type  Module   Description
-    !     ----------------------------------------------------------------
-    !      W3SBT5    Subr. W3SRC3MD Corresponding source term.
-    !     ----------------------------------------------------------------
-    !
-    !  6. Error messages :
-    !
-    !       None.
-    !
-    !  7. Remarks :
-    !
-    !  8. Structure :
-    !
-    !     See source code.
-    !
-    !  9. Switches :
-    !
-    !     !/S  Enable subroutine tracing.
-    !
-    ! 10. Source code :
-    !
-    !/ ------------------------------------------------------------------- /
-    !
-#ifdef W3_S
-    USE W3SERVMD, ONLY: STRACE
-#endif
-    !/
-    IMPLICIT NONE
-    !/
-    !/ ------------------------------------------------------------------- /
-    !/ Parameter list
-    !/
-    !      NONE
-    !/
-    !/ ------------------------------------------------------------------- /
-    !/ Local parameters
-    !/
-#ifdef W3_S
-    INTEGER, SAVE           :: IENT = 0
-#endif
-    !/
-    !/ ------------------------------------------------------------------- /
-    !/
-#ifdef W3_S
-    CALL STRACE (IENT, 'INSIN3')
-#endif
-    !
-    ! 1.  .... ----------------------------------------------------------- *
-    !
-    CALL TABU_ERF   !tabulates ERF function
-    !/
-    !/ End of INSBT5 ----------------------------------------------------- /
-    !/
-  END SUBROUTINE INSBT5
-  ! ----------------------------------------------------------------------
-
-  !>
-  !> @brief Tabulation of ERF function, which is used in bottom friction subgrid modeling.
-  !>
-  !> @details Initialization for source term routine.
-  !>
-  !> @author J. Lepesqueur
-  !> @date   14-Mar-2012
-  !>
-  SUBROUTINE TABU_ERF
-    !/
-    !/                  +-----------------------------------+
-    !/                  | WAVEWATCH III           NOAA/NCEP |
-    !/                  |        J. Lepesqueur              |
-    !/                  |                        FORTRAN 90 |
-    !/                  | Last update :         14-Mar-2012 |
-    !/                  +-----------------------------------+
-    !/
-    !/    14-Mar-2012 : Origination.                        ( version 3.13 )
-    !/
-    !  1. Purpose :
-    !     Tabulation of ERF function, which is used in bottom friction subgrid modelling
-    !
-    !     Initialization for source term routine.
-    !
-    !  2. Method :
-    !
-    !  3. Parameters :
-    !
-    !     Parameter list
-    !     ----------------------------------------------------------------
-    !     ----------------------------------------------------------------
-    !
-    !  4. Subroutines used :
-    !
-    !      Name      Type  Module   Description
-    !     ----------------------------------------------------------------
-    !      STRACE    Subr. W3SERVMD Subroutine tracing.
-    !     ----------------------------------------------------------------
-    !
-    !  5. Called by :
-    !
-    !      Name      Type  Module   Description
-    !     ----------------------------------------------------------------
-    !      W3SIN3    Subr. W3SRC3MD Corresponding source term.
-    !     ----------------------------------------------------------------
-    !
-    !  6. Error messages :
-    !
-    !       None.
-    !
-    !  7. Remarks :
-    !
-    !  8. Structure :
-    !
-    !     See source code.
-    !
-    !  9. Switches :
-    !
-    !     !/S  Enable subroutine tracing.
-    !
-    ! 10. Source code :
-    !
-    IMPLICIT NONE
-    INTEGER :: I
-    REAL :: x,y
-
-    DELXERF   = (2*XERFMAX)/REAL(SIZEERFTABLE)
-    DO I=0,SIZEERFTABLE
-      x=-1.*XERFMAX+I*DELXERF
-      if(x.lt.0.)then
-        y=2**(1/2)*(1-abs(erf(x)))/2
-      else
-        y=2**(1/2)*(1+erf(x))/2
-      end if
-      ERFTABLE(I)=y
-    END DO
-    RETURN
-    !/ ------------------------------------------------------------------- /
-  END SUBROUTINE TABU_ERF
-  !/ ------------------------------------------------------------------- /
-
-  !/ ------------------------------------------------------------------- /
-  !>
-  !> @brief Computes the SHOWEX bottom friction with movable bed effects.
-  !>
-  !> @details Uses a Gaussian distribution for friction factors, and estimates
-  !>  the contribution of rippled and non-rippled fractions based on the
-  !>  bayesian approach of Tolman (1995).
-  !>
+  !> @brief Computes the Rockey bottom friction parameterization adapted from 
+  !> (Madsen et al. 1988) and with coefficient from Sous et al. (2023).
   !> @param[in]    A        Action density spectrum.
   !> @param[in]    CG       Group velocities.
   !> @param[in]    WN       Wavenumbers.
   !> @param[in]    DEPTH    Water depth.
-  !> @param[in]    D50      Median grain size.
-  !> @param[in]    PSIC     Critical Shields parameter.
+  !> @param[in]    D50      Hydraulic roughness height
   !> @param[out]   TAUBBL   Components of stress leaking to the bottom.
-  !> @param[inout] BEDFORM  Ripple parameters (roughness and wavelength).
   !> @param[out]   S        Source term (1-D version).
   !> @param[out]   D        Diagonal term of derivative.
   !> @param[in]    IX       Spatial grid index.
   !> @param[in]    IY       Spatial grid index.
   !>
   !>
-  SUBROUTINE W3SBT5 (A, CG, WN, DEPTH, D50, PSIC, TAUBBL, BEDFORM, S, D, IX, IY )
+  SUBROUTINE W3SBT5 (A, CG, WN, DEPTH, D50, TAUBBL, S, D, IX, IY )
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
-    !/                  |            F. Ardhuin             |
-    !/                  !            J. Lepesqueur          !
+    !/                  |            H. Michaud             |
+    !/                  |            M. Pézérat             |
     !/                  |                        FORTRAN 90 |
-    !/                  | Last update :         15-Mar-2012 |
+    !/                  | Last update :         05-Aug-2025 |
     !/                  +-----------------------------------+
     !/
-    !/    23-Jun-2011 : Origination.                        ( version 4.04 )
+    !/    23-Jun-2024 : Origination.                        ( version 7.14 )
     !/
     !  1. Purpose :
     !
     !     Computes the MADSEN bottom friction adpated to rocky bottom
     !
     !  2. Method :
+    !
+    !                            1              SIG(IK)**3 * E(k,theta)    
+    !       Sbt (k,theta)= -  ------- fw Uorb -----------------------    (1)
+    !                         SQRT(2)          GRAV * sinh²(k*DEPTH)
+    !
+    !     with fw = EXP(a1*(UORB/(D50*SIG(IK)))**(a2)+a3)
+    !     Where a1 = 5
+    !           a2 = -0.15    
+    !           a3 = -5.9
+    !
+    !
     !
     !  3. Parameters :
     !
@@ -357,9 +169,7 @@ CONTAINS
     !       CG      R.A.  I   Group velocities.
     !       WN      R.A.  I   Wavenumbers.
     !       DEPTH   Real  I   Water depth.
-    !       KKR     Real  I   
-    !       PSIC    Real  I   Critical Shields parameter
-    !       BEFORMS Real I/O  Ripple parameters (roughness and wavelength).
+    !       D50     Real  I   Hydraulic roughness height
     !       TAUBBL  Real  O   Components of stress leaking to the bottom.
     !       S       R.A.  O   Source term (1-D version).
     !       D       R.A.  O   Diagonal term of derivative.             *)
@@ -404,7 +214,7 @@ CONTAINS
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
     USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, DDEN,  &
-         SBTCX, ECOS, ESIN, DTH
+          ECOS, ESIN, DTH
 
 #ifdef W3_S
     USE W3SERVMD, ONLY: STRACE
@@ -424,25 +234,16 @@ CONTAINS
     !/
     LOGICAL, SAVE           :: FIRST = .TRUE.
     REAL, INTENT(IN)        :: CG(NK), WN(NK), DEPTH, A(NSPEC), D50
-    REAL, INTENT(IN)        :: PSIC
     INTEGER, INTENT(IN)     :: IX, IY
     REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC), TAUBBL(2)
-    REAL, INTENT(INOUT)     :: BEDFORM(3)
     REAL                    :: CBETA(NK)
-    REAL :: UORB2,UORB,AORB, EBX, EBY, AX, AY, LX, LY
+    REAL :: UORB2, UORB, AORB, EBX, EBY, AX, AY, LX, LY
     REAL :: CONST2, TEMP2
     REAL :: FWJ, KSUBN, KSUBS, KSUBR, MINADIM
-    REAL :: SHIELDS(3), PSI, DELI1, DELI2, EB, XI, VARU, KKR ! DD50
+    REAL :: SHIELDS(3), PSI, DELI1, DELI2, EB, XI, VARU, KKR 
     INTEGER :: IK, ITH, IS, IND, INDE, ISUB
-
-    REAL :: KRR, DSUB
-    REAL DSUM(NK)
-    ! These are the 3-point Gauss-Hermitte quadrature coefficients
-    REAL, PARAMETER :: WSUB(3) = (/ 0.1666667,   0.1666666  , 0.6666667/)
-    REAL, PARAMETER :: XSUB(3) = (/ -0.001,  0.001 , 0. /)
-
-    REAL :: PROBA1, PROBA2, PSIX, PSIXT, PSIN2, DPSI , FACTOR
-    ! REAL :: BACKGROUND
+    REAL :: DSUM(NK)
+    REAL ::  FACTOR
 
     !/
     !/ ------------------------------------------------------------------- /
@@ -451,11 +252,6 @@ CONTAINS
     CALL STRACE (IENT, 'W3SBT5')
 #endif
     !
-    ! 0.  Initializations ------------------------------------------------ *
-    IF ( FIRST ) THEN
-      CALL INSBT5
-      FIRST  = .FALSE.
-    END IF
 
     !
     ! 1.  Min / Max settings for KKR ---- *
@@ -531,8 +327,7 @@ CONTAINS
     !/ End of W3SBT5  ----------------------------------------------------- /
     !/
   END SUBROUTINE W3SBT5
-
-  !/ ------------------------------------------------------------------- /
-
-
+  !/
+  !/ End of module W3SBT5MD -------------------------------------------- /
+  !/
 END MODULE W3SBT5MD
