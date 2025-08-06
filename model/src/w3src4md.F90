@@ -318,24 +318,24 @@ CONTAINS
       EB(IK)   = EB(IK) * DDEN(IK) / CG(IK)
       EB2(IK)   = EB2(IK) * DDEN(IK) / CG(IK)
       EMEAN    = EMEAN  + EB(IK)
-      IF (IX == DEBUG_NODE) THEN
-        WRITE(44444,*) IK, EMEAN, EB(IK), DDEN(IK) 
-      ENDIF
       FMEAN    = FMEAN  + EB(IK) /SIG(IK)
       FMEAN1   = FMEAN1 + EB(IK) *(SIG(IK)**(2.*WWNMEANPTAIL))
       WNMEAN   = WNMEAN + EB(IK) *(WN(IK)**WWNMEANP)
       EMEANWS  = EMEANWS+ EB2(IK)
       FMEANWS  = FMEANWS+ EB2(IK)*(SIG(IK)**(2.*WWNMEANPTAIL))
     END DO
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(44444,*) 'EMEAN, FMEAN, FMEAN1, WNMEAN, EMEANWS, EMEANWS', IK, EMEAN, FMEAN, FMEAN1, WNMEAN, EMEANWS, EMEANWS, WWNMEANPTAIL, WWNMEANP
+    ENDIF
 
     !
     ! 3.  Add tail beyond discrete spectrum and get mean pars ------------ *
     !     ( DTH * SIG absorbed in FTxx )
     !
     EBAND  = EB(NK) / DDEN(NK)
-    IF (IX == DEBUG_NODE) THEN
+    !IF (IX == DEBUG_NODE) THEN
       !WRITE(*,*) 'EBAND, EB(NK), DDEN(NK), FTE, EMEAN, EMEAN + EBAND * FTE', EBAND, EB(NK), DDEN(NK), FTE, EMEAN, EMEAN + EBAND * FTE
-    ENDIF
+    !ENDIF
     EMEAN  = EMEAN  + EBAND * FTE
     FMEAN  = FMEAN  + EBAND * FTF
     FMEAN1 = FMEAN1 + EBAND * SSTXFTFTAIL
@@ -343,6 +343,7 @@ CONTAINS
     EBAND  = EB2(NK) / DDEN(NK)
     EMEANWS = EMEANWS + EBAND * FTE
     FMEANWS = FMEANWS + EBAND * SSTXFTFTAIL
+
     !
     ! 4.  Final processing
     !
@@ -350,17 +351,26 @@ CONTAINS
     IF (FMEAN1.LT.1.E-7) THEN
       FMEAN1=TPIINV * SIG(NK)
     ELSE
-      FMEAN1  = TPIINV *( MAX ( 1.E-7 , FMEAN1 )                       &
-           / MAX ( 1.E-7 , EMEAN ))**(1/(2.*WWNMEANPTAIL))
+      FMEAN1  = TPIINV *( MAX ( 1.E-7 , FMEAN1 )/ MAX ( 1.E-7 , EMEAN ))**(1/(2.*WWNMEANPTAIL))
     ENDIF
-    WNMEAN = ( MAX ( 1.E-7 , WNMEAN )                              &
-         / MAX ( 1.E-7 , EMEAN ) )**(1/WWNMEANP)
+
+    WNMEAN = ( MAX ( 1.E-7 , WNMEAN ) / MAX ( 1.E-7 , EMEAN ) )**(1./WWNMEANP)
+
+    IF (IX == DEBUG_NODE) THEN
+      !WRITE(*,*) 'WNMEAN LIMIT', WNMEAN
+      !PAUSE
+    ENDIF
+
     IF (FMEANWS.LT.1.E-7.OR.EMEANWS.LT.1.E-7) THEN
       FMEANWS=TPIINV * SIG(NK)
     ELSE
       FMEANWS  = TPIINV *( MAX ( 1.E-7 , FMEANWS )                       &
            / MAX ( 1.E-7 , EMEANWS ))**(1/(2.*WWNMEANPTAIL))
     END IF
+
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'WNMEAN, WWNMEANP, EMEAN, EBAND, FTE', WNMEAN, WWNMEANP, EMEAN, EBAND, FTE, SSTXFTWN, SSTXFTFTAIL
+    !ENDIF
 
     !
     ! 5.  Cd and z0 ----------------------------------------------- *
@@ -379,10 +389,10 @@ CONTAINS
     !
     ! 6.  Final test output ---------------------------------------------- *
     !
-    IF (IX == DEBUG_NODE) THEN
-      WRITE(*,*) 'EMEAN HS', EMEAN, 4*SQRT(EMEAN), WNMEAN
-      WRITE(*,*) 'CD, Z0, CHARN, USTAR', CD, Z0, CHARN, USTAR
-    ENDIF 
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'EMEAN HS', EMEAN, 4*SQRT(EMEAN), WNMEAN
+    !  WRITE(*,*) 'CD, Z0, CHARN, USTAR', CD, Z0, CHARN, USTAR
+    !ENDIF 
 
 #ifdef W3_T
     WRITE (NDST,9060) EMEAN, WNMEAN, TPIINV, USTAR, CD, Z0
@@ -1194,7 +1204,7 @@ CONTAINS
           IF (I_INT.GT.NTH) J_INT=I_INT-NTH
           SATINDICES(I_INT-(ITH-SDSNTH)+1,ITH)=J_INT
           SATWEIGHTS(I_INT-(ITH-SDSNTH)+1,ITH)=COS(TH(ITH)-TH(J_INT))**SSDSCOS
-          WRITE(*,*) 'SATS ---', ITH, I_INT, J_INT, COS(TH(ITH)-TH(J_INT))**SSDSCOS
+          !WRITE(*,*) 'SATS ---', ITH, I_INT, J_INT, COS(TH(ITH)-TH(J_INT))**SSDSCOS
         END DO
       END DO
     ELSE

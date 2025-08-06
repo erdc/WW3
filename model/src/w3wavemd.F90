@@ -1072,6 +1072,8 @@ CONTAINS
           CALL WWTIME ( STTIME )
           CALL STME21 ( TIME , IDTIME )
           WRITE (SCREEN,950) IDTIME, STTIME
+          WRITE(*,*) 
+          WRITE(*,*) 
         END IF
         !
         call print_memcheck(memunit, 'memcheck_____:'//' WW3_WAVE TIME LOOP 2')

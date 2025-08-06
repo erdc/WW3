@@ -304,7 +304,8 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/ Parameter list
     !/
-    REAL, INTENT(IN)        :: A(NSPEC), CG(NK), KDMEAN
+    REAL, INTENT(INOUT)     :: A(NSPEC)
+    REAL, INTENT(IN)        :: CG(NK), KDMEAN
     REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC)
     INTEGER, INTENT(IN)     :: IX
     !/
@@ -340,6 +341,10 @@ CONTAINS
     X      = MAX ( KDCON*KDMEAN , KDMN )
     X2     = MAX ( -1.E15, SNLS3*X)
     CONS   = SNLC1 * ( 1. + SNLS1/X * (1.-SNLS2*X) * EXP(X2) )
+
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'X, X2, CONS, KDMEAN', X, X2, CONS, KDMEAN ! WNMEAN * DEPTH 
+    ENDIF
     !
 #ifdef W3_T
     WRITE (NDST,9000) KDMEAN, CONS
@@ -347,13 +352,15 @@ CONTAINS
     !
     ! 2.  Prepare auxiliary spectrum and arrays -------------------------- *
     !
+    A = 0.01
+ 
     DO IFR=1, NFR
       CONX = TPIINV / SIG(IFR) * CG(IFR)
       DO ITH=1, NTH
         ISP       = ITH + (IFR-1)*NTH
         UE (ISP) = A(ISP) / CONX
-        !IF (IX == DEBUG_NODE) 
-        !  WRITE(*,*) 'UE ISP', IFR, ITH, CONX, SIG(IFR), CG(IFR), UE(ISP), A(ISP) 
+        !IF (IX == DEBUG_NODE) THEN
+        !  WRITE(*,*) 'IFR, ITH, CONX, SIG(IFR), CG(IFR), UE(ISP), A(ISP)', IFR, ITH, CONX, SIG(IFR), CG(IFR), UE(ISP), A(ISP), A(ISP)/CG(IFR)
         !ENDIF
         CON(ISP) = CONX
       END DO
@@ -398,6 +405,11 @@ CONTAINS
            + AWG3 * UE(IP23(ISP)) + AWG4 * UE(IP24(ISP))
       EM2    = AWG5 * UE(IM21(ISP)) + AWG6 * UE(IM22(ISP))        &
            + AWG7 * UE(IM23(ISP)) + AWG8 * UE(IM24(ISP))
+   
+      if (IX == DEBUG_NODE) THEN
+        !WRITE(*,*) 'ISP, EP1', ISP, EP1, IP11(ISP), IP12(ISP), IP13(ISP), IP14(ISP), UE(IP11(ISP)), UE(IP12(ISP)), UE(IP13(ISP)), UE(IP14(ISP))
+        !WRITE(*,*) 'ISP, E00, EM1, EP1, EM2, EP2', ISP, E00, EM1, EP1, EM2, EP2
+      endif
       !
       ! 3.b Contribution to interactions
       !
@@ -418,6 +430,10 @@ CONTAINS
       DA2C(ISP) = CONS * AF11(ISP) * ( SA2A + SA2B )
       DA2P(ISP) = FACTOR * ( DAL1*E00 - DAL3*EM2 )
       DA2M(ISP) = FACTOR * ( DAL2*E00 - DAL3*EP2 )
+      IF (IX == DEBUG_NODE) THEN
+      !  WRITE(*,*) 'ISP CONS, AF11(ISP), SA1A, SA1B, FACTOR', ISP, CONS, AF11(ISP), SA1A, SA1B, FACTOR
+        WRITE(*,*) 'ISP, DA1C(ISP), DA1P(ISP), DA1M(ISP), DA2C(ISP), DA2P(ISP), DA2M(ISP)', ISP, DA1C(ISP), DA1P(ISP), DA1M(ISP), DA2C(ISP), DA2P(ISP), DA2M(ISP)
+      ENDIF
       !
     END DO
     !
@@ -444,8 +460,17 @@ CONTAINS
            + SWG6 * ( DA1M(IC61(ISP)) + DA2M(IC62(ISP)) )     &
            + SWG7 * ( DA1M(IC71(ISP)) + DA2M(IC72(ISP)) )     &
            + SWG8 * ( DA1M(IC81(ISP)) + DA2M(IC82(ISP)) )
-      !
+  
+      IF (IX == DEBUG_NODE) THEN
+        !WRITE(*,*) 'ISP, S(ISP), D(ISP), CON(ISP), DA2P(IC21(ISP), IC32(ISP)', ISP, S(ISP), D(ISP), CON(ISP), DA2P(IC32(ISP)), IC32(ISP)
+        WRITE(*,*) 'ISP, DA1M(IC61(ISP)), DA2M(IC62(ISP)), IC61(ISP), IC62(ISP)', ISP, DA1M(IC61(ISP)), DA2M(IC62(ISP)), IC61(ISP), IC62(ISP)
+      ENDIF 
+      !, 
     END DO
+
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'S & D', SUM(S), SUM(D) 
+    ENDIF
     !
     ! ... Test output :
     !
@@ -561,7 +586,11 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     USE CONSTANTS
     USE W3GDATMD, ONLY: NK, NTH, NSPEC, DTH, XFR, SIG, LAM
+    USE W3GDATMD, ONLY: SNLC1, SNLS1, SNLS2, SNLS3
+    USE W3GRIDMD, ONLY: FACHF, FACHFE
+    USE W3ADATMD, ONLY: NFR, NSPECX
     USE W3ADATMD, ONLY: W3DMNL
+
     USE W3ADATMD, ONLY: NFR, NFRHGH, NFRCHG, NSPECX, NSPECY,        &
          IP11, IP12, IP13, IP14, IM11, IM12, IM13, IM14,   &
          IP21, IP22, IP23, IP24, IM21, IM22, IM23, IM24,   &
@@ -611,10 +640,14 @@ CONTAINS
     !
     ! 1.  Internal angles of quadruplet.
     !
+
+
     LAMM2  = (1.-LAM)**2
     LAMP2  = (1.+LAM)**2
     DELTH3 = ACOS( (LAMM2**2+4.-LAMP2**2) / (4.*LAMM2) )
     DELTH4 = ASIN(-SIN(DELTH3)*LAMM2/LAMP2)
+
+    WRITE(*,*) 'NFR, LAMM2, LAMP2, DELTH3, DELTH4', NFR, LAMM2, LAMP2, DELTH3, DELTH4
     !
     ! 2.  Lambda dependend weight factors.
     !
@@ -622,6 +655,7 @@ CONTAINS
     DAL2   = 1. / (1.-LAM)**4
     DAL3   = 2. * DAL1 * DAL2
     !
+    WRITE(*,*) 'DAL1, DAL2, DAL3', DAL1, DAL2, DAL3
     ! 3.  Directional indices.
     !
     CTHP   = ABS(DELTH4/DTH)
@@ -629,12 +663,16 @@ CONTAINS
     ITHP1  = ITHP + 1
     WTHP   = CTHP - REAL(ITHP)
     WTHP1  = 1.- WTHP
+
+    WRITE(*,*) 'CTHP, ITHP, ITHP1, WTHP, WTHP1', CTHP, ITHP, ITHP1, WTHP, WTHP1
     !
     CTHM   = ABS(DELTH3/DTH)
     ITHM   = INT(CTHM)
     ITHM1  = ITHM + 1
     WTHM   = CTHM - REAL(ITHM)
     WTHM1  = 1.- WTHM
+
+    WRITE(*,*) 'CTHM, ITHM, ITHM1, WTHM, WTHM1', CTHM, ITHM, ITHM1, WTHM, WTHM1
     !
     ! 4.  Frequency indices.
     !
@@ -649,6 +687,8 @@ CONTAINS
     IFRM1  = IFRM - 1
     WFRM   = (XFR**IFRM -(1.-LAM)) / (XFR**IFRM - XFR**IFRM1)
     WFRM1  = 1. - WFRM
+
+    WRITE(*,*) 'XFRLN, IFRP, IFRP1, WFRP, WFRP1, IFRM, IFRM1, WFRM, WFRM1' , XFRLN, IFRP, IFRP1, WFRP, WFRP1, IFRM, IFRM1, WFRM, WFRM1 
     !
     ! 5.  Range of calculations
     !
@@ -656,6 +696,8 @@ CONTAINS
     NFRCHG = NFR - IFRM1
     NSPECY = NFRHGH * NTH
     NSPECX = NFRCHG * NTH
+
+    WRITE(*,*) 'NFRHGH, NFRCHG, NSPECY, NSPECX', NFRHGH, NFRCHG, NSPECY, NSPECX
     !
     ! 6.  Allocate arrays or check array sizes
     !
@@ -677,6 +719,7 @@ CONTAINS
       IF6(IFR) = MAX ( 0 , IFR-IFRP1 )
       IF7(IFR) =           IFR-IFRM
       IF8(IFR) =           IFR-IFRM1
+      WRITE(*,*) 'IFR, IF2(IFR)', IFR, IF2(IFR), IFRP1, IFRM1
     END DO
     !
     DO ITH=1, NTH
@@ -747,6 +790,7 @@ CONTAINS
     !
     DO IFR=1, NFR
       AF11A  = (SIG(IFR)*TPIINV)**11
+      WRITE(*,*) 'IFR, SIG(IFR)', IFR, SIG(IFR), SIG(IFR)*TPIINV, XFR
       DO ITH=1, NTH
         AF11(ITH+(IFR-1)*NTH) = AF11A
       END DO
@@ -760,6 +804,9 @@ CONTAINS
         AF11(ITH+(IFR-1)*NTH) = AF11A
       END DO
     END DO
+
+    WRITE(*,*) 'AF11(1), AF11(100), AF11(NSPX)', AF11(1), AF11(100), AF11(NSPECX)
+    
     !
     ! 9.  Interpolation weights
     !
@@ -771,6 +818,8 @@ CONTAINS
     AWG6   = WTHM1 * WFRM
     AWG7   = WTHM  * WFRM1
     AWG8   = WTHM1 * WFRM1
+    
+    WRITE(*,*) 'AWG1, AWG2, AWG3, AWG4, AWG5, AWG6, AWG7, AWG8', AWG1, AWG2, AWG3, AWG4, AWG5, AWG6, AWG7, AWG8
     !
     SWG1   = AWG1**2
     SWG2   = AWG2**2
@@ -780,6 +829,11 @@ CONTAINS
     SWG6   = AWG6**2
     SWG7   = AWG7**2
     SWG8   = AWG8**2
+
+    WRITE(*,*) 'LAM', LAM
+    WRITE(*,*) 'SNLC1, SNLS1, SNLS2, SNLS3', SNLC1, SNLS1, SNLS2, SNLS3
+    WRITE(*,*) 'FACHF, FACHFE', FACHF, FACHFE
+    WRITE(*,*) 'ITHP, ITHM', ITHP, ITHM
     !
     RETURN
     !
