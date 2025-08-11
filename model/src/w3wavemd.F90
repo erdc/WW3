@@ -1071,6 +1071,8 @@ CONTAINS
         IF ( TSTAMP .AND. SCREEN.NE.NDSO .AND. IAPROC.EQ.NAPOUT ) THEN
           CALL WWTIME ( STTIME )
           CALL STME21 ( TIME , IDTIME )
+          WRITE(*,*) 
+          WRITE(*,*) 
           WRITE (SCREEN,950) IDTIME, STTIME
           WRITE(*,*) 
           WRITE(*,*) 

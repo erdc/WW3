@@ -3727,10 +3727,10 @@ CONTAINS
 #ifdef W3_REF1
             IF (IBR == 1) THEN
               DTK               = KP(POS,IE) * DTG
-              !B_JAC(ISP,IP)     = B_JAC(ISP,IP) + PDLIB_TRIA03(IE) * VA(ISP,IP)
+              B_JAC(ISP,IP)     = B_JAC(ISP,IP) + PDLIB_TRIA03(IE) * VA(ISP,IP)
             ELSE
               DTK               = KP(POS,IE) * DTG * IB1
-              !B_JAC(ISP,IP)     = B_JAC(ISP,IP) + PDLIB_TRIA03(IE) * VA(ISP,IP) * IB2
+              B_JAC(ISP,IP)     = B_JAC(ISP,IP) + PDLIB_TRIA03(IE) * VA(ISP,IP) * IB2
             ENDIF
 #else
             DTK               = KP(POS,IE) * DTG * IB1
@@ -6241,6 +6241,9 @@ CONTAINS
       IF (B_JGS_LIMITER) THEN
         DO IK = 1, NK
           MAXDAC = 0.1*0.0081/(2*SIG(IK)*WN(IK,IP_GLOB)**3*CG(IK,IP_GLOB))
+          !IF (IP_GLOB == DEBUG_NODE) THEN
+          !  WRITE(*,*) 'MAXDAC', IP_GLOB, IK, MAXDAC, (2*SIG(IK)*WN(IK,IP_GLOB)**3*CG(IK,IP_GLOB))
+          !ENDIF 
           DO ITH = 1, NTH
             ISP = ITH + (IK-1)*NTH
             NEWDAC = VA(ISP,IP) - VAOLD(ISP,JSEA)

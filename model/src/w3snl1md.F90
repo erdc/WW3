@@ -305,7 +305,7 @@ CONTAINS
     !/ Parameter list
     !/
     REAL, INTENT(INOUT)     :: A(NSPEC)
-    REAL, INTENT(IN)        :: CG(NK), KDMEAN
+    REAL     :: CG(NK), KDMEAN
     REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC)
     INTEGER, INTENT(IN)     :: IX
     !/
@@ -338,13 +338,15 @@ CONTAINS
     !
     ! 1.  Calculate prop. constant --------------------------------------- *
     !
+    !A      = 0.01
+    !KDMEAN = 1
     X      = MAX ( KDCON*KDMEAN , KDMN )
     X2     = MAX ( -1.E15, SNLS3*X)
     CONS   = SNLC1 * ( 1. + SNLS1/X * (1.-SNLS2*X) * EXP(X2) )
 
-    IF (IX == DEBUG_NODE) THEN
-      WRITE(*,*) 'X, X2, CONS, KDMEAN', X, X2, CONS, KDMEAN ! WNMEAN * DEPTH 
-    ENDIF
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'X, X2, CONS, KDMEAN', X, X2, CONS, KDMEAN ! WNMEAN * DEPTH 
+    !ENDIF
     !
 #ifdef W3_T
     WRITE (NDST,9000) KDMEAN, CONS
@@ -352,7 +354,6 @@ CONTAINS
     !
     ! 2.  Prepare auxiliary spectrum and arrays -------------------------- *
     !
-    A = 0.01
  
     DO IFR=1, NFR
       CONX = TPIINV / SIG(IFR) * CG(IFR)
@@ -389,6 +390,10 @@ CONTAINS
       DA2P(ISP) = 0.
       DA2M(ISP) = 0.
     END DO
+
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'UE AFTER 0', SUM(UE) 
+    !ENDIF 
     !
     ! 3.  Calculate interactions for extended spectrum ------------------- *
     !
@@ -408,8 +413,11 @@ CONTAINS
    
       if (IX == DEBUG_NODE) THEN
         !WRITE(*,*) 'ISP, EP1', ISP, EP1, IP11(ISP), IP12(ISP), IP13(ISP), IP14(ISP), UE(IP11(ISP)), UE(IP12(ISP)), UE(IP13(ISP)), UE(IP14(ISP))
-        !WRITE(*,*) 'ISP, E00, EM1, EP1, EM2, EP2', ISP, E00, EM1, EP1, EM2, EP2
+        !WRITE(*,*) 'ISP, EM1 IMIs UEs', ISP, EM1, IM11(ISP), IM12(ISP), IM13(ISP), IM14(ISP), UE(IM11(ISP)), UE(IM12(ISP)), UE(IM13(ISP)), UE(IM14(ISP))
       endif
+      !IF (IX == DEBUG_NODE) THEN
+      !   WRITE(*,*) 'ISP, E00, EM1, EP1, EM2, EP2', ISP, E00, EM1, EP1, EM2, EP2
+      !ENDIF
       !
       ! 3.b Contribution to interactions
       !
@@ -430,12 +438,13 @@ CONTAINS
       DA2C(ISP) = CONS * AF11(ISP) * ( SA2A + SA2B )
       DA2P(ISP) = FACTOR * ( DAL1*E00 - DAL3*EM2 )
       DA2M(ISP) = FACTOR * ( DAL2*E00 - DAL3*EP2 )
-      IF (IX == DEBUG_NODE) THEN
+      !IF (IX == DEBUG_NODE) THEN
       !  WRITE(*,*) 'ISP CONS, AF11(ISP), SA1A, SA1B, FACTOR', ISP, CONS, AF11(ISP), SA1A, SA1B, FACTOR
-        WRITE(*,*) 'ISP, DA1C(ISP), DA1P(ISP), DA1M(ISP), DA2C(ISP), DA2P(ISP), DA2M(ISP)', ISP, DA1C(ISP), DA1P(ISP), DA1M(ISP), DA2C(ISP), DA2P(ISP), DA2M(ISP)
-      ENDIF
+      !  WRITE(*,*) 'ISP, DA1C(ISP), DA1P(ISP), DA1M(ISP), DA2C(ISP), DA2P(ISP), DA2M(ISP)', ISP, DA1C(ISP), DA1P(ISP), DA1M(ISP), DA2C(ISP), DA2P(ISP), DA2M(ISP)
+      !ENDIF
       !
     END DO
+
     !
     ! 4.  Put source and diagonal term together -------------------------- *
     !
@@ -461,16 +470,27 @@ CONTAINS
            + SWG7 * ( DA1M(IC71(ISP)) + DA2M(IC72(ISP)) )     &
            + SWG8 * ( DA1M(IC81(ISP)) + DA2M(IC82(ISP)) )
   
-      IF (IX == DEBUG_NODE) THEN
+      IF (.false.) THEN!IX == DEBUG_NODE) THEN
         !WRITE(*,*) 'ISP, S(ISP), D(ISP), CON(ISP), DA2P(IC21(ISP), IC32(ISP)', ISP, S(ISP), D(ISP), CON(ISP), DA2P(IC32(ISP)), IC32(ISP)
-        WRITE(*,*) 'ISP, DA1M(IC61(ISP)), DA2M(IC62(ISP)), IC61(ISP), IC62(ISP)', ISP, DA1M(IC61(ISP)), DA2M(IC62(ISP)), IC61(ISP), IC62(ISP)
-      ENDIF 
+        WRITE(77777,*) ISP, CON(ISP),  ( SA1(ISP) + SA2(ISP) ), ( SA1(IC11(ISP)) + SA2(IC12(ISP)) ), ( SA1(IC21(ISP)) + SA2(IC22(ISP)) ), ( SA1(IC31(ISP)) + SA2(IC32(ISP)) ), ( SA1(IC41(ISP)) + SA2(IC42(ISP)) ), ( SA1(IC51(ISP)) + SA2(IC52(ISP)) ), ( SA1(IC61(ISP)) + SA2(IC62(ISP)) ), ( SA1(IC71(ISP)) + SA2(IC72(ISP)) ), ( SA1(IC81(ISP)) + SA2(IC82(ISP)) )
+        WRITE(88888,*) ISP, CON(ISP), ( DA1C(ISP) + DA2C(ISP) ), &
+                                      ( DA1P(IC11(ISP)) + DA2P(IC12(ISP)) ), ( DA1P(IC21(ISP)) + DA2P(IC22(ISP)) ), &
+                                      ( DA1P(IC31(ISP)) + DA2P(IC32(ISP)) ), ( DA1P(IC41(ISP)) + DA2P(IC42(ISP)) ), &
+                                      ( DA1M(IC51(ISP)) + DA2M(IC52(ISP)) ), ( DA1M(IC61(ISP)) + DA2M(IC62(ISP)) ), & 
+                                      ( DA1M(IC71(ISP)) + DA2M(IC72(ISP)) ), ( DA1M(IC81(ISP)) + DA2M(IC82(ISP)) )
+       WRITE(99999,*) ISP, ( DA1P(IC11(ISP)) + DA2P(IC12(ISP)) ), IC11(ISP), IC12(ISP)
       !, 
+      ENDIF 
     END DO
 
     IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) '------------------------------------------------------------------------------------'
+      WRITE(*,*) '------------------------------------------------------------------------------------'
       WRITE(*,*) 'S & D', SUM(S), SUM(D) 
+      WRITE(*,*) '------------------------------------------------------------------------------------'
+      WRITE(*,*) '------------------------------------------------------------------------------------'
     ENDIF
+
     !
     ! ... Test output :
     !
@@ -719,8 +739,8 @@ CONTAINS
       IF6(IFR) = MAX ( 0 , IFR-IFRP1 )
       IF7(IFR) =           IFR-IFRM
       IF8(IFR) =           IFR-IFRM1
-      WRITE(*,*) 'IFR, IF2(IFR)', IFR, IF2(IFR), IFRP1, IFRM1
     END DO
+ 
     !
     DO ITH=1, NTH
       IT1(ITH) = ITH + ITHP
@@ -760,7 +780,9 @@ CONTAINS
       IM22(ISP) = IT3(ITH) + (IF4(IFR)-1)*NTH
       IM23(ISP) = IT4(ITH) + (IF3(IFR)-1)*NTH
       IM24(ISP) = IT3(ITH) + (IF3(IFR)-1)*NTH
+      !WRITE(*,*) 'ISP, IFR, ITH, IP11(ISP), IT2(ITH), (IF2(IFR)-1)', ISP, IFR, ITH, IP11(ISP), IT2(ITH), IF2(IFR), (IF2(IFR)-1)*NTH
     END DO
+    !PAUSE
     !
     DO ISP=1, NSPEC
       IFR       = 1 + (ISP-1)/NTH
@@ -782,6 +804,8 @@ CONTAINS
       IC72(ISP) = IT8(ITH) + (IF7(IFR)-1)*NTH
       IC82(ISP) = IT7(ITH) + (IF7(IFR)-1)*NTH
     END DO
+
+
     !
     DEALLOCATE ( IF1, IF2, IF3, IF4, IF5, IF6, IF7, IF8,  &
          IT1, IT2, IT3, IT4, IT5, IT6, IT7, IT8 )
@@ -796,7 +820,7 @@ CONTAINS
       END DO
     END DO
     !
-    FR     = SIG(NFR)*TPIINV
+    FR = SIG(NFR)*TPIINV
     DO IFR=NFR+1, NFRCHG
       FR     = FR * XFR
       AF11A  = FR**11
@@ -834,6 +858,8 @@ CONTAINS
     WRITE(*,*) 'SNLC1, SNLS1, SNLS2, SNLS3', SNLC1, SNLS1, SNLS2, SNLS3
     WRITE(*,*) 'FACHF, FACHFE', FACHF, FACHFE
     WRITE(*,*) 'ITHP, ITHM', ITHP, ITHM
+
+    
     !
     RETURN
     !

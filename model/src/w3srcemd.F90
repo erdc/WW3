@@ -1000,6 +1000,10 @@ CONTAINS
     BRLAMBDA(:)=0.
     WHITECAP(:)=0.
 #endif
+
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'SUM SPEC', SUM(SPEC) 
+    ENDIF
     !
     ! 1.c Set mean parameters
     !
@@ -1074,11 +1078,11 @@ CONTAINS
 #endif
 
 #ifdef W3_ST4
-      IF (SINTAILPAR(4).GT.0.5) CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
-           U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
-           VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
-           VSIN = 0
-           VDIN = 0 
+      !IF (SINTAILPAR(4).GT.0.5) CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
+      !     U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
+      !     VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
+      !    VSIN = 0
+      !     VDIN = 0 
      END IF
 #endif
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
@@ -1304,8 +1308,8 @@ CONTAINS
 #ifdef W3_ST4
       CALL W3SDS4 ( SPEC, WN1, CG1, USTAR, USTDIR, DEPTH, DAIR, VSDS,   &
            VDDS, IX, IY, BRLAMBDA, WHITECAP, DLWMEAN )
-       VSDS = 0
-       VDDS = 0 
+       !VSDS = 0
+       !VDDS = 0 
        IF (IX == DEBUG_NODE) THEN
          WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
        ENDIF
@@ -1613,7 +1617,7 @@ CONTAINS
               ENDDO
             ENDDO 
             IF (IX == DEBUG_NODE) THEN
-              !WRITE(*,*) 'SUM VSTOT VSSCGTOT, VDTOT', IX, SUM(VS), SUM(VSCG), SUM(VD), SUM(VSCGJAC), CLATSL 
+              WRITE(*,*) 'SUM VSTOT VDTOT', IX, SUM(VS), SUM(VD)
             ENDIF 
             DO IK = 1, NK
               JAC = 1./CG1(IK)
@@ -1638,6 +1642,7 @@ CONTAINS
                   eVS    = PreVS * JAC 
                   eVD    = MIN(0.,VD(ISP))
                 ENDIF
+
                 B_JAC(ISP,JSEA) = B_JAC(ISP,JSEA) + SIDT * (eVS - eVD * SPEC(ISP)*JAC)
                 
                 IF (ISEA == DEBUG_NODE) THEN
