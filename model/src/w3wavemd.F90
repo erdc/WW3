@@ -2209,32 +2209,31 @@ CONTAINS
                 TMP3   = TAUBBL(JSEA,1:2)
                 TMP4   = TAUICE(JSEA,1:2)
 #ifdef W3_PDLIB
-                if (.false.) then
                 IF (FSSOURCE) THEN
-                  CALL W3SRCE(srce_imp_post,IT,ISEA,JSEA,IX,IY,IMOD,     &
-                       VAOLD(:,JSEA), VA(:,JSEA),                        &
-                       VSioDummy,VDioDummy,SHAVETOT(JSEA),               &
-                       ALPHA(1:NK,JSEA), WN(1:NK,ISEA),                  &
-                       CG(1:NK,ISEA), CLATS(ISEA), DW(ISEA), U10(ISEA),  &
-                       U10D(ISEA),                                       &
+                  !CALL W3SRCE(srce_imp_post,IT,ISEA,JSEA,IX,IY,IMOD,     &
+                  !     VAOLD(:,JSEA), VA(:,JSEA),                        &
+                  !     VSioDummy,VDioDummy,SHAVETOT(JSEA),               &
+                  !     ALPHA(1:NK,JSEA), WN(1:NK,ISEA),                  &
+                  !     CG(1:NK,ISEA), CLATS(ISEA), DW(ISEA), U10(ISEA),  &
+                  !     U10D(ISEA),                                       &
 #ifdef W3_FLX5
-                       TAUA(ISEA), TAUADIR(ISEA),                        &
+                  !     TAUA(ISEA), TAUADIR(ISEA),                        &
 #endif
-                       AS(ISEA), UST(ISEA),                              &
-                       USTDIR(ISEA), CX(ISEA), CY(ISEA),                 &
-                       ICE(ISEA), ICEH(ISEA), ICEF(ISEA),                &
-                       ICEDMAX(ISEA),                                    &
-                       REFLEC, REFLED, DELX, DELY, DELA,                 &
-                       TRNX(IY,IX), TRNY(IY,IX), BERG(ISEA),             &
-                       FPIS(ISEA), DTDYN(JSEA),                          &
-                       FCUT(JSEA), DTG, TAUWX(JSEA), TAUWY(JSEA),        &
-                       TAUOX(JSEA), TAUOY(JSEA), TAUWIX(JSEA),           &
-                       TAUWIY(JSEA), TAUWNX(JSEA),                       &
-                       TAUWNY(JSEA),  PHIAW(JSEA), CHARN(JSEA),          &
-                       TWS(JSEA),PHIOC(JSEA), TMP1, D50, PSIC, TMP2,     &
-                       PHIBBL(JSEA), TMP3, TMP4, PHICE(JSEA),            &
-                       TAUOCX(JSEA), TAUOCY(JSEA), WNMEAN(JSEA),         &
-                       RHOAIR(ISEA), ASF(ISEA))
+                  !     AS(ISEA), UST(ISEA),                              &
+                  !     USTDIR(ISEA), CX(ISEA), CY(ISEA),                 &
+                  !     ICE(ISEA), ICEH(ISEA), ICEF(ISEA),                &
+                  !     ICEDMAX(ISEA),                                    &
+                  !     REFLEC, REFLED, DELX, DELY, DELA,                 &
+                  !     TRNX(IY,IX), TRNY(IY,IX), BERG(ISEA),             &
+                  !     FPIS(ISEA), DTDYN(JSEA),                          &
+                  !     FCUT(JSEA), DTG, TAUWX(JSEA), TAUWY(JSEA),        &
+                  !     TAUOX(JSEA), TAUOY(JSEA), TAUWIX(JSEA),           &
+                  !     TAUWIY(JSEA), TAUWNX(JSEA),                       &
+                  !     TAUWNY(JSEA),  PHIAW(JSEA), CHARN(JSEA),          &
+                  !     TWS(JSEA),PHIOC(JSEA), TMP1, D50, PSIC, TMP2,     &
+                  !     PHIBBL(JSEA), TMP3, TMP4, PHICE(JSEA),            &
+                  !     TAUOCX(JSEA), TAUOCY(JSEA), WNMEAN(JSEA),         &
+                  !     RHOAIR(ISEA), ASF(ISEA))
                 ELSE
 #endif
                   CALL W3SRCE(srce_direct, IT, ISEA, JSEA, IX, IY, IMOD, &
@@ -2263,7 +2262,6 @@ CONTAINS
                        RHOAIR(ISEA), ASF(ISEA))
 #ifdef W3_PDLIB
                 END IF
-                endif
 #endif
                 WHITECAP(JSEA,1:4) = TMP1
                 BEDFORMS(JSEA,1:3) = TMP2

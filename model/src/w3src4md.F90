@@ -246,7 +246,8 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/ Parameter list
     !/
-    REAL, INTENT(IN)        :: A(NTH,NK), CG(NK), WN(NK), U, UDIR
+    REAL, INTENT(INOUT)        :: A(NTH,NK)
+    REAL, INTENT(IN)        :: CG(NK), WN(NK), U, UDIR
 #ifdef W3_FLX5
     REAL, INTENT(IN)        :: TAUA, TAUADIR, DAIR
 #endif
@@ -287,6 +288,7 @@ CONTAINS
     DLWMEAN =0.
     ELCS =0.
     ELSN =0.
+    !A = 0.01
     !
     ! 1.  Integral over directions and maximum --------------------------- *
     !
@@ -570,7 +572,7 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     !/ Parameter list
     !/
-    REAL, INTENT(IN)        :: A(NSPEC), BRLAMBDA(NSPEC)
+    REAL, INTENT(INOUT)        :: A(NSPEC), BRLAMBDA(NSPEC)
     REAL, INTENT(IN)        :: CG(NK), K(NSPEC),Z0,U, CD
     REAL, INTENT(IN)        :: USTAR, USDIR, AS, DRAT
     REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC), TAUWX, TAUWY, TAUWNX, TAUWNY
@@ -653,6 +655,7 @@ CONTAINS
     UORB=0.
     AORB=0.
     ACG=0.
+    !A = 0.01
 
     DO IK=1, NK
       EB  = 0.
@@ -760,7 +763,7 @@ CONTAINS
       STRESSSTAB(ISTAB,:)=0.
       STRESSSTABN(ISTAB,:)=0.
       IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT' 
+        !WRITE(*,*) 'IK, TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT, STRESSSTAB(ISTAB,1), STRESSSTAB(ISTAB,2), TTAUWSHELTE' 
       ENDIF
       !
       DO IK=1, NK
@@ -791,7 +794,7 @@ CONTAINS
         SWELLCOEFT=-DRAT*SSWELLF(1)*16*SIG2(IS)**2/GRAV 
 
         IF (IX == DEBUG_NODE) THEN
-          WRITE(*,*) IK, TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT, STRESSSTAB(ISTAB,1), STRESSSTAB(ISTAB,2), TTAUWSHELTER
+          !WRITE(*,*) IK, TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT, STRESSSTAB(ISTAB,1), STRESSSTAB(ISTAB,2), TTAUWSHELTER
         ENDIF
         !
         DO ITH=1,NTH
@@ -859,7 +862,7 @@ CONTAINS
           END IF
 
           IF (IX == DEBUG_NODE) THEN
-            !WRITE(*,*) 'IK, ITH, IS, DSTAB(ISTAB,IS), CONST', IK, ITH, IS, DSTAB(ISTAB,IS), CONST, A(IS)/CG(IK)
+            !WRITE(*,*) 'IK, ITH, DSTAB(ISTAB,IS), CONST', IK, ITH, DSTAB(ISTAB,IS), CONST2
           ENDIF 
 
         END DO
@@ -882,6 +885,7 @@ CONTAINS
     WRITE (NDST,9002) SUM(D), SUM(A), XSTRESS, YSTRESS, TAUWNX, TAUWNY
 #endif
     IF (IX == DEBUG_NODE) THEN
+       WRITE(*,*) 'SUM DSTAB', SUM(D)
        !WRITE(*,*) 'PRINT_SPEC D from SIN4'
        !CALL PRINT_SPEC(D)
     ENDIF
@@ -909,14 +913,16 @@ CONTAINS
     USDIRP=ATAN2(TAUPY,TAUPX)
 
     UST=USTP
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'USTP', UST, Z0, LEVTAIL
+    ENDIF 
     !
     ! Computes HF tail
     !
     ! Computes the high-frequency contribution
     ! the difference in spectal density (kx,ky) to (f,theta)
     ! is integrated in this modified CONST0
-    CONST0=DTH*SIG(NK)**5/((GRAV**2)*tpi) &
-         *TPI*SIG(NK) / CG(NK)  !conversion WAM (E(f,theta) to WW3 A(k,theta)
+    CONST0=DTH*SIG(NK)**5/((GRAV**2)*tpi) *TPI*SIG(NK) / CG(NK) !conversion WAM (E(f,theta) to WW3 A(k,theta)
     TEMP=0.
     DO ITH=1,NTH
       IS=ITH+(NK-1)*NTH
@@ -927,6 +933,10 @@ CONTAINS
     LEVTAIL0= CONST0*TEMP  ! LEVTAIL is sum over theta of A(k,theta)*cos^3(theta-wind)*DTH*SIG^5/(g^2*2pi)*2*pi*SIG/CG
                            !  which is the same as sum of E(f,theta)*cos^3(theta-wind)*DTH*SIG^5/(g^2*2pi)
                            ! reminder:  sum of E(f,theta)*DTH*SIG^5/(g^2*2pi) is 2*k^3*E(k)
+
+    IF(IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'LEVTAIL0', LEVTAIL0, CONST0, TEMP 
+    ENDIF 
 !
 ! Computation of stress supported by tail: uses table if SINTAILPAR(1)=1 , correspoding to SINTABLE = 1
 !
@@ -1001,11 +1011,12 @@ CONTAINS
       END DO
       DEALLOCATE(W)
       TAU1NT=TAU1
-      TAUHF = TAU1
+      TAUHF=TAU1
       !
       ! In this case, uses tables for high frequency contribution to TAUW.
       !
     ELSE
+
       ! finds the values in the tabulated stress TAUHFT
       XI=UST/DELUST
       IND  = MAX(1,MIN (IUSTAR-1, INT(XI)))
@@ -1015,6 +1026,9 @@ CONTAINS
       J    = MAX(1 ,MIN (IALPHA-1, INT(XJ)))
       DELJ1= MAX(0.,MIN (1.      , XJ-FLOAT(J)))
       DELJ2=1. - DELJ1
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'TAUHF TABLE', XI, IND, DELI1, DELI2, J, XJ, DELJ1, DELJ2, UST, DELUST
+      ENDIF 
       IF (TTAUWSHELTER.GT.0) THEN
         XK = LEVTAIL0/ DELTAIL
         I = MIN (ILEVTAIL-1, INT(XK))
@@ -1028,12 +1042,18 @@ CONTAINS
         TAU1 =(TAUHFT(IND,J)*DELI2+TAUHFT(IND+1,J)*DELI1 )*DELJ2 &
              +(TAUHFT(IND,J+1)*DELI2+TAUHFT(IND+1,J+1)*DELI1)*DELJ1
       END IF
+
       !
       TAUHF = LEVTAIL0*UST**2*TAU1
+
+      IF (IX == DEBUG_NODE) THEN
+        WRITE(*,*) 'TAUHF', TAUHF, UST, Z0, LEVTAIL0, TAU1
+      ENDIF 
     END IF ! End of test on use of table
 
     TAUWX = XSTRESS+TAUHF*COS(USDIRP)
     TAUWY = YSTRESS+TAUHF*SIN(USDIRP)
+
     !
     ! Reduces tail effect to make sure that wave-supported stress
     ! is less than total stress, this is borrowed from ECWAM Stresso.F
@@ -1045,6 +1065,10 @@ CONTAINS
       TAUWX=TAUWX*TAUWB/TAUW
       TAUWY=TAUWY*TAUWB/TAUW
     END IF
+
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'TAU BULLSHIT', UST2, TAUWX, TAUWY, TAUHF, XSTRESS, YSTRESS
+    ENDIF 
     !
     RETURN
     !
@@ -2016,7 +2040,7 @@ CONTAINS
            + (TAUT(IND,J+1)*DELI2+TAUT(IND+1,J+1)*DELI1)*DELJ1
       !USTAR = WINDSPEED/28.
       IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'CALC_USTAR', TAUW_LOCAL, TAUW, TAUWMAX, IND, DELI1, DELI2, XJ, J, DELJ1, DELJ2, USTAR, TAUT(IND,J), TAUT(IND+1,J), TAUT(IND,J+1), TAUT(IND+1,J+1)
+        WRITE(*,*) 'CALC_USTAR', USTAR, WINDSPEED, TAUW
       ENDIF 
     ELSE
       IF (CAPCHNK(1).EQ.1.) THEN
