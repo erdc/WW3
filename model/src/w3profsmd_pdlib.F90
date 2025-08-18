@@ -3629,7 +3629,7 @@ CONTAINS
     REAL    :: FL21, FL22
     REAL    :: FL31, FL32
     REAL    :: CRFS(3), K(3)
-    REAL    :: KP(3,NE)
+    REAL    :: KP(3,NE), NM(NE) 
     REAL    :: KM(3), DELTAL(3,NE)
     REAL    :: K1, eSI, eVS, eVD
     REAL    :: eVal1, eVal2, eVal3
@@ -3674,6 +3674,7 @@ CONTAINS
 #else
         CG1    = CG(IK,IP_GLOB)
 #endif
+        CG1    = 1.
         CXY(1,IP) = CCOS * CG1/CLATS(IP_GLOB)
         CXY(2,IP) = CSIN * CG1
         IF (FLCUR) THEN
@@ -3705,8 +3706,13 @@ CONTAINS
         K(2)  = LAMBDA(1) * PDLIB_IEN(3,IE) + LAMBDA(2) * PDLIB_IEN(4,IE)
         K(3)  = LAMBDA(1) * PDLIB_IEN(5,IE) + LAMBDA(2) * PDLIB_IEN(6,IE)
         KP(1:3,IE) = MAX(ZERO,K(1:3))
-        DELTAL(1:3,IE) = (CRFS(1:3) - KP(1:3,IE)) * 1.d0/MIN(-THR,SUM(MIN(ZERO,K(1:3))))
+        NM(IE) = 1.d0/MIN(-THR,SUM(MIN(ZERO,K(1:3))))
+        DELTAL(1:3,IE) = (CRFS(1:3) - KP(1:3,IE))! * 1.d0/MIN(-THR,SUM(MIN(ZERO,K(1:3))))
+        IF (IE == 14401 .and. IK == 1) THEN
+          WRITE(*,*) 'IEN', 3 * PDLIB_TRIA03(IE), PDLIB_IEN(1:6,IE), KP(1:3,IE), NM(IE), DELTAL(1:3,IE)
+        ENDIF
       ENDDO
+ 
 
       J = 0
       DO IP = 1, np
@@ -3744,9 +3750,11 @@ CONTAINS
             I2  =  PDLIB_POSI(2,J)
             I3  =  PDLIB_POSI(3,J)
             IF (FSGEOADVECT) THEN
-              ASPAR_JAC(ISP,I1) = ASPAR_JAC(ISP,I1) + PDLIB_TRIA03(IE) + DTK - DTK * DELTAL(POS,IE)
-              ASPAR_JAC(ISP,I2) = ASPAR_JAC(ISP,I2)                          - DTK * DELTAL(POS_TRICK(POS,1),IE)
-              ASPAR_JAC(ISP,I3) = ASPAR_JAC(ISP,I3)                          - DTK * DELTAL(POS_TRICK(POS,2),IE)
+              ASPAR_JAC(ISP,I1) = ASPAR_JAC(ISP,I1) + PDLIB_TRIA03(IE) + DTK - DTK * DELTAL(POS,IE)*NM(IE)
+              ASPAR_JAC(ISP,I2) = ASPAR_JAC(ISP,I2)                          - DTK * DELTAL(POS_TRICK(POS,1),IE)*NM(IE) 
+              ASPAR_JAC(ISP,I3) = ASPAR_JAC(ISP,I3)                          - DTK * DELTAL(POS_TRICK(POS,2),IE)*NM(IE) 
+              !IF (IP == 7146 .and. IK == 1 .and. ITH == 1) WRITE(*,*) 'ASPAR_JAC', IP, IE, IK, ITH, ASPAR_JAC(ISP,I1)
+              IF (IP == 7146 .and. IK == 1 .and. ITH == 1) WRITE(*,*) 'ASPAR_JAC OFF', IP, IE, IK, ITH, ASPAR_JAC(ISP,I2), ASPAR_JAC(ISP,I3)
             ELSE
               ASPAR_JAC(ISP,I1) = ASPAR_JAC(ISP,I1) + PDLIB_TRIA03(IE)
             ENDIF
@@ -5663,6 +5671,8 @@ CONTAINS
     CALL ALL_VA_INTEGRAL_PRINT(IMOD, "VA(np) before transform", 0)
     CALL ALL_VA_INTEGRAL_PRINT(IMOD, "VA(npa) before transform", 1)
 #endif
+    VA(:,7146) = 0.01
+
     DO JSEA=1,NSEAL
       IP      = JSEA
       IP_glob = iplg(IP)

@@ -2328,6 +2328,10 @@ CONTAINS
 #ifdef W3_IG1
     IK1=NINT(IGPARS(5))+1
 #endif
+
+    if (IX == DEBUG_NODE) THEN 
+      CALL PRINT_SPEC(A) 
+    endif 
     !
     ! 1.b MSS parameters used for Modulation factors for lambda (Romero )
     !
@@ -2721,10 +2725,10 @@ CONTAINS
 
     END IF
 
-    !IF (IX == DEBUG_NODE) THEN
-    !  WRITE(*,*) '----------------------------------------------------------'
-    !  CALL PRINT_SPEC(DDIAG)
-    !ENDIF
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) '----------------------------------------------------------'
+      CALL PRINT_SPEC(DDIAG)
+    ENDIF
     !
     !  COMPUTES WHITECAP PARAMETERS
     !
