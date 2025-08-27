@@ -1086,7 +1086,7 @@ CONTAINS
     ! Local group 1 variables
     REAL          :: DWAUX, CXAUX, CYAUX, UAAUX, UDAUX, ASAUX,     &
          WLVAUX, ICEAUX, ICEHAUX, ICEFAUX, BERGAUX,    &
-         SED_D50AUX, RHOAIRAUX, TAUAAUX, TAUADIRAUX,   &
+         SED_D50AUX,SED_KRAUX, RHOAIRAUX, TAUAAUX, TAUADIRAUX,   &
          SUMWT1(NOGE(1))
     ! Local group 2 variables
     REAL          :: HSAUX, WLMAUX, T02AUX, T0M1AUX, T01AUX,       &
@@ -1174,7 +1174,7 @@ CONTAINS
     SED_D50  = UNDEF
 #endif
 #ifdef W3_BT5
-    SED_D50  = UNDEF
+    SED_KR  = UNDEF
 #endif
 
 #ifdef W3_IS2
@@ -1409,6 +1409,7 @@ CONTAINS
             ICEAUX      = UNDEF
             BERGAUX     = UNDEF
             SED_D50AUX  = UNDEF
+            SED_KRAUX  = UNDEF
             ICEHAUX     = UNDEF
             ICEFAUX     = UNDEF
             RHOAIRAUX   = UNDEF
@@ -1687,12 +1688,12 @@ CONTAINS
 #endif
 #ifdef W3_BT5
               IF ( FLOGRD(1,10) ) THEN
-                IF ( GRIDS(IGRID)%SED_D50(GSEA) .NE. UNDEF ) THEN
+                IF ( GRIDS(IGRID)%SED_KR(GSEA) .NE. UNDEF ) THEN
                   SUMWT1(10) = SUMWT1(10) + WT
-                  IF ( SED_D50AUX .EQ. UNDEF ) THEN
-                    SED_D50AUX = GRIDS(IGRID)%SED_D50(GSEA)*WT
+                  IF ( SED_KRAUX .EQ. UNDEF ) THEN
+                    SED_KRAUX = GRIDS(IGRID)%SED_KR(GSEA)*WT
                   ELSE
-                    SED_D50AUX = SED_D50AUX + GRIDS(IGRID)%SED_D50(GSEA)*WT
+                    SED_KRAUX = SED_KRAUX + GRIDS(IGRID)%SED_KR(GSEA)*WT
                   END IF
                 END IF
               END IF
@@ -2677,12 +2678,12 @@ CONTAINS
             END IF
 #endif
 #ifdef W3_BT5
-            IF ( SED_D50AUX .NE. UNDEF ) THEN
-              SED_D50AUX = SED_D50AUX / SUMWT1(10)
-              IF ( SED_D50(ISEA) .EQ. UNDEF )  THEN
-                SED_D50(ISEA) = SED_D50AUX / REAL( SUMGRD )
+            IF ( SED_KRAUX .NE. UNDEF ) THEN
+              SED_KRAUX = SED_KRAUX / SUMWT1(10)
+              IF ( SED_KR(ISEA) .EQ. UNDEF )  THEN
+                SED_KR(ISEA) = SED_KRAUX / REAL( SUMGRD )
               ELSE
-                SED_D50(ISEA) = SED_D50(ISEA) + SED_D50AUX / REAL( SUMGRD )
+                SED_KR(ISEA) = SED_KR(ISEA) + SED_KRAUX / REAL( SUMGRD )
               END IF
             END IF
 #endif

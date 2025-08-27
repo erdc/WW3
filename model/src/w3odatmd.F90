@@ -767,13 +767,13 @@ CONTAINS
     IDOUT( 1, 8)  = 'Atmospheric momentum'
     IDOUT( 1, 9)  = 'Air density         '
 #ifdef W3_BT4
-    IDOUT( 1, 10)  = 'Sediment diam D50   '
+    IDOUT( 1, 10) = 'Sediment diam D50   '
 #endif
 #ifdef W3_BT5
-    IDOUT( 1, 10)  = 'KKR   '
+    IDOUT( 1, 10) = 'Hydraulic rough Kr  '
 #endif
 #ifdef W3_IS2
-    IDOUT( 1, 11)  = 'ice thickness   '
+    IDOUT( 1, 11) = 'ice thickness   '
     IDOUT( 1, 12) = 'Avg. ice floe diam. '
 #endif
 #ifdef W3_SETUP

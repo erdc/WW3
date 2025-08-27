@@ -17,7 +17,6 @@
 !> @author H. Michaud
 !> @author M. Pezerat
 !> @date   23-07-2024
-
 !>
 !> @copyright Copyright 2009-2022 National Weather Service (NWS),
 !>       National Oceanic and Atmospheric Administration.  All rights
@@ -124,7 +123,7 @@ CONTAINS
   !> @param[in]    CG       Group velocities.
   !> @param[in]    WN       Wavenumbers.
   !> @param[in]    DEPTH    Water depth.
-  !> @param[in]    D50      Hydraulic roughness height
+  !> @param[in]    KKR      Hydraulic roughness height
   !> @param[out]   TAUBBL   Components of stress leaking to the bottom.
   !> @param[out]   S        Source term (1-D version).
   !> @param[out]   D        Diagonal term of derivative.
@@ -132,7 +131,7 @@ CONTAINS
   !> @param[in]    IY       Spatial grid index.
   !>
   !>
-  SUBROUTINE W3SBT5 (A, CG, WN, DEPTH, D50, TAUBBL, S, D, IX, IY )
+  SUBROUTINE W3SBT5 (A, CG, WN, DEPTH, KKR, TAUBBL, S, D, IX, IY )
     !/
     !/                  +-----------------------------------+
     !/                  | WAVEWATCH III           NOAA/NCEP |
@@ -154,7 +153,7 @@ CONTAINS
     !       Sbt (k,theta)= -  ------- fw Uorb -----------------------    (1)
     !                         SQRT(2)          GRAV * sinh²(k*DEPTH)
     !
-    !     with fw = EXP(a1*(UORB/(D50*SIG(IK)))**(a2)+a3)
+    !     with fw = EXP(a1*(UORB/(KKR*SIG(IK)))**(a2)+a3)
     !     Where a1 = 5
     !           a2 = -0.15    
     !           a3 = -5.9
@@ -169,7 +168,7 @@ CONTAINS
     !       CG      R.A.  I   Group velocities.
     !       WN      R.A.  I   Wavenumbers.
     !       DEPTH   Real  I   Water depth.
-    !       D50     Real  I   Hydraulic roughness height
+    !       KKR     Real  I   Hydraulic roughness height
     !       TAUBBL  Real  O   Components of stress leaking to the bottom.
     !       S       R.A.  O   Source term (1-D version).
     !       D       R.A.  O   Diagonal term of derivative.             *)
@@ -233,14 +232,14 @@ CONTAINS
 #endif
     !/
     LOGICAL, SAVE           :: FIRST = .TRUE.
-    REAL, INTENT(IN)        :: CG(NK), WN(NK), DEPTH, A(NSPEC), D50
+    REAL, INTENT(IN)        :: CG(NK), WN(NK), DEPTH, A(NSPEC), KKR
     INTEGER, INTENT(IN)     :: IX, IY
     REAL, INTENT(OUT)       :: S(NSPEC), D(NSPEC), TAUBBL(2)
     REAL                    :: CBETA(NK)
     REAL :: UORB2, UORB, AORB, EBX, EBY, AX, AY, LX, LY
     REAL :: CONST2, TEMP2
     REAL :: FWJ, KSUBN, KSUBS, KSUBR, MINADIM
-    REAL :: SHIELDS(3), PSI, DELI1, DELI2, EB, XI, VARU, KKR 
+    REAL :: SHIELDS(3), PSI, DELI1, DELI2, EB, XI, VARU, KKKR 
     INTEGER :: IK, ITH, IS, IND, INDE, ISUB
     REAL :: DSUM(NK)
     REAL ::  FACTOR
@@ -256,8 +255,8 @@ CONTAINS
     !
     ! 1.  Min / Max settings for KKR ---- *
     !
-    KKR=MAX(D50,1E-5)                
-    KKR=MIN(KKR,1.)                  
+    KKKR=MAX(KKR,1E-5)                
+    KKKR=MIN(KKKR,1.)                  
     !
     !
     DSUM(:)=0.
@@ -308,7 +307,7 @@ CONTAINS
     !
     DO IK=1, NK
       ! New parametrisation (Madsen - SWAN)
-      FWJ = EXP(5*(UORB/(KKR*SIG(IK)))**(-0.15)-5.9)
+      FWJ = EXP(5*(UORB/(KKKR*SIG(IK)))**(-0.15)-5.9)
       CONST2=DDEN(IK)/CG(IK) &         !Jacobian to get energy in band
            *GRAV/(SIG(IK)/WN(IK))    ! coefficient to get momentum
       DSUM(IK)=-FWJ*UORB*CBETA(IK)*SIG(IK)   

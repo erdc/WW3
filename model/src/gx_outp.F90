@@ -727,6 +727,9 @@ CONTAINS
 #ifdef W3_BT4
     USE W3SBT4MD
 #endif
+#ifdef W3_BT5
+    USE W3SBT5MD
+#endif
 #ifdef W3_BT8
     USE W3SBT8MD
 #endif
@@ -807,6 +810,9 @@ CONTAINS
 #endif
 #ifdef W3_BT4
     REAL                    :: D50, PSIC, BEDFORM(3), TAUBBL(2)
+#endif
+#ifdef W3_BT5
+    REAL                    :: KKR, TAUBBL(2)
 #endif
 #ifdef W3_STAB2
     REAL                    :: STAB0, STAB, THARG1, THARG2, COR1,   &
@@ -1278,6 +1284,17 @@ CONTAINS
 #ifdef W3_BT4
           CALL W3SBT4 ( A, CG, WN, DEPTH, D50, PSIC, TAUBBL,   &
                BEDFORM, XBT, DIA, IX, IY )
+#endif
+
+#ifdef W3_BT5
+          IX=1    ! to be fixed later
+          IY=1    ! to be fixed later
+          ISEA=1  ! to be fixed later
+          KKR = SED_KR(ISEA)
+#endif
+
+#ifdef W3_BT5
+          CALL W3SBT5 ( A, CG, WN, DEPTH, KKR, TAUBBL, XBT, DIA, IX, IY )
 #endif
           !
 

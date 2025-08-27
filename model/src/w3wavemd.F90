@@ -544,7 +544,7 @@ CONTAINS
          DTGA, DTG, DTGpre, DTRES,            &
          FAC, VGX, VGY, FACK, FACTH,          &
          FACX, XXX, REFLEC(4),                &
-         DELX, DELY, DELA, DEPTH, D50, PSIC
+         DELX, DELY, DELA, DEPTH, D50,KKR, PSIC
     REAL                     :: VSioDummy(NSPEC), VDioDummy(NSPEC), VAoldDummy(NSPEC)
     LOGICAL                  :: SHAVETOTioDummy
 #ifdef W3_SEC1
@@ -1469,6 +1469,7 @@ CONTAINS
 
 #ifdef W3_PDLIB
           D50=0.0002
+          KKR=0.0002
           REFLEC(:)=0.
           REFLED(:)=0
           PSIC=0.
@@ -1522,7 +1523,7 @@ CONTAINS
 #endif
 
 #ifdef W3_BT5
-            D50=SED_D50(ISEA)
+            KKR=SED_KR(ISEA)
 #endif
 
               !
@@ -1556,7 +1557,7 @@ CONTAINS
                    TAUOX(JSEA), TAUOY(JSEA), TAUWIX(JSEA),            &
                    TAUWIY(JSEA), TAUWNX(JSEA),                        &
                    TAUWNY(JSEA),  PHIAW(JSEA), CHARN(JSEA),           &
-                   TWS(JSEA), PHIOC(JSEA), TMP1, D50, PSIC, TMP2,     &
+                   TWS(JSEA), PHIOC(JSEA), TMP1, D50, KKR, PSIC, TMP2,     &
                    PHIBBL(JSEA), TMP3, TMP4, PHICE(JSEA),             &
                    TAUOCX(JSEA), TAUOCY(JSEA), WNMEAN(JSEA),          &
                    RHOAIR(ISEA), ASF(ISEA))
@@ -2147,6 +2148,7 @@ CONTAINS
           IF ( FLSOU ) THEN
             !
             D50=0.0002
+            KKR=0.0002
             REFLEC(:)=0.
             REFLED(:)=0
             PSIC=0.
@@ -2204,7 +2206,7 @@ CONTAINS
               PSIC=SED_PSIC(ISEA)
 #endif
 #ifdef W3_BT5
-              D50=SED_D50(ISEA)
+              KKR=SED_KR(ISEA)
 #endif
 
 
@@ -2236,7 +2238,7 @@ CONTAINS
                        TAUOX(JSEA), TAUOY(JSEA), TAUWIX(JSEA),           &
                        TAUWIY(JSEA), TAUWNX(JSEA),                       &
                        TAUWNY(JSEA),  PHIAW(JSEA), CHARN(JSEA),          &
-                       TWS(JSEA),PHIOC(JSEA), TMP1, D50, PSIC, TMP2,     &
+                       TWS(JSEA),PHIOC(JSEA), TMP1, D50, KKR, PSIC, TMP2,     &
                        PHIBBL(JSEA), TMP3, TMP4, PHICE(JSEA),            &
                        TAUOCX(JSEA), TAUOCY(JSEA), WNMEAN(JSEA),         &
                        RHOAIR(ISEA), ASF(ISEA))
@@ -2262,7 +2264,7 @@ CONTAINS
                        TAUOX(JSEA), TAUOY(JSEA), TAUWIX(JSEA),           &
                        TAUWIY(JSEA), TAUWNX(JSEA),                       &
                        TAUWNY(JSEA),  PHIAW(JSEA), CHARN(JSEA),          &
-                       TWS(JSEA), PHIOC(JSEA), TMP1, D50, PSIC,TMP2,     &
+                       TWS(JSEA), PHIOC(JSEA), TMP1, D50,KKR, PSIC,TMP2,     &
                        PHIBBL(JSEA), TMP3, TMP4 , PHICE(JSEA),           &
                        TAUOCX(JSEA), TAUOCY(JSEA), WNMEAN(JSEA),         &
                        RHOAIR(ISEA), ASF(ISEA))

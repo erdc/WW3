@@ -169,6 +169,7 @@ CONTAINS
   !> @param[inout] PHIOC
   !> @param[inout] WHITECAP   Whitecap statistics.
   !> @param[in]    D50        Sand grain size.
+  !> @param[in]    KKR        Hydraulic roughness.
   !> @param[in]    PSIC       Critical shields.
   !> @param[inout] BEDFORM    Bedform parameters.
   !> @param[inout] PHIBBL     Energy flux to BBL.
@@ -200,7 +201,7 @@ CONTAINS
        TRNY, BERG, FPI, DTDYN, FCUT, DTG, TAUWX,   &
        TAUWY, TAUOX, TAUOY, TAUWIX, TAUWIY, TAUWNX,&
        TAUWNY, PHIAW, CHARN, TWS, PHIOC, WHITECAP, &
-       D50, PSIC, BEDFORM , PHIBBL, TAUBBL, TAUICE,&
+       D50, KKR, PSIC, BEDFORM , PHIBBL, TAUBBL, TAUICE,&
        PHICE, TAUOCX, TAUOCY, WNMEAN, DAIR, COEF)
     !/
     !/                  +-----------------------------------+
@@ -354,6 +355,7 @@ CONTAINS
     !       FCUT    Real   O   Cut-off frequency for tail.
     !       DTG     Real   I   Global time step.
     !       D50     Real   I   Sand grain size                ( !/BT4 )
+    !       KKR     Real   I   Hydraulic roughness            ( !/BT5 )
     !       BEDFORM R.A.  I/O  Bedform parameters             ( !/BT4 )
     !       PSIC    Real   I   Critical Shields               ( !/BT4 )
     !       PHIBBL  Real   O   Energy flux to BBL             ( !/BTx )
@@ -665,7 +667,7 @@ CONTAINS
     REAL, INTENT(OUT)       :: VSIO(NSPEC), VDIO(NSPEC)
     LOGICAL, INTENT(OUT)    :: SHAVEIO
     REAL, INTENT(IN)        :: D_INP, U10ABS,     &
-         U10DIR, AS, CX, CY, DTG, D50,PSIC,   &
+         U10DIR, AS, CX, CY, DTG, D50,KKR,PSIC,   &
          ICE, ICEH
 #ifdef W3_FLX5
     REAL, INTENT(IN)        :: TAUA, TAUADIR
@@ -1313,7 +1315,7 @@ CONTAINS
            BEDFORM, VSBT, VDBT, IX, IY )
 #endif
 #ifdef W3_BT5
-      CALL W3SBT5 ( SPEC, CG1, WN1, DEPTH, D50, TAUBBL,    &
+      CALL W3SBT5 ( SPEC, CG1, WN1, DEPTH, KKR, TAUBBL,    &
            VSBT, VDBT, IX, IY )
 #endif
 

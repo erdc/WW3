@@ -1001,9 +1001,7 @@ CONTAINS
 #ifdef W3_BT4
     REAL, PARAMETER            :: LOG2=LOG(2.)
 #endif
-#ifdef W3_BT5
-    REAL, PARAMETER            :: LOG2=LOG(2.)
-#endif
+
 
     !
     REAL,DIMENSION(:),  ALLOCATABLE    :: LON, LAT, FREQ
@@ -1294,10 +1292,9 @@ CONTAINS
             NFIELD=1
 #endif
 #ifdef W3_BT5
-            ! Krumbein phi scale
+            ! Kr in m
           ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
-            CALL S2GRID(SED_D50, X1)
-            WHERE ( X1.NE.UNDEF) X1 = -LOG(X1/0.001)/LOG2
+            CALL S2GRID(SED_KR, X1)
             NFIELD=1
 #endif
 

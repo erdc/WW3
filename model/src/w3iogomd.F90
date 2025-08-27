@@ -836,7 +836,7 @@ CONTAINS
       J = 10
 #endif
 #ifdef W3_BT5
-    CASE('D50')
+    CASE('KR')
       I = 1
       J = 10
 #endif
@@ -3114,9 +3114,9 @@ CONTAINS
 #endif
 #ifdef W3_BT5
             ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
-              WRITE ( NDSOG ) SED_D50(1:NSEA)
+              WRITE ( NDSOG ) SED_KR(1:NSEA)
 #ifdef W3_ASCII
-              WRITE ( NDSOA,* ) 'SED_D50:', SED_D50(1:NSEA)
+              WRITE ( NDSOA,* ) 'SED_KR:', SED_KR(1:NSEA)
 #endif
 #endif
 #ifdef W3_IS2
@@ -3744,7 +3744,7 @@ CONTAINS
 #endif
 #ifdef W3_BT5
             ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 10 ) THEN
-              READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) SED_D50(1:NSEA)
+              READ (NDSOG,END=801,ERR=802,IOSTAT=IERR) SED_KR(1:NSEA)
 #endif
 #ifdef W3_IS2
             ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 11 ) THEN

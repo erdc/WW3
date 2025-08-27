@@ -722,7 +722,7 @@ MODULE W3GDATMD
     REAL, POINTER         :: SED_D50(:), SED_PSIC(:)
 #endif
 #ifdef W3_BT5
-    REAL, POINTER         :: SED_D50(:)
+    REAL, POINTER         :: SED_KR(:)
 #endif
 #ifdef W3_REF1
     LOGICAL, POINTER      :: RREF(:)
@@ -1220,7 +1220,7 @@ MODULE W3GDATMD
   REAL, POINTER         :: SED_D50(:), SED_PSIC(:)
 #endif
 #ifdef W3_BT5
-  REAL, POINTER         :: SED_D50(:)
+  REAL, POINTER         :: SED_KR(:)
 #endif
 
   LOGICAL, POINTER :: GINIT, FLDRY, FLCX, FLCY, FLCTH, FLCK, FLSOU, IICEDISP,&
@@ -1769,7 +1769,7 @@ CONTAINS
     CHECK_ALLOC_STATUS ( ISTAT )
 #endif
 #ifdef W3_BT5
-    ALLOCATE ( GRIDS(IMOD)%SED_D50(0:MSEA), &
+    ALLOCATE ( GRIDS(IMOD)%SED_KR(0:MSEA), &
          STAT=ISTAT                 )
     CHECK_ALLOC_STATUS ( ISTAT )
 #endif
@@ -2476,7 +2476,7 @@ CONTAINS
       SED_PSIC => GRIDS(IMOD)%SED_PSIC
 #endif
 #ifdef W3_BT5
-      SED_D50  => GRIDS(IMOD)%SED_D50
+      SED_KR  => GRIDS(IMOD)%SED_KR
 #endif
 
       !

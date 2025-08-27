@@ -711,11 +711,9 @@ MODULE W3GRIDMD
        BOTROUGHMIN, BOTROUGHFAC
 #endif
 #ifdef W3_BT5
-  REAL, ALLOCATABLE  :: SED_D50FILE(:,:), SED_POROFILE(:,:)
-  LOGICAL            :: SEDMAPD50
-  REAL               :: SED_D50_UNIFORM, SED_DSTAR, RIPFAC1, &
-       RIPFAC2, RIPFAC3, RIPFAC4, SIGDEPTH, &
-       BOTROUGHMIN, BOTROUGHFAC
+  REAL, ALLOCATABLE  :: SED_KRFILE(:,:)
+  LOGICAL            :: SEDMAPKR
+  REAL               :: SED_KR_UNIFORM
 #endif
   !
   LOGICAL                 :: FLLIN, FLINDS, FLNL, FLBT, FLDB,     &
@@ -1075,7 +1073,7 @@ MODULE W3GRIDMD
        BOTROUGHMIN, BOTROUGHFAC
 #endif
 #ifdef W3_BT5
-  NAMELIST /SBT5/ SEDMAPD50, SED_D50_UNIFORM
+  NAMELIST /SBT5/ SEDMAPKR, SED_KR_UNIFORM
 #endif
 #ifdef W3_DB1
   NAMELIST /SDB1/ BJALFA, BJGAM, BJFLAG
@@ -2365,11 +2363,11 @@ CONTAINS
     SBTCX(7)=BOTROUGHFAC
 #endif
 #ifdef W3_BT5
-    SEDMAPD50=.FALSE.
-    SED_D50_UNIFORM=0.03  ! default hydraulics roughness lenght 
+    SEDMAPKR=.FALSE.
+    SED_KR_UNIFORM=0.03  ! default hydraulics roughness lenght 
     CALL READNL ( NDSS, 'SBT5', STATUS )
     WRITE (NDSO,926) STATUS
-    WRITE (NDSO,927) SEDMAPD50, SED_D50_UNIFORM
+    WRITE (NDSO,927) SEDMAPKR, SED_KR_UNIFORM
 #endif
     !
     !
@@ -3340,7 +3338,7 @@ CONTAINS
            BOTROUGHMIN, BOTROUGHFAC
 #endif
 #ifdef W3_BT5
-      WRITE (NDSO,2926) SEDMAPD50, SED_D50_UNIFORM
+      WRITE (NDSO,2926) SEDMAPKR, SED_KR_UNIFORM
 #endif
 #ifdef W3_DB1
       IF ( BJFLAG ) THEN
@@ -5652,8 +5650,8 @@ CONTAINS
     END DO
 #endif
 #ifdef W3_BT5
-    ALLOCATE ( SED_D50FILE(NX,NY))
-    IF ( SEDMAPD50 ) THEN
+    ALLOCATE ( SED_KRFILE(NX,NY))
+    IF ( SEDMAPKR ) THEN
 
       !
       !  9.e.1 Info from input file
@@ -5722,23 +5720,23 @@ CONTAINS
       !
       ! 9.e.3 Read the data
       !
-      CALL INA2R ( SED_D50FILE, NX, NY, 1, NX, 1, NY, NDSTR, NDST, NDSE, &
+      CALL INA2R ( SED_KRFILE, NX, NY, 1, NX, 1, NY, NDSTR, NDST, NDSE, &
            IDFM, RFORM, IDLA, VSC, VOF)
       !
       IF ( NDSTR .EQ. NDSI ) CALL NEXTLN ( COMSTR , NDSI , NDSE )
       !
-      WRITE (NDSO,*) 'Min and Max values of kr :',MINVAL(SED_D50FILE), MAXVAL(SED_D50FILE)
+      WRITE (NDSO,*) 'Min and Max values of kr :',MINVAL(SED_KRFILE), MAXVAL(SED_KRFILE)
       WRITE (NDSO,*)
       !
     ELSE
-      SED_D50FILE(:,:)=SED_D50_UNIFORM
+      SED_KRFILE(:,:)=SED_KR_UNIFORM
     END IF
     !
     DO IY=1, NY
       DO IX=1, NX
         ISEA = MAPFS (IY,IX)
-        SED_D50(ISEA)       = SED_D50FILE(IX,IY)
-        SED_D50(ISEA)       = MAX(SED_D50(ISEA),1E-5)
+        SED_KR(ISEA)       = SED_KRFILE(IX,IY)
+        SED_KR(ISEA)       = MAX(SED_KR(ISEA),1E-5)
       END DO
     END DO
 #endif
@@ -6626,8 +6624,8 @@ CONTAINS
 #ifdef W3_BT5
 926 FORMAT (/'  Bottom friction  (MADSEN)  ',A/                 &
          ' --------------------------------------------------')
-927 FORMAT ( '       SEDMAPD50, SED_D50_UNIFORM        :',L3,1X,F8.6/) 
-2926 FORMAT ( '  &SBT5 SEDMAPD50 =',L3,', SED_D50_UNIFORM =',F8.6,' /')
+927 FORMAT ( '       SEDMAPKR, SED_KR_UNIFORM        :',L3,1X,F8.6/) 
+2926 FORMAT ( '  &SBT5 SEDMAPKR =',L3,', SED_KR_UNIFORM =',F8.6,' /')
 #endif
     !
 #ifdef W3_DB0
@@ -7083,7 +7081,7 @@ CONTAINS
          '       Layout indicator            :',I6/             &
          '       Format indicator            :',I6)
     !
-1979 FORMAT ( '       Hydraulics roughnesse length:',I6/             &
+1979 FORMAT ( '       Hydraulic roughness length:',I6/             &
          '       Scale factor                :',F10.4/          &
          '       Layout indicator            :',I6/             &
          '       Format indicator            :',I6)
