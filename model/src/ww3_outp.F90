@@ -1878,7 +1878,7 @@ CONTAINS
                TAUWX, TAUWY, CD, Z0, CHARN, LLWS, FMEANWS )
 #endif
 #ifdef W3_ST4
-          CALL W3SPR4 (A, CG, WN, EMEAN, FMEAN,  FMEAN1,      &
+          CALL W3SPR4 (IX, A, CG, WN, EMEAN, FMEAN,  FMEAN1,      &
                WNMEAN, AMAX, UABS, UDIRR,             &
 #ifdef W3_FLX5
                TAUA, TAUADIR, RHOAIR,           &
@@ -1933,7 +1933,7 @@ CONTAINS
             CALL W3SIN4 ( A, CG, WN2, UABS, USTAR, DAIR/DWAT,&
                  ASO(J), UDIRR, Z0, CD, TAUWX, TAUWY,&
                  TAUWNX, TAUWNY, XIN, DIA, LLWS, IX, IY, LAMBDA )
-            CALL W3SPR4 (A, CG, WN, EMEAN, FMEAN,  FMEAN1,      &
+            CALL W3SPR4 (IX, A, CG, WN, EMEAN, FMEAN,  FMEAN1,      &
                  WNMEAN, AMAX, UABS, UDIRR,               &
 #ifdef W3_FLX5
                  TAUA, TAUADIR, RHOAIR,             &
@@ -2055,7 +2055,7 @@ CONTAINS
                TAUWX, TAUWY, CD, Z0, CHARN, LLWS, FMEANWS )
 #endif
 #ifdef W3_ST4
-          CALL W3SPR4 (A, CG, WN, EMEAN, FMEAN,  FMEAN1,        &
+          CALL W3SPR4 (IX, A, CG, WN, EMEAN, FMEAN,  FMEAN1,        &
                WNMEAN, AMAX, UABS, UDIRR,               &
 #ifdef W3_FLX5
                TAUA, TAUADIR, RHOAIR,             &
@@ -2104,7 +2104,7 @@ CONTAINS
                  TAUWNX, TAUWNY, ICE, XIN, DIA, LLWS, IX, IY )
 #endif
 #ifdef W3_ST4
-            CALL W3SPR4 (A, CG, WN, EMEAN, FMEAN, FMEAN1,        &
+            CALL W3SPR4 (IX, A, CG, WN, EMEAN, FMEAN, FMEAN1,        &
                  WNMEAN, AMAX, UABS, UDIRR,              &
 #ifdef W3_FLX5
                  TAUA, TAUADIR, RHOAIR,            &
@@ -2131,7 +2131,7 @@ CONTAINS
           !
           IF ( FLSRCE(2) ) THEN
 #ifdef W3_LN1
-            CALL W3SLN1 (WN, FHIGH, USTAR, UDIRR, XLN )
+            CALL W3SLN1 (IX, WN, FHIGH, USTAR, UDIRR, XLN )
 #endif
             !
 #ifdef W3_ST1
@@ -2161,7 +2161,7 @@ CONTAINS
           IF ( FLSRCE(3) ) THEN
 #ifdef W3_NL1
             IF (IQTPE.GT.0) THEN
-              CALL W3SNL1 ( A, CG, WNMEAN*DEPTH,  XNL, DIA )
+              CALL W3SNL1 ( IX, A, CG, WNMEAN*DEPTH,  XNL, DIA )
             ELSE
               CALL W3SNLGQM ( A, CG, WN, DEPTH,  XNL, DIA )
             END IF

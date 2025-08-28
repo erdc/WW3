@@ -35,7 +35,7 @@
 ! -------------------------------------------------------------------- !
 &GRID_NML
   GRID%NAME         =  'LIMON'
-  GRID%NML          =  '../input/namelists_LIMON.nml'
+  GRID%NML          =  '../input/default_erdc.nml'
   GRID%TYPE         =  'UNST'
   GRID%COORD        =  'SPHE'
   GRID%CLOS         =  'NONE'
