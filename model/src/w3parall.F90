@@ -493,7 +493,8 @@ CONTAINS
 #ifdef W3_S
     USE W3SERVMD, ONLY: STRACE
 #endif
-    USE CONSTANTS, ONLY : LPDLIB
+    USE PDLIB_W3PROFSMD, ONLY : print_spec
+    USE CONSTANTS, ONLY : LPDLIB, DEBUG_NODE
     USE W3GDATMD, ONLY: NK, NK2, NTH, NSPEC, SIG, DSIP, ECOS, ESIN, &
          EC2, ESC, ES2, FACHFA, MAPWN, FLCTH, FLCK,  &
          CTMAX, DMIN, DTH, CTHG0S, MAPSF, SIG
@@ -528,13 +529,18 @@ CONTAINS
 
     IX = MAPSF(ISEA,1)
     IY = MAPSF(ISEA,2)
-    eDDDX=DDDX(1,IP)
-    eDDDY=DDDY(1,IP)
+    eDDDX = DDDX(1,IP)
+    eDDDY = DDDY(1,IP)
     eCTHG0 = CTHG0S(ISEA)
     FACTH  = 1.0 / DTH
     !
     FDG    = FACTH * eCTHG0
     DEPTH  = MAX ( DMIN , DW(ISEA) )
+
+    IF (IX == DEBUG_NODE) THEN
+      WRITE(*,*) 'TEST REFRACTION NODAL VALUES', IX, eDDDX, eDDDY, FACTH, eCTHG0, DEPTH
+    ENDIF 
+
     DO IK=0, NK+1
       IF ( DEPTH*WN(IK,ISEA) .LT. 5. ) THEN
         DSDD(IK) = MAX ( 0. , CG(IK,ISEA)*WN(IK,ISEA)-0.5*SIG(IK) ) / DEPTH
@@ -542,10 +548,12 @@ CONTAINS
         DSDD(IK) = 0.
       END IF
     END DO
+
     DO IK=1, NK
       FRK(IK) = FACTH * DSDD(IK) / WN(IK,ISEA)
       FRG(IK) = FDG * CG(IK,ISEA)
     END DO
+
     IF (FLCUR) THEN
       eDCXDX = DCXDX(1,IP)
       eDCXDY = DCXDY(1,IP)
@@ -583,10 +591,13 @@ CONTAINS
       ELSE
         VCFLT(ISP)=VELNOFILT
       END IF
-    END DO
-    DO ISP=1,NSPEC
       CAD(ISP)=DBLE(VCFLT(ISP))
     END DO
+
+!    IF (IX == DEBUG_NODE) THEN
+!      write(*,*) '----------print CAD---------'
+!      call print_spec(CAD)
+!    ENDIF
     !/
     !/ End of JACOBI_INIT ------------------------------------------------ /
     !/

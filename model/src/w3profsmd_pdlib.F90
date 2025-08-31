@@ -3657,7 +3657,7 @@ CONTAINS
     CSINA = FACX * ESIN(1:NTH)
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_JACOBI SECTION 0')
 
-    WRITE(*,*) 'ENTERING SOLVER'
+    !WRITE(*,*) 'ENTERING SOLVER'
 
     DO ISP = 1, NSPEC
 
@@ -3674,9 +3674,11 @@ CONTAINS
 #else
         CG1    = CG(IK,IP_GLOB)
 #endif
-        CG1    = 1.
         CXY(1,IP) = CCOS * CG1/CLATS(IP_GLOB)
         CXY(2,IP) = CSIN * CG1
+        !IF (IP_GLOB == DEBUG_NODE .and. IK == 1) THEN
+        !  WRITE(*,*) 'CG DEBUG_NODE', IP, CG1, SQRT(CXY(1,IP)**2+CXY(2,IP)**2), CCOS * CG1/CLATS(IP_GLOB), CSIN * CG1
+        !ENDIF
         IF (FLCUR) THEN
           CXY(1,IP) = CXY(1,IP) + FACX * CX(IP_GLOB)/CLATS(IP_GLOB)*IOBDP_LOC(IP)
           CXY(2,IP) = CXY(2,IP) + FACY * CY(IP_GLOB)*IOBDP_LOC(IP)
@@ -3708,13 +3710,13 @@ CONTAINS
         KP(1:3,IE) = MAX(ZERO,K(1:3))
         NM(IE) = 1.d0/MIN(-THR,SUM(MIN(ZERO,K(1:3))))
         DELTAL(1:3,IE) = (CRFS(1:3) - KP(1:3,IE))! * 1.d0/MIN(-THR,SUM(MIN(ZERO,K(1:3))))
-        IF (IE == 14401 .and. IK == 1) THEN
-          WRITE(*,*) 'IEN', 3 * PDLIB_TRIA03(IE), PDLIB_IEN(1:6,IE), KP(1:3,IE), NM(IE), DELTAL(1:3,IE)
+        IF (IE == 16155 .and. IK == 1) THEN
+          !WRITE(*,*) 'IEN', IE, IK, ITH, KP(1:3,IE)!, CXYY(1,1), CXYY(2,1), CXYY(1,2), CXYY(2,2), CXYY(1,3), CXYY(2,3), PDLIB_IEN(1,IE), PDLIB_IEN(2,IE), PDLIB_IEN(3,IE), PDLIB_IEN(4,IE), PDLIB_IEN(5,IE), PDLIB_IEN(6,IE)
         ENDIF
       ENDDO
  
 
-      J = 0
+      J = 0 
       DO IP = 1, np
         IB1 = (1-IOBPA_LOC(IP)) * IOBPD_LOC(ITH,IP)
         IB2 = IOBPD_LOC(ITH,IP)
@@ -3753,8 +3755,8 @@ CONTAINS
               ASPAR_JAC(ISP,I1) = ASPAR_JAC(ISP,I1) + PDLIB_TRIA03(IE) + DTK - DTK * DELTAL(POS,IE)*NM(IE)
               ASPAR_JAC(ISP,I2) = ASPAR_JAC(ISP,I2)                          - DTK * DELTAL(POS_TRICK(POS,1),IE)*NM(IE) 
               ASPAR_JAC(ISP,I3) = ASPAR_JAC(ISP,I3)                          - DTK * DELTAL(POS_TRICK(POS,2),IE)*NM(IE) 
-              !IF (IP == 7146 .and. IK == 1 .and. ITH == 1) WRITE(*,*) 'ASPAR_JAC', IP, IE, IK, ITH, ASPAR_JAC(ISP,I1)
-              IF (IP == 7146 .and. IK == 1 .and. ITH == 1) WRITE(*,*) 'ASPAR_JAC OFF', IP, IE, IK, ITH, ASPAR_JAC(ISP,I2), ASPAR_JAC(ISP,I3)
+              !IF (IP == DEBUG_NODE .and. IK == 1 .and. ITH == 9) WRITE(*,*) 'ASPAR_JAC', IP, IE, IK, ITH, ASPAR_JAC(ISP,I1), ASPAR_JAC(ISP,I2), ASPAR_JAC(ISP,I3)
+              !IF (IP == DEBUG_NODE .and. IE == 16155 .and. IK == 1) WRITE(*,*) 'ASPAR_JAC OFF', IP, IE, IK, ITH, ASPAR_JAC(ISP,I1), DTG, DTK, DELTAL(POS,IE), NM(IE), CXY(1,IP), CXY(2,IP), DW(IP)
             ELSE
               ASPAR_JAC(ISP,I1) = ASPAR_JAC(ISP,I1) + PDLIB_TRIA03(IE)
             ENDIF
@@ -3773,9 +3775,9 @@ CONTAINS
 
     DO IP = 1, NP
       B_JAC(:,IP) = B_JAC(:,IP) + PDLIB_SI(IP) * VA(:,IP) 
-      IF (IP == DEBUG_NODE) THEN
-        !WRITE(*,*) 'IP  SUM(B_JAC(:,IP)), PDLIB_SI(IP), SUM(VA(:,IP))', SUM(B_JAC(:,IP)), PDLIB_SI(IP), SUM(VA(:,IP))
-      ENDIF
+      !IF (IP == DEBUG_NODE) THEN
+      !  WRITE(*,*) 'IP  SUM(B_JAC(:,IP)), PDLIB_SI(IP), SUM(VA(:,IP))', SUM(B_JAC(:,IP)), PDLIB_SI(IP), SUM(VA(:,IP)), SUM(ASPAR_JAC(1:NSPEC,PDLIB_I_DIAG(IP)))
+      !ENDIF
     ENDDO 
 
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_JACOBI SECTION 1')
@@ -5657,7 +5659,7 @@ CONTAINS
     WRITE(740+IAPROC,*) 'optionCall=', optionCall
     FLUSH(740+IAPROC)
 
-    WRITE(*,*) 'Entering Solver WW3 System', sum(VA(:,DEBUG_NODE))
+    !WRITE(*,*) 'Entering Solver WW3 System', sum(VA(:,DEBUG_NODE))
 
 #endif
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_PROP SECTION 1')
@@ -5671,8 +5673,6 @@ CONTAINS
     CALL ALL_VA_INTEGRAL_PRINT(IMOD, "VA(np) before transform", 0)
     CALL ALL_VA_INTEGRAL_PRINT(IMOD, "VA(npa) before transform", 1)
 #endif
-    VA(:,7146) = 0.01
-
     DO JSEA=1,NSEAL
       IP      = JSEA
       IP_glob = iplg(IP)
@@ -5686,8 +5686,6 @@ CONTAINS
       END DO
     END DO
     VAOLD = MAX(0.,VA(1:NSPEC,1:NSEAL))
-
-    WRITE(*,*) 'Entering Solver WWM System', sum(VA(:,DEBUG_NODE))
 
 #ifdef W3_DEBUGSRC
     DO JSEA=1,NSEAL
@@ -5780,7 +5778,7 @@ CONTAINS
 #endif
     enddo
 
-    WRITE(*,*) 'entry sum(VA)out=', sum(VA(:,DEBUG_NODE))
+    !WRITE(*,*) 'entry sum(VA)out=', sum(VA), sum(B_JAC), SUM(ASPAR_JAC)
     !
     DO
 
@@ -5790,9 +5788,9 @@ CONTAINS
 
       DO IP = 1, np
 
-        IF (IP == DEBUG_NODE .and. nbiter == 0) THEN 
-          !WRITE(*,*) 'SUM VA SOLVER', SUM(VA(:,IP))
-        ENDIF
+        !IF (IP == DEBUG_NODE) THEN 
+        !  WRITE(*,*) 'NBITER, SUM VA, B_JAC, ASPAR_JAC', NBITER, SUM(VA(:,IP)), SUM(B_JAC(1:NSPEC,IP)), SUM(ASPAR_JAC(1:NSPEC,PDLIB_I_DIAG(IP))) 
+        !ENDIF
 
         IP_glob = iplg(IP)
         IF (IOBDP_LOC(IP) .eq. 0) THEN
@@ -5868,9 +5866,9 @@ CONTAINS
               END IF
             END DO
         
-            IF (IP == DEBUG_NODE) THEN
-              !WRITE(*,*) 'DEBUG SOLVER B_JAC ASPAR_DIAG', SUM(B_JAC(:,IP)), SUM(ASPAR_DIAG), SUM(eSum)
-            ENDIF
+            !IF (IP == DEBUG_NODE) THEN
+            !  WRITE(*,*) 'DEBUG SOLVER B_JAC ASPAR_DIAG', SUM(B_JAC(:,IP)), SUM(ASPAR_DIAG), SUM(eSum)
+            !ENDIF
           ENDIF ! IMEM
 
 #ifdef W3_DEBUGSOLVERCOH
@@ -5966,9 +5964,9 @@ CONTAINS
             ENDDO 
           ENDIF
           eSum(1:NSPEC)  = eSum(1:NSPEC) / ASPAR_DIAG(1:NSPEC)
-          IF (IP == DEBUG_NODE) THEN
+          !IF (IP == DEBUG_NODE) THEN
             !WRITE(*,*) 'DEBUG SOLVER AFTER SUM ESUM', IP, sum(eSum)
-          ENDIF 
+          !ENDIF 
 #ifdef W3_DEBUGFREQSHIFT
           WRITE(740+IAPROC,*) 'JSEA=', JSEA, ' nbIter=', nbIter
           DO ISP=1,NSPEC
@@ -6054,6 +6052,9 @@ CONTAINS
 #ifdef W3_DEBUGFREQSHIFT
           WRITE(740+IAPROC,*) 'p_is_converged=', p_is_converged
 #endif
+          !IF (IP == DEBUG_NODE) THEN
+          !  WRITE(*,*) 'node convergence', nbiter, IP, DiffNew, sum(Acloc), Sum_new, DiffNew .lt. B_JGS_DIFF_THR
+          !ENDIF
           IF (p_is_converged .lt. B_JGS_DIFF_THR .and. nbiter .gt. 1) then
             is_converged   = is_converged + 1
             lconverged(ip) = .true.
@@ -6099,7 +6100,7 @@ CONTAINS
       !
       ! Terminate via differences
       !
-      IF (B_JGS_TERMINATE_DIFFERENCE .and. INT(MOD(NBITER,1)) == 0) THEN ! Every 10th step check conv.
+      IF (B_JGS_TERMINATE_DIFFERENCE .and. INT(MOD(NBITER,10)) == 0) THEN ! Every 10th step check conv.
         CALL MPI_ALLREDUCE(is_converged, itmp, 1, MPI_INT, MPI_SUM, MPI_COMM_WCMP, ierr)
         is_converged = itmp
         prop_conv = (DBLE(NX) - DBLE(is_converged))/DBLE(NX) * 100.
@@ -6244,9 +6245,9 @@ CONTAINS
       SumACout=0
 #endif
       !
-      IF (IP == DEBUG_NODE) THEN
-        WRITE(22222,*) VA(:,IP)
-      ENDIF
+      !IF (IP == DEBUG_NODE) THEN
+      !  WRITE(22222,*) VA(:,IP)
+      !ENDIF
 
       IF (B_JGS_LIMITER) THEN
         DO IK = 1, NK
@@ -6289,7 +6290,7 @@ CONTAINS
 
     END DO ! IP 
 
-    WRITE(*,*) 'After limiter in WW3 system', sum(VA(:,DEBUG_NODE))
+    WRITE(*,*) 'After cg in WW3 system', sum(VA(:,DEBUG_NODE))
     !CALL print_spec(VA(1:NSPEC,DEBUG_NODE))
 
 #ifdef WEIGHTS

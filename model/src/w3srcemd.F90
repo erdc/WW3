@@ -1084,8 +1084,8 @@ CONTAINS
       IF (SINTAILPAR(4).GT.0.5) CALL W3SIN4 ( SPEC, CG1, WN2, U10ABS, USTAR, DRAT, AS,       &
            U10DIR, Z0, CD, TAUWX, TAUWY, TAUWAX, TAUWAY,       &
            VSIN, VDIN, LLWS, IX, IY, BRLAMBDA )
-      !    VSIN = 0
-      !     VDIN = 0 
+      ! VSIN = 0
+      ! VDIN = 0 
      END IF
 #endif
 #if defined(W3_DEBUGSRC) && defined(W3_ST4)
@@ -1265,8 +1265,8 @@ CONTAINS
 !          WRITE(*,*) 'IX, WNMEAN, DEPTH, WNMEAN*DEPTH', IX, WNMEAN, DEPTH, WNMEAN*DEPTH
 !        ENDIF 
         CALL W3SNL1 ( IX, SPEC, CG1, WNMEAN*DEPTH, VSNL, VDNL )
-        VSNL = 0.
-        VDNL = 0. 
+!        VSNL = 0.
+!        VDNL = 0. 
         IF (IX == DEBUG_NODE) THEN
         !  WRITE(*,*) 'SUM W3SNL1', SUM(VSNL), SUM(VDNL) 
         ENDIF
@@ -1314,8 +1314,8 @@ CONTAINS
 #ifdef W3_ST4
       CALL W3SDS4 ( SPEC, WN1, CG1, USTAR, USTDIR, DEPTH, DAIR, VSDS,   &
            VDDS, IX, IY, BRLAMBDA, WHITECAP, DLWMEAN )
-       VSDS = 0
-       VDDS = 0 
+       !VSDS = 0
+       !VDDS = 0 
        IF (IX == DEBUG_NODE) THEN
          WRITE(*,*) 'SUM W3SDS4', SUM(VSDS), SUM(VDDS)
        ENDIF

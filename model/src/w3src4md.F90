@@ -327,9 +327,9 @@ CONTAINS
       FMEANWS  = FMEANWS+ EB2(IK)*(SIG(IK)**(2.*WWNMEANPTAIL))
     END DO
 
-    IF (IX == DEBUG_NODE) THEN
-      WRITE(*,*) 'EMEAN & HS AFTER TAIL ', EMEAN, 4 * SQRT(EMEAN) 
-    ENDIF
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'EMEAN & HS AFTER TAIL ', EMEAN, 4 * SQRT(EMEAN) 
+    !ENDIF
 
     !IF (IX == DEBUG_NODE) THEN
     !  WRITE(44444,*) 'EMEAN, FMEAN, FMEAN1, WNMEAN, EMEANWS, EMEANWS', IK, EMEAN, FMEAN, FMEAN1, WNMEAN, EMEANWS, EMEANWS, WWNMEANPTAIL, WWNMEANP
@@ -379,10 +379,9 @@ CONTAINS
     !  WRITE(*,*) 'WNMEAN, WWNMEANP, EMEAN, EBAND, FTE', WNMEAN, WWNMEANP, EMEAN, EBAND, FTE, SSTXFTWN, SSTXFTFTAIL
     !ENDIF
 
-
-    IF (IX == DEBUG_NODE) THEN
-      WRITE(*,*) 'EMEAN & HS AFTER TAIL ', EMEAN, 4 * SQRT(EMEAN) 
-    ENDIF
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'EMEAN & HS AFTER TAIL ', EMEAN, 4 * SQRT(EMEAN) 
+    !ENDIF
 
     !
     ! 5.  Cd and z0 ----------------------------------------------- *
@@ -683,9 +682,9 @@ CONTAINS
     AORB1 = 2*AORB**(1-0.5*SSWELLF(6))    ! half the significant wave height ... if SWELLF(6)=1
     RE = 4*UORB*AORB1 / NU_AIR           ! Reynolds number
 
-    IF (IX == DEBUG_NODE) THEN
-      WRITE(*,*) 'UORB, AORB, RE, CONST0, CONST1', UORB, AORB, RE, CONST0, CONST1
-    ENDIF
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'UORB, AORB, RE, CONST0, CONST1', UORB, AORB, RE, CONST0, CONST1
+    !ENDIF
     !
     ! Defines the swell dissipation based on the "Reynolds number"
     !
@@ -743,9 +742,9 @@ CONTAINS
     WRITE (NDST,9003) AS, Usigma, USTARsigma, U
 #endif
     UST=USTAR
-    IF (IX == DEBUG_NODE) THEN
-      WRITE(*,*) 'UST', UST, DRAT  
-    ENDIF
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'UST', UST, DRAT  
+    !ENDIF
     ISTAB=3
 #ifdef W3_STAB3
     DO ISTAB=1,2
@@ -762,7 +761,7 @@ CONTAINS
       !
       STRESSSTAB(ISTAB,:)=0.
       STRESSSTABN(ISTAB,:)=0.
-      IF (IX == DEBUG_NODE) THEN
+      !IF (IX == DEBUG_NODE) THEN
         !WRITE(*,*) 'IK, TAUPX, TAUPY, USTP, USDIRP, COSU, SINU, CM, UCN, CONST2, ZCN, SWELLCOEFV, SWELLCOEFT, STRESSSTAB(ISTAB,1), STRESSSTAB(ISTAB,2), TTAUWSHELTE' 
       ENDIF
       !
@@ -885,7 +884,7 @@ CONTAINS
     WRITE (NDST,9002) SUM(D), SUM(A), XSTRESS, YSTRESS, TAUWNX, TAUWNY
 #endif
     IF (IX == DEBUG_NODE) THEN
-       WRITE(*,*) 'SUM DSTAB', SUM(D)
+       !WRITE(*,*) 'SUM DSTAB', SUM(D)
        !WRITE(*,*) 'PRINT_SPEC D from SIN4'
        !CALL PRINT_SPEC(D)
     ENDIF
@@ -913,9 +912,9 @@ CONTAINS
     USDIRP=ATAN2(TAUPY,TAUPX)
 
     UST=USTP
-    IF (IX == DEBUG_NODE) THEN
-      WRITE(*,*) 'USTP', UST, Z0, LEVTAIL
-    ENDIF 
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'USTP', UST, Z0, LEVTAIL
+    !ENDIF 
     !
     ! Computes HF tail
     !
@@ -934,9 +933,9 @@ CONTAINS
                            !  which is the same as sum of E(f,theta)*cos^3(theta-wind)*DTH*SIG^5/(g^2*2pi)
                            ! reminder:  sum of E(f,theta)*DTH*SIG^5/(g^2*2pi) is 2*k^3*E(k)
 
-    IF(IX == DEBUG_NODE) THEN
-      WRITE(*,*) 'LEVTAIL0', LEVTAIL0, CONST0, TEMP 
-    ENDIF 
+    !IF(IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'LEVTAIL0', LEVTAIL0, CONST0, TEMP 
+    !ENDIF 
 !
 ! Computation of stress supported by tail: uses table if SINTAILPAR(1)=1 , correspoding to SINTABLE = 1
 !
@@ -1026,9 +1025,9 @@ CONTAINS
       J    = MAX(1 ,MIN (IALPHA-1, INT(XJ)))
       DELJ1= MAX(0.,MIN (1.      , XJ-FLOAT(J)))
       DELJ2=1. - DELJ1
-      IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'TAUHF TABLE', XI, IND, DELI1, DELI2, J, XJ, DELJ1, DELJ2, UST, DELUST
-      ENDIF 
+      !IF (IX == DEBUG_NODE) THEN
+      !  WRITE(*,*) 'TAUHF TABLE', XI, IND, DELI1, DELI2, J, XJ, DELJ1, DELJ2, UST, DELUST
+      !ENDIF 
       IF (TTAUWSHELTER.GT.0) THEN
         XK = LEVTAIL0/ DELTAIL
         I = MIN (ILEVTAIL-1, INT(XK))
@@ -1046,9 +1045,9 @@ CONTAINS
       !
       TAUHF = LEVTAIL0*UST**2*TAU1
 
-      IF (IX == DEBUG_NODE) THEN
-        WRITE(*,*) 'TAUHF', TAUHF, UST, Z0, LEVTAIL0, TAU1
-      ENDIF 
+      !IF (IX == DEBUG_NODE) THEN
+      !  WRITE(*,*) 'TAUHF', TAUHF, UST, Z0, LEVTAIL0, TAU1
+      !ENDIF 
     END IF ! End of test on use of table
 
     TAUWX = XSTRESS+TAUHF*COS(USDIRP)
@@ -1066,9 +1065,9 @@ CONTAINS
       TAUWY=TAUWY*TAUWB/TAUW
     END IF
 
-    IF (IX == DEBUG_NODE) THEN
-      WRITE(*,*) 'TAU BULLSHIT', UST2, TAUWX, TAUWY, TAUHF, XSTRESS, YSTRESS
-    ENDIF 
+    !IF (IX == DEBUG_NODE) THEN
+    !  WRITE(*,*) 'TAU BULLSHIT', UST2, TAUWX, TAUWY, TAUHF, XSTRESS, YSTRESS
+    !ENDIF 
     !
     RETURN
     !
@@ -2329,9 +2328,9 @@ CONTAINS
     IK1=NINT(IGPARS(5))+1
 #endif
 
-    if (IX == DEBUG_NODE) THEN 
-      CALL PRINT_SPEC(A) 
-    endif 
+    !if (IX == DEBUG_NODE) THEN 
+    !  CALL PRINT_SPEC(A) 
+    !endif 
     !
     ! 1.b MSS parameters used for Modulation factors for lambda (Romero )
     !
@@ -2725,10 +2724,10 @@ CONTAINS
 
     END IF
 
-    IF (IX == DEBUG_NODE) THEN
-      WRITE(*,*) '----------------------------------------------------------'
-      CALL PRINT_SPEC(DDIAG)
-    ENDIF
+!    IF (IX == DEBUG_NODE) THEN
+!      WRITE(*,*) '----------------------------------------------------------'
+!      CALL PRINT_SPEC(DDIAG)
+!    ENDIF
     !
     !  COMPUTES WHITECAP PARAMETERS
     !

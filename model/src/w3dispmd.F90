@@ -444,7 +444,7 @@ CONTAINS
     TMP = 1.55 + 1.3*KH0 + 0.216*KH0*KH0
     KH  = KH0 * (1 + KH0**1.09 * 1./EXP(MIN(KDMAX,TMP))) / SQRT(TANH(MIN(KDMAX,KH0)))
     K   = KH/H
-    CG  = 1.!0.5*(1+(2*KH/SINH(MIN(KDMAX,2*KH))))*SI/K
+    CG  = 0.5*(1+(2*KH/SINH(MIN(KDMAX,2*KH))))*SI/K
     !
     RETURN
     !/
