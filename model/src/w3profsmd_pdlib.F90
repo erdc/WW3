@@ -6033,9 +6033,9 @@ CONTAINS
           END IF
         ELSE
           esum = VA(1:NSPEC,IP)
-          IF (IP == DEBUG_NODE) THEN
-            !WRITE(*,*) 'SUM VA AFTER SOLVER', IP, SUM(esum)
-          ENDIF
+          !IF (IP == DEBUG_NODE) THEN
+          !  !WRITE(*,*) 'SUM VA AFTER SOLVER', IP, SUM(esum)
+          !ENDIF
         ENDIF ! .NOT. LCONVERGED
 
         IF (B_JGS_TERMINATE_DIFFERENCE) THEN
@@ -6197,7 +6197,7 @@ CONTAINS
 
     END DO ! Open Do Loop ... End of Time Interval
 
-    WRITE(*,*) 'After Solver WWM system', sum(VA(:,DEBUG_NODE))
+    !WRITE(*,*) 'After Solver WWM system', sum(VA(:,DEBUG_NODE))
     !CALL print_spec(VA(1:NSPEC,DEBUG_NODE))
 
 #ifdef W3_DEBUGSOLVER
@@ -6265,7 +6265,7 @@ CONTAINS
       ENDIF ! B_JGS_LIMITER
     ENDDO 
  
-    WRITE(*,*) 'After limiter in WWM system', sum(VA(:,DEBUG_NODE))
+    !WRITE(*,*) 'After limiter in WWM system', sum(VA(:,DEBUG_NODE))
     !CALL print_spec(VA(1:NSPEC,DEBUG_NODE))
 
     DO IP=1, NSEAL
@@ -6290,7 +6290,7 @@ CONTAINS
 
     END DO ! IP 
 
-    WRITE(*,*) 'After cg in WW3 system', sum(VA(:,DEBUG_NODE))
+    !WRITE(*,*) 'After cg in WW3 system', sum(VA(:,DEBUG_NODE))
     !CALL print_spec(VA(1:NSPEC,DEBUG_NODE))
 
 #ifdef WEIGHTS

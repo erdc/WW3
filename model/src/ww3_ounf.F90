@@ -832,10 +832,9 @@ PROGRAM W3OUNF
     IOUT   = IOUT + 1
     CALL STME21 ( TOUT , IDTIME )
     WRITE (NDSO,971) IDTIME
-
-
+   
     ! 5.1.2  Processes the variable value for the time step IOUT
-    CALL W3EXNC ( NX, NY, IX1, IXN, IY1, IYN, NSEA, FILEPREFIX,   &
+    CALL W3EXNC ( IOUT, NX, NY, IX1, IXN, IY1, IYN, NSEA, FILEPREFIX,   &
          E3DF, P2MSF, US3DF, USSPF, NCTYPE, TOGETHER, NCVARTYPEI,&
          FLG2D, NCIDS, S3, STRSTOPDATE )
 
@@ -1063,7 +1062,7 @@ CONTAINS
   !> @author M. Accensi
   !> @date 22-Mar-2021
   !>
-  SUBROUTINE W3EXNC ( NX, NY, IX1, IXN, IY1, IYN, NSEA,             &
+  SUBROUTINE W3EXNC ( IOUT, NX, NY, IX1, IXN, IY1, IYN, NSEA,             &
        FILEPREFIX, E3DF, P2MSF, US3DF, USSPF,NCTYPE, &
        TOGETHER, NCVARTYPEI, FLG2D, NCIDS, S3, STRSTOPDATE )
     !/
@@ -1172,7 +1171,7 @@ CONTAINS
     !/
     INTEGER, INTENT(IN)     :: NX, NY, IX1, IXN, IY1, IYN, NSEA,     &
          E3DF(3,5), P2MSF(3), US3DF(3),        &
-         USSPF(2), NCTYPE, NCVARTYPEI
+         USSPF(2), NCTYPE, NCVARTYPEI, IOUT
     CHARACTER(30)           :: FILEPREFIX
     LOGICAL, INTENT(IN)     :: TOGETHER
     LOGICAL, INTENT(IN)     :: FLG2D(NOGRP,NGRPP)
@@ -1441,7 +1440,8 @@ CONTAINS
             NFIELD=2
             !
             ! ww-x output part
-            call writer%writeNext(1.0, UA(1:NSEA), UD(1:NSEA))
+            write(*,*) 'epoch', time
+            call writer%writeNext((IOUT-1)*3600., UA(1:NSEA), UD(1:NSEA))
             !
             ! Air-sea temperature difference
           ELSE IF ( IFI .EQ. 1 .AND. IFJ .EQ. 4 ) THEN
