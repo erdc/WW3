@@ -1,3 +1,145 @@
+module BinaryWriter_m
+    implicit none
+
+    type :: BinaryWriter_t
+        integer :: fhdl = 0
+
+        contains
+        procedure :: close => BinaryWriter_close
+        procedure :: BinaryWriter_write_string, BinaryWriter_write_int4, BinaryWriter_write_int8, BinaryWriter_write_real4, BinaryWriter_write_array1D_int4, BinaryWriter_write_array3D_real4
+        generic :: write => BinaryWriter_write_string, BinaryWriter_write_int4, BinaryWriter_write_int8, BinaryWriter_write_real4, BinaryWriter_write_array1D_int4, BinaryWriter_write_array3D_real4
+    end type
+
+    contains
+
+    function BinaryWriter(filename) result(this)
+        implicit none
+        character(len=*), intent(in) :: filename
+        type(BinaryWriter_t) :: this
+
+        open(newunit=this%fhdl, file=trim(filename), access="stream", action='write', status='replace')
+    end function
+
+    subroutine BinaryWriter_close(this)
+        implicit none
+        class(BinaryWriter_t), intent(inout) :: this
+
+        if(this%fhdl /= 0) then
+            close(this%fhdl)
+        endif
+    end subroutine
+
+    subroutine BinaryWriter_write_string(this, str)
+        implicit none
+        class(BinaryWriter_t), intent(inout) :: this
+        character(len=*), intent(in) :: str
+        integer(8) :: len
+
+        len = len_trim(str)
+        write(this%fhdl) len
+        write(this%fhdl) trim(str)
+    end subroutine
+
+    subroutine BinaryWriter_write_int4(this, value)
+        implicit none
+        class(BinaryWriter_t), intent(inout) :: this
+        integer(4), intent(in) :: value
+
+        write(this%fhdl) value
+    end subroutine
+
+    subroutine BinaryWriter_write_int8(this, value)
+        implicit none
+        class(BinaryWriter_t), intent(inout) :: this
+        integer(8), intent(in) :: value
+
+        write(this%fhdl) value
+    end subroutine
+
+    subroutine BinaryWriter_write_real4(this, value)
+        implicit none
+        class(BinaryWriter_t), intent(inout) :: this
+        real(4), intent(in) :: value
+
+        write(this%fhdl) value
+    end subroutine
+
+    subroutine BinaryWriter_write_array1D_int4(this, size1, arr)
+        implicit none
+        class(BinaryWriter_t), intent(inout) :: this
+        integer, intent(in) :: size1
+        integer, intent(in) :: arr(:)
+
+        write(this%fhdl) size1
+        write(this%fhdl) arr(1:size1)
+    end subroutine
+
+    subroutine BinaryWriter_write_array3D_real4(this, size1, size2, size3, arr)
+        implicit none
+        class(BinaryWriter_t), intent(inout) :: this
+        integer, intent(in) :: size1
+        integer, intent(in) :: size2
+        integer, intent(in) :: size3
+        real(4), intent(in) :: arr(:,:,:)
+
+        write(this%fhdl) size3
+        write(this%fhdl) size2
+        write(this%fhdl) size1
+        write(this%fhdl) arr(1:size1,1:size2,1:size3)
+    end subroutine
+end module
+
+module BoundSpecWriter_m
+    use BinaryWriter_m
+    implicit none
+
+    type :: BoundSpecWriter_t
+        type(BinaryWriter_t) :: file
+
+        contains
+        procedure :: writeNextTimeStep => BoundSpecWriter_writeNextTimeStep
+    end type
+
+    contains
+
+    function BoundSpecWriter(filename, np_global, ND, NS, nNodes, nodeIds) result(this)
+        implicit none
+        character(len=*), intent(in) :: filename
+        integer, intent(in) :: np_global
+        integer, intent(in) :: ND
+        integer, intent(in) :: NS
+        integer, intent(in) :: nNodes
+        integer, intent(in) :: nodeIDs(:)
+
+        type(BoundSpecWriter_t) :: this
+        integer :: boundspecVer = 1
+        integer(8) :: sizeof
+
+        this%file = BinaryWriter(filename)
+        call this%file%write("Bound Specs float")
+        call this%file%write(boundspecVer)
+        call this%file%write(np_global)
+        call this%file%write(nNodes, nodeIDs)
+        call this%file%write(NS)
+        call this%file%write(ND)
+        sizeof = 4 ! 4 for real(4), 8 for real(8)
+        call this%file%write(sizeof)
+    end function
+
+
+    subroutine BoundSpecWriter_writeNextTimeStep(this, time, ND, NS, nNodes, spec)
+        class(BoundSpecWriter_t), intent(inout) :: this
+        real(4), intent(in) :: time
+        integer, intent(in) :: ND
+        integer, intent(in) :: NS
+        integer, intent(in) :: nNodes
+        real(4), intent(in) :: spec(:,:,:)
+
+        call this%file%write(time)
+        call this%file%write(ND, NS, nNodes, spec)
+    end subroutine
+end module
+
 !> @file
 !> @brief Contains the boundary condition program, W3BOUNC.
 !>
@@ -150,6 +292,7 @@ PROGRAM W3BOUNC
 #ifdef W3_S
   USE W3SERVMD, ONLY : STRACE
 #endif
+  use BoundSpecWriter_m
 
   !/
   IMPLICIT NONE
@@ -171,23 +314,24 @@ PROGRAM W3BOUNC
        IERR, INTERP, ILOOP, VERBOSE, IBO,    &
        IRET, ICODE, NDSL
   INTEGER                 :: TIME(2), TIME2(2), VARID(12),         &
-       REFDATE(8), CURDATE(8), VARTYPE
+       REFDATE(8), CURDATE(8), VARTYPE, IK, ITH, ISP
 #ifdef W3_S
   INTEGER, SAVE           :: IENT = 0
 #endif
   !
   INTEGER, ALLOCATABLE    :: IPBPI(:,:), IPBPO(:,:), NCID(:),      &
-       DIMID(:,:), DIMLN(:,:)
+       DIMID(:,:), DIMLN(:,:), NODEIDS(:)
   !
   REAL                    :: FR1I, XFRI, TH1I, FACTOR, OFFSET, DMIN,&
        DIST, DMIN2, COS1, DLON, DLAT, DLO,    &
        FILLVAL
   !
+
   REAL, ALLOCATABLE       :: SPEC2D(:,:,:,:), LATS(:), LONS(:),    &
        FREQ(:), THETA(:),                    &
        XBPI(:), YBPI(:), RDBPI(:,:),         &
        XBPO(:), YBPO(:), RDBPO(:,:),         &
-       ABPIN(:,:), ABPIN2(:,:,:)
+       ABPIN(:,:), ABPIN2(:,:,:), SPEC(:,:,:)
 #ifdef W3_RTD
   REAL, ALLOCATABLE     :: XTMP(:), YTMP(:), ANGTMP(:)
   LOGICAL               :: ISRTD
@@ -208,6 +352,7 @@ PROGRAM W3BOUNC
   CHARACTER, ALLOCATABLE              :: STATION(:,:)
   !
   LOGICAL                 :: FLGNML, SPCONV
+  type(BoundSpecWriter_t) :: writer
   !
   !/
   !/ ------------------------------------------------------------------- /
@@ -416,11 +561,14 @@ PROGRAM W3BOUNC
 #endif
     ALLOCATE (IPBPO(NBO,4),RDBPO(NBO,4))
     IBO=0
+    ALLOCATE (nodeIDS(NBO))
+    nodeIDs = 0
     DO ISEA=1,NSEA
       IX     = MAPSF(ISEA,1)
       IY     = MAPSF(ISEA,2)
       IF (MAPSTA(IY,IX).EQ.2) THEN
         IBO=IBO+1
+        NodeIds(IBO) = ISEA
         SELECT CASE ( GTYPE )
         CASE ( RLGTYPE )
           XBPO(IBO)=X0+SX*(IX-1)
@@ -740,6 +888,9 @@ PROGRAM W3BOUNC
     !--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ! 10. Loops on times and files and write to nest.ww3
     !
+    writer = BoundSpecWriter("specbnd.bin", NSEA, NT1, NK1, NBO, nodeIDs)
+    ALLOCATE(SPEC(NTH1,NK1,NBO))
+    SPEC = 0
     DO IT=1,NT1
       CURJULDAY=TIMES(IT)
       IF (INDEX(TIMEUNITS, "seconds").NE.0)   CURJULDAY=CURJULDAY/86400.
@@ -758,6 +909,18 @@ PROGRAM W3BOUNC
       DO IP=1, NBO2
         WRITE(NDSB) ABPIN2(:,IT,IP)
       END DO
+      ALLOCATE(SPEC(NTH1,NK1,NBO))
+      SPEC = 0.
+      WRITE(*,*) 'DEBUG BOUNDSPEC', NBO, NBO2
+      DO IP=1, NBO2
+        DO IK = 1, NK1
+          DO ITH = 1, NTH1
+            ISP = ITH + (IK-1)*NTH 
+            SPEC(IK,ITH,IP) = ABPIN2(ITH,IT,IP)
+          ENDDO 
+        ENDDO  
+      ENDDO 
+      call writer%writeNextTimeStep(0., NTH1, NK1, NBO, SPEC)
     END DO ! IT=0,NT1
     CLOSE(NDSB)
 
@@ -885,3 +1048,5 @@ SUBROUTINE CHECK_ERR(IRET)
 END SUBROUTINE CHECK_ERR
 
 !==============================================================================
+
+
