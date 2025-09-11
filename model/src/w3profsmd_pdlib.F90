@@ -5778,6 +5778,12 @@ CONTAINS
 #endif
     enddo
 
+!IMEX INSERT 
+
+    !CALL CFL
+
+!IMEX END
+
     !WRITE(*,*) 'entry sum(VA)out=', sum(VA), sum(B_JAC), SUM(ASPAR_JAC)
     !
     DO
@@ -5799,11 +5805,11 @@ CONTAINS
           CYCLE
         ENDIF
 
-        DO IK = 0, NK + 1
 #ifdef NOCGTABLE
+        DO IK = 0, NK + 1
           CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN(IK,IP_GLOB),CG(IK,IP_GLOB))
-#endif
         ENDDO
+#endif
 
         JSEA  = JX_TO_JSEA(IP)
         eSI   = PDLIB_SI(IP)

@@ -888,7 +888,7 @@ PROGRAM W3BOUNC
     !--- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ! 10. Loops on times and files and write to nest.ww3
     !
-    writer = BoundSpecWriter("specbnd.bin", NSEA, NT1, NK1, NBO, nodeIDs)
+    writer = BoundSpecWriter("specbnd.bin", NSEA, NTH1, NK1, NBO, nodeIDs)
     ALLOCATE(SPEC(NTH1,NK1,NBO))
     SPEC = 0
     DO IT=1,NT1
@@ -909,14 +909,12 @@ PROGRAM W3BOUNC
       DO IP=1, NBO2
         WRITE(NDSB) ABPIN2(:,IT,IP)
       END DO
-      ALLOCATE(SPEC(NTH1,NK1,NBO))
-      SPEC = 0.
-      WRITE(*,*) 'DEBUG BOUNDSPEC', NBO, NBO2
+      WRITE(*,*) 'DEBUG BOUNDSPEC', NBO, NBO2, NK1, NTH1, NBO
       DO IP=1, NBO2
         DO IK = 1, NK1
           DO ITH = 1, NTH1
             ISP = ITH + (IK-1)*NTH 
-            SPEC(IK,ITH,IP) = ABPIN2(ITH,IT,IP)
+            SPEC(ITH,IK,IP) = ABPIN2(ITH,IT,IP)
           ENDDO 
         ENDDO  
       ENDDO 
