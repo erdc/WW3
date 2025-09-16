@@ -407,13 +407,13 @@ CONTAINS
     EMEAN  = 0.
     JACEPS = 1E-12
 
-    HMAX   = DEPTH * 0.73
+!    HMAX   = DEPTH * 0.73
 #ifdef W3_DB1  !modification HM
-!    IF ( FDONLY ) THEN
-!      HMAX     = DBLE(SDBC2) * DBLE(DEPTH)
-!    ELSE
-!      HMAX   = DBLE(SDBC2) / DBLE(WNMEAN) * TANH ( DBLE(WNMEAN) * MAX(DEPTH,0.) )
-!    END IF
+    IF ( FDONLY ) THEN
+      HMAX     = DBLE(SDBC2) * DBLE(DEPTH)
+    ELSE
+      HMAX   = DBLE(SDBC2) / DBLE(WNMEAN) * TANH ( DBLE(WNMEAN) * MAX(DEPTH,0.) )
+    END IF
 #endif
     DO IK=1, NK
       EB(IK) = 0.
