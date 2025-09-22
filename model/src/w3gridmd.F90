@@ -2504,6 +2504,7 @@ CONTAINS
       IMPFREQSHIFT = .FALSE.
       IMPSOURCE = .FALSE.
       EXPFSN = .TRUE.
+      EXPTOTAL = .TRUE.
     END IF
 
     nbSel=0
