@@ -2450,12 +2450,12 @@ CONTAINS
     !
     ! 6.l Read unstructured data
     ! initialisation of logical related to unstructured grid
-    UGOBCAUTO = .TRUE.
-    UGBCCFL = .TRUE.
+    UGOBCAUTO = .FALSE.
+    UGBCCFL = .FALSE.
     UGOBCDEPTH= -10.
     UGOBCOK = .FALSE.
     UGOBCFILE = 'unset'
-    EXPFSN    = .TRUE.
+    EXPFSN    = .FALSE.
     EXPFSPSI  = .FALSE.
     EXPFSFCT  = .FALSE.
     IMPFSN    = .FALSE.
@@ -2464,7 +2464,7 @@ CONTAINS
     IMPREFRACTION = .FALSE.
     IMPFREQSHIFT = .FALSE.
     IMPSOURCE = .FALSE.
-    SETUP_APPLY_WLV = .TRUE.
+    SETUP_APPLY_WLV = .FALSE.
     SOLVERTHR_SETUP=1E-6
     CRIT_DEP_SETUP=0.1
     JGS_TERMINATE_MAXITER = .TRUE.
@@ -2474,12 +2474,19 @@ CONTAINS
     JGS_LIMITER_FUNC = 1
     JGS_BLOCK_GAUSS_SEIDEL = .TRUE.
     JGS_USE_JACOBI = .TRUE.
-    JGS_MAXITER=100
-    JGS_PMIN = 1
-    JGS_DIFF_THR = 1.E-10
-    JGS_NORM_THR = 1.E-20
+    JGS_MAXITER=1000
+    JGS_PMIN = 3
+    JGS_DIFF_THR = 1.E-8
+    JGS_NORM_THR = 1.E-10
     JGS_NLEVEL = 0
     JGS_SOURCE_NONLINEAR = .FALSE.
+
+    IF (EXPTOTAL) EXPFSN = .TRUE.
+    IF (IMPTOTAL) THEN
+      IMPREFRACTION = .TRUE.
+      IMPFREQSHIFT = .TRUE.
+      IMPSOURCE = .TRUE.
+    END IF
     ! read data from the unstructured devoted namelist
     CALL READNL ( NDSS, 'UNST', STATUS )
 
