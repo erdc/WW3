@@ -317,7 +317,7 @@ PROGRAM W3SHEL
   !/ ------------------------------------------------------------------- /
   !/ Local PARAMETER statements
   !/
-  INTEGER, PARAMETER  :: NHMAX =    200
+  INTEGER, PARAMETER  :: NHMAX =    1000
   !/
   !/ ------------------------------------------------------------------- /
   !/ Local parameters
