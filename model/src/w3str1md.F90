@@ -309,9 +309,9 @@ CONTAINS
     !/ ------------------------------------------------------------------- /
     USE CONSTANTS, ONLY: GRAV, PI, TPI
     USE W3GDATMD, ONLY: NK, NTH, NSPEC, DTH, SIG, DDEN, FTE, FTF
-!#ifdef W3_DB1  !modification HM
-!    USE W3GDATMD, ONLY: FDONLY,SDBC2
-!#endif
+#ifdef W3_DB1  !modification HM
+    USE W3GDATMD, ONLY: FDONLY,SDBC2
+#endif
     USE W3ODATMD, ONLY: NDSE
     USE W3SERVMD, ONLY: EXTCDE
 #ifdef W3_S
@@ -381,7 +381,7 @@ CONTAINS
     REAL    :: AUX1, AUX2, BIPH, C0, CM, DEP, DEP_2, DEP_3, E0, EM, HS
     REAL    :: FT, RINT, SIGPICG, SINBPH, STRI, WISM, WISM1, WISP
     REAL    :: WISP1, W0, WM, WN0, WNM, XIS, XISLN, EDM, ED0, G9DEP, STRI2
-    REAL    :: E(NK), SA(NTH,200), SA2(NTH,200), A2(NSPEC), A3(NSPEC), HMAX
+    REAL    :: E(NK), SA(NTH,200), SA2(NTH,200), A2(NSPEC), A3(NSPEC)
     REAL    :: EB(NK), EBAND, EMEAN, SIGM01, ED(NK)
 !----- Temp (to be moved) -----
     REAL    :: EF(NK), JACEPS, DIFFSTR
@@ -407,14 +407,6 @@ CONTAINS
     EMEAN  = 0.
     JACEPS = 1E-12
 
-!    HMAX   = DEPTH * 0.73
-#ifdef W3_DB1  !modification HM
-    IF ( FDONLY ) THEN
-      HMAX     = DBLE(SDBC2) * DBLE(DEPTH)
-    ELSE
-      HMAX   = DBLE(SDBC2) / DBLE(WNMEAN) * TANH ( DBLE(WNMEAN) * MAX(DEPTH,0.) )
-    END IF
-#endif
     DO IK=1, NK
       EB(IK) = 0.
       ED(IK) = 0.
