@@ -1519,7 +1519,7 @@ CONTAINS
           IF (IMEM == 1) THEN
             SIDT  = PDLIB_SI(JSEA) * DTG
             DO IK = 1, NK
-              JAC = CLATSL/CG1(IK)
+              JAC = 1./CG1(IK)
               DO ITH = 1, NTH
                 ISP = ITH + (IK-1)*NTH
                 VD(ISP) = MIN(0., VD(ISP))
@@ -1577,7 +1577,7 @@ CONTAINS
 
             SIDT   = PDLIB_SI(JSEA) * DTG
             DO IK=1,NK
-              JAC = CLATSL/CG1(IK)
+              JAC = 1./CG1(IK)
               DO ITH=1,NTH
                 ISP=ITH + (IK-1)*NTH
                 VD(ISP) = MIN(0., VD(ISP))
