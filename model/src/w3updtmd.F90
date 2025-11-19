@@ -1837,6 +1837,9 @@ CONTAINS
 #if defined W3_ST3 || defined(W3_ST4)
     USE W3GDATMD, ONLY: AALPHA
 #endif
+#ifdef W3_PDLIB
+    USE W3GDATMD, ONLY: IOBPA_LOC 
+#endif
     USE W3IDATMD, ONLY: TIN, ICEI, BERGI
     USE W3PARALL, ONLY: INIT_GET_JSEA_ISPROC, INIT_GET_ISEA
     !/
@@ -1909,6 +1912,7 @@ CONTAINS
                ICEI(IX,IY), 'ICE (NEW)'
 #endif
           VA(:,JSEA) = 0.
+          IOBPA_LOC(JSEA) = 1
 #if defined W3_ST3 || defined(W3_ST4)
           CHARN(JSEA) = AALPHA
 #else
@@ -1944,6 +1948,7 @@ CONTAINS
             WRITE (NDST,9021) ISEA, IX, IY, MAPSTA(IY,IX), &
                  ICEI(IX,IY), 'SEA (NEW)'
 #endif
+            IOBPA_LOC(JSEA) = 1 
             VA(:,JSEA) = 0.
 #if defined W3_ST3 || defined(W3_ST4)
             CHARN(JSEA) = AALPHA
@@ -3032,9 +3037,6 @@ CONTAINS
             LICEN  = FICEN*DY
             TRIY(IXY) = ( LICEN - ICE(ISEA)*DY ) / ( LICEN - LICE0 )
           END IF
-#endif
-          !
-#ifdef W3_IC0
           TRIX(IXY) = MAX ( 0. , MIN ( 1. , TRIX(IXY) ) )
           TRIY(IXY) = MAX ( 0. , MIN ( 1. , TRIY(IXY) ) )
         END IF

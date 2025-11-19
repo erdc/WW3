@@ -7,8 +7,8 @@
 ! -------------------------------------------------------------------- !
 &FIELD_NML
   FIELD%TIMESTART        =  '20100801 000000'
-  FIELD%TIMESTRIDE       =  '10'
-  FIELD%TIMECOUNT        =  '3600'
+  FIELD%TIMESTRIDE       =  '600'
+  FIELD%TIMECOUNT        =  '600'
   FIELD%LIST             =  'HS LM T02 T01 T0M1 UST CHA CGE DTD FC CFX CFD QP QKK'
   FIELD%PARTITION        =  '0 1 2'
   FIELD%SAMEFILE         =  F
