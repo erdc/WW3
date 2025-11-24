@@ -3677,7 +3677,7 @@ CONTAINS
           CXY(2,IP) = CXY(2,IP) + FACY * CY(IP_GLOB)*IOBDP_LOC(IP)
         ENDIF
 #ifdef W3_MGP
-        CXY(1,IP) = CXY(1,IP) - CCURX*VGX/CLATS(ISEA)
+        CXY(1,IP) = CXY(1,IP) - CCURX*VGX/CLATS(IP_GLOB)
         CXY(2,IP) = CXY(2,IP) - CCURY*VGY
 #endif
       ENDDO
@@ -3921,7 +3921,7 @@ CONTAINS
             CXY(:,2) = CXY(:,2) + FACY * CY(NI_ISEA)
           ENDIF
 #ifdef W3_MGP
-          CXY(:,1) = CXY(:,1) - CCURX*VGX/CLATS(ISEA)
+          CXY(:,1) = CXY(:,1) - CCURX*VGX/CLATS(NI_ISEA)
           CXY(:,2) = CXY(:,2) - CCURY*VGY
 #endif
           FL11 = CXY(2,1)*IEN_LOCAL(1)+CXY(2,2)*IEN_LOCAL(2)
@@ -4125,7 +4125,7 @@ CONTAINS
         ENDIF
 
 #ifdef W3_MGP
-        CXY(:,1) = CXY(:,1) - CCURX*VGX/CLATS(ISEA)
+        CXY(:,1) = CXY(:,1) - CCURX*VGX/CLATS(IP_GLOB)
         CXY(:,2) = CXY(:,2) - CCURY*VGY
 #endif
         FL11 = CXY(2,1)*IEN_LOCAL(1)+CXY(2,2)*IEN_LOCAL(2)
@@ -6265,7 +6265,7 @@ CONTAINS
 
           DAM = 0.
           DO IK=1, NK
-            DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG(IK,ISEA)) * CG1(IK) / CLATS(ISEA)
+            DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG(IK,ISEA)) * CG1(IK) !/ CLATS(ISEA)
           END DO
           !
           DO IK=1, NK
@@ -6278,8 +6278,10 @@ CONTAINS
           DAM2 = 0.
           DO IK=1, NK
             JAC2     = 1./TPI/SIG(IK)
-            FRLOCAL  = SIG(IK)*TPIINV
-            DAM2(1+(IK-1)*NTH) = 1E-06 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2 * CG1(IK) / CLATS(ISEA)
+            !FRLOCAL  = SIG(IK)*TPIINV
+            !DAM2(1+(IK-1)*NTH) = 5E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2 * CG1(IK) !/ CLATS(ISEA)
+            !DAM2(1+(IK-1)*NTH) = 5E-7 * GRAV/FRLOCAL**4 * 30./28. * FMEAN * DTG * JAC2 * CG1(IK) !/ CLATS(ISEA)
+            DAM2(1+(IK-1)*NTH) = 5E-7 * GRAV * UST(ISEA) * FMEAN * DTG * (TPI**3) / (SIG(IK)**4) * JAC2 * CG1(IK)
           END DO
           DO IK=1, NK
             IS0  = (IK-1)*NTH
@@ -6984,7 +6986,7 @@ CONTAINS
 #endif
     DO JSEA=1,NSEAL
       IP_glob = iplg(JSEA)
-      IF (MAPSTA(1,IP_glob).EQ.2) THEN
+      IF (MAPSTA(1,IP_glob).EQ.2 .OR. MAPSTA(1,IP_glob).LT.0) THEN
         IOBPA_LOC(JSEA) = 1
       ELSE
         IOBPA_LOC(JSEA) = 0
