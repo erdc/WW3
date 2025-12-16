@@ -764,11 +764,11 @@ CONTAINS
       ISEA    = MAPFS(1,IP_glob)
 #ifdef NOCGTABLE
       CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN1,CG1)
-      AC(IP)  = VA(ISP,JSEA) / CG1 * CLATS(ISEA)
+      AC(IP)  = VA(ISP,JSEA) / CG1
       VLCFLX(IP) = CCOS * CG1 / CLATS(ISEA)
       VLCFLY(IP) = CSIN * CG1
 #else
-      AC(IP)  = VA(ISP,JSEA) / CG(IK,ISEA) * CLATS(ISEA)
+      AC(IP)  = VA(ISP,JSEA) / CG(IK,ISEA)
       VLCFLX(IP) = CCOS * CG(IK,ISEA) / CLATS(ISEA)
       VLCFLY(IP) = CSIN * CG(IK,ISEA)
 #endif
@@ -855,7 +855,7 @@ CONTAINS
       IP      = JSEA
       IP_glob = iplg(IP)
       ISEA=MAPFS(1,IP_glob)
-      VA(ISP,JSEA) = MAX ( 0. , CG(IK,ISEA)/CLATS(ISEA)*AC(IP) )
+      VA(ISP,JSEA) = MAX ( 0. , CG(IK,ISEA)*AC(IP) )
     END DO
 #ifdef W3_DEBUGSOLVER
     WRITE(740+IAPROC,*) 'Leaving PDLIB_W3XYPUG'
@@ -1157,7 +1157,7 @@ CONTAINS
           JX=IPGL_npa(IP_glob)
           IF (JX .gt. 0) THEN
             AC(JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )   &
-                 / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))
+                 / CG(IK,ISBPI(IBI))
 #ifdef W3_DEBUGSOLVER
             sumAC=sumAC + AC(JX)
             sumBPI0=sumBPI0 + BBPI0(ISP,IBI)
@@ -1451,7 +1451,7 @@ CONTAINS
           JX=IPGL_npa(IP_glob)
           IF (JX .gt. 0) THEN
             AC(JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )   &
-                 / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))
+                 / CG(IK,ISBPI(IBI))
 #ifdef W3_DEBUGSOLVER
             sumAC=sumAC + AC(JX)
             sumBPI0=sumBPI0 + BBPI0(ISP,IBI)
@@ -1821,7 +1821,7 @@ CONTAINS
           JX=IPGL_npa(IP_glob)
           IF (JX .gt. 0) THEN
             AC(JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )   &
-                 / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))
+                 / CG(IK,ISBPI(IBI))
 #ifdef W3_DEBUGSOLVER
             sumAC=sumAC + AC(JX)
             sumBPI0=sumBPI0 + BBPI0(ISP,IBI)
@@ -4815,7 +4815,7 @@ CONTAINS
         DO IK=1,NK
           DO ITH=1,NTH
             ISP=ITH + (IK-1)*NTH
-            SPEC_VA(ISP) = VA(ISP,JSEA) * CG(IK,ISEA) / CLATS(ISEA)
+            SPEC_VA(ISP) = VA(ISP,JSEA) * CG(IK,ISEA)
           ENDDO
         ENDDO
         CALL COMPUTE_MEAN_PARAM(SPEC_VA, CG1, WN1, EMEAN, FMEAN, WNMEAN, AMAX)
@@ -4834,7 +4834,7 @@ CONTAINS
         DO IK=1,NK
           DO ITH=1,NTH
             ISP=ITH + (IK-1)*NTH
-            SPEC_VA(ISP) = VA(ISP,JSEA) * CG(IK,ISEA) / CLATS(ISEA)
+            SPEC_VA(ISP) = VA(ISP,JSEA) * CG(IK,ISEA)
           ENDDO
         ENDDO
         CALL COMPUTE_MEAN_PARAM(SPEC_VA, CG1, WN1, EMEAN, FMEAN, WNMEAN, AMAX)
@@ -4852,14 +4852,14 @@ CONTAINS
             ELSE
               PreVS     = VSTOT(ISP,JSEA)
             END IF
-            eVS = PreVS * CLATS(ISEA) / CG(IK,ISEA)
+            eVS = PreVS / CG(IK,ISEA)
             eVD = DBLE(VDTOT(ISP,JSEA))
 #ifdef W3_DB1
-            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA)
             eVD = evD + DBLE(VDDB(ISP))
 #endif
 #ifdef W3_DB2
-            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA)
             eVD = evD + DBLE(VDDB(ISP))
 #endif
             B_JAC(ISP,IP)                   = B_JAC(ISP,IP) + SIDT * (eVS - eVD*VA(ISP,JSEA))
@@ -4976,7 +4976,7 @@ CONTAINS
         DO IK=1,NK
           DO ITH=1,NTH
             ISP=ITH + (IK-1)*NTH
-            SPEC_VA(ISP) = VA(ISP,JSEA) * CG(IK,ISEA) / CLATS(ISEA)
+            SPEC_VA(ISP) = VA(ISP,JSEA) * CG(IK,ISEA)
           ENDDO
         ENDDO
         CALL COMPUTE_MEAN_PARAM(SPEC_VA, CG1, WN1, EMEAN, FMEAN, WNMEAN, AMAX)
@@ -4995,7 +4995,7 @@ CONTAINS
         DO IK=1,NK
           DO ITH=1,NTH
             ISP=ITH + (IK-1)*NTH
-            SPEC_VA(ISP) = VA(ISP,JSEA) * CG(IK,ISEA) / CLATS(ISEA)
+            SPEC_VA(ISP) = VA(ISP,JSEA) * CG(IK,ISEA)
           ENDDO
         ENDDO
         CALL COMPUTE_MEAN_PARAM(SPEC_VA, CG1, WN1, EMEAN, FMEAN, WNMEAN, AMAX)
@@ -5013,14 +5013,14 @@ CONTAINS
             ELSE
               PreVS     = VSTOT(ISP,JSEA)
             END IF
-            eVS = PreVS / CG(IK,ISEA) * CLATS(ISEA)
+            eVS = PreVS / CG(IK,ISEA)
             eVD = DBLE(VDTOT(ISP,JSEA))
 #ifdef W3_DB1
-            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA)
             eVD = evD + DBLE(VDDB(ISP))
 #endif
 #ifdef W3_DB2
-            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA) * CLATS(ISEA)
+            eVS = eVS + DBLE(VSDB(ISP)) / CG(IK,ISEA)
             eVD = evD + DBLE(VDDB(ISP))
 #endif
             B_JAC(ISP,IP)                   = B_JAC(ISP,IP) + SIDT * (eVS - eVD*VA(ISP,JSEA))
@@ -5135,8 +5135,8 @@ CONTAINS
               DO IK=1,NK
                 ISP=ITH + (IK-1)*NTH
                 eAC = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )   &
-                     / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))
-                eVA = MAX(0., CG(IK,ISEA)/CLATS(ISEA)*eAC)
+                     / CG(IK,ISBPI(IBI))
+                eVA = MAX(0., CG(IK,ISEA)*eAC)
                 VA(ISP,JSEA) = eVA
               END DO
             END DO
@@ -5275,7 +5275,7 @@ CONTAINS
             DO IK=1,NK
               ISP=ITH + (IK-1)*NTH
               VA(ISP,JX) = (( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )  &
-                   / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))) * IOBDP_LOC(JX)
+                   / CG(IK,ISBPI(IBI))) * IOBDP_LOC(JX)
             END DO
           END DO
 #ifdef W3_DEBUGIOBC
@@ -5285,7 +5285,7 @@ CONTAINS
               FACTOR = DDEN(IK)/CG(IK,ISEA)
               ISP=ITH + (IK-1)*NTH
               eAC=REAL(VA(ISP,JX))
-              eVA=CG(IK,ISEA)/CLATS(ISEA)*eAC
+              eVA=CG(IK,ISEA)*eAC
               ETOT = ETOT + eVA*FACTOR
             END DO
           END DO
@@ -5662,7 +5662,7 @@ CONTAINS
 #else
         CG1(IK)    = CG(IK,ISEA)
 #endif
-        VA(ISP,JSEA) = VA(ISP,JSEA) / CG1(IK) * CLATS(ISEA)
+        VA(ISP,JSEA) = VA(ISP,JSEA) / CG1(IK)
       END DO
     END DO
     VAOLD = VA(1:NSPEC,1:NSEAL)
@@ -5804,8 +5804,8 @@ CONTAINS
           DO ISP=1,NSPEC
             VAold(ISP) = VA(ISP,JSEA)
             IK=MAPWN(ISP)
-            VAinput(ISP) = DBLE(CG(IK,ISEA)/CLATS(ISEA)) * VA(ISP, IP)
-            VAacloc(ISP) = DBLE(CG(IK,ISEA)/CLATS(ISEA)) * ACLOC(ISP)
+            VAinput(ISP) = DBLE(CG(IK,ISEA)) * VA(ISP, IP)
+            VAacloc(ISP) = DBLE(CG(IK,ISEA)) * ACLOC(ISP)
           END DO
           WRITE(740+IAPROC,*) 'sum(VAold/VAinput/VAacloc)=', sum(VAold), sum(VAinput), sum(VAacloc)
 #endif
@@ -5933,7 +5933,7 @@ CONTAINS
           WRITE(740+IAPROC,*) 'JSEA=', JSEA, ' nbIter=', nbIter
           DO ISP=1,NSPEC
             IK=MAPWN(ISP)
-            VAnew(ISP) = DBLE(CG(IK,ISEA)/CLATS(ISEA)) * eSum(ISP)
+            VAnew(ISP) = DBLE(CG(IK,ISEA)) * eSum(ISP)
           END DO
           DO ISP=1,NSPEC
             VAAnew(ISP)   = VAnew(ISP)
@@ -6209,8 +6209,8 @@ CONTAINS
 #else
         CG1(IK)    = CG(IK,ISEA)
 #endif
-        eVA = MAX ( ZERO ,CG1(IK)/CLATS(ISEA)*REAL(VA(ISP,IP)) )
-        eVO = MAX ( ZERO ,CG1(IK)/CLATS(ISEA)*REAL(VAOLD(ISP,JSEA)) )
+        eVA = MAX ( ZERO ,CG1(IK)*REAL(VA(ISP,IP)) )
+        eVO = MAX ( ZERO ,CG1(IK)*REAL(VAOLD(ISP,JSEA)) )
 #ifdef W3_DEBUGSRC
         SumACout=SumACout + REAL(VA(ISP,IP))
         VS_w3srce = VSTOT(ISP,JSEA) * DTG / MAX(1., (1. - DTG*VDTOT(ISP,JSEA)))
@@ -6218,7 +6218,7 @@ CONTAINS
         IntDiff = IntDiff + abs(eVA - eVA_w3srce)
         ACsolve=B_JAC(ISP,IP)/ASPAR_JAC(ISP,PDLIB_I_DIAG(IP))
         eB=VA(ISP,JSEA) + DTG*(VSTOT(ISP,JSEA) - VDTOT(ISP,JSEA)*VA(ISP,JSEA))
-        eVAsolve=MAX(0., CG(IK,ISEA)/CLATS(ISEA)*ACsolve)
+        eVAsolve=MAX(0., CG(IK,ISEA)*ACsolve)
         VAsolve(ISP)=eVAsolve
         SumVS = SumVS + abs(VSTOT(ISP,JSEA))
         SumVD = SumVD + abs(VDTOT(ISP,JSEA))
@@ -6594,7 +6594,7 @@ CONTAINS
               IP_glob = MAPSF(ISBPI(IBI),1)
               JX      = IPGL_npa(IP_glob)
               IF (JX .gt. 0) THEN
-                U(ITH,JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) ) / CGSIG(ISBPI(IBI)) * CLATS(ISBPI(IBI))
+                U(ITH,JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) ) / CGSIG(ISBPI(IBI))
               END IF
             END DO
           ENDDO

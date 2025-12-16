@@ -1389,7 +1389,7 @@ CONTAINS
 #ifdef W3_PDLIB
       IF (B_JGS_LIMITER_FUNC == 2) THEN
         DO IK=1, NK
-          JAC      = CG1(IK)/CLATSL
+          JAC      = CG1(IK)
           JAC2     = 1./TPI/SIG(IK)
           FRLOCAL  = SIG(IK)*TPIINV
 #ifdef W3_ST6
@@ -1538,7 +1538,7 @@ CONTAINS
                   eVS = 0
                   eVD = 0
                 ELSE
-                  eVS    = PreVS / CG1(IK) * CLATSL
+                  eVS    = PreVS / CG1(IK)
                   eVD    = MIN(0.,VD(ISP))
                 ENDIF
                 B_JAC(ISP,JSEA)                   = B_JAC(ISP,JSEA) + SIDT * (eVS - eVD*SPEC(ISP)*JAC)
@@ -1592,7 +1592,7 @@ CONTAINS
                   DVS       = SIGN(MIN(MAXDAC,ABS(DVS)),DVS)
                 ENDIF
                 PreVS     = DVS / FAKS
-                eVS = PreVS / CG1(IK) * CLATSL
+                eVS = PreVS / CG1(IK)
                 eVD = VD(ISP)
 #ifdef W3_DB1
                 eVS = eVS + DBLE(VSDB(ISP)) * JAC
