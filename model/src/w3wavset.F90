@@ -1328,6 +1328,7 @@
       END IF
       DO
         nbIter=nbIter + 1
+        IF (nbIter .gt. 10000) EXIT
         CALL TRIG_WAVE_SETUP_APPLY_FCT(ASPAR, V_P, V_Y, ACTIVE, ACTIVESEC)
         CALL TRIG_WAVE_SETUP_SCALAR_PROD(V_P, V_Y, h2)
         alphaV=uO/h2
@@ -1731,15 +1732,15 @@
       FLUSH(740+IAPROC)
 #endif
       CALL PDLIB_exchange1Dreal(ZETA_WORK)
-      max_val = -100000000
-      min_val = -100000000
+      max_val = -1.E8
+      min_val =  1.E8
       DO IP=1,npa
         IX=iplg(IP)
         ISEA=MAPFS(1,IX)
         IF (ISEA .gt. 0) THEN
            ZETA_SETUP(ISEA) = ZETA_WORK(IP)
-           max_val = MAX(max_Val, ZETA_WORK(IP))
-           min_val = MAX(min_Val, ZETA_WORK(IP))
+           max_val = MAX(max_val, ZETA_WORK(IP))
+           min_val = MIN(min_val, ZETA_WORK(IP))
         END IF
       END DO
 #ifdef W3_DEBUGSTP
