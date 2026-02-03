@@ -1865,6 +1865,7 @@ CONTAINS
 #ifdef W3_MLIM
       IF ( DTTOT .GE. 0.9999*DTG ) THEN
         HM     = FHMAX *TANH(WNMEAN*MAX(0.,D_INP)) / MAX(1.E-4,WNMEAN )
+        HM     = 0.81 * D_INP
         EM     = HM * HM / 16.
         IF ( EMEAN.GT.EM .AND. EMEAN.GT.1.E-30 ) THEN
           SPEC   = SPEC / EMEAN * EM

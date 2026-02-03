@@ -89,6 +89,7 @@
 !/
 
       LOGICAL :: DO_WAVE_SETUP = .TRUE.
+!
       CONTAINS
 !/ ------------------------------------------------------------------- /
 !>
@@ -496,7 +497,7 @@
 !
       USE CONSTANTS, ONLY: GRAV, DWAT
       use yowNodepool, only: npa, iplg
-      USE W3GDATMD, only : MAPFS
+      USE W3GDATMD, only : MAPFS, ZB
       USE W3ADATMD, ONLY: SXX, SXY, SYY, WN, CG
       USE W3PARALL, only: INIT_GET_ISEA
       USE W3ODATMD, only : IAPROC
@@ -692,8 +693,6 @@
 !> @param[in]  DWNX
 !> @param[out] ASPAR
 !> @param[out] B
-!> @param[in]  ACTIVE
-!> @param[out] ACTIVESEC
 !>
 !> @author Mathieu Dutour-Sikiric
 !> @author Aron Roland
@@ -750,8 +749,9 @@
 !
       use yowElementpool, only: INE, NE
       use yowNodepool, only: PDLIB_NNZ, PDLIB_JA_IE, PDLIB_TRIA, npa, np
-      use yowNodepool, only: PDLIB_I_DIAG
-      USE yowNodepool, only: iplg
+      use yowNodepool, only: PDLIB_I_DIAG, PDLIB_IA, PDLIB_JA
+      USE yowNodepool, only: iplg, x, y
+      USE W3GDATMD, only: IOBPA_LOC, IOBDP_LOC, IOBP_LOC
       USE W3ODATMD, only : IAPROC
       IMPLICIT NONE
 !/
@@ -797,6 +797,7 @@
       POS_TRICK(3,2) = 2
       ASPAR=0
       B=0
+!
       DO I=1,3
         DO J=1,3
           K= I-J+1
@@ -860,6 +861,12 @@
           END DO
         END IF
       END DO
+!
+!     ================================================================
+!     SWAN-style Natural Neumann BC: NO boundary integrals added
+!     Boundary condition emerges naturally from weak formulation
+!     ================================================================
+!
       DoPrintOut=.TRUE.
       IF (DoPrintOut .eqv. .TRUE.) THEN
         DO IP=1,NP
@@ -882,8 +889,6 @@
 !> @param[in]  ASPAR
 !> @param[in]  TheIn
 !> @param[out] TheOut
-!> @param[in]  ACTIVE
-!> @param[in]  ACTIVESEC
 !>
 !> @author Mathieu Dutour-Sikiric
 !> @author Aron Roland
@@ -941,7 +946,7 @@
       use yowExchangeModule, only : PDLIB_exchange1Dreal
       use yowNodepool, only: PDLIB_NNZ, PDLIB_IA, PDLIB_JA, PDLIB_I_DIAG
       use yowNodepool, only: npa
-      USE W3ODATMD, only : IAPROC
+      USE W3GDATMD, only : IOBDP_LOC
       USE W3ODATMD, only : IAPROC
       USE yowNodepool, only: iplg
       IMPLICIT NONE
@@ -1010,8 +1015,6 @@
 !> @param[in]  ASPAR
 !> @param[in]  TheIn
 !> @param[out] TheOut
-!> @param[in]  ACTIVE
-!> @param[in]  ACTIVESEC
 !>
 !> @author Mathieu Dutour-Sikiric
 !> @author Aron Roland
@@ -1069,7 +1072,7 @@
       use yowExchangeModule, only : PDLIB_exchange1Dreal
       USE yowNodepool, only: PDLIB_IA, PDLIB_JA, PDLIB_NNZ
       use yowNodepool, only: np, npa
-      USE W3GDATMD, ONLY: NSEAL
+      USE W3GDATMD, ONLY: NSEAL, IOBDP_LOC
       IMPLICIT NONE
 !/
 !/ ------------------------------------------------------------------- /
@@ -1209,8 +1212,6 @@
 !> @param[in]  ASPAR
 !> @param[in]  B
 !> @param[out] TheOut
-!> @param[in]  ACTIVE
-!> @param[in]  ACTIVESEC
 !>
 !> @author Mathieu Dutour-Sikiric
 !> @author Aron Roland
@@ -1328,6 +1329,7 @@
       END IF
       DO
         nbIter=nbIter + 1
+        IF (nbIter .gt. 10000) EXIT
         CALL TRIG_WAVE_SETUP_APPLY_FCT(ASPAR, V_P, V_Y, ACTIVE, ACTIVESEC)
         CALL TRIG_WAVE_SETUP_SCALAR_PROD(V_P, V_Y, h2)
         alphaV=uO/h2
@@ -1336,6 +1338,9 @@
           V_X(IP) = V_X(IP) + alphaV * V_P(IP)
           V_R(IP) = V_R(IP) - alphaV * V_Y(IP)
         END DO
+        !
+!       Enforce zero-mean constraint at each iteration
+        CALL TRIG_SET_MEANVALUE_TO_ZERO(V_X)
         !
         CALL TRIG_WAVE_SETUP_SCALAR_PROD(V_R, V_R, eNorm)
 #ifdef W3_DEBUGSTP
@@ -1365,6 +1370,283 @@
       WRITE(740+IAPROC,*) 'TRIG_WAVE_SETUP_SOLVE_POISSON_NEUMANN_DIR, max/min=', maxval(TheOut), minval(TheOut)
       FLUSH(740+IAPROC)
 #endif
+      END SUBROUTINE
+!/ ------------------------------------------------------------------- /
+!>
+!> @brief Implicit pseudo-time stepping solver for wave setup.
+!>
+!> @details Solves the wave setup equation using implicit pseudo-time
+!>          stepping. This approach regularizes the singular Neumann
+!>          problem by adding mass matrix terms, making the system
+!>          symmetric positive definite and well-conditioned.
+!>
+!> @param[in]  ASPAR     Sparse stiffness matrix
+!> @param[in]  B         Right-hand side forcing
+!> @param[out] TheOut    Solution (wave setup)
+!>
+!> @author Aron Roland
+!> @date Jan-2026
+!>
+      SUBROUTINE TRIG_WAVE_SETUP_SOLVE_IMPLICIT(ASPAR, B, TheOut, DWNX)
+!/
+!/                  +-----------------------------------+
+!/                  | WAVEWATCH III           NOAA/NCEP |
+!/                  |                                   |
+!/                  | Aron Roland (BGS IT&E GmbH)       |
+!/                  |                                   |
+!/                  |                        FORTRAN 90 |
+!/                  | Last update :         Jan-2026   |
+!/                  +-----------------------------------+
+!/
+!/    Jan-2026 : Origination.                          ( version 7.xx )
+!/
+!  1. Purpose : Implicit pseudo-time solver for wave setup
+!  2. Method  : Backward Euler with Jacobi inner iterations
+!
+!     The steady equation A*zeta = b is singular (pure Neumann BCs).
+!     We reformulate as pseudo-time stepping:
+!
+!        (M/dt + A) * zeta^{n+1} = M/dt * zeta^n + b
+!
+!     where M is the lumped mass matrix (PDLIB_SI).
+!     This system is SPD and well-conditioned for any dt > 0.
+!     Large dt approaches steady state quickly.
+!
+!/ ------------------------------------------------------------------- /
+#ifdef W3_S
+      USE W3SERVMD, ONLY: STRACE
+#endif
+!
+      USE yowNodepool, only: PDLIB_NNZ, PDLIB_SI, PDLIB_I_DIAG
+      USE yowNodepool, only: PDLIB_IA, PDLIB_JA
+      USE W3GDATMD, ONLY: NSEAL
+      USE W3GDATMD, only : IOBPA_LOC, IOBDP_LOC, IOBP_LOC
+      USE W3ODATMD, only : IAPROC, NAPROC
+      use yowNodepool, only: np, npa
+      use yowExchangeModule, only : PDLIB_exchange1Dreal
+      USE W3ADATMD, ONLY: MPI_COMM_WCMP
+      IMPLICIT NONE
+      INCLUDE "mpif.h"
+!/
+!/ ------------------------------------------------------------------- /
+!/ Parameter list
+!/
+!/ ------------------------------------------------------------------- /
+!/ Local PARAMETERs
+!/
+#ifdef W3_S
+      INTEGER, SAVE           :: IENT = 0
+#endif
+!/
+!/ ------------------------------------------------------------------- /
+!/
+      REAL(rkind), intent(in) :: ASPAR(PDLIB_NNZ)
+      REAL(rkind), intent(in) :: B(npa)
+      REAL(rkind), intent(out) :: TheOut(npa)
+      REAL(rkind), intent(in) :: DWNX(npa)
+!
+      REAL(rkind) :: ZETA_OLD(npa), ZETA_NEW(npa)
+      REAL(rkind) :: RHS_IMPL(npa), DIAG_IMPL(npa)
+      REAL(rkind) :: dt_pseudo, diff, tol_outer, tol_inner
+      REAL(rkind) :: off_diag_sum, eCoeff, res_norm
+      INTEGER :: IP, J, JP, J_diag
+      INTEGER :: iter_outer, iter_inner
+      INTEGER :: max_outer, max_inner
+      INTEGER :: ierr_mpi
+      INTEGER :: IP_deepest
+      REAL(rkind) :: max_depth
+#ifdef W3_S
+      CALL STRACE (IENT, 'TRIG_WAVE_SETUP_SOLVE_IMPLICIT')
+#endif
+!
+!     Parameters for implicit solver
+!     dt_pseudo: large value approaches steady state
+!     Typical range: 1e4 to 1e8
+!
+      dt_pseudo = 1.0E6
+      max_outer = 100
+      max_inner = 20
+      tol_outer = 1.0E-10
+      tol_inner = 1.0E-8
+!
+!     Precompute diagonal of implicit system: M/dt + A_diag
+!
+      DO IP = 1, npa
+        IF (IOBDP_LOC(IP) .eq. 1 .OR. IOBPA_LOC(IP) .eq. 1) THEN
+!         Wet node OR boundary node (wet or dry): include in system
+          J_diag = PDLIB_I_DIAG(IP)
+          DIAG_IMPL(IP) = PDLIB_SI(IP)/dt_pseudo + ASPAR(J_diag)
+        ELSE
+!         Interior dry node: diagonal = 1 for ζ=0 enforcement
+          DIAG_IMPL(IP) = 1.0
+        END IF
+      END DO
+!
+!     Find boundary point with largest depth to fix reference level
+!     This removes constant ambiguity in pure Neumann problem (SWAN approach)
+!
+      IP_deepest = -1
+      max_depth = -999.0
+      DO IP = 1, npa
+        IF (IOBPA_LOC(IP) .eq. 1 .AND. IOBDP_LOC(IP) .eq. 1) THEN
+          IF (DWNX(IP) .gt. max_depth) THEN
+            max_depth = DWNX(IP)
+            IP_deepest = IP
+          END IF
+        END IF
+      END DO
+!
+!     Diagnostic: Check wave forcing at boundary nodes
+!
+      IF (IAPROC .eq. 1) THEN
+        WRITE(6,*) '================================================'
+        WRITE(6,*) 'SETUP BC: Boundary node diagnostics'
+        WRITE(6,*) '================================================'
+        DO IP = 1, npa
+          IF (IOBPA_LOC(IP) .eq. 1 .AND. IOBDP_LOC(IP) .eq. 1) THEN
+            WRITE(6,'(A,I6,A,F12.6,A,E12.4)') &
+              ' IP=', IP, ' depth=', DWNX(IP), ' B(IP)=', B(IP)
+          END IF
+        END DO
+        WRITE(6,*) '================================================'
+      END IF
+!
+!     Apply Dirichlet BC (ζ=0) at deepest boundary point only
+!
+      IF (IP_deepest .gt. 0) THEN
+        DIAG_IMPL(IP_deepest) = 1.0
+        IF (IAPROC .eq. 1) THEN
+          WRITE(6,*) 'SETUP BC: Reference point IP=', IP_deepest, ' depth=', max_depth
+          WRITE(6,*) 'SETUP BC: Natural Neumann applied at all other boundaries'
+        END IF
+      END IF
+!
+!     Initialize solution to zero
+!
+      ZETA_OLD = 0.0
+      ZETA_NEW = 0.0
+!
+!     Outer pseudo-time iteration
+!
+      IF (IAPROC .eq. 1) THEN
+        WRITE(6,*) 'IMPLICIT: Starting outer iterations, max_outer=', max_outer
+      END IF
+#ifdef W3_DEBUGSTP
+      WRITE(740+IAPROC,*) 'IMPLICIT: Starting outer iterations'
+      FLUSH(740+IAPROC)
+#endif
+!
+      DO iter_outer = 1, max_outer
+!
+!       Build RHS for implicit system: M/dt * zeta^n + b
+!
+!       NOTE: Wave forcing B(IP) is excluded at boundary nodes (IOBPA_LOC=1)
+!       to enforce Fn=0, matching the wave model's zero gradient condition.
+!       This prevents artificial setup gradients at boundaries.
+!
+        DO IP = 1, npa
+          IF (IP .eq. IP_deepest) THEN
+!           Reference point: ζ = 0
+            RHS_IMPL(IP) = 0.0
+          ELSE IF (IOBPA_LOC(IP) .eq. 1) THEN
+!           Boundary node: exclude wave forcing to enforce Fn=0
+!           This matches the wave model's zero gradient condition
+            RHS_IMPL(IP) = PDLIB_SI(IP)/dt_pseudo * ZETA_OLD(IP)
+          ELSE IF (IOBDP_LOC(IP) .eq. 1) THEN
+!           Interior wet node: include wave forcing
+            RHS_IMPL(IP) = PDLIB_SI(IP)/dt_pseudo * ZETA_OLD(IP) + B(IP)
+          ELSE
+!           Interior dry node: RHS = 0 for ζ=0 enforcement
+            RHS_IMPL(IP) = 0.0
+          END IF
+        END DO
+!
+!       Inner Jacobi iterations to solve (M/dt + A) * zeta^{n+1} = RHS
+!
+        ZETA_NEW = ZETA_OLD
+!
+        DO iter_inner = 1, max_inner
+!
+          DO IP = 1, npa
+            IF (IP .eq. IP_deepest) THEN
+!             Reference point: enforce ζ = 0
+              ZETA_NEW(IP) = 0.0
+            ELSE IF (IOBDP_LOC(IP) .eq. 1 .OR. IOBPA_LOC(IP) .eq. 1) THEN
+!             Wet nodes and boundary nodes: solve equation
+!             Natural Neumann BC at boundaries (no boundary integrals)
+              off_diag_sum = 0.0
+              J_diag = PDLIB_I_DIAG(IP)
+              DO J = PDLIB_IA(IP), PDLIB_IA(IP+1)-1
+                JP = PDLIB_JA(J)
+                IF (J .ne. J_diag) THEN
+                  eCoeff = ASPAR(J)
+                  off_diag_sum = off_diag_sum + eCoeff * ZETA_NEW(JP)
+                END IF
+              END DO
+              ZETA_NEW(IP) = (RHS_IMPL(IP) - off_diag_sum) / DIAG_IMPL(IP)
+            ELSE
+!             Interior dry node (wetting/drying): Dirichlet BC ζ = 0
+              ZETA_NEW(IP) = 0.0
+            END IF
+          END DO
+!
+!         Exchange for parallel
+!
+          CALL PDLIB_exchange1Dreal(ZETA_NEW)
+!
+        END DO  ! inner iterations
+!
+!       Check outer convergence
+!
+        diff = 0.0
+        DO IP = 1, np
+          diff = MAX(diff, ABS(ZETA_NEW(IP) - ZETA_OLD(IP)))
+        END DO
+!
+        IF (IAPROC .eq. 1) THEN
+          WRITE(6,'(A,I4,A,E12.4,A,E12.4,A,E12.4)') '  iter=', iter_outer, &
+            ' diff=', diff, ' minZeta=', minval(ZETA_NEW), ' maxZeta=', maxval(ZETA_NEW)
+        END IF
+#ifdef W3_DEBUGSTP
+        WRITE(740+IAPROC,*) 'IMPLICIT: iter=', iter_outer, ' diff=', diff
+        FLUSH(740+IAPROC)
+#endif
+!
+        IF (diff .lt. tol_outer) THEN
+          IF (IAPROC .eq. 1) THEN
+            WRITE(6,*) 'IMPLICIT: Converged at iter=', iter_outer
+          END IF
+#ifdef W3_DEBUGSTP
+          WRITE(740+IAPROC,*) 'IMPLICIT: Converged at iter=', iter_outer
+          FLUSH(740+IAPROC)
+#endif
+          EXIT
+        END IF
+!
+        ZETA_OLD = ZETA_NEW
+!
+      END DO  ! outer iterations
+!
+      IF (iter_outer .ge. max_outer) THEN
+        IF (IAPROC .eq. 1) THEN
+          WRITE(6,*) 'IMPLICIT: WARNING - max iterations reached'
+        END IF
+#ifdef W3_DEBUGSTP
+        WRITE(740+IAPROC,*) 'IMPLICIT: WARNING - max iterations reached'
+        FLUSH(740+IAPROC)
+#endif
+      END IF
+!
+      IF (IAPROC .eq. 1) THEN
+        WRITE(6,*) 'IMPLICIT: Final solution min/max=', minval(ZETA_NEW), maxval(ZETA_NEW)
+      END IF
+#ifdef W3_DEBUGSTP
+      WRITE(740+IAPROC,*) 'IMPLICIT: Solution min/max=', minval(ZETA_NEW), maxval(ZETA_NEW)
+      FLUSH(740+IAPROC)
+#endif
+!
+      TheOut = ZETA_NEW
+!
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
 !>
@@ -1642,12 +1924,13 @@
 #ifdef W3_S
       USE W3SERVMD, ONLY: STRACE
 #endif
+      USE W3SERVMD, ONLY: EXTCDE
 !
-      USE yowNodepool, only: PDLIB_NNZ, PDLIB_IA, PDLIB_JA, iplg, npa, np
-      USE W3GDATMD, only : MAPFS, ZB
+      USE yowNodepool, only: PDLIB_NNZ, PDLIB_IA, PDLIB_JA, PDLIB_I_DIAG, iplg, npa, np
+      USE W3GDATMD, only : MAPFS, ZB, IOBP_LOC
       USE W3PARALL, only : SYNCHRONIZE_GLOBAL_ARRAY
       USE W3ADATMD, ONLY: DW
-      USE W3GDATMD, ONLY: NSEAL, NSEA, NX
+      USE W3GDATMD, ONLY: NSEAL, NSEA, NX, ISETUP_STP
       USE W3WDATMD, ONLY: ZETA_SETUP, WLV
       USE W3ODATMD, only : IAPROC, NAPROC, NTPROC
       USE W3PARALL, only: INIT_GET_ISEA
@@ -1723,23 +2006,34 @@
 #endif
 
 
-      CALL TRIG_WAVE_SETUP_SOLVE_POISSON_NEUMANN_DIR(ASPAR, B, ZETA_WORK, ACTIVE, ACTIVESEC)
-
-      CALL TRIG_SET_MEANVALUE_TO_ZERO(ZETA_WORK)
+!     Choose solver based on ISETUP_STP
+      IF (ISETUP_STP .eq. 1) THEN
+!       Old PCG solver (original working method)
+        CALL TRIG_WAVE_SETUP_SOLVE_POISSON_NEUMANN_DIR(ASPAR, B, ZETA_WORK, ACTIVE, ACTIVESEC)
+!       Mean-zero constraint now enforced inside solver loop
+!        CALL TRIG_SET_MEANVALUE_TO_ZERO(ZETA_WORK)
+      ELSE IF (ISETUP_STP .eq. 2) THEN
+!       New implicit pseudo-time solver (more robust for ill-conditioned problems)
+        CALL TRIG_WAVE_SETUP_SOLVE_IMPLICIT(ASPAR, B, ZETA_WORK, DWNX)
+      ELSE
+        WRITE(*,*) 'ERROR: Invalid ISETUP_STP =', ISETUP_STP
+        WRITE(*,*) 'Valid options: 1=PCG solver, 2=Implicit solver'
+        CALL EXTCDE(1)
+      END IF
 #ifdef W3_DEBUGSTP
       WRITE(740+IAPROC,*) 'After SET_MEAN ZETA_WORK(min/max)=', minval(ZETA_WORK), maxval(ZETA_WORK)
       FLUSH(740+IAPROC)
 #endif
       CALL PDLIB_exchange1Dreal(ZETA_WORK)
-      max_val = -100000000
-      min_val = -100000000
+      max_val = -1.E8
+      min_val =  1.E8
       DO IP=1,npa
         IX=iplg(IP)
         ISEA=MAPFS(1,IX)
         IF (ISEA .gt. 0) THEN
            ZETA_SETUP(ISEA) = ZETA_WORK(IP)
-           max_val = MAX(max_Val, ZETA_WORK(IP))
-           min_val = MAX(min_Val, ZETA_WORK(IP))
+           max_val = MAX(max_val, ZETA_WORK(IP))
+           min_val = MIN(min_val, ZETA_WORK(IP))
         END IF
       END DO
 #ifdef W3_DEBUGSTP
@@ -1755,7 +2049,7 @@
       DO IX = 1, NX
         ZETA_SETUP(IX) = ZETA_WORK_ALL(IX)
         !WLVeff    = WLV(ISEA) + ZETA_SETUP(ISEA)
-        !WLV(ISEA) = WLVeff 
+        !WLV(ISEA) = WLVeff
         !WRITE(*,*) DW (IX), MAX ( 0. ,ZETA_WORK_ALL(IX)-ZB(IX) ), ZETA_WORK_ALL(IX), ZB(IX)
         !DW (ISEA) = MAX ( 0. , WLVeff-ZB(ISEA) )
         DW (IX) = MAX ( 0. , ZETA_WORK_ALL(IX) - ZB(IX) )

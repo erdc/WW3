@@ -242,7 +242,7 @@ CONTAINS
     THR = DBLE(1.E-15)
     IF (SUM(A) .LT. THR) RETURN
 
-    IWB = 1
+    IWB = 0
     !
 #ifdef W3_T
     WRITE (NDST,9000) SDBC1, SDBC2, FDONLY
