@@ -1541,7 +1541,7 @@ CONTAINS
                   eVS    = PreVS / CG1(IK)
                   eVD    = MIN(0.,VD(ISP))
                 ENDIF
-                B_JAC(ISP,JSEA)                   = B_JAC(ISP,JSEA) + SIDT * (eVS - eVD*SPEC(ISP)*JAC)
+                B_JAC(ISP,JSEA)                   = B_JAC(ISP,JSEA) + SIDT * (eVS - eVD*SPEC(ISP)*JAC) 
                 ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) = ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) - SIDT * eVD
 #ifdef W3_DB1
                 eVS = VSDB(ISP) * JAC
@@ -1553,7 +1553,7 @@ CONTAINS
                   evS = -evS
                   evD = 2*evD
                 ENDIF
-                B_JAC(ISP,JSEA)                   = B_JAC(ISP,JSEA) + SIDT * eVS
+                B_JAC(ISP,JSEA)                   = B_JAC(ISP,JSEA) + PDLIB_SI(JSEA) * DTG * eVS
                 ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) = ASPAR_JAC(ISP,PDLIB_I_DIAG(JSEA)) - SIDT * eVD
 #endif
 
@@ -1865,7 +1865,9 @@ CONTAINS
 #ifdef W3_MLIM
       IF ( DTTOT .GE. 0.9999*DTG ) THEN
         HM     = FHMAX *TANH(WNMEAN*MAX(0.,D_INP)) / MAX(1.E-4,WNMEAN )
+!#ifdef W3_ANALYTICAL_WAVE_SETUP 
         HM     = 0.81 * D_INP
+!#endif
         EM     = HM * HM / 16.
         IF ( EMEAN.GT.EM .AND. EMEAN.GT.1.E-30 ) THEN
           SPEC   = SPEC / EMEAN * EM
@@ -2642,6 +2644,4 @@ CONTAINS
     END DO
   END SUBROUTINE SIGN_VSD_PATANKAR_WW3
   !/
-  !/ End of module W3SRCEMD -------------------------------------------- /
-  !/
-END MODULE W3SRCEMD
+  END MODULE

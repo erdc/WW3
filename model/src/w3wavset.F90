@@ -89,6 +89,7 @@
 !/
 
       LOGICAL :: DO_WAVE_SETUP = .TRUE.
+      INTEGER, PARAMETER :: POS_TRICK(3,2) = RESHAPE([2,3,3,1,1,2],[3,2])
 !
       CONTAINS
 !/ ------------------------------------------------------------------- /
@@ -153,9 +154,10 @@
 #endif
 !
       use yowExchangeModule, only : PDLIB_exchange1Dreal
-      use yowNodepool,    only : PDLIB_IEN, PDLIB_TRIA, npa
+      use yowNodepool,    only : PDLIB_IEN, PDLIB_TRIA, npa, iplg, y
       use yowElementpool, only : INE, NE
-      USE W3GDATMD, ONLY : MAPSTA
+      USE W3GDATMD, ONLY : MAPSTA, FLAGLL
+      USE CONSTANTS, ONLY : DERA, RADIUS
       IMPLICIT NONE
 !/
 !/ ------------------------------------------------------------------- /
@@ -179,6 +181,8 @@
       REAL(rkind)           :: DVDXIE, DVDYIE
       REAL(rkind)           :: WEI(npa), eW
       INTEGER           :: IX
+      INTEGER           :: IP_glob
+      REAL(rkind)       :: cos_lat
 #ifdef W3_S
       CALL STRACE (IENT, 'VA_SETUP_IOBPD')
 #endif
@@ -208,6 +212,14 @@
         DVDX(IX)=DVDX(IX) / eW
         DVDY(IX)=DVDY(IX) / eW
       END DO
+      IF (FLAGLL) THEN
+        DO IX = 1, npa
+          IP_glob = iplg(IX)
+          cos_lat = COS(DERA * y(IX))
+          DVDX(IX) = DVDX(IX) / (DERA * RADIUS * cos_lat)
+          DVDY(IX) = DVDY(IX) / (DERA * RADIUS)
+        END DO
+      END IF
       CALL PDLIB_exchange1Dreal(DVDX)
       CALL PDLIB_exchange1Dreal(DVDY)
       END SUBROUTINE
@@ -273,10 +285,11 @@
 #endif
 !
       use yowExchangeModule, only : PDLIB_exchange1Dreal
-      use yowNodepool,    only : PDLIB_IEN, PDLIB_TRIA, npa, iplg
+      use yowNodepool,    only : PDLIB_IEN, PDLIB_TRIA, npa, iplg, y
       use yowElementpool, only : INE, NE
-      USE W3GDATMD, ONLY : MAPSTA
+      USE W3GDATMD, ONLY : MAPSTA, FLAGLL
       USE W3PARALL, only: INIT_GET_ISEA
+      USE CONSTANTS, ONLY : DERA, RADIUS
       IMPLICIT NONE
 !/
 !/ ------------------------------------------------------------------- /
@@ -299,6 +312,7 @@
       REAL(rkind)           :: DVDXIE, DVDYIE
       REAL(rkind)           :: WEI(npa), eW
       INTEGER           :: IX1, IX2, IX3, ISEA
+      REAL(rkind)       :: cos_lat
 #ifdef W3_S
       CALL STRACE (IENT, 'VA_SETUP_IOBPD')
 #endif
@@ -339,13 +353,13 @@
           DVDY(IP)=0.
         ENDIF
       END DO
-      DO IP=1,npa
-        IX=iplg(IP)
-        IF (MAPSTA(1,IX) .lt. 0) THEN
-          DVDX(IP)=0.
-          DVDY(IP)=0.
-        END IF
-      END DO
+      IF (FLAGLL) THEN
+        DO IP = 1, npa
+          cos_lat = COS(DERA * y(IP))
+          DVDX(IP) = DVDX(IP) / (DERA * RADIUS * cos_lat)
+          DVDY(IP) = DVDY(IP) / (DERA * RADIUS)
+        END DO
+      END IF
       CALL PDLIB_exchange1Dreal(DVDX)
       CALL PDLIB_exchange1Dreal(DVDY)
       END SUBROUTINE
@@ -647,6 +661,8 @@
 !
       use yowElementpool, only: INE
       use yowNodepool,    only: x, y, PDLIB_TRIA
+      USE W3GDATMD, ONLY : FLAGLL
+      USE CONSTANTS, ONLY : DERA, RADIUS
       IMPLICIT NONE
 !/
 !/ ------------------------------------------------------------------- /
@@ -665,16 +681,10 @@
       REAL(rkind), intent(inout) :: UGRAD, VGRAD
       REAL(rkind) :: h
       integer I2, I3, IP1, IP2, IP3
-      INTEGER :: POS_TRICK(3,2)
+      REAL(rkind) :: cos_lat_mean
 #ifdef W3_S
       CALL STRACE (IENT, 'VA_SETUP_IOBPD')
 #endif
-      POS_TRICK(1,1) = 2
-      POS_TRICK(1,2) = 3
-      POS_TRICK(2,1) = 3
-      POS_TRICK(2,2) = 1
-      POS_TRICK(3,1) = 1
-      POS_TRICK(3,2) = 2
       I2=POS_TRICK(I1, 1)
       I3=POS_TRICK(I1, 2)
       IP1=INE(I1, IE)
@@ -683,6 +693,11 @@
       h=2.0*PDLIB_TRIA(IE)
       UGRAD=-(y(IP3) - y(IP2))/h
       VGRAD= (x(IP3) - x(IP2))/h
+      IF (FLAGLL) THEN
+        cos_lat_mean = COS(DERA * (y(IP1)+y(IP2)+y(IP3)) / 3.0)
+        UGRAD = UGRAD / (RADIUS * cos_lat_mean * DERA)
+        VGRAD = VGRAD / (RADIUS * DERA)
+      END IF
       END SUBROUTINE
 !/ ------------------------------------------------------------------- /
 !>
@@ -751,8 +766,9 @@
       use yowNodepool, only: PDLIB_NNZ, PDLIB_JA_IE, PDLIB_TRIA, npa, np
       use yowNodepool, only: PDLIB_I_DIAG, PDLIB_IA, PDLIB_JA
       USE yowNodepool, only: iplg, x, y
-      USE W3GDATMD, only: IOBPA_LOC, IOBDP_LOC, IOBP_LOC
+      USE W3GDATMD, only: IOBPA_LOC, IOBDP_LOC, IOBP_LOC, FLAGLL
       USE W3ODATMD, only : IAPROC
+      USE CONSTANTS, ONLY : DERA, RADIUS
       IMPLICIT NONE
 !/
 !/ ------------------------------------------------------------------- /
@@ -772,13 +788,15 @@
       real(rkind), intent(out) :: B(npa)
       integer, intent(in)  :: ACTIVE(npa)
       integer, intent(out)  :: ACTIVESEC(npa)
-      INTEGER :: POS_TRICK(3,2), POS_SHIFT(3,3)
+      INTEGER :: POS_SHIFT(3,3)
       integer I1, I2, I3, IP1, IP2, IP3
       integer IDX, IDX1, IDX2, IDX3
       INTEGER IE, IP, I, J, K, IPp, JPp
       real(rkind) :: eDep, eFX, eFY, eScal, eFact, eArea
-      real(rkind) :: UGRAD, VGRAD, UGRAD1, VGRAD1
       real(rkind) :: eOff
+      real(rkind) :: cos_lat_e
+      real(rkind) :: EL_UGRAD(3), EL_VGRAD(3)
+      real(rkind) :: h, scale_x, scale_y
       logical DoPrintOut
       INTEGER sumActive
       INTEGER LIDX(2), KIDX(2), jdx
@@ -789,12 +807,6 @@
 #ifdef W3_S
       CALL STRACE (IENT, 'VA_SETUP_IOBPD')
 #endif
-      POS_TRICK(1,1) = 2
-      POS_TRICK(1,2) = 3
-      POS_TRICK(2,1) = 3
-      POS_TRICK(2,2) = 1
-      POS_TRICK(3,1) = 1
-      POS_TRICK(3,2) = 2
       ASPAR=0
       B=0
 !
@@ -837,24 +849,42 @@
           ACTIVESEC(IP3)=1
           eDep=(DWNX(IP1) + DWNX(IP2) + DWNX(IP3))/3.0
           eArea=PDLIB_TRIA(IE)
+          IF (FLAGLL) THEN
+            cos_lat_e = COS(DERA*(y(INE(1,IE))+y(INE(2,IE))+y(INE(3,IE)))/3.0)
+            eArea = eArea * RADIUS * RADIUS * cos_lat_e * DERA * DERA
+          END IF
           eFact=eDep*eArea
+!
+!         Precompute all 3 shape function gradients for this element
+!         (inlined from TRIG_COMPUTE_DIFF — eliminates 12 calls per element)
+!
+          h = 2.0 * PDLIB_TRIA(IE)
+          IF (FLAGLL) THEN
+            scale_x = 1.0 / (h * RADIUS * cos_lat_e * DERA)
+            scale_y = 1.0 / (h * RADIUS * DERA)
+          ELSE
+            scale_x = 1.0 / h
+            scale_y = scale_x
+          END IF
+!         Node 1: opposite edge is 2->3
+          EL_UGRAD(1) = -(y(INE(3,IE)) - y(INE(2,IE))) * scale_x
+          EL_VGRAD(1) =  (x(INE(3,IE)) - x(INE(2,IE))) * scale_y
+!         Node 2: opposite edge is 3->1
+          EL_UGRAD(2) = -(y(INE(1,IE)) - y(INE(3,IE))) * scale_x
+          EL_VGRAD(2) =  (x(INE(1,IE)) - x(INE(3,IE))) * scale_y
+!         Node 3: opposite edge is 1->2
+          EL_UGRAD(3) = -(y(INE(2,IE)) - y(INE(1,IE))) * scale_x
+          EL_VGRAD(3) =  (x(INE(2,IE)) - x(INE(1,IE))) * scale_y
+!
+!         Assemble RHS and stiffness using precomputed gradients
+!
           DO I1=1,3
-            I2=POS_TRICK(I1,1)
-            I3=POS_TRICK(I1,2)
             IP1=INE(I1,IE)
-            IP2=INE(I2,IE)
-            IP3=INE(I3,IE)
-            IDX1=PDLIB_JA_IE(I1,1,IE)
-            IDX2=PDLIB_JA_IE(I1,2,IE)
-            IDX3=PDLIB_JA_IE(I1,3,IE)
-            CALL TRIG_COMPUTE_DIFF(IE, I1, UGRAD1, VGRAD1)
-            eScal=UGRAD1*eFX + VGRAD1*eFY
+            eScal = EL_UGRAD(I1)*eFX + EL_VGRAD(I1)*eFY
             B(IP1) = B(IP1) + eScal*eArea
-            !
             DO IDX=1,3
               K=POS_SHIFT(I1, IDX)
-              CALL TRIG_COMPUTE_DIFF(IE, K, UGRAD, VGRAD)
-              eScal=UGRAD*UGRAD1 + VGRAD*VGRAD1
+              eScal = EL_UGRAD(K)*EL_UGRAD(I1) + EL_VGRAD(K)*EL_VGRAD(I1)
               J=PDLIB_JA_IE(I1,IDX,IE)
               ASPAR(J)=ASPAR(J) + eFact*eScal
             END DO
@@ -1268,6 +1298,7 @@
 !
       USE yowNodepool, only: PDLIB_NNZ
       USE W3GDATMD, ONLY: NSEAL, SOLVERTHR_STP
+      USE W3GDATMD, ONLY: STP_MAX_OUTER
       USE W3ODATMD, only : IAPROC
       use yowNodepool, only: np, npa
       IMPLICIT NONE
@@ -1329,7 +1360,7 @@
       END IF
       DO
         nbIter=nbIter + 1
-        IF (nbIter .gt. 10000) EXIT
+        IF (nbIter .gt. STP_MAX_OUTER) EXIT
         CALL TRIG_WAVE_SETUP_APPLY_FCT(ASPAR, V_P, V_Y, ACTIVE, ACTIVESEC)
         CALL TRIG_WAVE_SETUP_SCALAR_PROD(V_P, V_Y, h2)
         alphaV=uO/h2
@@ -1419,12 +1450,15 @@
 !
       USE yowNodepool, only: PDLIB_NNZ, PDLIB_SI, PDLIB_I_DIAG
       USE yowNodepool, only: PDLIB_IA, PDLIB_JA
-      USE W3GDATMD, ONLY: NSEAL
+      USE W3GDATMD, ONLY: NSEAL, FLAGLL
+      USE W3GDATMD, ONLY: STP_DT_PSEUDO, STP_MAX_OUTER, STP_MAX_INNER
+      USE W3GDATMD, ONLY: STP_TOL_OUTER, STP_TOL_INNER
       USE W3GDATMD, only : IOBPA_LOC, IOBDP_LOC, IOBP_LOC
       USE W3ODATMD, only : IAPROC, NAPROC
-      use yowNodepool, only: np, npa
+      use yowNodepool, only: np, npa, y
       use yowExchangeModule, only : PDLIB_exchange1Dreal
       USE W3ADATMD, ONLY: MPI_COMM_WCMP
+      USE CONSTANTS, ONLY : DERA, RADIUS
       IMPLICIT NONE
       INCLUDE "mpif.h"
 !/
@@ -1445,13 +1479,13 @@
       REAL(rkind), intent(out) :: TheOut(npa)
       REAL(rkind), intent(in) :: DWNX(npa)
 !
-      REAL(rkind) :: ZETA_OLD(npa), ZETA_NEW(npa)
-      REAL(rkind) :: RHS_IMPL(npa), DIAG_IMPL(npa)
-      REAL(rkind) :: dt_pseudo, diff, tol_outer, tol_inner
-      REAL(rkind) :: off_diag_sum, eCoeff, res_norm
+      REAL(rkind) :: ZETA_PREV(npa), ZETA_NEW(npa)
+      REAL(rkind) :: DIAG_IMPL(npa), INV_DIAG(npa)
+      REAL(rkind) :: diff, tol
+      REAL(rkind) :: off_diag_sum, eCoeff
+      REAL(rkind) :: zmin_val, zmax_val
       INTEGER :: IP, J, JP, J_diag
-      INTEGER :: iter_outer, iter_inner
-      INTEGER :: max_outer, max_inner
+      INTEGER :: iter, max_iter
       INTEGER :: ierr_mpi
       INTEGER :: IP_deepest
       REAL(rkind) :: max_depth
@@ -1459,23 +1493,21 @@
       CALL STRACE (IENT, 'TRIG_WAVE_SETUP_SOLVE_IMPLICIT')
 #endif
 !
-!     Parameters for implicit solver
-!     dt_pseudo: large value approaches steady state
-!     Typical range: 1e4 to 1e8
+!     Parameters for Gauss-Seidel solver
 !
-      dt_pseudo = 1.0E6
-      max_outer = 100
-      max_inner = 20
-      tol_outer = 1.0E-10
-      tol_inner = 1.0E-8
+      max_iter = STP_MAX_OUTER * STP_MAX_INNER
+      tol = STP_TOL_OUTER
 !
-!     Precompute diagonal of implicit system: M/dt + A_diag
+!     Precompute diagonal of stiffness matrix A
 !
       DO IP = 1, npa
         IF (IOBDP_LOC(IP) .eq. 1 .OR. IOBPA_LOC(IP) .eq. 1) THEN
-!         Wet node OR boundary node (wet or dry): include in system
           J_diag = PDLIB_I_DIAG(IP)
-          DIAG_IMPL(IP) = PDLIB_SI(IP)/dt_pseudo + ASPAR(J_diag)
+          DIAG_IMPL(IP) = ASPAR(J_diag)
+          IF (DIAG_IMPL(IP) .eq. 0.0) THEN
+!           Isolated node (no element contributions): treat as Dirichlet ζ=0
+            DIAG_IMPL(IP) = 1.0
+          END IF
         ELSE
 !         Interior dry node: diagonal = 1 for ζ=0 enforcement
           DIAG_IMPL(IP) = 1.0
@@ -1496,152 +1528,126 @@
         END IF
       END DO
 !
-!     Diagnostic: Check wave forcing at boundary nodes
-!
-      IF (IAPROC .eq. 1) THEN
-        WRITE(6,*) '================================================'
-        WRITE(6,*) 'SETUP BC: Boundary node diagnostics'
-        WRITE(6,*) '================================================'
-        DO IP = 1, npa
-          IF (IOBPA_LOC(IP) .eq. 1 .AND. IOBDP_LOC(IP) .eq. 1) THEN
-            WRITE(6,'(A,I6,A,F12.6,A,E12.4)') &
-              ' IP=', IP, ' depth=', DWNX(IP), ' B(IP)=', B(IP)
-          END IF
-        END DO
-        WRITE(6,*) '================================================'
-      END IF
-!
-!     Apply Dirichlet BC (ζ=0) at deepest boundary point only
+!     Apply Dirichlet BC (ζ=0) at deepest boundary point
 !
       IF (IP_deepest .gt. 0) THEN
         DIAG_IMPL(IP_deepest) = 1.0
         IF (IAPROC .eq. 1) THEN
-          WRITE(6,*) 'SETUP BC: Reference point IP=', IP_deepest, ' depth=', max_depth
-          WRITE(6,*) 'SETUP BC: Natural Neumann applied at all other boundaries'
+          WRITE(6,*) 'SETUP: Reference point IP=', IP_deepest, ' depth=', max_depth
         END IF
       END IF
+!
+!     Precompute reciprocal of diagonal
+!
+      DO IP = 1, npa
+        INV_DIAG(IP) = 1.0 / DIAG_IMPL(IP)
+      END DO
 !
 !     Initialize solution to zero
 !
-      ZETA_OLD = 0.0
       ZETA_NEW = 0.0
 !
-!     Outer pseudo-time iteration
+!     Gauss-Seidel iteration to solve A * ζ = b directly
 !
       IF (IAPROC .eq. 1) THEN
-        WRITE(6,*) 'IMPLICIT: Starting outer iterations, max_outer=', max_outer
+        WRITE(6,*) 'SETUP GS: Starting iterations, max_iter=', max_iter
       END IF
 #ifdef W3_DEBUGSTP
-      WRITE(740+IAPROC,*) 'IMPLICIT: Starting outer iterations'
+      WRITE(740+IAPROC,*) 'SETUP GS: Starting iterations'
       FLUSH(740+IAPROC)
 #endif
 !
-      DO iter_outer = 1, max_outer
+      DO iter = 1, max_iter
 !
-!       Build RHS for implicit system: M/dt * zeta^n + b
-!
-!       NOTE: Wave forcing B(IP) is excluded at boundary nodes (IOBPA_LOC=1)
-!       to enforce Fn=0, matching the wave model's zero gradient condition.
-!       This prevents artificial setup gradients at boundaries.
+        ZETA_PREV(1:np) = ZETA_NEW(1:np)
 !
         DO IP = 1, npa
           IF (IP .eq. IP_deepest) THEN
-!           Reference point: ζ = 0
-            RHS_IMPL(IP) = 0.0
-          ELSE IF (IOBPA_LOC(IP) .eq. 1) THEN
-!           Boundary node: exclude wave forcing to enforce Fn=0
-!           This matches the wave model's zero gradient condition
-            RHS_IMPL(IP) = PDLIB_SI(IP)/dt_pseudo * ZETA_OLD(IP)
-          ELSE IF (IOBDP_LOC(IP) .eq. 1) THEN
-!           Interior wet node: include wave forcing
-            RHS_IMPL(IP) = PDLIB_SI(IP)/dt_pseudo * ZETA_OLD(IP) + B(IP)
+!           Reference point: enforce ζ = 0
+            ZETA_NEW(IP) = 0.0
+          ELSE IF (IOBDP_LOC(IP) .eq. 1 .OR. IOBPA_LOC(IP) .eq. 1) THEN
+!           Wet/boundary nodes: GS update for A * ζ = b
+!           Boundary nodes get B(IP) from assembly (natural Neumann)
+            off_diag_sum = 0.0
+            DO J = PDLIB_IA(IP), PDLIB_IA(IP+1)-1
+              JP = PDLIB_JA(J)
+              IF (JP .ne. IP) THEN
+                off_diag_sum = off_diag_sum + ASPAR(J) * ZETA_NEW(JP)
+              END IF
+            END DO
+            ZETA_NEW(IP) = (B(IP) - off_diag_sum) * INV_DIAG(IP)
           ELSE
-!           Interior dry node: RHS = 0 for ζ=0 enforcement
-            RHS_IMPL(IP) = 0.0
+!           Dry node: ζ = 0
+            ZETA_NEW(IP) = 0.0
           END IF
         END DO
 !
-!       Inner Jacobi iterations to solve (M/dt + A) * zeta^{n+1} = RHS
+!       Exchange ghost values
 !
-        ZETA_NEW = ZETA_OLD
+        CALL PDLIB_exchange1Dreal(ZETA_NEW)
 !
-        DO iter_inner = 1, max_inner
-!
-          DO IP = 1, npa
-            IF (IP .eq. IP_deepest) THEN
-!             Reference point: enforce ζ = 0
-              ZETA_NEW(IP) = 0.0
-            ELSE IF (IOBDP_LOC(IP) .eq. 1 .OR. IOBPA_LOC(IP) .eq. 1) THEN
-!             Wet nodes and boundary nodes: solve equation
-!             Natural Neumann BC at boundaries (no boundary integrals)
-              off_diag_sum = 0.0
-              J_diag = PDLIB_I_DIAG(IP)
-              DO J = PDLIB_IA(IP), PDLIB_IA(IP+1)-1
-                JP = PDLIB_JA(J)
-                IF (J .ne. J_diag) THEN
-                  eCoeff = ASPAR(J)
-                  off_diag_sum = off_diag_sum + eCoeff * ZETA_NEW(JP)
-                END IF
-              END DO
-              ZETA_NEW(IP) = (RHS_IMPL(IP) - off_diag_sum) / DIAG_IMPL(IP)
-            ELSE
-!             Interior dry node (wetting/drying): Dirichlet BC ζ = 0
-              ZETA_NEW(IP) = 0.0
-            END IF
-          END DO
-!
-!         Exchange for parallel
-!
-          CALL PDLIB_exchange1Dreal(ZETA_NEW)
-!
-        END DO  ! inner iterations
-!
-!       Check outer convergence
+!       Check convergence
 !
         diff = 0.0
         DO IP = 1, np
-          diff = MAX(diff, ABS(ZETA_NEW(IP) - ZETA_OLD(IP)))
+          diff = MAX(diff, ABS(ZETA_NEW(IP) - ZETA_PREV(IP)))
         END DO
+        CALL MPI_ALLREDUCE(MPI_IN_PLACE, diff, 1, MPI_DOUBLE_PRECISION, &
+                           MPI_MAX, MPI_COMM_WCMP, ierr_mpi)
 !
-        IF (IAPROC .eq. 1) THEN
-          WRITE(6,'(A,I4,A,E12.4,A,E12.4,A,E12.4)') '  iter=', iter_outer, &
-            ' diff=', diff, ' minZeta=', minval(ZETA_NEW), ' maxZeta=', maxval(ZETA_NEW)
+        IF (MOD(iter,10) .eq. 0) THEN
+          zmin_val = MINVAL(ZETA_NEW(1:np))
+          zmax_val = MAXVAL(ZETA_NEW(1:np))
+          CALL MPI_ALLREDUCE(MPI_IN_PLACE, zmin_val, 1, MPI_DOUBLE_PRECISION, &
+                             MPI_MIN, MPI_COMM_WCMP, ierr_mpi)
+          CALL MPI_ALLREDUCE(MPI_IN_PLACE, zmax_val, 1, MPI_DOUBLE_PRECISION, &
+                             MPI_MAX, MPI_COMM_WCMP, ierr_mpi)
+          IF (IAPROC .eq. 1) THEN
+            WRITE(6,'(A,I5,A,E12.4,A,E12.4,A,E12.4,A,E12.4)') &
+              '  SETUP GS: iter=', iter, ' diff=', diff, &
+              ' tol=', tol, ' min=', zmin_val, &
+              ' max=', zmax_val
+          END IF
         END IF
 #ifdef W3_DEBUGSTP
-        WRITE(740+IAPROC,*) 'IMPLICIT: iter=', iter_outer, ' diff=', diff
+        WRITE(740+IAPROC,*) 'SETUP GS: iter=', iter, ' diff=', diff
         FLUSH(740+IAPROC)
 #endif
 !
-        IF (diff .lt. tol_outer) THEN
+        IF (diff .lt. tol) THEN
           IF (IAPROC .eq. 1) THEN
-            WRITE(6,*) 'IMPLICIT: Converged at iter=', iter_outer
+            WRITE(6,*) 'SETUP GS: Converged at iter=', iter
           END IF
 #ifdef W3_DEBUGSTP
-          WRITE(740+IAPROC,*) 'IMPLICIT: Converged at iter=', iter_outer
+          WRITE(740+IAPROC,*) 'SETUP GS: Converged at iter=', iter
           FLUSH(740+IAPROC)
 #endif
           EXIT
         END IF
 !
-        ZETA_OLD = ZETA_NEW
+      END DO  ! GS iterations
 !
-      END DO  ! outer iterations
-!
-      IF (iter_outer .ge. max_outer) THEN
+      IF (iter .ge. max_iter) THEN
         IF (IAPROC .eq. 1) THEN
-          WRITE(6,*) 'IMPLICIT: WARNING - max iterations reached'
+          WRITE(6,*) 'SETUP GS: WARNING - max iterations reached'
         END IF
 #ifdef W3_DEBUGSTP
-        WRITE(740+IAPROC,*) 'IMPLICIT: WARNING - max iterations reached'
+        WRITE(740+IAPROC,*) 'SETUP GS: WARNING - max iterations reached'
         FLUSH(740+IAPROC)
 #endif
       END IF
 !
+      zmin_val = MINVAL(ZETA_NEW(1:np))
+      zmax_val = MAXVAL(ZETA_NEW(1:np))
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, zmin_val, 1, MPI_DOUBLE_PRECISION, &
+                         MPI_MIN, MPI_COMM_WCMP, ierr_mpi)
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, zmax_val, 1, MPI_DOUBLE_PRECISION, &
+                         MPI_MAX, MPI_COMM_WCMP, ierr_mpi)
       IF (IAPROC .eq. 1) THEN
-        WRITE(6,*) 'IMPLICIT: Final solution min/max=', minval(ZETA_NEW), maxval(ZETA_NEW)
+        WRITE(6,*) 'SETUP GS: Final solution min/max=', zmin_val, zmax_val
       END IF
 #ifdef W3_DEBUGSTP
-      WRITE(740+IAPROC,*) 'IMPLICIT: Solution min/max=', minval(ZETA_NEW), maxval(ZETA_NEW)
+      WRITE(740+IAPROC,*) 'IMPLICIT: Solution min/max=', zmin_val, zmax_val
       FLUSH(740+IAPROC)
 #endif
 !
@@ -2907,7 +2913,7 @@
       real(rkind), intent(in)  :: FX(NSEA), FY(NSEA)
       real(rkind), intent(out) :: ASPAR(PDLIB_NNZ)
       real(rkind), intent(out) :: B(NX)
-      INTEGER :: POS_TRICK(3,2), POS_SHIFT(3,3)
+      INTEGER :: POS_SHIFT(3,3)
       integer I1, I2, I3, IP1, IP2, IP3
       integer IDX, IDX1, IDX2, IDX3
       INTEGER IE, IP, I, J, K, IPp, JPp

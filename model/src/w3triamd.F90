@@ -2616,6 +2616,7 @@ CONTAINS
     REAL                 :: DVDXIE, DVDYIE
     REAL                 :: WEI(NX), WEI_LOCAL(NSEAL)
     REAL*8               :: RTMP(NSEAL)
+    REAL*8               :: TMPX(NPA), TMPY(NPA)
 
     DIFFX = 0.
     DIFFY = 0.
@@ -2672,8 +2673,12 @@ CONTAINS
       DIFFX(1,:) = DIFFX(1,:)/WEI_LOCAL
       DIFFY(1,:) = DIFFY(1,:)/WEI_LOCAL
     ENDIF
-    CALL PDLIB_exchange1Dreal(DIFFX(1,:))
-    CALL PDLIB_exchange1Dreal(DIFFY(1,:))
+    TMPX = DIFFX(1,1:NPA)
+    TMPY = DIFFY(1,1:NPA)
+    CALL PDLIB_exchange1Dreal(TMPX)
+    CALL PDLIB_exchange1Dreal(TMPY)
+    DIFFX(1,1:NPA) = TMPX
+    DIFFY(1,1:NPA) = TMPY
 #endif
     !
   END SUBROUTINE UG_GRADIENTS

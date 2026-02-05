@@ -44,7 +44,7 @@ module yowDatapool
   !  integer,parameter :: rkind = 4
   !#else
   !> double precision. Default real datatype
-  integer,parameter :: rkind = 4
+  integer,parameter :: rkind = 8
   !#endif
   logical, parameter :: debugPrePartition = .false.
   logical, parameter :: debugPostPartition = .false.
@@ -73,9 +73,9 @@ module yowDatapool
   !> Shpuld be MPI_REAL8
   integer :: istatus(MPI_STATUS_SIZE)
   !#ifdef USE_SINGLE
-  integer, save :: rtype = MPI_REAL4
+  !  integer, save :: rtype = MPI_REAL4
   !#else
-  !  integer, save :: rtype = MPI_REAL8
+  integer, save :: rtype = MPI_REAL8
   !#endif
 
 end module yowDatapool

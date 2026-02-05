@@ -981,6 +981,7 @@ CONTAINS
     REAL  :: eSumAC, sumAC, sumBPI0, sumBPIN, sumCG, sumCLATS
     LOGICAL :: testWrite
     REAL  :: FIN(1), FOUT(1)
+    REAL*8 :: AC8(npa)
 #ifdef W3_S
     CALL STRACE (IENT, 'W3XYPFSN')
 #endif
@@ -1179,7 +1180,9 @@ CONTAINS
       WRITE(740+IAPROC,*) 'ISP=', ISP, 'sumCLATS=', sumCLATS
       FLUSH(740+IAPROC)
 #endif
-      CALL PDLIB_exchange1DREAL(AC)
+      AC8 = AC
+      CALL PDLIB_exchange1DREAL(AC8)
+      AC = AC8
 
 #ifdef W3_DEBUGSOLVER
       IF (testWrite) THEN
@@ -1298,6 +1301,7 @@ CONTAINS
     REAL  :: KELEM(3,NE), FLALL(3,NE)
     REAL  :: KKSUM(npa), ST(npa)
     REAL  :: NM(NE), FIN(1), FOUT(1)
+    REAL*8 :: AC8(npa)
 #ifdef W3_S
     CALL STRACE (IENT, 'W3XYPFSN')
 #endif
@@ -1473,7 +1477,9 @@ CONTAINS
       WRITE(740+IAPROC,*) 'ISP=', ISP, 'sumCLATS=', sumCLATS
       FLUSH(740+IAPROC)
 #endif
-      CALL PDLIB_exchange1DREAL(AC)
+      AC8 = AC
+      CALL PDLIB_exchange1DREAL(AC8)
+      AC = AC8
 
 #ifdef W3_DEBUGSOLVER
       IF (testWrite) THEN
@@ -1606,6 +1612,7 @@ CONTAINS
     REAL*8 :: THETA_H(3), THETA_ACE(3,NE), THETA_L(3,NE)
     REAL*8 :: PM(NPA), PP(NPA), UIM(NE), WII(2,NPA)
     REAL   :: USTARI(2,NPA)
+    REAL*8 :: AC8(npa)
 
 #ifdef W3_S
     CALL STRACE (IENT, 'W3XYPFSN')
@@ -1843,7 +1850,9 @@ CONTAINS
       WRITE(740+IAPROC,*) 'ISP=', ISP, 'sumCLATS=', sumCLATS
       FLUSH(740+IAPROC)
 #endif
-      CALL PDLIB_exchange1DREAL(AC)
+      AC8 = AC
+      CALL PDLIB_exchange1DREAL(AC8)
+      AC = AC8
 
 #ifdef W3_DEBUGSOLVER
       IF (testWrite) THEN
@@ -5602,6 +5611,7 @@ CONTAINS
     INTEGER :: TESTNODE = 923
 
     LOGICAL :: LSIG = .FALSE.
+    REAL*8, ALLOCATABLE :: VA8(:,:), UJ8(:,:)
 
     memunit = 50000+IAPROC
     !AR: this is missing in init ... but there is a design error in ww3_grid with FLCUR and FLLEV
@@ -6033,9 +6043,17 @@ CONTAINS
       CALL ALL_VA_INTEGRAL_PRINT(IMOD, "VA(np) before exchanges", 0)
 #endif
       IF (B_JGS_BLOCK_GAUSS_SEIDEL) THEN
-        CALL PDLIB_exchange2DREAL_zero(VA)
+        ALLOCATE(VA8(SIZE(VA,1),0:NPA))
+        VA8 = VA(:,0:NPA)
+        CALL PDLIB_exchange2DREAL_zero(VA8)
+        VA(:,0:NPA) = VA8
+        DEALLOCATE(VA8)
       ELSE
-        CALL PDLIB_exchange2DREAL(U_JAC)
+        ALLOCATE(UJ8(SIZE(U_JAC,1),SIZE(U_JAC,2)))
+        UJ8 = U_JAC
+        CALL PDLIB_exchange2DREAL(UJ8)
+        U_JAC = UJ8
+        DEALLOCATE(UJ8)
         VA(:,1:NPA) = U_JAC
       END IF
       call print_memcheck(memunit, 'memcheck_____:'//' WW3_PROP SECTION SOLVER LOOP 3')
@@ -6430,6 +6448,7 @@ CONTAINS
     REAL, PARAMETER   :: THR = 1.0E-12
 
     INTEGER           :: IK, ISP, ITH, IE, IP, IT, IBI, NI(3), I1, I2, I3, JX, IERR, IP_GLOB, ISEA
+    REAL*8            :: U8(NTH,NPA)
     !
     ! 1.b Initialize arrays
     !
@@ -6556,7 +6575,9 @@ CONTAINS
           u(ith,ip) = va(isp,ip) / cgsig(ip) * clats(iplg(ip))
         enddo
       enddo
-      CALL PDLIB_exchange2DREAL(U)
+      U8 = U
+      CALL PDLIB_exchange2DREAL(U8)
+      U = U8
 
       DO IT = 1, ITER(IK)
         ST = ZERO
@@ -6600,7 +6621,9 @@ CONTAINS
           ENDDO
         ENDIF ! FLBPI
 
-        CALL PDLIB_exchange2DREAL(U)
+        U8 = U
+        CALL PDLIB_exchange2DREAL(U8)
+        U = U8
 
       ENDDO ! IT
 
@@ -7099,6 +7122,7 @@ CONTAINS
     INTEGER                 :: ITMP(NX), NEXTVERT(NX), PREVVERT(NX)
     INTEGER                 :: MAX_IOBPD, MIN_IOBPD
     REAL                    :: rtmp(NPA)
+    REAL*8                  :: rtmp8(NPA)
     CHARACTER(60) :: FNAME
 #ifdef W3_S
     INTEGER, SAVE           :: IENT = 0
@@ -7154,9 +7178,9 @@ CONTAINS
     END DO
 
     DO ITH = 1, NTH
-      rtmp = REAL(IOBPD_LOC(ITH,1:NPA))
-      CALL PDLIB_exchange1Dreal(rtmp)
-      IOBPD_LOC(ITH,1:NPA) = INT(rtmp)
+      rtmp8 = DBLE(IOBPD_LOC(ITH,1:NPA))
+      CALL PDLIB_exchange1Dreal(rtmp8)
+      IOBPD_LOC(ITH,1:NPA) = INT(rtmp8)
     ENDDO
     MAX_IOBPD = MAXVAL(IOBPD_LOC)
     MIN_IOBPD = MINVAL(IOBPD_LOC)

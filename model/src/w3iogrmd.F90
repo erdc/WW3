@@ -784,6 +784,8 @@ CONTAINS
              FSN, FSPSI,FSFCT,FSNIMP,FSTOTALIMP,FSTOTALEXP,   &
              FSBCCFL, FSREFRACTION, FSFREQSHIFT, FSSOURCE,    &
              DO_CHANGE_WLV, SOLVERTHR_STP, CRIT_DEP_STP,      &
+             STP_DT_PSEUDO, STP_MAX_OUTER, STP_MAX_INNER,    &
+             STP_TOL_OUTER, STP_TOL_INNER,                   &
              NTRI,COUNTOT, COUNTRI, NNZ,                      &
              B_JGS_TERMINATE_MAXITER,                         &
              B_JGS_TERMINATE_DIFFERENCE,                      &
@@ -802,6 +804,8 @@ CONTAINS
              'FSN, FSPSI,FSFCT,FSNIMP,FSTOTALIMP,FSTOTALEXP,   &
              FSBCCFL, FSREFRACTION, FSFREQSHIFT, FSSOURCE,    &
              DO_CHANGE_WLV, SOLVERTHR_STP, CRIT_DEP_STP,      &
+             STP_DT_PSEUDO, STP_MAX_OUTER, STP_MAX_INNER,    &
+             STP_TOL_OUTER, STP_TOL_INNER,                   &
              NTRI,COUNTOT, COUNTRI, NNZ,                      &
              B_JGS_TERMINATE_MAXITER,                         &
              B_JGS_TERMINATE_DIFFERENCE,                      &
@@ -818,6 +822,8 @@ CONTAINS
              FSN, FSPSI,FSFCT,FSNIMP,FSTOTALIMP,FSTOTALEXP,   &
              FSBCCFL, FSREFRACTION, FSFREQSHIFT, FSSOURCE,    &
              DO_CHANGE_WLV, SOLVERTHR_STP, CRIT_DEP_STP,      &
+             STP_DT_PSEUDO, STP_MAX_OUTER, STP_MAX_INNER,    &
+             STP_TOL_OUTER, STP_TOL_INNER,                   &
              NTRI,COUNTOT, COUNTRI, NNZ,                      &
              B_JGS_TERMINATE_MAXITER,                         &
              B_JGS_TERMINATE_DIFFERENCE,                      &
@@ -983,6 +989,8 @@ CONTAINS
              FSN, FSPSI,FSFCT,FSNIMP,FSTOTALIMP,FSTOTALEXP,   &
              FSBCCFL, FSREFRACTION, FSFREQSHIFT, FSSOURCE,    &
              DO_CHANGE_WLV, SOLVERTHR_STP, CRIT_DEP_STP,      &
+             STP_DT_PSEUDO, STP_MAX_OUTER, STP_MAX_INNER,    &
+             STP_TOL_OUTER, STP_TOL_INNER,                   &
              NTRI,COUNTOT, COUNTRI, NNZ,                      &
              B_JGS_TERMINATE_MAXITER,                         &
              B_JGS_TERMINATE_DIFFERENCE,                      &
