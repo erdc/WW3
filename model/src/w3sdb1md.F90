@@ -242,7 +242,9 @@ CONTAINS
     THR = DBLE(1.E-15)
     IF (SUM(A) .LT. THR) RETURN
 
+#ifdef W3_ANALYTICAL_WAVE_SETUP
     IWB = 0
+#endif
     !
 #ifdef W3_T
     WRITE (NDST,9000) SDBC1, SDBC2, FDONLY
@@ -281,7 +283,6 @@ CONTAINS
       HM     = DBLE(SDBC2) / DBLE(WNMEAN) * TANH ( DBLE(WNMEAN) * MAX(DEPTH,0.) )
     END IF
     !
-    !AR: Add Dingemans ...
     ! 1.b. Hrms and ratio Hrms / Hmax
     !
     HRMS = DSQRT (8.d0 * DBLE(EMEAN))
