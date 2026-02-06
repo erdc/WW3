@@ -579,23 +579,28 @@ PROGRAM W3BOUNC
 
                 WRITE(6,*) 'Reading spec (NBO2, NTI, NKI, NTHI) = ', NBO2, NTI, NKI, NTHI
 
-!                  WRITE(6,*) 'Size of SPEC2D', SIZE(SPEC2D, 1), SIZE(SPEC2D,2), SIZE(SPEC2D,3), SIZE(SPEC2D,4)
                 IF (IRET.NE.0) THEN
+                  ! efth(latitude, longitude, direction, frequency, time)
+                  ! No station_name: read station by station using lat/lon indices
                   DO IP = 1, NBO2
-                     ! efth(time, frequency, direction, latitude,
-                     ! longitude)
-                     
                      IRET=NF90_GET_VAR(NCID(1),VARID(7),SPEC2D(:,:,:,IP),&
                                        start=(/IP,IP,1,1,1/),count=(/1,1,NTHI,NKI,NTI/))
                      CALL CHECK_ERR(IRET)
                   ENDDO
                 ELSE
-                  DO IP = 1, NBO2
-                     ! efth(time, station, frequency, direction)
-                     IRET=NF90_GET_VAR(NCID(1),VARID(7),SPEC2D(:,:,:,IP),&
-                                       start=(/1,1,IP,1/),count=(/NTHI,NKI,1,NTI/))
-                     CALL CHECK_ERR(IRET)
-                  ENDDO
+                  ! efth(direction, frequency, station, time)
+                  ! Read entire variable at once into temp array, then transpose
+                  ! station<->time to match SPEC2D(NTHI, NKI, NTI, NBO2)
+                  BLOCK
+                    REAL, ALLOCATABLE :: SPEC2D_TMP(:,:,:,:)
+                    ALLOCATE(SPEC2D_TMP(NTHI,NKI,NBO2,NTI))
+                    IRET=NF90_GET_VAR(NCID(1),VARID(7),SPEC2D_TMP)
+                    CALL CHECK_ERR(IRET)
+                    DO IP = 1, NBO2
+                      SPEC2D(:,:,:,IP) = SPEC2D_TMP(:,:,IP,:)
+                    END DO
+                    DEALLOCATE(SPEC2D_TMP)
+                  END BLOCK
                 END IF
 
 
