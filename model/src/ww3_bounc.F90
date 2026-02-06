@@ -446,148 +446,314 @@ PROGRAM W3BOUNC
     !
 #endif
     !
-    OPEN(NDSB,FILE='nest.ww3',form='UNFORMATTED', convert=file_endian,status='unknown')
-    ALLOCATE(DIMID(NBO2,3),DIMLN(NBO2,3),NCID(NBO2))
+        OPEN(NDSB,FILE='nest.ww3',form='UNFORMATTED', convert=file_endian,status='unknown')
+        
+        IF(NBO2 == 1) THEN
+              ALLOCATE(DIMID(1,4),DIMLN(1,4),NCID(1))
 
-    ALLOCATE(LATS(NBO2),LONS(NBO2),STATION(16,NBO2))
 
-    DO IP=1,NBO2
-      ! open file
-      OPEN(NDSC,FILE=TRIM(SPECFILES(IP)),form='UNFORMATTED', convert=file_endian,      &
-           status='old',iostat=ICODE)
-      IF (ICODE.NE.0) THEN
-        LONS(IP)=-999.
-        LATS(IP)=-999.
-        WRITE (NDSE,1010) TRIM(SPECFILES(IP))
-        CALL EXTCDE ( 70 )
-      END IF
+              OPEN(NDSC,FILE=TRIM(SPECFILES(1)),form='UNFORMATTED',  convert=file_endian,      &
+                     status='old',iostat=ICODE)
+                IF (ICODE.NE.0) THEN 
+                  LONS(IP)=-999.
+                  LATS(IP)=-999.
+                  WRITE (NDSE,1010) TRIM(SPECFILES(1))
+                  CALL EXTCDE ( 70 )
+                END IF
 
-      IRET=NF90_OPEN(TRIM(SPECFILES(IP)),NF90_NOWRITE,NCID(IP))
-      WRITE(6,*) 'Opening file:',TRIM(SPECFILES(IP))
-      CALL CHECK_ERR(IRET)
+                IRET=NF90_OPEN(TRIM(SPECFILES(1)),NF90_NOWRITE,NCID(1))
+                WRITE(6,*) 'Opening the only file:',TRIM(SPECFILES(1))
+                CALL CHECK_ERR(IRET)
 
-      ! dimensions
-      IRET=NF90_INQ_DIMID(NCID(IP),'time',DIMID(IP,1))
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_INQ_DIMID(NCID(IP),'frequency',DIMID(IP,2))
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_INQ_DIMID(NCID(IP),'direction',DIMID(IP,3))
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_INQUIRE_DIMENSION(NCID(IP),DIMID(IP,1),len=DIMLN(IP,1))
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_INQUIRE_DIMENSION(NCID(IP),DIMID(IP,2),len=DIMLN(IP,2))
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_INQUIRE_DIMENSION(NCID(IP),DIMID(IP,3),len=DIMLN(IP,3))
-      CALL CHECK_ERR(IRET)
+                ! dimensions
+                IRET=NF90_INQ_DIMID(NCID(1),'time',DIMID(1,1))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQ_DIMID(NCID(1),'frequency',DIMID(1,2))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQ_DIMID(NCID(1),'direction',DIMID(1,3))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQ_DIMID(NCID(1),'station',DIMID(1,4))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQUIRE_DIMENSION(NCID(1),DIMID(1,1),len=DIMLN(1,1))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQUIRE_DIMENSION(NCID(1),DIMID(1,2),len=DIMLN(1,2))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQUIRE_DIMENSION(NCID(1),DIMID(1,3),len=DIMLN(1,3))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQUIRE_DIMENSION(NCID(1),DIMID(1,4),len=DIMLN(1,4))
+                CALL CHECK_ERR(IRET)
 
-      NTI=DIMLN(IP,1)
-      NKI=DIMLN(IP,2)
-      NTHI=DIMLN(IP,3)
+                NTI=DIMLN(1,1)
+                NKI=DIMLN(1,2)
+                NTHI=DIMLN(1,3)
+                NBO2=DIMLN(1,4)
+                
+                ! The writing loop uses NT1 etc.
+                NT1=NTI
+                NK1=NKI
+                NTH1=NTHI
 
-      IF (IP.EQ.1) THEN
-        NT1=NTI
-        NK1=NKI
-        NTH1=NTHI
-        NSPEC1  = NK1 * NTH1
-        ALLOCATE(TIMES(NT1))
-        ALLOCATE (FREQ(NK1),THETA(NTH1))
-        ALLOCATE (SPEC2D(NTH1,NK1,NT1,NBO2))
-        ALLOCATE (ABPIN2(NK*NTH,NT1,NBO2))
+                WRITE(6,*) 'Dims ok'
 
-        ! instanciates time
-        REFDATE(:)=0.
-        IRET=NF90_INQ_VARID(NCID(IP),"time",VARID(1))
-        CALL CHECK_ERR(IRET)
-        IRET=NF90_GET_VAR(NCID(IP), VARID(1), TIMES(:))
-        CALL CHECK_ERR(IRET)
-        IRET=NF90_GET_ATT(NCID(IP),VARID(1),"calendar",CALENDAR)
-        IF ( IRET/=NF90_NOERR ) THEN
-          WRITE(NDSE,951)
-        ELSE IF ((INDEX(CALENDAR, "standard").EQ.0) .AND. &
-             (INDEX(CALENDAR, "gregorian").EQ.0)) THEN
-          WRITE(NDSE,952)
-        END IF
-        IRET=NF90_GET_ATT(NCID(IP),VARID(1),"units",TIMEUNITS)
-        CALL U2D(TIMEUNITS,REFDATE,IERR)
-        CALL D2J(REFDATE,REFJULDAY,IERR)
+                NSPEC1  = NKI * NTHI
+                ALLOCATE(TIMES(NTI))
+                ALLOCATE (FREQ(NKI),THETA(NTHI))
+                ALLOCATE (SPEC2D(NTHI,NKI,NTI,NBO2))
+                ALLOCATE (ABPIN2(NK*NTH,NTI,NBO2))
+                  
+                ALLOCATE(LATS(NBO2),LONS(NBO2),STATION(16,NBO2))
+                
+                ! instanciates time
+                REFDATE(:)=0.
+                IRET=NF90_INQ_VARID(NCID(1),"time",VARID(1))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_VAR(NCID(1), VARID(1), TIMES(:))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_ATT(NCID(1),VARID(1),"calendar",CALENDAR)
+                IF ( IRET/=NF90_NOERR ) THEN 
+                  WRITE(NDSE,951)
+                ELSE IF ((INDEX(CALENDAR, "standard").EQ.0) .AND. &
+                         (INDEX(CALENDAR, "gregorian").EQ.0)) THEN
+                  WRITE(NDSE,952)
+                END IF
+                IRET=NF90_GET_ATT(NCID(1),VARID(1),"units",TIMEUNITS)
+                CALL U2D(TIMEUNITS,REFDATE,IERR)
+                CALL D2J(REFDATE,REFJULDAY,IERR)
 
-      ELSE
-        IF (NKI.NE.NK1.OR.NTHI.NE.NTH1.OR.NT1.NE.NTI &
-             ) GOTO 805
-      END IF
+                ! position variables : lon/lat or x/y
+                IF ( FLAGLL ) THEN
+                  IRET=NF90_INQ_VARID(NCID(1), 'latitude', VARID(2))
+                  CALL CHECK_ERR(IRET)
+                  IRET=NF90_GET_VAR(NCID(1), VARID(2), LATS, &
+                              start=(/1,1/), count=(/NBO2,1/))
+                  CALL CHECK_ERR(IRET)
+                  IRET=NF90_INQ_VARID(NCID(1), 'longitude', VARID(3))        
+                  CALL CHECK_ERR(IRET)
+                  IRET=NF90_GET_VAR(NCID(1), VARID(3), LONS, &
+                              start=(/1,1/), count=(/NBO2,1/))
+                  CALL CHECK_ERR(IRET)
+                ELSE
+                  IRET=NF90_INQ_VARID(NCID(1), 'y', VARID(2))        
+                  CALL CHECK_ERR(IRET)
+                  IRET=NF90_GET_VAR(NCID(1), VARID(2), LATS, &
+                              start=(/1,1/), count=(/NBO2,1/))
+                  CALL CHECK_ERR(IRET)
+                  IRET=NF90_INQ_VARID(NCID(1), 'x', VARID(3))        
+                  CALL CHECK_ERR(IRET)
+                  IRET=NF90_GET_VAR(NCID(1), VARID(3), LONS, &
+                              start=(/1,1/), count=(/NBO2,1/))
+                  CALL CHECK_ERR(IRET)
+                END IF
 
-      ! position variables : lon/lat or x/y
-      IF ( FLAGLL ) THEN
-        IRET=NF90_INQ_VARID(NCID(IP), 'latitude', VARID(2))
-        CALL CHECK_ERR(IRET)
-        IRET=NF90_GET_VAR(NCID(IP), VARID(2), LATS(IP))
-        CALL CHECK_ERR(IRET)
-        IRET=NF90_INQ_VARID(NCID(IP), 'longitude', VARID(3))
-        CALL CHECK_ERR(IRET)
-        IRET=NF90_GET_VAR(NCID(IP), VARID(3), LONS(IP))
-        CALL CHECK_ERR(IRET)
-      ELSE
-        IRET=NF90_INQ_VARID(NCID(IP), 'y', VARID(2))
-        CALL CHECK_ERR(IRET)
-        IRET=NF90_GET_VAR(NCID(IP), VARID(2), LATS(IP))
-        CALL CHECK_ERR(IRET)
-        IRET=NF90_INQ_VARID(NCID(IP), 'x', VARID(3))
-        CALL CHECK_ERR(IRET)
-        IRET=NF90_GET_VAR(NCID(IP), VARID(3), LONS(IP))
-        CALL CHECK_ERR(IRET)
-      END IF
 
-      ! Display the location of the ingested NetCDF file
-      IF (VERBOSE.GE.2) WRITE(NDSO,*) 'FILEID:',IP,'LON:',LONS(IP),'LAT:',LATS(IP)
+                ! freq and dir variables
+                IRET=NF90_INQ_VARID(NCID(1),"frequency",VARID(4))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_VAR(NCID(1),VARID(4),FREQ)
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQ_VARID(NCID(1),"direction",VARID(5))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_VAR(NCID(1),VARID(5),THETA)
+                CALL CHECK_ERR(IRET)
+                THETA=MOD(2.5*PI-(PI/180)*THETA,TPI)
 
-      ! freq and dir variables
-      IRET=NF90_INQ_VARID(NCID(IP),"frequency",VARID(4))
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_GET_VAR(NCID(IP),VARID(4),FREQ)
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_INQ_VARID(NCID(IP),"direction",VARID(5))
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_GET_VAR(NCID(IP),VARID(5),THETA)
-      CALL CHECK_ERR(IRET)
-      THETA=MOD(2.5*PI-(PI/180)*THETA,TPI)
+                ! 2D spectra depending on station name or lat/lon 
+                IRET=NF90_INQ_VARID(NCID(1),"efth",VARID(7))
+                IF (IRET.NE.0) IRET=NF90_INQ_VARID(NCID(1),"Efth",VARID(7))
+                IF (IRET.NE.0) IRET=NF90_INQ_VARID(NCID(1),"SPEC",VARID(7))
+              
 
-      ! 2D spectra depending on station name or lat/lon
-      IRET=NF90_INQ_VARID(NCID(IP),"efth",VARID(7))
-      IF (IRET.NE.0) IRET=NF90_INQ_VARID(NCID(IP),"Efth",VARID(7))
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_INQUIRE_VARIABLE(NCID(IP),VARID(7),XTYPE=VARTYPE)
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_GET_ATT(NCID(IP),VARID(7),"_FillValue",FILLVAL)
-      CALL CHECK_ERR(IRET)
-      IRET=NF90_GET_ATT(NCID(IP),VARID(7),"scale_factor",FACTOR)
-      IF (IRET.NE.0) FACTOR=1.
-      IRET=NF90_GET_ATT(NCID(IP),VARID(7),"add_offset",OFFSET)
-      IF (IRET.NE.0) OFFSET=0.
-      IRET = NF90_INQ_VARID(NCID(IP), 'station_name', VARID(6))
-      IF (IRET.NE.0) THEN
-        ! efth(time, frequency, direction, latitude, longitude)
-        IRET=NF90_GET_VAR(NCID(IP),VARID(7),SPEC2D(:,:,:,IP),       &
-             start=(/1,1,1,1/),count=(/1,1,NTHI,NKI,NTI/))
-        CALL CHECK_ERR(IRET)
-      ELSE
-        ! efth(time, station, frequency, direction)
-        IRET=NF90_GET_VAR(NCID(IP),VARID(7),SPEC2D(:,:,:,IP),       &
-             start=(/1,1,1,1/),count=(/NTHI,NKI,1,NTI/))
-        CALL CHECK_ERR(IRET)
-      END IF
-      ! apply scale_factor and add_offset
-      IF (VARTYPE.EQ.NF90_SHORT) THEN
-        WHERE(SPEC2D(:,:,:,IP).NE.FILLVAL) SPEC2D(:,:,:,IP)=(EXP(SPEC2D(:,:,:,IP)*FACTOR*LOG(10.)))-1e-12
-      ELSE
-        WHERE(SPEC2D(:,:,:,IP).NE.FILLVAL) SPEC2D(:,:,:,IP)=(SPEC2D(:,:,:,IP)*FACTOR)+OFFSET
-      END IF
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQUIRE_VARIABLE(NCID(1),VARID(7),XTYPE=VARTYPE)
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_ATT(NCID(1),VARID(7),"_FillValue",FILLVAL)
+                IF (IRET.NE.0) FILLVAL=-999.
+                IRET=NF90_GET_ATT(NCID(1),VARID(7),"scale_factor",FACTOR)
+                IF (IRET.NE.0) FACTOR=1.
+                IRET=NF90_GET_ATT(NCID(1),VARID(7),"add_offset",OFFSET)
+                IF (IRET.NE.0) OFFSET=0.
 
-      ! close spectra file
-      IRET=NF90_CLOSE(NCID(IP))
-      CALL CHECK_ERR(IRET)
-      !
-    END DO ! IP=1,NBO2
+                IRET = NF90_INQ_VARID(NCID(1), 'station_name', VARID(6)) 
 
+                
+
+                WRITE(6,*) 'Reading spec (NBO2, NTI, NKI, NTHI) = ', NBO2, NTI, NKI, NTHI
+
+!                  WRITE(6,*) 'Size of SPEC2D', SIZE(SPEC2D, 1), SIZE(SPEC2D,2), SIZE(SPEC2D,3), SIZE(SPEC2D,4)
+                IF (IRET.NE.0) THEN
+                  DO IP = 1, NBO2
+                     ! efth(time, frequency, direction, latitude,
+                     ! longitude)
+                     
+                     IRET=NF90_GET_VAR(NCID(1),VARID(7),SPEC2D(:,:,:,IP),&
+                                       start=(/IP,IP,1,1,1/),count=(/1,1,NTHI,NKI,NTI/))
+                     CALL CHECK_ERR(IRET)
+                  ENDDO
+                ELSE
+                  DO IP = 1, NBO2
+                     ! efth(time, station, frequency, direction)
+                     IRET=NF90_GET_VAR(NCID(1),VARID(7),SPEC2D(:,:,:,IP),&
+                                       start=(/1,1,IP,1/),count=(/NTHI,NKI,1,NTI/))
+                     CALL CHECK_ERR(IRET)
+                  ENDDO
+                END IF
+
+
+                ! apply scale_factor and add_offset
+                IF (VARTYPE.EQ.NF90_SHORT) THEN
+                  WHERE(SPEC2D(:,:,:,:).NE.FILLVAL) SPEC2D(:,:,:,:)=(EXP(SPEC2D(:,:,:,:)*FACTOR*LOG(10.)))-1e-12
+                ELSE
+                  WHERE(SPEC2D(:,:,:,:).NE.FILLVAL) SPEC2D(:,:,:,:)=(SPEC2D(:,:,:,:)*FACTOR)+OFFSET
+                END IF
+               
+                ! close spectra file
+                IRET=NF90_CLOSE(NCID(1))
+                CALL CHECK_ERR(IRET)
+
+        ELSE
+
+            OPEN(NDSB,FILE='nest.ww3',form='UNFORMATTED', convert=file_endian,status='unknown')
+            ALLOCATE(DIMID(NBO2,3),DIMLN(NBO2,3),NCID(NBO2))
+        
+            ALLOCATE(LATS(NBO2),LONS(NBO2),STATION(16,NBO2))
+        
+            DO IP=1,NBO2
+              ! open file
+              OPEN(NDSC,FILE=TRIM(SPECFILES(IP)),form='UNFORMATTED', convert=file_endian,      &
+                   status='old',iostat=ICODE)
+              IF (ICODE.NE.0) THEN
+                LONS(IP)=-999.
+                LATS(IP)=-999.
+                WRITE (NDSE,1010) TRIM(SPECFILES(IP))
+                CALL EXTCDE ( 70 )
+              END IF
+        
+              IRET=NF90_OPEN(TRIM(SPECFILES(IP)),NF90_NOWRITE,NCID(IP))
+              WRITE(6,*) 'Opening file:',TRIM(SPECFILES(IP))
+              CALL CHECK_ERR(IRET)
+        
+              ! dimensions
+              IRET=NF90_INQ_DIMID(NCID(IP),'time',DIMID(IP,1))
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_INQ_DIMID(NCID(IP),'frequency',DIMID(IP,2))
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_INQ_DIMID(NCID(IP),'direction',DIMID(IP,3))
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_INQUIRE_DIMENSION(NCID(IP),DIMID(IP,1),len=DIMLN(IP,1))
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_INQUIRE_DIMENSION(NCID(IP),DIMID(IP,2),len=DIMLN(IP,2))
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_INQUIRE_DIMENSION(NCID(IP),DIMID(IP,3),len=DIMLN(IP,3))
+              CALL CHECK_ERR(IRET)
+        
+              NTI=DIMLN(IP,1)
+              NKI=DIMLN(IP,2)
+              NTHI=DIMLN(IP,3)
+        
+              IF (IP.EQ.1) THEN
+                NT1=NTI
+                NK1=NKI
+                NTH1=NTHI
+                NSPEC1  = NK1 * NTH1
+                ALLOCATE(TIMES(NT1))
+                ALLOCATE (FREQ(NK1),THETA(NTH1))
+                ALLOCATE (SPEC2D(NTH1,NK1,NT1,NBO2))
+                ALLOCATE (ABPIN2(NK*NTH,NT1,NBO2))
+        
+                ! instanciates time
+                REFDATE(:)=0.
+                IRET=NF90_INQ_VARID(NCID(IP),"time",VARID(1))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_VAR(NCID(IP), VARID(1), TIMES(:))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_ATT(NCID(IP),VARID(1),"calendar",CALENDAR)
+                IF ( IRET/=NF90_NOERR ) THEN
+                  WRITE(NDSE,951)
+                ELSE IF ((INDEX(CALENDAR, "standard").EQ.0) .AND. &
+                     (INDEX(CALENDAR, "gregorian").EQ.0)) THEN
+                  WRITE(NDSE,952)
+                END IF
+                IRET=NF90_GET_ATT(NCID(IP),VARID(1),"units",TIMEUNITS)
+                CALL U2D(TIMEUNITS,REFDATE,IERR)
+                CALL D2J(REFDATE,REFJULDAY,IERR)
+        
+              ELSE
+                IF (NKI.NE.NK1.OR.NTHI.NE.NTH1.OR.NT1.NE.NTI &
+                     ) GOTO 805
+              END IF
+        
+              ! position variables : lon/lat or x/y
+              IF ( FLAGLL ) THEN
+                IRET=NF90_INQ_VARID(NCID(IP), 'latitude', VARID(2))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_VAR(NCID(IP), VARID(2), LATS(IP))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQ_VARID(NCID(IP), 'longitude', VARID(3))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_VAR(NCID(IP), VARID(3), LONS(IP))
+                CALL CHECK_ERR(IRET)
+              ELSE
+                IRET=NF90_INQ_VARID(NCID(IP), 'y', VARID(2))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_VAR(NCID(IP), VARID(2), LATS(IP))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_INQ_VARID(NCID(IP), 'x', VARID(3))
+                CALL CHECK_ERR(IRET)
+                IRET=NF90_GET_VAR(NCID(IP), VARID(3), LONS(IP))
+                CALL CHECK_ERR(IRET)
+              END IF
+        
+              ! Display the location of the ingested NetCDF file
+              IF (VERBOSE.GE.2) WRITE(NDSO,*) 'FILEID:',IP,'LON:',LONS(IP),'LAT:',LATS(IP)
+        
+              ! freq and dir variables
+              IRET=NF90_INQ_VARID(NCID(IP),"frequency",VARID(4))
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_GET_VAR(NCID(IP),VARID(4),FREQ)
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_INQ_VARID(NCID(IP),"direction",VARID(5))
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_GET_VAR(NCID(IP),VARID(5),THETA)
+              CALL CHECK_ERR(IRET)
+              THETA=MOD(2.5*PI-(PI/180)*THETA,TPI)
+        
+              ! 2D spectra depending on station name or lat/lon
+              IRET=NF90_INQ_VARID(NCID(IP),"efth",VARID(7))
+              IF (IRET.NE.0) IRET=NF90_INQ_VARID(NCID(IP),"Efth",VARID(7))
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_INQUIRE_VARIABLE(NCID(IP),VARID(7),XTYPE=VARTYPE)
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_GET_ATT(NCID(IP),VARID(7),"_FillValue",FILLVAL)
+              CALL CHECK_ERR(IRET)
+              IRET=NF90_GET_ATT(NCID(IP),VARID(7),"scale_factor",FACTOR)
+              IF (IRET.NE.0) FACTOR=1.
+              IRET=NF90_GET_ATT(NCID(IP),VARID(7),"add_offset",OFFSET)
+              IF (IRET.NE.0) OFFSET=0.
+              IRET = NF90_INQ_VARID(NCID(IP), 'station_name', VARID(6))
+              IF (IRET.NE.0) THEN
+                ! efth(time, frequency, direction, latitude, longitude)
+                IRET=NF90_GET_VAR(NCID(IP),VARID(7),SPEC2D(:,:,:,IP),       &
+                     start=(/1,1,1,1/),count=(/1,1,NTHI,NKI,NTI/))
+                CALL CHECK_ERR(IRET)
+              ELSE
+                ! efth(time, station, frequency, direction)
+                IRET=NF90_GET_VAR(NCID(IP),VARID(7),SPEC2D(:,:,:,IP),       &
+                     start=(/1,1,1,1/),count=(/NTHI,NKI,1,NTI/))
+                CALL CHECK_ERR(IRET)
+              END IF
+              ! apply scale_factor and add_offset
+              IF (VARTYPE.EQ.NF90_SHORT) THEN
+                WHERE(SPEC2D(:,:,:,IP).NE.FILLVAL) SPEC2D(:,:,:,IP)=(EXP(SPEC2D(:,:,:,IP)*FACTOR*LOG(10.)))-1e-12
+              ELSE
+                WHERE(SPEC2D(:,:,:,IP).NE.FILLVAL) SPEC2D(:,:,:,IP)=(SPEC2D(:,:,:,IP)*FACTOR)+OFFSET
+              END IF
+        
+              ! close spectra file
+              IRET=NF90_CLOSE(NCID(IP))
+              CALL CHECK_ERR(IRET)
+              !
+            END DO ! IP=1,NBO2
+        END IF ! One or several files
 
 
     !
