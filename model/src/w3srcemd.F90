@@ -1387,7 +1387,7 @@ CONTAINS
       END IF
 
 #ifdef W3_PDLIB
-      IF (B_JGS_LIMITER_FUNC == 2) THEN
+      IF (B_JGS_LIMITER_FUNC >= 2) THEN
         DO IK=1, NK
           JAC      = CG1(IK)
           JAC2     = 1./TPI/SIG(IK)
@@ -1523,10 +1523,12 @@ CONTAINS
               DO ITH = 1, NTH
                 ISP = ITH + (IK-1)*NTH
                 VD(ISP) = MIN(0., VD(ISP))
-                IF (B_JGS_LIMITER_FUNC == 2) THEN
-                  MAXDAC = MAX(DAM(ISP),DAM2(ISP))
-                ELSE
+                IF (B_JGS_LIMITER_FUNC == 1) THEN
                   MAXDAC = DAM(ISP)
+                ELSE IF (B_JGS_LIMITER_FUNC == 2) THEN
+                  MAXDAC = DAM2(ISP)
+                ELSE
+                  MAXDAC = MAX(DAM(ISP),DAM2(ISP))
                 ENDIF
                 FAKS   = DTG / MAX ( 1. , (1.-DTG*VD(ISP)))
                 DVS    = VS(ISP) * FAKS
@@ -1581,10 +1583,12 @@ CONTAINS
               DO ITH=1,NTH
                 ISP=ITH + (IK-1)*NTH
                 VD(ISP) = MIN(0., VD(ISP))
-                IF (B_JGS_LIMITER_FUNC == 2) THEN
-                  MAXDAC    = MAX(DAM(ISP),DAM2(ISP))
-                ELSE
+                IF (B_JGS_LIMITER_FUNC == 1) THEN
                   MAXDAC    = DAM(ISP)
+                ELSE IF (B_JGS_LIMITER_FUNC == 2) THEN
+                  MAXDAC    = DAM2(ISP)
+                ELSE
+                  MAXDAC    = MAX(DAM(ISP),DAM2(ISP))
                 ENDIF
                 FAKS      = DTG / MAX ( 1. , (1.-DTG*VD(ISP)))
                 DVS       = VS(ISP) * FAKS
