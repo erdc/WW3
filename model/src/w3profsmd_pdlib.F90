@@ -5516,6 +5516,7 @@ CONTAINS
     USE W3GDATMD, only: B_JGS_NORM_THR, B_JGS_TERMINATE_NORM, B_JGS_PMIN
     USE W3GDATMD, only: B_JGS_TERMINATE_DIFFERENCE, B_JGS_MAXITER, B_JGS_LIMITER
     USE W3GDATMD, only: B_JGS_TERMINATE_MAXITER, B_JGS_BLOCK_GAUSS_SEIDEL, B_JGS_DIFF_THR
+    USE W3GDATMD, only: B_JGS_LIMITER_FUNC
     USE W3GDATMD, only: MAPWN
 #ifdef W3_DEBUGSRC
     USE W3GDATMD, only: optionCall
@@ -6293,23 +6294,31 @@ CONTAINS
             END DO
           END DO
 
-          DAM2 = 0.
-          DO IK=1, NK
-            JAC2     = 1./TPI/SIG(IK)
-            DAM2(1+(IK-1)*NTH) = 5E-7 * GRAV * UST(ISEA) * FMEAN * DTG * (TPI**3) / (SIG(IK)**4) * JAC2 * CG1(IK)
-          END DO
-          DO IK=1, NK
-            IS0  = (IK-1)*NTH
-            DO ITH=2, NTH
-              DAM2(ITH+IS0) = DAM2(1+IS0)
+          IF (B_JGS_LIMITER_FUNC >= 2) THEN
+            DAM2 = 0.
+            DO IK=1, NK
+              JAC2     = 1./TPI/SIG(IK)
+              DAM2(1+(IK-1)*NTH) = 5E-7 * GRAV * UST(ISEA) * FMEAN * DTG * (TPI**3) / (SIG(IK)**4) * JAC2 * CG1(IK)
             END DO
-          END DO
+            DO IK=1, NK
+              IS0  = (IK-1)*NTH
+              DO ITH=2, NTH
+                DAM2(ITH+IS0) = DAM2(1+IS0)
+              END DO
+            END DO
+          END IF
 
           DO IK = 1, NK
             DO ITH = 1, NTH
               ISP = ITH + (IK-1)*NTH
               newdac     = VA(ISP,IP) - VAOLD(ISP,JSEA)
-              maxdac     = max(DAM(ISP),DAM2(ISP))
+              IF (B_JGS_LIMITER_FUNC == 1) THEN
+                maxdac   = DAM(ISP)
+              ELSE IF (B_JGS_LIMITER_FUNC == 2) THEN
+                maxdac   = DAM2(ISP)
+              ELSE
+                maxdac   = max(DAM(ISP),DAM2(ISP))
+              ENDIF
               NEWDAC     = SIGN(MIN(MAXDAC,ABS(NEWDAC)), NEWDAC)
               VA(ISP,IP) = max(0., VAOLD(ISP,IP) + NEWDAC)
             ENDDO
