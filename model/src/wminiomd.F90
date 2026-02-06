@@ -1853,6 +1853,9 @@ CONTAINS
 #ifdef W3_MPIT
     LOGICAL                 :: FLAG
 #endif
+#ifdef W3_PDLIB
+    REAL*8, ALLOCATABLE     :: VA8(:,:)
+#endif
     !/
 #ifdef W3_S
     CALL STRACE (IENT, 'WMIOHG')
@@ -2268,7 +2271,11 @@ CONTAINS
     IF ( PRESENT(DONE) ) DONE = .TRUE.
     !
 #ifdef W3_PDLIB
-    CALL PDLIB_exchange2Dreal_zero(VA)
+    ALLOCATE(VA8(SIZE(VA,1),0:NPA))
+    VA8 = VA(:,0:NPA)
+    CALL PDLIB_exchange2Dreal_zero(VA8)
+    VA(:,0:NPA) = VA8
+    DEALLOCATE(VA8)
 #endif
     !
     ! Formats
@@ -2946,6 +2953,9 @@ CONTAINS
     LOGICAL                 :: FLAGOK
     LOGICAL                 :: FLAG
 #endif
+#ifdef W3_PDLIB
+    REAL*8, ALLOCATABLE     :: VA8(:,:)
+#endif
     !/
 #ifdef W3_S
     CALL STRACE (IENT, 'WMIOEG')
@@ -3343,7 +3353,11 @@ CONTAINS
     IF ( PRESENT(DONE) ) DONE = .TRUE.
     !
 #ifdef W3_PDLIB
-    CALL PDLIB_exchange2Dreal_zero(VA)
+    ALLOCATE(VA8(SIZE(VA,1),0:NPA))
+    VA8 = VA(:,0:NPA)
+    CALL PDLIB_exchange2Dreal_zero(VA8)
+    VA(:,0:NPA) = VA8
+    DEALLOCATE(VA8)
 #endif
     !
     ! Formats

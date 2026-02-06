@@ -4495,6 +4495,7 @@ end subroutine pgmres
 !-----------------------------------------------------------------------
 !     subroutine from blas1.f90
 !-----------------------------------------------------------------------
+#ifndef W3_SHYFEM
 DOUBLE PRECISION FUNCTION DNRM2(N,X)
   !     .. Scalar Arguments ..
   INTEGER N
@@ -4684,3 +4685,4 @@ subroutine daxpy(n,da,dx,incx,dy,incy)
   end do
   return
 end subroutine daxpy
+#endif
