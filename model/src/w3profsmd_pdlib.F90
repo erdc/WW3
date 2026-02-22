@@ -6300,7 +6300,7 @@ CONTAINS
               IF (FMEAN .LT. 0.0001) THEN
                 DAM2(1+(IK-1)*NTH) = DAM(1+(IK-1)*NTH)
               ELSE
-                DAM2(1+(IK-1)*NTH) = 1E-7 * GRAV * USTAR * FMEAN * DTG * (TPI**3) / (SIG(IK)**4) * JAC2 * CG1(IK)
+                DAM2(1+(IK-1)*NTH) = 5E-7 * GRAV * USTAR * FMEAN * DTG * (TPI**3) / (SIG(IK)**4) * JAC2 * CG1(IK)
               ENDIF
             END DO
             DO IK=1, NK
