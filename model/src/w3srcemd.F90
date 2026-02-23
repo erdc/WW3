@@ -1386,6 +1386,7 @@ CONTAINS
         VDDS(1:NSPECH) = ICESCALEDS * VDDS(1:NSPECH)
       END IF
 
+
 #ifdef W3_PDLIB
       IF (B_JGS_LIMITER_FUNC >= 2) THEN
         DO IK=1, NK

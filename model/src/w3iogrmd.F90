@@ -791,6 +791,7 @@ CONTAINS
              B_JGS_TERMINATE_DIFFERENCE,                      &
              B_JGS_TERMINATE_NORM,                            &
              B_JGS_LIMITER,                                   &
+             B_JGS_LIMITER_FUNC,                              &
              B_JGS_BLOCK_GAUSS_SEIDEL,                        &
              B_JGS_USE_JACOBI,                                &
              B_JGS_MAXITER,                                   &
@@ -811,6 +812,7 @@ CONTAINS
              B_JGS_TERMINATE_DIFFERENCE,                      &
              B_JGS_TERMINATE_NORM,                            &
              B_JGS_LIMITER,                                   &
+             B_JGS_LIMITER_FUNC,                              &
              B_JGS_BLOCK_GAUSS_SEIDEL,                        &
              B_JGS_USE_JACOBI,                                &
              B_JGS_MAXITER,                                   &
@@ -829,6 +831,7 @@ CONTAINS
              B_JGS_TERMINATE_DIFFERENCE,                      &
              B_JGS_TERMINATE_NORM,                            &
              B_JGS_LIMITER,                                   &
+             B_JGS_LIMITER_FUNC,                              &
              B_JGS_BLOCK_GAUSS_SEIDEL,                        &
              B_JGS_USE_JACOBI,                                &
              B_JGS_MAXITER,                                   &
@@ -996,6 +999,7 @@ CONTAINS
              B_JGS_TERMINATE_DIFFERENCE,                      &
              B_JGS_TERMINATE_NORM,                            &
              B_JGS_LIMITER,                                   &
+             B_JGS_LIMITER_FUNC,                              &
              B_JGS_BLOCK_GAUSS_SEIDEL,                        &
              B_JGS_USE_JACOBI,                                &
              B_JGS_MAXITER,                                   &
