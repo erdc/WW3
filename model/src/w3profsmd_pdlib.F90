@@ -6305,13 +6305,7 @@ CONTAINS
             DO ITH=2, NTH
               DAM2(ITH+IS0) = DAM2(1+IS0)
             END DO
-            DO IK=1, NK
-              IS0  = (IK-1)*NTH
-              DO ITH=2, NTH
-                DAM2(ITH+IS0) = DAM2(1+IS0)
-              END DO
-            END DO
-          END IF
+          END DO
 
           DO IK = 1, NK
             DO ITH = 1, NTH
