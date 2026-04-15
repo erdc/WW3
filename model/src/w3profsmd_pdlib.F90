@@ -6298,7 +6298,11 @@ CONTAINS
           DO IK=1, NK
             JAC2     = 1./TPI/SIG(IK)
             FRLOCAL  = SIG(IK)*TPIINV
-            DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2
+#ifdef W3_ST6
+            DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * UST(ISEA) * FMEAN * DTG * JAC2 * CG1(IK)
+#else
+            DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2 * CG1(IK)
+#endif
           END DO
           DO IK=1, NK
             IS0  = (IK-1)*NTH
