@@ -6294,16 +6294,11 @@ CONTAINS
             END DO
           END DO
 
-          DAM2 = 0.
-          DO IK=1, NK
-            JAC2     = 1./TPI/SIG(IK)
-            FRLOCAL  = SIG(IK)*TPIINV
-            DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2
-          END DO
-          DO IK=1, NK
-            IS0  = (IK-1)*NTH
-            DO ITH=2, NTH
-              DAM2(ITH+IS0) = DAM2(1+IS0)
+          IF (B_JGS_LIMITER_FUNC >= 2) THEN
+            DAM2 = 0.
+            DO IK=1, NK
+              JAC2     = 1./TPI/SIG(IK)
+              DAM2(1+(IK-1)*NTH) = 5E-7 * GRAV * UST(ISEA) * FMEAN * DTG * (TPI**3) / (SIG(IK)**4) * JAC2 * CG1(IK)
             END DO
             DO IK=1, NK
               IS0  = (IK-1)*NTH
