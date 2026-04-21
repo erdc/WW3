@@ -3661,7 +3661,7 @@ CONTAINS
     TMP3   = 0
 
     CCOSA = FACX * ECOS(1:NTH)
-    CSINA = FACX * ESIN(1:NTH)
+    CSINA = FACY * ESIN(1:NTH)
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_JACOBI SECTION 0')
 
     DO ISP = 1, NSPEC
@@ -6284,7 +6284,7 @@ CONTAINS
 
           DAM = 0.
           DO IK=1, NK
-            DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG(IK,ISEA)) * CG1(IK) 
+            DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG(IK,ISEA)) * CG1(IK) * CG1(IK)
           END DO
           !
           DO IK=1, NK
@@ -6300,9 +6300,9 @@ CONTAINS
               JAC2     = 1./TPI/SIG(IK)
               FRLOCAL  = SIG(IK)*TPIINV
 #ifdef W3_ST6
-              DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * UST(ISEA) * FMEAN * DTG * JAC2 * CG1(IK)
+              DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * UST(ISEA) * FMEAN * DTG * JAC2 * CG1(IK) * CG1(IK)
 #else
-              DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2 * CG1(IK)
+              DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2 * CG1(IK) * CG1(IK)
 #endif
             END DO
             DO IK=1, NK
