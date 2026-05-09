@@ -6281,7 +6281,6 @@ CONTAINS
                USTAR, USTDIR,                                  &
                TAUWX, TAUWY, CD, Z0, CHARN, LLWS, FMEANWS, DLWMEAN)
 #endif
-
           DAM = 0.
           DO IK=1, NK
             DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG(IK,ISEA)) * CG1(IK)
@@ -6299,7 +6298,11 @@ CONTAINS
             DO IK=1, NK
               JAC2     = 1./TPI/SIG(IK)
               FRLOCAL  = SIG(IK)*TPIINV
-              DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2
+              IF (FMEAN .LT. 0.0001) THEN
+                DAM2(1+(IK-1)*NTH) = DAM(1+(IK-1)*NTH)
+              ELSE
+                DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2
+              ENDIF
             END DO
             DO IK=1, NK
               IS0  = (IK-1)*NTH
@@ -6312,7 +6315,7 @@ CONTAINS
           DO IK = 1, NK
             DO ITH = 1, NTH
               ISP = ITH + (IK-1)*NTH
-              newdac     = VA(ISP,IP) - VAOLD(ISP,JSEA)
+              newdac     = VA(ISP,JSEA) - VAOLD(ISP,JSEA)
               IF (B_JGS_LIMITER_FUNC == 1) THEN
                 maxdac   = DAM(ISP)
               ELSE IF (B_JGS_LIMITER_FUNC == 2) THEN
@@ -6321,7 +6324,7 @@ CONTAINS
                 maxdac   = max(DAM(ISP),DAM2(ISP))
               ENDIF
               NEWDAC     = SIGN(MIN(MAXDAC,ABS(NEWDAC)), NEWDAC)
-              VA(ISP,IP) = max(0., VAOLD(ISP,IP) + NEWDAC)
+              VA(ISP,JSEA) = max(0., VAOLD(ISP,JSEA) + NEWDAC)
             ENDDO
           ENDDO
         ENDIF ! B_JGS_LIMITER
