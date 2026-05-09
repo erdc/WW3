@@ -764,11 +764,11 @@ CONTAINS
       ISEA    = MAPFS(1,IP_glob)
 #ifdef NOCGTABLE
       CALL WAVNU_LOCAL(SIG(IK),DW(ISEA),WN1,CG1)
-      AC(IP)  = VA(ISP,JSEA) / CG1
+      AC(IP)  = VA(ISP,JSEA) / CG1 * CLATS(ISEA)
       VLCFLX(IP) = CCOS * CG1 / CLATS(ISEA)
       VLCFLY(IP) = CSIN * CG1
 #else
-      AC(IP)  = VA(ISP,JSEA) / CG(IK,ISEA)
+      AC(IP)  = VA(ISP,JSEA) / CG(IK,ISEA) * CLATS(ISEA)
       VLCFLX(IP) = CCOS * CG(IK,ISEA) / CLATS(ISEA)
       VLCFLY(IP) = CSIN * CG(IK,ISEA)
 #endif
@@ -855,7 +855,7 @@ CONTAINS
       IP      = JSEA
       IP_glob = iplg(IP)
       ISEA=MAPFS(1,IP_glob)
-      VA(ISP,JSEA) = MAX ( 0. , CG(IK,ISEA)*AC(IP) )
+      VA(ISP,JSEA) = MAX ( 0. , CG(IK,ISEA)/CLATS(ISEA)*AC(IP) )
     END DO
 #ifdef W3_DEBUGSOLVER
     WRITE(740+IAPROC,*) 'Leaving PDLIB_W3XYPUG'
@@ -954,7 +954,7 @@ CONTAINS
     INTEGER, SAVE           :: IENT = 0
 #endif
 #ifdef W3_REF1
-    INTEGER(KIND=1)    :: IOBPDR(NX)
+    INTEGER(KIND=1)    :: IOBPDR(NPA)
 #endif
     INTEGER :: IP, IE, POS, IT, I1, I2, I3, I, J, ITH, IK
     INTEGER :: IBI, NI(3)
@@ -1158,7 +1158,7 @@ CONTAINS
           JX=IPGL_npa(IP_glob)
           IF (JX .gt. 0) THEN
             AC(JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )   &
-                 / CG(IK,ISBPI(IBI))
+                 / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))
 #ifdef W3_DEBUGSOLVER
             sumAC=sumAC + AC(JX)
             sumBPI0=sumBPI0 + BBPI0(ISP,IBI)
@@ -1282,7 +1282,7 @@ CONTAINS
     INTEGER, SAVE           :: IENT = 0
 #endif
 #ifdef W3_REF1
-    INTEGER(KIND=1)    :: IOBPDR(NX)
+    INTEGER(KIND=1)    :: IOBPDR(NPA)
 #endif
     INTEGER :: IP, IE, POS, IT, I1, I2, I3, I, J, ITH, IK
     INTEGER :: IBI, NI(3), JX
@@ -1455,7 +1455,7 @@ CONTAINS
           JX=IPGL_npa(IP_glob)
           IF (JX .gt. 0) THEN
             AC(JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )   &
-                 / CG(IK,ISBPI(IBI))
+                 / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))
 #ifdef W3_DEBUGSOLVER
             sumAC=sumAC + AC(JX)
             sumBPI0=sumBPI0 + BBPI0(ISP,IBI)
@@ -1582,7 +1582,7 @@ CONTAINS
     INTEGER, SAVE           :: IENT = 0
 #endif
 #ifdef W3_REF1
-    INTEGER(KIND=1)    :: IOBPDR(NX)
+    INTEGER(KIND=1)    :: IOBPDR(NPA)
 #endif
     INTEGER :: IP, IE, POS, IT, I1, I2, I3, I, J, ITH, IK
     INTEGER :: IBI, NI(3)
@@ -1828,7 +1828,7 @@ CONTAINS
           JX=IPGL_npa(IP_glob)
           IF (JX .gt. 0) THEN
             AC(JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) )   &
-                 / CG(IK,ISBPI(IBI))
+                 / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))
 #ifdef W3_DEBUGSOLVER
             sumAC=sumAC + AC(JX)
             sumBPI0=sumBPI0 + BBPI0(ISP,IBI)
@@ -3661,7 +3661,7 @@ CONTAINS
     TMP3   = 0
 
     CCOSA = FACX * ECOS(1:NTH)
-    CSINA = FACX * ESIN(1:NTH)
+    CSINA = FACY * ESIN(1:NTH)
     call print_memcheck(memunit, 'memcheck_____:'//' WW3_JACOBI SECTION 0')
 
     DO ISP = 1, NSPEC
@@ -6283,7 +6283,7 @@ CONTAINS
 #endif
           DAM = 0.
           DO IK=1, NK
-            DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG(IK,ISEA)) * CG1(IK)
+            DAM(1+(IK-1)*NTH) = 0.0081*0.1 / ( 2 * SIG(IK) * WN(IK,ISEA)**3 * CG(IK,ISEA)) * CG1(IK) * CG1(IK)
           END DO
           !
           DO IK=1, NK
@@ -6301,7 +6301,11 @@ CONTAINS
               IF (FMEAN .LT. 0.0001) THEN
                 DAM2(1+(IK-1)*NTH) = DAM(1+(IK-1)*NTH)
               ELSE
-                DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2
+#ifdef W3_ST6
+                DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * UST(ISEA) * FMEAN * DTG * JAC2 * CG1(IK) * CG1(IK)
+#else
+                DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTG * JAC2 * CG1(IK) * CG1(IK)
+#endif
               ENDIF
             END DO
             DO IK=1, NK
@@ -6418,7 +6422,7 @@ CONTAINS
     USE W3GDATMD, ONLY: NK, NTH, NSPEC, SIG, DTH, ESIN, ECOS, NSEAL, FSBCCFL, CLATS, MAPFS
     USE W3GDATMD, ONLY: IOBP_LOC, IOBPD_LOC, IOBPA_LOC, IOBDP_LOC, MAPSF, NSEA
     USE W3ODATMD, ONLY: NDSE, NDST, FLBPI, NBI, TBPI0, TBPIN, ISBPI, BBPI0, BBPIN
-    USE W3ADATMD, ONLY: DW, CX, CY, MPI_COMM_WCMP
+    USE W3ADATMD, ONLY: DW, CX, CY, CG, MPI_COMM_WCMP
     USE W3IDATMD, ONLY: FLCUR, FLLEV
     USE W3WDATMD, ONLY: VA
     USE W3DISPMD, ONLY: WAVNU3
@@ -6625,7 +6629,8 @@ CONTAINS
               IP_glob = MAPSF(ISBPI(IBI),1)
               JX      = IPGL_npa(IP_glob)
               IF (JX .gt. 0) THEN
-                U(ITH,JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) ) / CGSIG(ISBPI(IBI))
+                U(ITH,JX) = ( RD1*BBPI0(ISP,IBI) + RD2*BBPIN(ISP,IBI) ) &
+                     / CG(IK,ISBPI(IBI)) * CLATS(ISBPI(IBI))
               END IF
             END DO
           ENDDO
@@ -6928,7 +6933,7 @@ CONTAINS
 #ifdef W3_S
     CALL STRACE (IENT, 'SETDEPTH_PDLIB')
 #endif
-    DO JSEA=1,NPA
+    DO JSEA=1,SIZE(IOBDP_LOC)
       IP = JSEA
       IP_glob = iplg(IP)
       IF (DW(IP_glob) .LT. DMIN + DTHR) THEN
@@ -7017,7 +7022,7 @@ CONTAINS
 #ifdef W3_S
     CALL STRACE (IENT, 'SETDEPTH_PDLIB')
 #endif
-    DO JSEA=1,NSEAL
+    DO JSEA=1,SIZE(IOBPA_LOC)
       IP_glob = iplg(JSEA)
       IF (MAPSTA(1,IP_glob).EQ.2 .OR. MAPSTA(1,IP_glob).LT.0) THEN
         IOBPA_LOC(JSEA) = 1
