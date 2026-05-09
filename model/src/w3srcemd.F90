@@ -1393,9 +1393,9 @@ CONTAINS
           JAC2     = 1./TPI/SIG(IK)
           FRLOCAL  = SIG(IK)*TPIINV
 #ifdef W3_ST6
-          DAM2(1+(IK-1)*NTH) = 5E-7 * GRAV/FRLOCAL**4 * USTAR * FMEAN * DTMIN * JAC * JAC2
+          DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * FMEAN * DTMIN * JAC * JAC2
 #else
-          DAM2(1+(IK-1)*NTH) = 5E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTMIN * JAC * JAC2
+          DAM2(1+(IK-1)*NTH) = 3E-7 * GRAV/FRLOCAL**4 * USTAR * MAX(FMEANWS,FMEAN) * DTMIN * JAC * JAC2
 #endif
           !FROM WWM:           5E-7  * GRAV/FR(IS)**4          * USTAR * MAX(FMEANWS(IP),FMEAN(IP)) * DT4S/PI2/SPSIG(IS)
         END DO
