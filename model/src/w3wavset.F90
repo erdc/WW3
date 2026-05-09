@@ -1455,7 +1455,7 @@
       USE W3GDATMD, ONLY: STP_TOL_OUTER, STP_TOL_INNER
       USE W3GDATMD, only : IOBPA_LOC, IOBDP_LOC, IOBP_LOC
       USE W3ODATMD, only : IAPROC, NAPROC
-      use yowNodepool, only: np, npa, y
+      use yowNodepool, only: np, npa, y, iplg
       use yowExchangeModule, only : PDLIB_exchange1Dreal
       USE W3ADATMD, ONLY: MPI_COMM_WCMP
       USE CONSTANTS, ONLY : DERA, RADIUS
@@ -1487,8 +1487,8 @@
       INTEGER :: IP, J, JP, J_diag
       INTEGER :: iter, max_iter
       INTEGER :: ierr_mpi
-      INTEGER :: IP_deepest
-      REAL(rkind) :: max_depth
+      INTEGER :: IP_deepest, IP_deepest_glob, IP_ref_glob
+      REAL(rkind) :: max_depth, global_max_depth
 #ifdef W3_S
       CALL STRACE (IENT, 'TRIG_WAVE_SETUP_SOLVE_IMPLICIT')
 #endif
@@ -1514,27 +1514,50 @@
         END IF
       END DO
 !
-!     Find boundary point with largest depth to fix reference level
+!     Find one global boundary point with largest depth to fix reference level
 !     This removes constant ambiguity in pure Neumann problem (SWAN approach)
 !
       IP_deepest = -1
       max_depth = -999.0
-      DO IP = 1, npa
+      IP_deepest_glob = HUGE(IP_deepest_glob)
+      DO IP = 1, np
         IF (IOBPA_LOC(IP) .eq. 1 .AND. IOBDP_LOC(IP) .eq. 1) THEN
-          IF (DWNX(IP) .gt. max_depth) THEN
+          IF (DWNX(IP) .gt. max_depth .OR.                         &
+              (DWNX(IP) .eq. max_depth .AND.                       &
+               iplg(IP) .lt. IP_deepest_glob)) THEN
             max_depth = DWNX(IP)
             IP_deepest = IP
+            IP_deepest_glob = iplg(IP)
           END IF
         END IF
       END DO
+      global_max_depth = max_depth
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, global_max_depth, 1,         &
+                         MPI_DOUBLE_PRECISION, MPI_MAX,             &
+                         MPI_COMM_WCMP, ierr_mpi)
+      IP_ref_glob = HUGE(IP_ref_glob)
+      IF (IP_deepest .gt. 0 .AND. max_depth .eq. global_max_depth) THEN
+        IP_ref_glob = IP_deepest_glob
+      END IF
+      CALL MPI_ALLREDUCE(MPI_IN_PLACE, IP_ref_glob, 1, MPI_INTEGER, &
+                         MPI_MIN, MPI_COMM_WCMP, ierr_mpi)
+      IP_deepest = -1
+      IF (IP_ref_glob .lt. HUGE(IP_ref_glob)) THEN
+        DO IP = 1, npa
+          IF (iplg(IP) .eq. IP_ref_glob) THEN
+            IP_deepest = IP
+          END IF
+        END DO
+      END IF
 !
 !     Apply Dirichlet BC (ζ=0) at deepest boundary point
 !
       IF (IP_deepest .gt. 0) THEN
         DIAG_IMPL(IP_deepest) = 1.0
-        IF (IAPROC .eq. 1) THEN
-          WRITE(6,*) 'SETUP: Reference point IP=', IP_deepest, ' depth=', max_depth
-        END IF
+      END IF
+      IF (IP_ref_glob .lt. HUGE(IP_ref_glob) .AND. IAPROC .eq. 1) THEN
+        WRITE(6,*) 'SETUP: Reference point global IP=', IP_ref_glob, &
+                   ' depth=', global_max_depth
       END IF
 !
 !     Precompute reciprocal of diagonal
@@ -2048,17 +2071,20 @@
 #endif
       ZETA_WORK_ALL = 0.
       DO IP = 1, npa
-        isea = iplg(IP)
-        ZETA_WORK_ALL(isea) = ZETA_WORK(IP)
+        IX = iplg(IP)
+        ZETA_WORK_ALL(IX) = ZETA_WORK(IP)
       END DO
       CALL SYNCHRONIZE_GLOBAL_ARRAY(ZETA_WORK_ALL)
       DO IX = 1, NX
-        ZETA_SETUP(IX) = ZETA_WORK_ALL(IX)
+        ISEA = MAPFS(1,IX)
+        IF (ISEA .gt. 0) THEN
+          ZETA_SETUP(ISEA) = ZETA_WORK_ALL(IX)
         !WLVeff    = WLV(ISEA) + ZETA_SETUP(ISEA)
         !WLV(ISEA) = WLVeff
         !WRITE(*,*) DW (IX), MAX ( 0. ,ZETA_WORK_ALL(IX)-ZB(IX) ), ZETA_WORK_ALL(IX), ZB(IX)
         !DW (ISEA) = MAX ( 0. , WLVeff-ZB(ISEA) )
-        DW (IX) = MAX ( 0. , ZETA_WORK_ALL(IX) - ZB(IX) )
+          DW (ISEA) = MAX ( 0. , ZETA_WORK_ALL(IX) - ZB(IX) )
+        END IF
       END DO
 !      IF (IAPROC .EQ. 1) THEN
 !        write(6666)  1. 

@@ -3500,7 +3500,7 @@ CONTAINS
           IK     = 1 + (ISP-1)/NTH
           K1    =  KP(POS,ISP,IE)
 #ifdef W3_REF1
-          eIOBPDR=(1-IOBP_LOC(IP_glob))*(1-IOBPD_LOC(ITH,IP_glob))
+          eIOBPDR=(1-IOBP_LOC(IP))*(1-IOBPD_LOC(ITH,IP))
           IF (eIOBPDR .eq. 1) THEN
             K1=ZERO
           END IF
@@ -6908,7 +6908,7 @@ CONTAINS
     USE W3SERVMD, only: STRACE
 #endif
     USE CONSTANTS, only : LPDLIB
-    USE W3GDATMD, only: MAPSF, NSEAL, DMIN, MAPSTA, NX
+    USE W3GDATMD, only: MAPFS, DMIN
     USE W3GDATMD, only: IOBP_LOC, IOBPD_LOC, IOBPA_LOC, IOBDP_LOC
     USE W3ADATMD, only: DW
     USE W3PARALL, only: INIT_GET_ISEA
@@ -6936,7 +6936,10 @@ CONTAINS
     DO JSEA=1,SIZE(IOBDP_LOC)
       IP = JSEA
       IP_glob = iplg(IP)
-      IF (DW(IP_glob) .LT. DMIN + DTHR) THEN
+      ISEA = MAPFS(1,IP_glob)
+      IF (ISEA .LE. 0) THEN
+        IOBDP_LOC(IP)  = 0
+      ELSE IF (DW(ISEA) .LT. DMIN + DTHR) THEN
         IOBDP_LOC(IP)  = 0
       ELSE
         IOBDP_LOC(IP)  = 1
