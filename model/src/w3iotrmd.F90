@@ -221,8 +221,8 @@ CONTAINS
     USE W3ADATMD, ONLY: W3SETA
     USE W3ODATMD, ONLY: W3SETO, W3DMO3
     !/
-    USE W3GDATMD, ONLY: NK, NTH, NSPEC, NSEA, NSEAL, NX, NY,        &
-         FLAGLL, ICLOSE, XGRD, YGRD, GSU,            &
+    USE W3GDATMD, ONLY: NK, NTH, NSEAL, NX, NY,        &
+         FLAGLL, XGRD, YGRD, GSU,            &
          DPDX, DPDY, DQDX, DQDY, MAPSTA, MAPST2,     &
          MAPFS, TH, DTH, SIG, DSIP, XFR, FILEXT
     USE W3GSRUMD, ONLY: W3GFCL
@@ -234,8 +234,9 @@ CONTAINS
     USE W3ADATMD, ONLY: CG, DW, CX, CY, UA, UD, AS
 #ifdef W3_MPI
     USE W3ADATMD, ONLY: MPI_COMM_WAVE
+    USE W3GDATMD, ONLY: NSPEC
 #endif
-    USE W3ODATMD, ONLY: NDST, NDSE, IAPROC, NAPROC, NAPTRK, NAPERR, &
+    USE W3ODATMD, ONLY: NDST, NDSE, IAPROC, NAPTRK, NAPERR, &
          IPASS => IPASS3, ATOLAST => TOLAST,         &
          ADTOUT => DTOUT, O3INIT, STOP, MASK1,       &
          MASK2, TRCKID, FNMPRE
@@ -249,12 +250,12 @@ CONTAINS
 #ifdef W3_S
     USE W3SERVMD, ONLY: STRACE
 #endif
+#ifdef W3_MPI
+    use mpi_f08
+#endif
     !
     IMPLICIT NONE
     !
-#ifdef W3_MPI
-    INCLUDE "mpif.h"
-#endif
     !/
     !/ ------------------------------------------------------------------- /
     !/ Parameter list
@@ -282,7 +283,7 @@ CONTAINS
 #endif
 #ifdef W3_MPI
     INTEGER                 :: IT, IROOT, IFROM, IERR_MPI
-    INTEGER, ALLOCATABLE    :: STATUS(:,:)
+    type(MPI_STATUS), ALLOCATABLE    :: STATUS(:)
 #endif
     REAL                    :: XN, YN, XT, YT, RD, X, Y, WX, WY,    &
          SPEC(NK,NTH), FACTOR, ASPTRK(NTH,NK),&
@@ -344,7 +345,7 @@ CONTAINS
 #ifdef W3_MPI
     IF ( NRQTR .NE. 0 ) THEN
       CALL MPI_STARTALL ( NRQTR, IRQTR, IERR_MPI )
-      ALLOCATE ( STATUS(MPI_STATUS_SIZE,NRQTR) )
+      ALLOCATE ( STATUS(NRQTR) )
       CALL MPI_WAITALL ( NRQTR, IRQTR , STATUS, IERR_MPI )
       DEALLOCATE ( STATUS )
     END IF
@@ -721,7 +722,7 @@ CONTAINS
 #ifdef W3_MPI
     IT     = IT0TRK
     IROOT  = NAPTRK - 1
-    ALLOCATE ( STATUS(MPI_STATUS_SIZE,1) )
+    ALLOCATE ( STATUS(1) )
 #endif
     !
     DO IY=1, NY
@@ -829,7 +830,7 @@ CONTAINS
 #ifdef W3_MPI
                 CALL MPI_RECV (ASPTRK, NSPEC, MPI_REAL,&
                      IFROM, IT, MPI_COMM_WAVE,   &
-                     STATUS, IERR_MPI )
+                     STATUS(1), IERR_MPI )
 #endif
                 !
                 DO IK=1, NK

@@ -316,12 +316,10 @@ CONTAINS
     !/       No unauthorized use without permission.
     !/
     USE W3SERVMD, ONLY: EXTIOF
-
-    IMPLICIT NONE
 #ifdef W3_MPI
-
-    INCLUDE "mpif.h"
+    use mpi_f08
 #endif
+    IMPLICIT NONE
     !
     !  1. Purpose :
     !
@@ -371,8 +369,7 @@ CONTAINS
     INTEGER      :: maxGroup, intype, tmax, tcur, ntint
     INTEGER, POINTER :: maxSys(:)
     TYPE(dat2d), POINTER :: wsdat(:)
-    TYPE(timsys), POINTER :: sysA(:), sysAA(:)
-    INTEGER      :: NumConsSys, iConsSys
+    TYPE(timsys), POINTER :: sysA(:)
     REAL         :: dt
     REAL         :: minlon, maxlon, minlat, maxlat
     INTEGER      :: mxcwt, mycwt
@@ -421,7 +418,7 @@ CONTAINS
     REAL, ALLOCATABLE :: mlon(:,:), mlat(:,:), tmp_r4(:)
     REAL, POINTER :: uniqueTim(:),uniqueLatraw(:),uniqueLonraw(:), &
          uniqueLat(:),uniqueLon(:)
-    INTEGER    :: ioerr,ierr, i, j, k, l, alreadyIn, ok, tss, tsA
+    INTEGER    :: ioerr,ierr, i, j, k, l, tsA
     INTEGER    :: maxPart, DATETIME(2)
     INTEGER    :: tstep, iline, numpart, skipln, readln, filesize
     REAL       :: x,y,wnd,wnddir
@@ -429,17 +426,15 @@ CONTAINS
     REAL       :: invar5, invar6, invar7
     REAL, ALLOCATABLE :: phs(:),ptp(:),pdir(:),pspr(:),pwf(:) ! current partition values
     REAL*8     :: date1, date2, ttest, ttemp
-    INTEGER    :: ic, leng, maxpartout                                  ! Remove?
-    REAL       :: dx
+    INTEGER    :: maxpartout                                  ! Remove?
     INTEGER    :: latind1, latind2, lonind1, lonind2
     REAL       :: lonext, latext
     LOGICAL    :: endloop
 
 #ifdef W3_MPI
-    INTEGER    :: rank, irank, nproc, EXTENT, DOMSIZE, tag1, tag2
+    INTEGER    :: rank, irank, nproc, DOMSIZE, tag1, tag2, ic
     !      INTEGER    :: MPI_INT_DOMARR, MPI_REAL_DOMARR
-    INTEGER    :: MPI_STATUS(MPI_STATUS_SIZE)
-    INTEGER    :: REQ(16)
+    type(MPI_STATUS) :: MPI_STAT 
     !    INTEGER    :: ISTAT(MPI_STATUS_SIZE,16)
     REAL       :: COMMARR1(44)
     INTEGER    :: COMMARR2(11)
@@ -1287,7 +1282,7 @@ CONTAINS
                 !                         WRITE(6,*) '<< Receiving: rank,irank,tag1=', &
                 !                                rank,irank,(tag1+1)
                 CALL MPI_RECV(COMMARR1,44,MPI_REAL,0,(tag1+1), &
-                     MPI_COMM_WORLD,MPI_STATUS,IERR)
+                     MPI_COMM_WORLD,MPI_STAT,IERR)
                 wsdat(tsA)%par(i,j)%hs = COMMARR1(1:10)
                 wsdat(tsA)%par(i,j)%tp = COMMARR1(11:20)
                 wsdat(tsA)%par(i,j)%dir = COMMARR1(21:30)
@@ -1306,7 +1301,7 @@ CONTAINS
               IF (rank.EQ.irank) THEN
                 CALL MPI_RECV(wsdat(tsA)%date,1, &
                      MPI_DOUBLE_PRECISION,0,(tag1+2), &
-                     MPI_COMM_WORLD,MPI_STATUS,IERR)
+                     MPI_COMM_WORLD,MPI_STAT,IERR)
               END IF
 
               IF (rank.EQ.0) THEN
@@ -1322,7 +1317,7 @@ CONTAINS
                 !                                rank,irank,(tag1+3)
                 CALL MPI_RECV(COMMARR2,11, &
                      MPI_INTEGER,0,(tag1+3), &
-                     MPI_COMM_WORLD,MPI_STATUS,IERR)
+                     MPI_COMM_WORLD,MPI_STAT,IERR)
                 wsdat(tsA)%par(i,j)%ipart(:) = COMMARR2(1:10)
                 wsdat(tsA)%par(i,j)%checked = COMMARR2(11)
               END IF
@@ -1557,7 +1552,7 @@ CONTAINS
         IF (rank.EQ.0) THEN
           !               WRITE(20,*) '<< Receiving: rank,tsA,tag1=',rank,tsA,tag1
           CALL MPI_RECV(maxSys(tsA),1,MPI_INTEGER, &
-               irank,tag1,MPI_COMM_WORLD,MPI_STATUS,IERR)
+               irank,tag1,MPI_COMM_WORLD,MPI_STAT,IERR)
           !              Allocate structure at this time level
           ALLOCATE( sysA(tsA)%sys(maxSys(tsA)) )
           DO ic = 1,maxSys(tsA)
@@ -1605,14 +1600,14 @@ CONTAINS
               !                 WRITE(20,*) '>> Sending: rank,irank,tag2=', &
               !                             rank,irank,(tag2+1)
               CALL MPI_SEND(sysA(tsA)%sys(ic)%i(:),DOMSIZE, &
-                   MPI_INTEGER,0,(tag2+1),MPI_COMM_WORLD,REQ(1),IERR)
+                   MPI_INTEGER,0,(tag2+1),MPI_COMM_WORLD,IERR)
             END IF
             IF (rank.EQ.0) THEN
               !                 WRITE(20,*) '<< Receiving: rank,irank,tag2=', &
               !                             rank,irank,(tag2+1)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%i(:),DOMSIZE, &
                    MPI_INTEGER,irank,(tag2+1), &
-                   MPI_COMM_WORLD,MPI_STATUS,REQ(2),IERR)
+                   MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
             !               CALL MPI_WAITALL(2,REQ,ISTAT,IERR)
 
@@ -1620,92 +1615,92 @@ CONTAINS
               !                 WRITE(20,*) '>> Sending: rank,irank,tag2=', &
               !                             rank,irank,(tag2+2)
               CALL MPI_SEND(sysA(tsA)%sys(ic)%j(:),DOMSIZE, &
-                   MPI_INTEGER,0,(tag2+2),MPI_COMM_WORLD,REQ(1),IERR)
+                   MPI_INTEGER,0,(tag2+2),MPI_COMM_WORLD,IERR)
             END IF
             IF (rank.EQ.0) THEN
               !                 WRITE(20,*) '<< Receiving: rank,irank,tag2=', &
               !                             rank,irank,(tag2+2)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%j(:),DOMSIZE, &
                    MPI_INTEGER,irank,(tag2+2), &
-                   MPI_COMM_WORLD,MPI_STATUS,REQ(2),IERR)
+                   MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
             !               CALL MPI_WAITALL(2,REQ,ISTAT,IERR)
 
             IF (rank.EQ.irank) THEN
               !                 WRITE(20,*) '>> Sending: rank,tag2=',rank,(tag2+3)
               CALL MPI_SEND(sysA(tsA)%sys(ic)%lon(:),DOMSIZE, &
-                   MPI_REAL,0,(tag2+3),MPI_COMM_WORLD,REQ(1),IERR)
+                   MPI_REAL,0,(tag2+3),MPI_COMM_WORLD,IERR)
             END IF
             IF (rank.EQ.0) THEN
               !                 WRITE(20,*) '<< Receiving: rank,tag2=',rank,(tag2+3)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%lon(:),DOMSIZE, &
                    MPI_REAL,irank,(tag2+3), &
-                   MPI_COMM_WORLD,MPI_STATUS,REQ(2),IERR)
+                   MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
             !               CALL MPI_WAITALL(2,REQ,ISTAT,IERR)
 
             IF (rank.EQ.irank) THEN
               !                 WRITE(20,*) '>> Sending: rank,tag2=',rank,(tag2+4)
               CALL MPI_SEND(sysA(tsA)%sys(ic)%lat(:),DOMSIZE, &
-                   MPI_REAL,0,(tag2+4),MPI_COMM_WORLD,REQ(1),IERR)
+                   MPI_REAL,0,(tag2+4),MPI_COMM_WORLD,IERR)
             END IF
             IF (rank.EQ.0) THEN
               !                 WRITE(20,*) '<< Receiving: rank,tag2=',rank,(tag2+4)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%lat(:),DOMSIZE, &
                    MPI_REAL,irank,(tag2+4), &
-                   MPI_COMM_WORLD,MPI_STATUS,REQ(2),IERR)
+                   MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
             !               CALL MPI_WAITALL(2,REQ,ISTAT,IERR)
 
             IF (rank.EQ.irank) THEN
               !                 WRITE(20,*) '>> Sending: rank,tag2=',rank,(tag2+5)
               CALL MPI_SEND(sysA(tsA)%sys(ic)%hs(:),DOMSIZE, &
-                   MPI_REAL,0,(tag2+5),MPI_COMM_WORLD,REQ(1),IERR)
+                   MPI_REAL,0,(tag2+5),MPI_COMM_WORLD,IERR)
             END IF
             IF (rank.EQ.0) THEN
               !                 WRITE(20,*) '<< Receiving: rank,tag2=',rank,(tag2+5)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%hs(:),DOMSIZE, &
                    MPI_REAL,irank,(tag2+5), &
-                   MPI_COMM_WORLD,MPI_STATUS,REQ(2),IERR)
+                   MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
             !               CALL MPI_WAITALL(2,REQ,ISTAT,IERR)
 
             IF (rank.EQ.irank) THEN
               !                 WRITE(20,*) '>> Sending: rank,tag2=',rank,(tag2+6)
               CALL MPI_SEND(sysA(tsA)%sys(ic)%tp(:),DOMSIZE, &
-                   MPI_REAL,0,(tag2+6),MPI_COMM_WORLD,REQ(1),IERR)
+                   MPI_REAL,0,(tag2+6),MPI_COMM_WORLD,IERR)
             END IF
             IF (rank.EQ.0) THEN
               !                 WRITE(20,*) '<< Receiving: rank,tag2=',rank,(tag2+6)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%tp(:),DOMSIZE, &
                    MPI_REAL,irank,(tag2+6), &
-                   MPI_COMM_WORLD,MPI_STATUS,REQ(2),IERR)
+                   MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
             !               CALL MPI_WAITALL(2,REQ,ISTAT,IERR)
 
             IF (rank.EQ.irank) THEN
               !                 WRITE(20,*) '>> Sending: rank,tag2=',rank,(tag2+7)
               CALL MPI_SEND(sysA(tsA)%sys(ic)%dir(:),DOMSIZE, &
-                   MPI_REAL,0,(tag2+7),MPI_COMM_WORLD,REQ(1),IERR)
+                   MPI_REAL,0,(tag2+7),MPI_COMM_WORLD,IERR)
             END IF
             IF (rank.EQ.0) THEN
               !                 WRITE(20,*) '<< Receiving: rank,tag2=',rank,(tag2+7)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%dir(:),DOMSIZE, &
                    MPI_REAL,irank,(tag2+7), &
-                   MPI_COMM_WORLD,MPI_STATUS,REQ(2),IERR)
+                   MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
             !               CALL MPI_WAITALL(2,REQ,ISTAT,IERR)
 
             IF (rank.EQ.irank) THEN
               !                 WRITE(20,*) '>> Sending: rank,tag2=',rank,(tag2+8)
               CALL MPI_SEND(sysA(tsA)%sys(ic)%dspr(:),DOMSIZE, &
-                   MPI_REAL,0,(tag2+8),MPI_COMM_WORLD,REQ(1),IERR)
+                   MPI_REAL,0,(tag2+8),MPI_COMM_WORLD,IERR)
             END IF
             IF (rank.EQ.0) THEN
               !                 WRITE(20,*) '<< Receiving: rank,tag2=',rank,(tag2+8)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%dspr(:),DOMSIZE, &
                    MPI_REAL,irank,(tag2+8), &
-                   MPI_COMM_WORLD,MPI_STATUS,REQ(2),IERR)
+                   MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
             !               CALL MPI_WAITALL(2,REQ,ISTAT,IERR)
 
@@ -1719,7 +1714,7 @@ CONTAINS
               !                 WRITE(20,*) '<< Receiving: rank,irank,tag2=', &
               !                             rank,irank,(tag2+9)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%hsMean,1,MPI_REAL, &
-                   irank,(tag2+9),MPI_COMM_WORLD,MPI_STATUS,IERR)
+                   irank,(tag2+9),MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
 
             IF (rank.EQ.irank) THEN
@@ -1732,7 +1727,7 @@ CONTAINS
               !                 WRITE(20,*) '<< Receiving: rank,irank,tag2=', &
               !                             rank,irank,(tag2+10)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%tpMean,1,MPI_REAL, &
-                   irank,(tag2+10),MPI_COMM_WORLD,MPI_STATUS,IERR)
+                   irank,(tag2+10),MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
 
             IF (rank.EQ.irank) THEN
@@ -1745,7 +1740,7 @@ CONTAINS
               !                 WRITE(20,*) '<< Receiving: rank,irank,tag2=', &
               !                             rank,irank,(tag2+11)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%dirMean,1,MPI_REAL, &
-                   irank,(tag2+11),MPI_COMM_WORLD,MPI_STATUS,IERR)
+                   irank,(tag2+11),MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
 
             IF (rank.EQ.irank) THEN
@@ -1758,7 +1753,7 @@ CONTAINS
               !                 WRITE(20,*) '<< Receiving: rank,irank,tag2=', &
               !                             rank,irank,(tag2+12)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%sysInd,1,MPI_INTEGER,&
-                   irank,(tag2+12),MPI_COMM_WORLD,MPI_STATUS,IERR)
+                   irank,(tag2+12),MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
 
             IF (rank.EQ.irank) THEN
@@ -1771,7 +1766,7 @@ CONTAINS
               !                 WRITE(20,*) '<< Receiving: rank,irank,tag2=', &
               !                             rank,irank,(tag2+13)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%nPoints,1,MPI_INTEGER,&
-                   irank,(tag2+13),MPI_COMM_WORLD,MPI_STATUS,IERR)
+                   irank,(tag2+13),MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
 
             IF (rank.EQ.irank) THEN
@@ -1784,7 +1779,7 @@ CONTAINS
               !                 WRITE(20,*) '<< Receiving: rank,irank,tag2=', &
               !                             rank,irank,(tag2+14)
               CALL MPI_RECV(sysA(tsA)%sys(ic)%grp,1,MPI_INTEGER,&
-                   irank,(tag2+14),MPI_COMM_WORLD,MPI_STATUS,IERR)
+                   irank,(tag2+14),MPI_COMM_WORLD,MPI_STAT,IERR)
             END IF
           END DO
         END IF
@@ -2129,21 +2124,18 @@ CONTAINS
     LOGICAL :: file_exists
     CHARACTER :: dummy*23
     TYPE(sysmemory) :: sysMem(50)                                             !!! 50 memory spaces should be enough Check!!!
-    INTEGER :: leng, l, i, ii, j, k, kk, idir, numSys, &
-         counter, new, DIFSIZE, tpMinInd, dirMinInd, used, ok
-    REAL    :: Tb,  deltaPer, deltaDir, tpMinVal, dirMinVal, &
-         dirForTpMin, tpForDirMin
+    INTEGER :: leng, l, i, ii, j, k, kk, idir,       &
+         counter, new, tpMinInd, dirMinInd, used, ok
+    REAL    :: deltaPer, deltaDir, tpMinVal
     REAL, ALLOCATABLE :: sysOrdered(:), TEMP(:), dirs(:)
-    REAL, POINTER :: DIFARR(:)
     INTEGER, ALLOCATABLE :: indSorted(:), alreadyUsed(:), allInd(:)
     INTEGER, ALLOCATABLE :: ind(:), ind2(:)
     INTEGER :: ts1
     REAL, ALLOCATABLE :: GOF(:,:), GOFMinVal(:), GOFMinInd(:), &
          Tbsysmem(:), deltaDirsysmem(:), &
          deltaPersysmem(:),m1sysmem(:),m2sysmem(:)
-    REAL    :: m1, m2
     REAL    :: lonmean, latmean, dmndiag
-    INTEGER :: npnts, npnts2
+    INTEGER :: npnts
     REAL, ALLOCATABLE :: mnlonlist(:), mnlatlist(:), mndist(:)
     REAL, POINTER     :: dummy1(:),dummy2(:),dummy3(:)
     INTEGER, ALLOCATABLE :: olsize(:)
@@ -3059,14 +3051,12 @@ CONTAINS
     TYPE(mtchsys) :: match
     LOGICAL       :: found
     INTEGER       :: counter, ii, jj, nngbr, startCount, endCount, l,&
-         nout, maxS, s, p, n, countAll, ind, minInd, &
-         npart, pp, leng
+         nout, maxS, s, p, n, countAll, ind, npart, pp, leng
     INTEGER       :: allFullSys(50)
     REAL, POINTER :: realarr(:)
     INTEGER, ALLOCATABLE :: allSys(:)
     REAL         :: hsAll(50),tpAll(50),dirAll(50),GOF(50)
-    REAL         :: absDir,absPer,absHs,T,&
-         deltaPer,deltaDir,deltaHs,temp
+    REAL         :: absDir,absPer,absHs,T,deltaPer,deltaDir,deltaHs
     REAL         :: dx, m1, m2
     REAL         :: GOFMinVal
     INTEGER      :: GOFMinInd
@@ -3346,7 +3336,7 @@ CONTAINS
     !     combine     Int      input   Toggle: 1=combine systems; 0=do not combine
 
     TYPE(dat2d) :: wsdat
-    TYPE(system), POINTER :: sys(:), systemp(:)
+    TYPE(system), POINTER :: sys(:)
     INTEGER      :: maxSys, maxPts, maxI, maxJ, combine
     REAL         :: perKnob ,dirKnob, hsKnob
 
@@ -3359,12 +3349,11 @@ CONTAINS
     !     nSys       Int   Number of wave systems (for checking iterative combining loop)
     !
     LOGICAL   :: found
-    INTEGER, ALLOCATABLE :: sysOut(:)
     INTEGER, ALLOCATABLE :: actSysInd(:)
     INTEGER   :: iter, ok, nSys, mS, s, so, ss, ind, leng, &
          iw, jw, iloop
     INTEGER   :: actSys
-    REAL      :: dev, hsCmp, maxHgt, temp(5)
+    REAL      :: dev, hsCmp, maxHgt
     !
     !  4. Subroutines used :
     !
@@ -3837,7 +3826,7 @@ CONTAINS
     REAL, ALLOCATABLE    :: sysOrdered(:), rounded(:)
     REAL, POINTER    :: uniarr(:), difarr(:), allngbr(:)
     INTEGER   :: leng, leng2, s, ss, so, ngb, lsys, lsys2, hh, i, j, &
-         ii, jj, ind, ind2, nn, nbr, icEnd,ic,iii,iloop
+         ii, jj, ind, ind2, nn, nbr, ic, iii
     INTEGER   :: myngbr, indMatch, matchSys, keep, replacedInd, &
          hhForIndMatch, lMatch, tot, outsize
     INTEGER   :: ngbIndex(10000), keepInd(maxI*maxJ), oneLess(1000)     !Array large enough?
@@ -4430,7 +4419,7 @@ CONTAINS
 
     TYPE(duplicate) :: dup(100)                                         !40.PAR
     LOGICAL :: found
-    INTEGER :: nsys, ndup, p, pp, maxInd, npart, s, ss, ppp
+    INTEGER :: nsys, p, pp, maxInd, npart, s, ss, ppp
     REAL :: temp
     !
     !  4. Subroutines used :
@@ -5735,6 +5724,8 @@ CONTAINS
     !     LO      INTEGER      input    First element
     !     HI      INTEGER      input    Last element
     !
+    USE W3SERVMD, ONLY: EXTCDE
+    !/
     IMPLICIT NONE
     !/
     INTEGER, INTENT(IN) :: LO,HI
@@ -5768,16 +5759,16 @@ CONTAINS
     !/    --- Check array size and bounds. ---
     IF ( SIZE(ARRAY).EQ. 0 ) THEN
       WRITE(6,199)
-      CALL ABORT
+      CALL EXTCDE(1)
     ELSE IF ( SIZE(ARRAY).NE.SIZE(IDX) ) THEN
       WRITE(6,201)
-      CALL ABORT
+      CALL EXTCDE(2)
     ELSE IF ( LBOUND(ARRAY,1).GT.LO ) THEN
       WRITE(6,203)
-      CALL ABORT
+      CALL EXTCDE(3)
     ELSE IF ( UBOUND(ARRAY,1).LT.HI ) THEN
       WRITE(6,205)
-      CALL ABORT
+      CALL EXTCDE(4)
     END IF
     !
     TOP = LO
@@ -5860,6 +5851,8 @@ CONTAINS
     !     LO      INTEGER      input    First element
     !     HI      INTEGER      input    Last element
     !
+    USE W3SERVMD, ONLY: EXTCDE
+    !/
     IMPLICIT NONE
     !/
     INTEGER, INTENT(IN) :: LO,HI
@@ -5867,7 +5860,7 @@ CONTAINS
     !/
     !     Local variables
     !     ----------------------------------------------------------------
-    INTEGER :: TOP, BOT, I
+    INTEGER :: TOP, BOT
     REAL    :: VAL, TMP
     LOGICAL :: LOOP
     !
@@ -5893,16 +5886,16 @@ CONTAINS
     !/    --- Check array size and bounds. ---
     IF ( SIZE(ARRAY).EQ. 0 ) THEN
       WRITE(6,199)
-      CALL ABORT
+      CALL EXTCDE(5)
     ELSE IF ( SIZE(ARRAY).NE.SIZE(IDX) ) THEN
       WRITE(6,201)
-      CALL ABORT
+      CALL EXTCDE(6)
     ELSE IF ( LBOUND(ARRAY,1).GT.LO ) THEN
       WRITE(6,203)
-      CALL ABORT
+      CALL EXTCDE(7)
     ELSE IF ( UBOUND(ARRAY,1).LT.HI ) THEN
       WRITE(6,205)
-      CALL ABORT
+      CALL EXTCDE(8)
     END IF
     !
     TOP = LO

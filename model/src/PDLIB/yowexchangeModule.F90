@@ -38,7 +38,7 @@
 !> Has only the ghost nodes assign to a neighbor domain
 module yowExchangeModule
   use yowDatapool, only: rkind
-  use MPI, only: MPI_DATATYPE_NULL
+  use mpi_f08, only: MPI_INTEGER, MPI_Datatype, MPI_DATATYPE_NULL
   implicit none
   private
   public :: initNbrDomains, createMPITypes, setDimSize
@@ -72,22 +72,22 @@ module yowExchangeModule
     ! MPI datatypes for size(U) == npa+1  U(0:npa)
 
     !> MPI datatypes for 1D exchange
-    integer :: p1DRsendType_zero = MPI_DATATYPE_NULL
-    integer :: p1DRrecvType_zero = MPI_DATATYPE_NULL
+    type(MPI_Datatype) :: p1DRsendType_zero = MPI_DATATYPE_NULL
+    type(MPI_Datatype) :: p1DRrecvType_zero = MPI_DATATYPE_NULL
 
     !> MPI datatypes for 2D exchange
-    integer :: p2DRsendType_zero = MPI_DATATYPE_NULL
-    integer :: p2DRrecvType_zero = MPI_DATATYPE_NULL
+    type(MPI_Datatype) :: p2DRsendType_zero = MPI_DATATYPE_NULL
+    type(MPI_Datatype) :: p2DRrecvType_zero = MPI_DATATYPE_NULL
 
     ! MPI datatypes for size(U) == npa  U(1:npa)
     !> MPI datatypes for 1D exchange
-    integer :: p1DRsendType = MPI_DATATYPE_NULL
-    integer :: p1DRrecvType = MPI_DATATYPE_NULL
+    type(MPI_Datatype) :: p1DRsendType = MPI_DATATYPE_NULL
+    type(MPI_Datatype) :: p1DRrecvType = MPI_DATATYPE_NULL
     !> MPI datatypes for 2D exchange
-    integer :: p2DRsendType1 = MPI_DATATYPE_NULL
-    integer :: p2DRrecvType1 = MPI_DATATYPE_NULL
-    integer :: p2DRsendType2 = MPI_DATATYPE_NULL
-    integer :: p2DRrecvType2 = MPI_DATATYPE_NULL
+    type(MPI_Datatype) :: p2DRsendType1 = MPI_DATATYPE_NULL
+    type(MPI_Datatype) :: p2DRrecvType1 = MPI_DATATYPE_NULL
+    type(MPI_Datatype) :: p2DRsendType2 = MPI_DATATYPE_NULL
+    type(MPI_Datatype) :: p2DRrecvType2 = MPI_DATATYPE_NULL
 
   contains
     !     procedure :: exchangeGhostIds
@@ -116,7 +116,7 @@ contains
 
   subroutine finalize(this)
     use yowerr
-    use MPI
+    use mpi_f08
     implicit none
     class(t_neighborDomain), intent(inout) :: this
     integer :: ierr
@@ -149,9 +149,9 @@ contains
   ! create MPI indexed datatype for this neighborDomain
   subroutine createMPIType(this)
     use yowerr
-    use MPI
+    use mpi_f08
     use yowNodepool, only: ghostgl, np, ipgl
-    use yowDatapool, only: rtype, itype
+    use yowDatapool, only: rtype
     implicit none
     class(t_neighborDomain), intent(inout) :: this
 
@@ -249,15 +249,15 @@ contains
   !> \note MPI send tag: 10000 + neighbor MPI rank
   subroutine PDLIB_exchange1Dreal(U)
     use yowDatapool, only: comm, myrank, rkind
-    use yowNodepool, only: t_Node, nodes_global, np, ng, ghosts, npa
+    use yowNodepool, only: t_Node, ghosts, npa
     use yowerr
-    use MPI
+    use mpi_f08
     implicit none
-    real(kind=rkind), intent(inout) :: U(:)
+    real(kind=rkind), intent(inout) :: U(npa)
 
     integer :: i, ierr, tag
-    integer :: sendRqst(nConnDomains), recvRqst(nConnDomains)
-    integer :: recvStat(MPI_STATUS_SIZE, nConnDomains), sendStat(MPI_STATUS_SIZE, nConnDomains)
+    type(MPI_REQUEST) :: sendRqst(nConnDomains), recvRqst(nConnDomains)
+    type(MPI_STATUS)  :: recvStat(nConnDomains), sendStat(nConnDomains)
     character(len=140) :: errmsg
 
     if(size(U) /= npa) then
@@ -292,6 +292,7 @@ contains
     if(ierr/=MPI_SUCCESS) CALL PARALLEL_ABORT("waitall", ierr)
     call mpi_waitall(nConnDomains, sendRqst, sendStat,ierr)
     if(ierr/=MPI_SUCCESS) CALL PARALLEL_ABORT("waitall", ierr)
+
   end subroutine PDLIB_exchange1Dreal
 
 
@@ -301,22 +302,31 @@ contains
   !> \note MPI send tag: 30000 + neighbor MPI rank
   subroutine PDLIB_exchange2Dreal(U)
     use yowDatapool, only: comm, myrank, rkind
-    use yowNodepool, only: t_Node, nodes_global, np, ng, ghosts, npa
+    use yowNodepool, only: t_Node, ghosts
     use yowerr
-    use MPI
+    use mpi_f08
+#ifdef W3_DEBUGEXCH
     USE W3ODATMD, only : IAPROC
+#endif
     implicit none
     real(kind=rkind), intent(inout) :: U(:,:)
 
-    integer :: i, ierr, tag
-    integer :: sendRqst(nConnDomains), recvRqst(nConnDomains)
-    integer :: recvStat(MPI_STATUS_SIZE, nConnDomains), sendStat(MPI_STATUS_SIZE, nConnDomains)
+    real(kind=rkind), allocatable :: Ub_send(:,:), Ub_recv(:,:)
+
+    integer :: i, ierr, tag, istat
+    type(MPI_REQUEST) :: sendRqst(nConnDomains), recvRqst(nConnDomains)
+    type(MPI_STATUS)  :: recvStat(nConnDomains), sendStat(nConnDomains)
 
 
 #ifdef W3_DEBUGEXCH
     WRITE(740+IAPROC,*) 'PDLIB_exchange2Dreal, step 3'
     FLUSH(740+IAPROC)
 #endif
+
+    allocate(Ub_send(size(U,1), size(U,2)))
+    allocate(Ub_recv(size(U,1), size(U,2)))
+    Ub_send = U
+    Ub_recv = U
 
     ! post receives
 #ifdef W3_DEBUGEXCH
@@ -325,7 +335,7 @@ contains
 #endif
     do i=1, nConnDomains
       tag = 30000 + myrank
-      call MPI_IRecv(U, 1, neighborDomains(i)%p2DRrecvType1, &
+      call MPI_IRecv(Ub_recv, 1, neighborDomains(i)%p2DRrecvType1, &
            neighborDomains(i)%domainID-1, tag, comm, &
            recvRqst(i), ierr)
       if(ierr/=MPI_SUCCESS) then
@@ -340,7 +350,7 @@ contains
     ! post sends
     do i=1, nConnDomains
       tag = 30000 + (neighborDomains(i)%domainID-1)
-      call MPI_ISend(U, 1, neighborDomains(i)%p2DRsendType1, &
+      call MPI_ISend(Ub_send, 1, neighborDomains(i)%p2DRsendType1, &
            neighborDomains(i)%domainID-1, tag, comm, &
            sendRqst(i), ierr)
       if(ierr/=MPI_SUCCESS) then
@@ -365,6 +375,10 @@ contains
     WRITE(740+IAPROC,*) 'PDLIB_exchange2Dreal, step 12'
     FLUSH(740+IAPROC)
 #endif
+
+    U = Ub_recv
+    deallocate(Ub_send, Ub_recv, stat=istat)
+
   end subroutine PDLIB_exchange2Dreal
 
 
@@ -398,14 +412,13 @@ contains
     use yowDatapool, only: comm, myrank, rkind
     use yowNodepool, only: npa
     use yowErr
-    use Mpi
+    use mpi_f08
     implicit none
     real(kind=rkind), intent(inout) :: U(0:npa)
 
     integer :: i, ierr, tag
-    integer :: sendRqst(nConnDomains), recvRqst(nConnDomains)
-    integer :: recvStat(MPI_STATUS_SIZE, nConnDomains), sendStat(MPI_STATUS_SIZE, nConnDomains)
-    character(len=200) errstr
+    type(MPI_REQUEST) :: sendRqst(nConnDomains), recvRqst(nConnDomains)
+    type(MPI_STATUS)  :: recvStat(nConnDomains), sendStat(nConnDomains)
 
     ! It is impossible to add these range checks because assumed shape array start vom 1:npa+1 even if you allocate it from 0:npa
 
@@ -468,14 +481,13 @@ contains
     use yowDatapool, only: comm, myrank, rkind
     use yowNodepool, only: npa
     use yowErr
-    use Mpi
+    use mpi_f08
     implicit none
     real(kind=rkind), intent(inout) :: U(n2ndDim,0:npa)
 
     integer :: i, ierr, tag
-    integer :: sendRqst(nConnDomains), recvRqst(nConnDomains)
-    integer :: recvStat(MPI_STATUS_SIZE, nConnDomains), sendStat(MPI_STATUS_SIZE, nConnDomains)
-    character(len=200) errstr
+    type(MPI_REQUEST) :: sendRqst(nConnDomains), recvRqst(nConnDomains)
+    type(MPI_STATUS)  :: recvStat(nConnDomains), sendStat(nConnDomains)
 
     ! It is impossible to add these range checks because assumed shape array start vom 1:npa+1 even if you allocate it from 0:npa
     !     if(size(U,2) /= npa+1) then
