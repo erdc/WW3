@@ -154,6 +154,13 @@ if("MPI" IN_LIST switches)
   target_link_libraries(ww3_lib PUBLIC MPI::MPI_Fortran)
 endif()
 
+# When SHYFEM is enabled in switches, w3profsmd's internal BLAS (DNRM2/DDOT/DAXPY/DLASSQ)
+# is wrapped in #ifndef W3_SHYFEM, so an external BLAS must be linked.
+if("SHYFEM" IN_LIST switches)
+  find_package(BLAS REQUIRED)
+  target_link_libraries(ww3_lib PUBLIC BLAS::BLAS)
+endif()
+
 # Handle PDLIB, SCRIP, SCRIPNC build files directly instead of through configuration file
 if("PDLIB" IN_LIST switches)
   if("SCOTCH" IN_LIST switches)

@@ -2040,6 +2040,10 @@ END MODULE W3PROFSMD
 !     the routine that performs the preconditioning operations or the
 !     convergence tests.
 !-----------------------------------------------------------------------
+#ifndef W3_SHYFEM
+!=== begin dead-code block: SPARSKIT iterative solvers + helpers
+!=== not called from any WW3 source outside w3profsmd; wrapped to avoid
+!=== duplicate-symbol conflict with SHYFEM's libsparskit.a
 subroutine bcgstab(n, rhs, sol, ipar, fpar, w)
   implicit none
   integer n, ipar(16)
@@ -4490,6 +4494,8 @@ subroutine pgmres(n, im, rhs, sol, eps, maxits, aspar, nnz, ia, ja, alu, jlu, ju
   !---------------------------------------------------------------------
 end subroutine pgmres
 !-----------------------------------------------------------------------
+#endif
+!=== end dead-code SPARSKIT block
 
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
