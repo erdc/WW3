@@ -650,14 +650,6 @@ CONTAINS
       CALL FLUSH(NDSE)
       STOP
     END IF
-#ifdef W3_PDLIB
-    IF (B_JGS_BLOCK_GAUSS_SEIDEL .AND. .NOT. B_JGS_USE_JACOBI) THEN
-      WRITE(NDSE,*) 'B_JGS_BLOCK_GAUSS_SEIDEL is used but the Jacobi solver is not choosen'
-      WRITE(NDSE,*) 'Please set JGS_USE_JACOBI .eqv. .true.'
-      CALL FLUSH(NDSE)
-      STOP
-    ENDIF
-#endif
 
     !
     ! 1.c Open files without unpacking MDS ,,,
@@ -726,6 +718,16 @@ CONTAINS
     ! 2.a Read model definition file
     !
     CALL W3IOGR ( 'READ', NDS(5), IMOD, FEXT )
+#ifdef W3_PDLIB
+    ! check moved here (after mod_def is read) so the JGS flags hold their
+    ! real values; the original position in section 1 read them uninitialized
+    IF (B_JGS_BLOCK_GAUSS_SEIDEL .AND. .NOT. B_JGS_USE_JACOBI) THEN
+      WRITE(NDSE,*) 'B_JGS_BLOCK_GAUSS_SEIDEL is used but the Jacobi solver is not choosen'
+      WRITE(NDSE,*) 'Please set JGS_USE_JACOBI .eqv. .true.'
+      CALL FLUSH(NDSE)
+      STOP
+    ENDIF
+#endif
     IF (GTYPE .eq. UNGTYPE) THEN
       CALL SPATIAL_GRID
       CALL NVECTRI
