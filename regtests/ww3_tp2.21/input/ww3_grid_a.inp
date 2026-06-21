@@ -10,7 +10,7 @@ $
 $
    900  300  450  30
 $
-&UNST UGOBCAUTO = T  EXPFSN = T /
+&UNST UGOBCAUTO = T  EXPSCHEME = T /
 &UOST
    UOSTFILELOCAL = '../input/obstructions_local.glo_unst.in',
    UOSTFILESHADOW = '../input/obstructions_shadow.glo_unst.in',

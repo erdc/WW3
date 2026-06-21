@@ -51,7 +51,7 @@ SDSDTH = 80., FXFM3= 2.5,
 SDSCOS = 2., SDSISO = 2  /
 $
   &OUTS E3D = 1, TH1MF = 1, STH1MF = 1 /
-  &UNST UGOBCAUTO = F,  EXPFSN = T   /
+  &UNST UGOBCAUTO = F,  EXPSCHEME = T   /
 $
 $ Bottom friction  - - - - - - - - - - - - - - - - - - - - - - - - - -
 $   JONSWAP             : Namelist SBT1

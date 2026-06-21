@@ -43,32 +43,48 @@ EOF
 
 # Module Versions from spack-stack that are common for all platforms
   modnetcdf='cray-netcdf'
-  metispath='$HOME/code_management/tools/parmetis-4.0.3'
-  scotchpath='$HOME/code_management/tools/scotch-v7.0.4'
+  metispath='$HOME/tools/parmetis-4.0.3'
+  scotchpath='$HOME/tools/scotch'
 # Set batchq queue, choose modules and other custom variables to fit system and
 # to define headers etc (default to original version if empty)
-  iscarp=`hostname | grep Carpenter`
-  if [ $iscarp ]
-  then
-    # If no other h, assuming Hera
-    batchq='pbs'
-  fi
-
-# 1. Set up
-
+iscarp=`hostname | grep carpenter` 
+iswheat=`hostname | grep wheat` 
+if [ -n "$iscarp" ]
+then
+  # If no other h, assuming Hera
+  batchq='pbs'
   export np='24'      #number of mpi tasks
   export npl='192'    #number of mpi tasks for ufs applications and large setups
   export npl1='192'   #number of mpi tasks for ufs/large setups (b4b check)
   export nr='4'       #number of mpi tasks for hybrid
   export nth='6'      #number of threads
   export nth1='4'     #number of threads (b4b check)
+elif [ -n "$iswheat" ]
+then
+  batchq='pbs'
+  export np='23'      #number of mpi tasks
+  export npl='92'     #number of mpi tasks for ufs applications and large setups
+  export npl1='92'    #number of mpi tasks for ufs/large setups (b4b check)
+  export nr='4'       #number of mpi tasks for hybrid
+  export nth='6'      #number of threads
+  export nth1='4'     #number of threads (b4b check)
+fi
+
+# 1. Set up
+
+#  export np='24'      #number of mpi tasks
+#  export npl='192'    #number of mpi tasks for ufs applications and large setups
+#  export npl1='192'   #number of mpi tasks for ufs/large setups (b4b check)
+#  export nr='4'       #number of mpi tasks for hybrid
+#  export nth='6'      #number of threads
+#  export nth1='4'     #number of threads (b4b check)
 
 # 1.a Computer/ user dependent set up
 
   echo '#!/bin/sh'                                           > matrix.head
   echo ' '                                                  >> matrix.head
-#  if [ $batchq = "pbs" ] && [ $iscarp ]
-#  then
+  if [ -n "$iscarp" ]
+  then
     echo "#PBS -l select=1:ncpus=192:mpiprocs=${np}"        >> matrix.head
     echo '#PBS -l walltime=08:00:00'                        >> matrix.head
     echo '#PBS -q standard'                                 >> matrix.head
@@ -76,20 +92,35 @@ EOF
     echo '#PBS -N ww3_regtest'                              >> matrix.head
     echo '#PBS -j oe'                                       >> matrix.head
     echo '#PBS -o matrix.out'                               >> matrix.head
-#  fi
+ elif [ -n "$iswheat" ]
+ then
+    echo "#PBS -l select=1:ncpus=92:mpiprocs=${np}"        >> matrix.head
+    echo '#PBS -l walltime=08:00:00'                        >> matrix.head
+    echo '#PBS -q standard'                                 >> matrix.head
+    echo '#PBS -A ERDCV00898M20'                            >> matrix.head
+    echo '#PBS -N ww3_regtest'                              >> matrix.head
+    echo '#PBS -j oe'                                       >> matrix.head
+    echo '#PBS -o matrix.out'                               >> matrix.head 
+ fi
   echo ' '                                                  >> matrix.head
   echo "  cd $(dirname $main_dir)/regtests"                 >> matrix.head
   echo ' '                                                  >> matrix.head
 
 # Netcdf, Parmetis and SCOTCH modules & variables
-  echo "  module switch PrgEnv-cray/8.4.0 PrgEnv-intel"     >> matrix.head
+ if [ -n "$iscarp" ] 
+ then
+  echo "  module switch PrgEnv-cray PrgEnv-intel"     >> matrix.head
 #  echo "  module load gcc/12.2.0"                           >> matrix.head
   echo "  module load ${modnetcdf}"                         >> matrix.head
+  echo "  export CMAKE_OPTIONS=-DEXCLUDE_FIND='netcdf'"     >> matrix.head
+ elif [ -n "$iswheat" ] 
+ then
+  echo "  export CC=icx"                                     >> matrix.head
+  echo "  export FC=ifort"                                   >> matrix.head
+  echo "  source /p/home/thesser1/local/netcdf/netcdf_env.sh"        >> matrix.head
+ fi 
   echo "  export METIS_PATH=${metispath}"                   >> matrix.head
   echo "  export SCOTCH_PATH=${scotchpath}"                 >> matrix.head
-  echo "  export CMAKE_OPTIONS=-DEXCLUDE_FIND='netcdf'"     >> matrix.head
-  echo "  export path_build_root=$(dirname $main_dir)/regtests/buildmatrix" >> matrix.head
-  echo '  [[ -d ${path_build_root} ]] && rm -rf ${path_build_root}'         >> matrix.head
   echo ' '
 
 #  if [ "$batchq" = 'pbs' ]
@@ -115,8 +146,8 @@ EOF
 
   export       shrd='y' # Do shared architecture tests
   export       dist='y' # Do distributed architecture (MPI) tests
-  export        omp='n' # Threaded (OpenMP) tests
-  export       hybd='n' # Hybrid options
+  export        omp='y' # Threaded (OpenMP) tests
+  export       hybd='y' # Hybrid options
 
   export     prop1D='y' # 1-D propagation tests (ww3_tp1.X)
   export     prop2D='y' # 2-D propagation tests (ww3_tp2.X)
@@ -132,7 +163,7 @@ EOF
   export     infgrv='y' # Second harmonic generation tests
   export       uost='y' # ww3_ts4 Unresolved Obstacles Source Term (UOST)
   export      assim='y' # Restart spectra update
-  export      oasis='y' # Atmosphere, ocean, and ice coupling using OASIS
+  export      oasis='n' # Atmosphere, ocean, and ice coupling using OASIS
   export   calendar='y' # Calendar type
   export   confignc='y' # Configurable netCDF meta data (ww3_ounf)
 
