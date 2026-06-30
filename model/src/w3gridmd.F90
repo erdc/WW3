@@ -2462,7 +2462,7 @@ CONTAINS
     UGOBCFILE = 'unset'
     EXPSCHEME = .FALSE.
     IMPSCHEME = .FALSE.
-    EXPFSN    = .TRUE.
+    EXPFSN    = .FALSE.
     EXPFSPSI  = .FALSE.
     EXPFSFCT  = .FALSE.
     IMPFSN    = .FALSE.
